@@ -4,10 +4,14 @@ This is a collection of simple client command-line plugins for [koji].
 
 [koji]: https://pagure.io/koji
 
+The name "smoky-dingo" was provided by [coolname] and has no particular relevance.
+
+[coolname]: https://pypi.org/project/coolname/
+
 
 ## Contents
 
-The following commands are included
+The following client-side commands are included with koji-smoky-dingo
 
 
 ### Admin CLI Command: mass-tag
