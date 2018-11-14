@@ -1,0 +1,14 @@
+[flake8]
+
+# E251 complains about unexpected spaces around keyword/parameter equals
+# E303 complains about more than one blank lines between methods in a class
+# E731 do not assign to a lambda, use a def (bite me)
+# N801 class names should use CapWords (you first)
+# N813 camelcase import as lowercase (I do what I want)
+# T484 relative imports are good. don't tell me ..lib is bad
+
+ignore = E303,N801,N813,T484
+exclude = setup.py,build,dist,.git
+
+#
+# The end.
