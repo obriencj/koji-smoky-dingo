@@ -14,11 +14,11 @@ author: cobrien@redhat.com
 import sys
 
 from functools import partial
-from itertools import izip
 from koji import GenericError
 from koji.plugin import export_cli
 from koji_cli.lib import OptionParser, activate_session
 from rpmUtils.miscutils import compareEVR
+from six.moves import zip as izip
 
 
 class NoSuchTag(Exception):
@@ -128,7 +128,7 @@ def debug_off(message, *args):
     pass
 
 
-def cli_mass_tag(session, options, tagname):
+def mass_tag(session, options, tagname):
 
     test = options.test
     if test:
@@ -224,8 +224,8 @@ def cli_mass_tag(session, options, tagname):
     debug("All done!")
 
 
-def cli_options():
-    opts = OptionParser(usage="%prog [OPTIONS] TAG",
+def mass_tag_options():
+    opts = OptionParser(usage="%prog mass-tag [OPTIONS] TAG",
                         description="Tags a large number of builds."
                         " Requires admin permissions in brew.")
 
@@ -271,12 +271,12 @@ def handle_mass_tag(goptions, session, args):
     [admin] Tag a large number of builds
     """
 
-    parser = cli_options()
+    parser = mass_tag_options()
     options, args = parser.parse_args(args)
 
-    if len(args) < 2:
+    if len(args) < 1:
         parser.error("You must specify a destination tag")
-    elif len(args) > 2:
+    elif len(args) > 1:
         parser.error("You may only specify one tag at a time. Build NVRs"
                      " must be on stdin or via the --file option")
     elif options.nvr_sort and options.id_sort:
@@ -284,7 +284,7 @@ def handle_mass_tag(goptions, session, args):
 
     try:
         activate_session(session, goptions)
-        cli_mass_tag(session, options, args[1])
+        mass_tag(session, options, args[0])
 
     except KeyboardInterrupt:
         print
