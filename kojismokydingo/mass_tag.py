@@ -1,40 +1,16 @@
-#! /usr/bin/env python2
 
 
 """
-Tags a large number of files into a tag, using tagBuildBypass.
-Will create package listings based on the owner of the build if none
-exist (rather than using the identity of the user running the tag
-operation)
+Meta plugin for Koji Smoky Dingo. Uses python entry_points to load
+the actual koji command-line plugins.
 
 author: cobrien@redhat.com
 """
 
 
-import sys
-
-from functools import partial
 from koji import GenericError
 from koji.plugin import export_cli
 from koji_cli.lib import OptionParser, activate_session
-from rpmUtils.miscutils import compareEVR
-from six.moves import zip as izip
-
-
-class NoSuchTag(Exception):
-    pass
-
-
-class NoSuchBuild(Exception):
-    pass
-
-
-class NoSuchUser(Exception):
-    pass
-
-
-class PermissionException(Exception):
-    pass
 
 
 def raise_nsb(nvr):
@@ -121,14 +97,17 @@ def build_id_sort(builds):
 
 
 def debug_on(message, *args):
-    print >> sys.stderr, message % args
+    printerr(message % args)
 
 
 def debug_off(message, *args):
     pass
 
 
-def mass_tag(session, options, tagname):
+def mass_tag(options):
+
+    session = options.session
+    tagname = options.tagname
 
     test = options.test
     if test:
@@ -224,97 +203,55 @@ def mass_tag(session, options, tagname):
     debug("All done!")
 
 
-def mass_tag_options():
-    opts = OptionParser(usage="%prog mass-tag [OPTIONS] TAG",
-                        description="Tags a large number of builds."
-                        " Requires admin permissions in brew.")
-
-    opts.add_option("--debug", action="store_true", default=False,
-                    help="Print debugging information")
-
-    opts.add_option("--test", action="store_true", default=False,
-                    help="Print write operatons to stderr without actually"
-                    " calling the RPC function")
-
-    opts.add_option("--owner", action="store", default=None,
-                    help="Force missing package listings to be created"
-                    " with the specified owner")
-
-    opts.add_option("--no-inherit", action="store_false", default=True,
-                    dest="inherit", help="Do not use parent tags to"
-                    " determine existing package listing.")
-
-    opts.add_option("--file", action="store", default=None,
-                    help="Read list of builds from file, one NVR per line."
-                    " Omit for default behavior: read build NVRs from stdin")
-
-    opts.add_option("--continue", action="store_true", default=False,
-                    dest="cont", help="Continue with tagging operations,"
-                    " even after encountering a malformed or non-existing"
-                    " NVR")
-
-    opts.add_option("--nvr-sort", action="store_true", default=False,
-                    help="pre-sort build list by NVR, so highest NVR is"
-                    " tagged last")
-
-    opts.add_option("--id-sort", action="store_true", default=False,
-                    help="pre-sort build list by build ID, so most recently"
-                    " completed build is tagged last")
-
-    return opts
-
-
-@export_cli
-def handle_mass_tag(goptions, session, args):
-
+def parser_mass_tag():
     """
-    [admin] Tag a large number of builds
+    [admin] Quickly tag a large number of builds
     """
 
-    parser = mass_tag_options()
-    options, args = parser.parse_args(args)
+    parser = ArgumentParser(prog="mass-tag")
+    addarg = parser.add_argument
 
-    if len(args) < 1:
-        parser.error("You must specify a destination tag")
-    elif len(args) > 1:
-        parser.error("You may only specify one tag at a time. Build NVRs"
-                     " must be on stdin or via the --file option")
-    elif options.nvr_sort and options.id_sort:
-        parser.error("--nvr-sort and --id-sort are mutually exlusive")
+    parser.set_default("cli", cli_mass_tag)
 
-    try:
-        activate_session(session, goptions)
-        mass_tag(session, options, args[0])
+    addarg("tag", action="store",
+           help="Tag to associate builds with")
 
-    except KeyboardInterrupt:
-        print
-        return 130
+    addarg("--debug", action="store_true", default=False,
+           help="Print debugging information")
 
-    except GenericError as kge:
-        print >> sys.stderr, kge.message
-        return -1
+    addarg("--test", action="store_true", default=False,
+           help="Print write operatons to stderr without actually"
+           " calling the RPC function")
 
-    except NoSuchTag as nst:
-        print >> sys.stderr, "No such tag:", nst
-        return -2
+    addarg("--owner", action="store", default=None,
+           help="Force missing package listings to be created"
+           " with the specified owner")
 
-    except NoSuchBuild as nsb:
-        print >> sys.stderr, "No such build:", nsb
-        return -3
+    addarg("--no-inherit", action="store_false", default=True,
+           dest="inherit", help="Do not use parent tags to"
+           " determine existing package listing.")
 
-    except NoSuchUser as nsu:
-        print >> sys.stderr, "No such user:", nsu
-        return -4
+    addarg("--file", action="store", default=None,
+           help="Read list of builds from file, one NVR per line."
+           " Omit for default behavior: read build NVRs from stdin")
 
-    except PermissionException:
-        errmsg = ("Insufficient privileges.\n"
-                  "This tool relies on API calls which are restricted to"
-                  " users with the 'admin' permission.\n")
-        print >> sys.stderr, errmsg
-        return -5
+    addarg("--continue", action="store_true", default=False,
+           dest="cont", help="Continue with tagging operations,"
+           " even after encountering a malformed or non-existing"
+           " NVR")
 
-    else:
-        return 0
+    group = parser.add_mutually_exclusive_group()
+    addarg = group.add_argument
+
+    addarg("--nvr-sort", action="store_true", default=False,
+           help="pre-sort build list by NVR, so highest NVR is"
+           " tagged last")
+
+    addarg("--id-sort", action="store_true", default=False,
+           help="pre-sort build list by build ID, so most recently"
+           " completed build is tagged last")
+
+    return parser
 
 
 # The end.

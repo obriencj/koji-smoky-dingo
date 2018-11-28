@@ -27,14 +27,21 @@ from setuptools import setup
 
 
 setup(
-    name = "koji-smoky-dingo",
-    version = "0.9.0",
+    name = 'koji-smoky-dingo',
+    version = '0.9.0',
 
     packages = [
-        "koji_cli_plugins",
+        'koji_cli_plugins',
+        'kojismokydingo',
     ],
 
     # install_requires = ["koji", ],
+
+    entry_points = {
+        'koji_cli_plugins': [
+            'mass-tag = kojismokidingo.mass_tag:plugin',
+        ],
+    },
 
     description = "A collection of koji command-line plugins",
 
