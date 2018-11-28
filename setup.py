@@ -39,7 +39,7 @@ setup(
 
     entry_points = {
         'koji_cli_plugins': [
-            'mass-tag = kojismokidingo.mass_tag:plugin',
+            'mass-tag = kojismokydingo.plugins:mass_tag',
         ],
     },
 

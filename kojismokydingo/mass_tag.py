@@ -7,10 +7,14 @@ the actual koji command-line plugins.
 author: cobrien@redhat.com
 """
 
+import sys
 
-from koji import GenericError
-from koji.plugin import export_cli
-from koji_cli.lib import OptionParser, activate_session
+from . import koji_cli_plugin, printerr, \
+    NoSuchTag, NoSuchBuild, NoSuchUser, PermissionException
+
+from argparse import ArgumentParser
+from functools import partial
+from six.moves import range as xrange, zip as izip
 
 
 def raise_nsb(nvr):
@@ -75,6 +79,8 @@ def build_dedup(builds):
 
 
 def nvrcmp(left, right):
+    from rpmUtils.miscutils import compareEVR
+
     ln, le, lv, lr, lb = left
     rn, re, rv, rr, rb = right
 
@@ -104,7 +110,7 @@ def debug_off(message, *args):
     pass
 
 
-def mass_tag(options):
+def cli_mass_tag(options):
 
     session = options.session
     tagname = options.tagname
@@ -203,15 +209,13 @@ def mass_tag(options):
     debug("All done!")
 
 
-def parser_mass_tag():
+def options_mass_tag():
     """
     [admin] Quickly tag a large number of builds
     """
 
     parser = ArgumentParser(prog="mass-tag")
     addarg = parser.add_argument
-
-    parser.set_default("cli", cli_mass_tag)
 
     addarg("tag", action="store",
            help="Tag to associate builds with")
@@ -252,6 +256,9 @@ def parser_mass_tag():
            " completed build is tagged last")
 
     return parser
+
+
+plugin = koji_cli_plugin(options_mass_tag, cli_mass_tag)
 
 
 # The end.

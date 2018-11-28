@@ -3,6 +3,9 @@
 from __future__ import print_function
 
 from functools import partial
+from koji import GenericError
+from koji.plugin import export_cli
+from koji_cli.lib import activate_session
 
 import sys
 
@@ -26,7 +29,7 @@ class PermissionException(Exception):
 printerr = partial(print, file=sys.stderr)
 
 
-def handle_cli(parser_factory, goptions, session, args):
+def handle_cli(parser_factory, handler_fn, goptions, session, args):
     parser = parser_factory()
     options = parser.parse_args(args)
 
@@ -35,7 +38,7 @@ def handle_cli(parser_factory, goptions, session, args):
 
     try:
         activate_session(session, goptions)
-        return options.cli(options) or 0
+        return handler_fn(options) or 0
 
     except KeyboardInterrupt:
         print(file=sys.stderr)
@@ -62,10 +65,32 @@ def handle_cli(parser_factory, goptions, session, args):
         return -5
 
 
-def produce_handler(parser_factory):
-    handler = partial(handle_cli, parser_factory)
-    update_wrapper(handler, parser_factory)
-    return export_cli(handler)
+def koji_cli_plugin(parser_factory, cli_fn):
+    def cli_plugin(name):
+        wonkyname = "handle_%s" % name
+
+        handler = partial(handle_cli, parser_factory, cli_fn)
+        handler.__doc__ = parser_factory.__doc__.strip()
+        handler.__name__ = wonkyname
+        handler.export_alias = wonkyname
+
+        return export_cli(handler)
+
+    return cli_plugin
+
+
+def koji_anon_cli_plugin(parser_factory, cli_fn):
+    def anon_cli_plugin(name):
+        wonkyname = "anon_handle_%s" % name
+
+        handler = partial(handle_cli, parser_factory, cli_fn)
+        handler.__doc__ = parser_factory.__doc__.strip()
+        handler.__name__ = wonkyname
+        handler.export_alias = wonkyname
+
+        return export_cli(handler)
+
+    return anon_cli_plugin
 
 
 #

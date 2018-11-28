@@ -27,34 +27,42 @@ from __future__ import print_function
 
 def __plugin__(glbls):
 
+    print("=== IN KOJI SMOKY DINGO ===")
+
     import koji
-    from koji.plugin import export_as
     from pkg_resources import iter_entry_points
     from sys import stderr
 
     kconfig = getattr(koji, "config", None)
-    if not (kconfig and kconfig.getboolean("cli_entry_points", True)):
+    if kconfig and not kconfig.getboolean("cli_entry_points", True):
+        print("=== cli_entry_points is disabled, FUCK IT ===")
         return
 
     commands = {}
 
-    for entry_point in pkg_resources.iter_entry_points('koji_cli_plugins'):
+    for entry_point in iter_entry_points('koji_cli_plugins'):
+        print("=== found entry point", entry_point, "===")
+
         name = entry_point.name
 
         try:
             handler_fn = entry_point.load()
-            handler = handler_fn()
+            handler = handler_fn(name)
 
         except Exception as ex:
             message = "Exception while loading plugin %r (skipping)" % name
             print(message, ex, file=stderr)
             continue
 
-        handler = export_as(name)(handler)
-        commands[name] = handler
+        print("handler name is", handler.__name__)
+        print("handler is", handler)
+        print("vars(handler) is", vars(handler))
+        commands[handler.__name__] = handler
+
+    print(commands)
 
     glbls.update(commands)
-    glbls["__all__"] = tuple(sorted(commands))
+    # glbls["__all__"] = tuple(sorted(commands))
 
 
 __plugin__(globals())
