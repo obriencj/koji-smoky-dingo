@@ -29,8 +29,22 @@ class PermissionException(Exception):
 printerr = partial(print, file=sys.stderr)
 
 
-def handle_cli(parser_factory, handler_fn, goptions, session, args):
-    parser = parser_factory()
+def handle_cli(name, parser_factory, handler_fn, goptions, session, args):
+    """
+    Helper function which is used by koji_cli_plugin and
+    koji_anon_cli_plugin to combine a command name, an option parser
+    factory, and a handler function with the parameters passed by koji
+    to command handlers.
+
+    This function will create the parser using the given name, parse the
+    arguments from the koji cli invocation, activate the session using
+    the global options, and then invoke the handler_fn.
+
+    A number of basic exception types are caught by default, providing
+    polite output and a return code, but without a traceback.
+    """
+
+    parser = parser_factory(name)
     options = parser.parse_args(args)
 
     options.session = session
@@ -66,10 +80,28 @@ def handle_cli(parser_factory, handler_fn, goptions, session, args):
 
 
 def koji_cli_plugin(parser_factory, cli_fn):
+    """
+    Helper to combine a function that creates an ArgumentParser with a
+    function to handle the parsed args, and produce a unary function
+    that takes its invocation name to produce a koji cli handler
+    function.
+
+    :parser_factory: unary function accepting the name of the command as
+    invoked. Should return an ArgumentParser instance
+
+    :cli_fn: unary function accepting an options object as produced by
+    the parser_factor's parser.
+
+    :return: partial combining the handler_cli function, the name, the
+    parser_factory, and the cli_fn. Will be marked as a cli command
+    handler for koji, and will present a name appropriate for the koji
+    cli.
+    """
+
     def cli_plugin(name):
         wonkyname = "handle_%s" % name
 
-        handler = partial(handle_cli, parser_factory, cli_fn)
+        handler = partial(handle_cli, name, parser_factory, cli_fn)
         handler.__doc__ = parser_factory.__doc__.strip()
         handler.__name__ = wonkyname
         handler.export_alias = wonkyname
@@ -80,10 +112,31 @@ def koji_cli_plugin(parser_factory, cli_fn):
 
 
 def koji_anon_cli_plugin(parser_factory, cli_fn):
+    """
+    Helper to combine a function that creates an ArgumentParser with a
+    function to handle the parsed args, and produce a unary function
+    that takes its invocation name to produce a koji cli handler
+    function.
+
+    Identical to koji_cli_plugin but the session will not be
+    authenticated.
+
+    :parser_factory: unary function accepting the name of the command as
+    invoked. Should return an ArgumentParser instance
+
+    :cli_fn: unary function accepting an options object as produced by
+    the parser_factor's parser.
+
+    :return: partial combining the handler_cli function, the name, the
+    parser_factory, and the cli_fn. Will be marked as a cli command
+    handler for koji, and will present a name appropriate for the koji
+    cli.
+    """
+
     def anon_cli_plugin(name):
         wonkyname = "anon_handle_%s" % name
 
-        handler = partial(handle_cli, parser_factory, cli_fn)
+        handler = partial(handle_cli, name, parser_factory, cli_fn)
         handler.__doc__ = parser_factory.__doc__.strip()
         handler.__name__ = wonkyname
         handler.export_alias = wonkyname

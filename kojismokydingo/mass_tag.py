@@ -1,11 +1,26 @@
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, see
+# <http://www.gnu.org/licenses/>.
 
 
 """
-Meta plugin for Koji Smoky Dingo. Uses python entry_points to load
-the actual koji command-line plugins.
+mass_tag features, allowing large numbers of builds to be tagged
+rapidly, via multicall to tagBuildBypass
 
-author: cobrien@redhat.com
+:author: cobrien@redhat.com
+:license: GPL version 3
 """
+
 
 import sys
 
@@ -209,12 +224,12 @@ def cli_mass_tag(options):
     debug("All done!")
 
 
-def options_mass_tag():
+def options_mass_tag(name):
     """
     [admin] Quickly tag a large number of builds
     """
 
-    parser = ArgumentParser(prog="mass-tag")
+    parser = ArgumentParser(prog=name)
     addarg = parser.add_argument
 
     addarg("tag", action="store",
@@ -258,7 +273,8 @@ def options_mass_tag():
     return parser
 
 
-plugin = koji_cli_plugin(options_mass_tag, cli_mass_tag)
+# provide the function that entry_points will want
+cli = koji_cli_plugin(options_mass_tag, cli_mass_tag)
 
 
 # The end.

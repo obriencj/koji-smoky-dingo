@@ -16,7 +16,16 @@
 
 
 """
-A collection of koji command-line plugins I find useful
+Koji Smoky Dingo - a collection of koji command-line features for
+advanced users.
+
+Note that this package needs to be installed using either:
+
+  python setup.py install --root=/
+
+or
+
+  python setup.py install --old-and-unmanageable
 
 :author: Christopher O'Brien  <obriencj@gmail.com>
 :license: GPL version 3
@@ -35,11 +44,18 @@ setup(
         'kojismokydingo',
     ],
 
-    # install_requires = ["koji", ],
+    requires = [
+        # Note that koji currently isn't installed in a way that
+        # setuptools can see, so we shouldn't have a hard requires on
+        # it.
+        # "koji",
+
+        "six",
+    ],
 
     entry_points = {
         'koji_cli_plugins': [
-            'mass-tag = kojismokydingo.plugins:mass_tag',
+            'mass-tag = kojismokydingo.mass_tag:cli',
         ],
     },
 
