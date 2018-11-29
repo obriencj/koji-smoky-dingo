@@ -99,7 +99,7 @@ def koji_cli_plugin(parser_factory, cli_fn):
     """
 
     def cli_plugin(name):
-        wonkyname = "handle_%s" % name
+        wonkyname = "handle_%s" % name.replace("-", "_")
 
         handler = partial(handle_cli, name, parser_factory, cli_fn)
         handler.__doc__ = parser_factory.__doc__.strip()
@@ -134,7 +134,7 @@ def koji_anon_cli_plugin(parser_factory, cli_fn):
     """
 
     def anon_cli_plugin(name):
-        wonkyname = "anon_handle_%s" % name
+        wonkyname = "anon_handle_%s" % name.replace("-", "_")
 
         handler = partial(handle_cli, name, parser_factory, cli_fn)
         handler.__doc__ = parser_factory.__doc__.strip()
