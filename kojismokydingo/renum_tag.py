@@ -51,21 +51,6 @@ def renum_inheritance(inheritance, begin, step):
 
 def cli_renum_tag(options):
 
-    # todo, move these checks into the argument parser options. Sadly
-    # we'll lose the snark, but it makes for cleaner code
-
-    if options.begin < 0:
-        raise GenericError("Inheritance priorities must be positive")
-    elif options.begin > 1000:
-        raise GenericError("Sensibilities offended. Use a lower begin"
-                           " priority")
-    elif options.step < 1:
-        raise GenericError("Inheritance steps must be 1 or greater"
-                           " (no reversing)")
-    elif options.step > 100:
-        raise GenericError("Chill out with the big numbers."
-                           " Seriously. Relax.")
-
     session = options.session
     tagname = options.tagname
 
