@@ -233,7 +233,7 @@ def options_mass_tag(name):
     parser = ArgumentParser(prog=name)
     addarg = parser.add_argument
 
-    addarg("tag", action="store", metavar="TAG",
+    addarg("tag", action="store", metavar="TAGNAME",
            help="Tag to associate builds with")
 
     addarg("--debug", action="store_true", default=False,

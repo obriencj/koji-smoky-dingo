@@ -41,6 +41,28 @@ class PermissionException(Exception):
 printerr = partial(print, file=sys.stderr)
 
 
+def int_range(start, stop=None):
+    """
+    For use as a type in an ArgumentParser argument, raises a
+    TypeError if the given integer argument is not within the start
+    and stop values provided
+    """
+
+    errname = "int (out of range start=%i, stop=%i)" % (start, stop)
+
+    def rint(val):
+        rint.__name__ = "int"
+        val = int(val)
+
+        if start < val <= stop:
+            return val
+        else:
+            rint.__name__ = errname
+            raise TypeError(val)
+
+    return rint
+
+
 def handle_cli(name, parser_factory, handler_fn, goptions, session, args):
     """
     Helper function which is used by koji_cli_plugin and

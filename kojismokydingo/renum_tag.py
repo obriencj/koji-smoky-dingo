@@ -105,10 +105,12 @@ def options_renum_tag(name):
     [admin] Renumbers inheritance priorities of a tag, preserving order
     """
 
+    from . import int_range
+
     parser = ArgumentParser(prog=name)
     addarg = parser.add_argument
 
-    addarg("tag", action="store", metavar="TAG",
+    addarg("tag", action="store", metavar="TAGNAME",
            help="Tag to renumber")
 
     addarg("--verbose", action="store_true", default=False,
@@ -118,14 +120,15 @@ def options_renum_tag(name):
            help="Calculate the new priorities, but don't commit"
            " the changes")
 
-    addarg("--begin", action="store", type=int,
-           default=10, choices=xrange(0, 1000),
-           help="New priority for first inheritance link")
+    addarg("--begin", action="store", type=int_range(0, 1000),
+           default=10,
+           help="New priority for first inheritance link"
+           " (default: 10)")
 
-    addarg("--step", action="store", type=int,
-           default=10, choices=xrange(1, 100),
+    addarg("--step", action="store", type=int_range(1, 100),
+           default=10,
            help="Priority increment for each subsequent"
-           " inheritance link after the first")
+           " inheritance link after the first (default: 10)")
 
     return parser
 
