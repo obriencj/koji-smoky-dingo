@@ -1,13 +1,25 @@
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import print_function
+
+import sys
 
 from functools import partial
 from koji import GenericError
 from koji.plugin import export_cli
 from koji_cli.lib import activate_session
-
-import sys
 
 
 class NoSuchTag(Exception):
@@ -27,6 +39,28 @@ class PermissionException(Exception):
 
 
 printerr = partial(print, file=sys.stderr)
+
+
+def int_range(start, stop=None):
+    """
+    For use as a type in an ArgumentParser argument, raises a
+    TypeError if the given integer argument is not within the start
+    and stop values provided
+    """
+
+    errname = "int (out of range start=%i, stop=%i)" % (start, stop)
+
+    def rint(val):
+        rint.__name__ = "int"
+        val = int(val)
+
+        if start < val <= stop:
+            return val
+        else:
+            rint.__name__ = errname
+            raise TypeError(val)
+
+    return rint
 
 
 def handle_cli(name, parser_factory, handler_fn, goptions, session, args):

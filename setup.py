@@ -10,9 +10,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
 #
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, see
-# <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
 """
@@ -56,6 +55,7 @@ setup(
     entry_points = {
         'koji_cli_plugins': [
             'mass-tag = kojismokydingo.mass_tag:cli',
+            'renum-tag = kojismokydingo.renum_tag:cli',
         ],
     },
 
