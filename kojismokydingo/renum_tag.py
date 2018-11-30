@@ -1,45 +1,43 @@
-#! /usr/bin/env python2
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
 """
+Koji Smoky Dingo - admin command renum-tag
 
 Remember RENUM from BASIC? It's like that, but for brew tag
 inheritance priority.
 
-author: cobrien@redhat.com
-
+:author: cobrien@redhat.com
+:license: GPL version 3
 """
 
 
+from __future__ import print_function
+
 import sys
 
-from itertools import izip
-from koji import ClientSession, GenericError
-from krbV import Krb5Error
-from optparse import OptionParser
+from argparse import ArgumentParser
+from six.moves import zip as izip
 
-
-DEFAULT_BREW_HOST = "https://brewhub.engineering.redhat.com/brewhub"
-
-
-class ManagedClientSession(ClientSession):
-
-    """ A koji.ClientSession that can be used as via the 'with'
-    keyword to provide a managed session that will handle login and
-    logout """
-
-    def __enter__(self):
-        self.krb_login()
-        return self
-
-    def __exit__(self, exc_type, _exc_val, _exc_tb):
-        self.logout()
-        return (exc_type is None)
+from . import koji_cli_plugin, \
+    NoSuchTag, PermissionException, GenericError
 
 
 def renum_inheritance(inheritance, begin, step):
-
-    """ a new copy of the tag inheritance data, renumbered """
+    """
+    a new copy of the tag inheritance data, renumbered
+    """
 
     renumbered = list()
 
@@ -51,91 +49,88 @@ def renum_inheritance(inheritance, begin, step):
     return renumbered
 
 
-def cli_renum(options, tagname):
+def cli_renum_tag(options):
 
-    with ManagedClientSession(options.server,
-                              opts={'krbservice':'brewhub'}) as brewhub:
+    # todo, move these checks into the argument parser options. Sadly
+    # we'll lose the snark, but it makes for cleaner code
 
-        original = brewhub.getInheritanceData(tagname)
-        renumbered = renum_inheritance(original, options.begin, options.step)
-
-        if options.verbose:
-            print "Renumbering inheritance priorities for", tagname
-            for left, right in izip(original, renumbered):
-                name = left['name']
-                lp = left['priority']
-                rp = right['priority']
-                print " %3i -> %3i  %s" % (lp, rp, name)
-
-        if options.test:
-            print "Changes not committed in test mode."
-        else:
-            results = brewhub.setInheritanceData(tagname, renumbered)
-            if options.verbose and results:
-                print results
-
-
-def cli_options():
-    opts = OptionParser(usage="%prog [OPTIONS] TAG",
-                        description="Renumbers inheritance priorities of a"
-                        " brew tag, preserving order.")
-
-    opts.add_option("--server", action="store", default=DEFAULT_BREW_HOST)
-
-    opts.add_option("--verbose", action="store_true", default=False,
-                    help="Print information about what's changing")
-
-    opts.add_option("--test", action="store_true",  default=False,
-                    help="Calculate the new priorities, but don't commit"
-                    " the changes")
-
-    opts.add_option("--begin", action="store", type="int", default=10,
-                    help="New priority for first inheritance link")
-
-    opts.add_option("--step", action="store", type="int", default=10,
-                    help="Priority increment for each subsequent"
-                    " inheritance link after the first")
-
-    return opts
-
-
-def main(args):
-    parser = cli_options()
-    options, args = parser.parse_args(args)
-
-    if len(args) < 2:
-        parser.error("You must specify a tag to renumber")
-    elif len(args) > 2:
-        parser.error("You may only specify one tag at a time")
-    elif options.begin < 0:
-        parser.error("Inheritance priorities must be positive")
+    if options.begin < 0:
+        raise GenericError("Inheritance priorities must be positive")
     elif options.begin > 1000:
-        parser.error("Sensibilities offended. Use a lower begin priority")
+        raise GenericError("Sensibilities offended. Use a lower begin"
+                           " priority")
     elif options.step < 1:
-        parser.error("Inheritance steps must be 1 or greater (no reversing)")
+        raise GenericError("Inheritance steps must be 1 or greater"
+                           " (no reversing)")
     elif options.step > 100:
-        parser.error("Chill out with the big numbers. Seriously. Relax.")
+        raise GenericError("Chill out with the big numbers."
+                           " Seriously. Relax.")
 
-    try:
-        cli_renum(options, args[1])
+    session = options.session
+    tagname = options.tagname
 
-    except KeyboardInterrupt, ki:
-        return 130
+    if not session.getTag(tagname):
+        raise NoSuchTag(tagname)
 
-    except GenericError, kge:
-        print >> sys.stderr, kge.message
-        return -1
+    original = session.getInheritanceData(tagname)
+    renumbered = renum_inheritance(original, options.begin, options.step)
 
-    except Krb5Error, krbe:
-        print >> sys.stderr, "Kerberos error:", krbe.args[1]
-        return -1
+    if options.verbose:
+        print("Renumbering inheritance priorities for", tagname)
+        for left, right in izip(original, renumbered):
+            name = left['name']
+            lp = left['priority']
+            rp = right['priority']
+            print(" %3i -> %3i  %s" % (lp, rp, name))
+
+    if options.test:
+        print("Changes not committed in test mode.")
 
     else:
-        return 0
+        # setting tag inheritance require admin, so let's make sure we
+        # have that first.
+        userinfo = session.getLoggedInUser()
+        userperms = session.getUserPerms(userinfo["id"]) or ()
+
+        if "admin" not in userperms:
+            raise PermissionException()
+
+        results = session.setInheritanceData(tagname, renumbered)
+        if options.verbose and results:
+            print(results)
 
 
-if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+def options_renum_tag(name):
+    """
+    [admin] Renumbers inheritance priorities of a tag, preserving order
+    """
+
+    parser = ArgumentParser(prog=name)
+    addarg = parser.add_argument
+
+    addarg("tag", action="store", metavar="TAG",
+           help="Tag to renumber")
+
+    addarg("--verbose", action="store_true", default=False,
+           help="Print information about what's changing")
+
+    addarg("--test", action="store_true",  default=False,
+           help="Calculate the new priorities, but don't commit"
+           " the changes")
+
+    addarg("--begin", action="store", type=int,
+           default=10, choices=xrange(0, 1000),
+           help="New priority for first inheritance link")
+
+    addarg("--step", action="store", type=int,
+           default=10, choices=xrange(1, 100),
+           help="Priority increment for each subsequent"
+           " inheritance link after the first")
+
+    return parser
+
+
+cli = koji_cli_plugin(options_renum_tag, cli_renum_tag)
 
 
 # The end.
