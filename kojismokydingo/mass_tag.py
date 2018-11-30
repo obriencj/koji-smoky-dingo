@@ -29,6 +29,7 @@ from . import koji_cli_plugin, printerr, \
 
 from argparse import ArgumentParser
 from functools import partial
+from rpmUtils.miscutils import compareEVR
 from six.moves import range as xrange, zip as izip
 
 
@@ -94,8 +95,6 @@ def build_dedup(builds):
 
 
 def nvrcmp(left, right):
-    from rpmUtils.miscutils import compareEVR
-
     ln, le, lv, lr, lb = left
     rn, re, rv, rr, rb = right
 
