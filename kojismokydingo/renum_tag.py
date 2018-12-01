@@ -25,13 +25,9 @@ inheritance priority.
 
 from __future__ import print_function
 
-import sys
-
-from argparse import ArgumentParser
 from six.moves import zip as izip
 
-from . import koji_cli_plugin, \
-    NoSuchTag, PermissionException, GenericError
+from . import AdminSmokyDingo, NoSuchTag
 
 
 def renum_inheritance(inheritance, begin, step):
@@ -49,18 +45,16 @@ def renum_inheritance(inheritance, begin, step):
     return renumbered
 
 
-def cli_renum_tag(options):
-
-    session = options.session
-    tagname = options.tagname
+def cli_renum_tag(session, tagname, begin=10, step=10,
+                  verbose=False, test=False):
 
     if not session.getTag(tagname):
         raise NoSuchTag(tagname)
 
     original = session.getInheritanceData(tagname)
-    renumbered = renum_inheritance(original, options.begin, options.step)
+    renumbered = renum_inheritance(original, begin, step)
 
-    if options.verbose:
+    if verbose:
         print("Renumbering inheritance priorities for", tagname)
         for left, right in izip(original, renumbered):
             name = left['name']
@@ -68,57 +62,68 @@ def cli_renum_tag(options):
             rp = right['priority']
             print(" %3i -> %3i  %s" % (lp, rp, name))
 
-    if options.test:
+    if test:
         print("Changes not committed in test mode.")
 
     else:
-        # setting tag inheritance require admin, so let's make sure we
-        # have that first.
-        userinfo = session.getLoggedInUser()
-        userperms = session.getUserPerms(userinfo["id"]) or ()
-
-        if "admin" not in userperms:
-            raise PermissionException()
-
         results = session.setInheritanceData(tagname, renumbered)
-        if options.verbose and results:
+        if verbose and results:
             print(results)
 
 
-def options_renum_tag(name):
-    """
-    [admin] Renumbers inheritance priorities of a tag, preserving order
-    """
+class cli(AdminSmokyDingo):
 
-    from . import int_range
-
-    parser = ArgumentParser(prog=name)
-    addarg = parser.add_argument
-
-    addarg("tag", action="store", metavar="TAGNAME",
-           help="Tag to renumber")
-
-    addarg("--verbose", action="store_true", default=False,
-           help="Print information about what's changing")
-
-    addarg("--test", action="store_true",  default=False,
-           help="Calculate the new priorities, but don't commit"
-           " the changes")
-
-    addarg("--begin", action="store", type=int_range(0, 1000),
-           default=10,
-           help="New priority for first inheritance link"
-           " (default: 10)")
-
-    addarg("--step", action="store", type=int_range(1, 100),
-           default=10,
-           help="Priority increment for each subsequent"
-           " inheritance link after the first (default: 10)")
-
-    return parser
+    description = "Renumbers inheritance priorities of a tag," \
+                  " preserving order"
 
 
-cli = koji_cli_plugin(options_renum_tag, cli_renum_tag)
+    def parser(self):
+        parser = super(cli, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Tag to renumber")
+
+        addarg("--verbose", action="store_true", default=False,
+               help="Print information about what's changing")
+
+        addarg("--test", action="store_true", default=False,
+               help="Calculate the new priorities, but don't commit"
+               " the changes")
+
+        addarg("--begin", action="store", type=int, default=10,
+               help="New priority for first inheritance link"
+               " (default: 10)")
+
+        addarg("--step", action="store", type=int, default=10,
+               help="Priority increment for each subsequent"
+               " inheritance link after the first (default: 10)")
+
+        return parser
 
 
+    def validate(self, parser, options):
+        begin = options.begin
+        if begin < 0:
+            parser.error("begin value must not be negative")
+
+        elif begin >= 1000:
+            parser.error("don't be ridiculous")
+
+        step = options.step
+        if step < 1:
+            parser.error("priority increment must be positive"
+                         " (no reversing)")
+
+        elif step > 100:
+            parser.error("don't be ridiculous")
+
+
+    def handle(self, options):
+        return cli_renum_tag(options.session, options.tagname,
+                             options.begin, options.step,
+                             options.verbose, options.test)
+
+
+#
 # The end.

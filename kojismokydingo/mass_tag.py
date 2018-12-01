@@ -23,22 +23,17 @@ to tagBuildBypass
 """
 
 
-import sys
+from __future__ import print_function
 
-from argparse import ArgumentParser
+import sys
 from functools import partial
-from rpmUtils.miscutils import compareEVR
 from six.moves import range as xrange, zip as izip
 
-from . import koji_cli_plugin, printerr, \
-    NoSuchTag, NoSuchBuild, NoSuchUser, PermissionException
+from . import AdminSmokyDingo, NoSuchBuild, NoSuchTag, NoSuchUser
 
 
-def raise_nsb(nvr):
-    # used as a parameter to iter_mass_load_builds to raise an
-    # exception rather than continuing with mass build loading when a
-    # result is not found
-    raise NoSuchBuild(nvr)
+SORT_BY_ID = "sort-by-id"
+SORT_BY_NVR = "sort-by-nvr"
 
 
 def chunk_seq(seq, chunksize):
@@ -96,6 +91,8 @@ def build_dedup(builds):
 
 
 def nvrcmp(left, right):
+    from rpmUtils.miscutils import compareEVR
+
     ln, le, lv, lr, lb = left
     rn, re, rv, rr, rb = right
 
@@ -117,70 +114,63 @@ def build_id_sort(builds):
     return [b for bid, b in sorted(dedup.iteritems())]
 
 
-def debug_on(message, *args):
-    printerr(message % args)
+def cli_mass_tag(session, tagname, nvrs,
+                 sorting=None, strict=False,
+                 owner=None, inherit=False,
+                 verbose=False, test=False):
 
+    # set up the verbose debugging output function
+    if test or verbose:
+        def debug(message, *args):
+            print(message % args, file=sys.stderr)
+    else:
+        def debug(message, *args):
+            pass
 
-def debug_off(message, *args):
-    pass
-
-
-def cli_mass_tag(options):
-
-    session = options.session
-    tagname = options.tagname
-
-    test = options.test
-    if test:
-        options.debug = True
-
-    debug = debug_on if options.debug else debug_off
-
-    # the tagBuildBypass calls require admin, so let's make sure
-    # we have that first.
-    userinfo = session.getLoggedInUser()
-    userperms = session.getUserPerms(userinfo["id"]) or ()
-
-    if "admin" not in userperms:
-        raise PermissionException()
-
+    # fetch the destination tag info (and make sure it actually
+    # exists)
     taginfo = session.getTag(tagname)
     if not taginfo:
         raise NoSuchTag(tagname)
     tagid = taginfo["id"]
 
+    # figure out how we're going to be dealing with builds that don't
+    # have a matching pkg entry already. Someone needs to own them...
     ownerid = None
-    ownername = options.owner
-    if ownername:
-        ownerinfo = session.getUser(ownername)
+    if owner:
+        ownerinfo = session.getUser(owner)
         if not ownerinfo:
-            raise NoSuchUser(ownername)
+            raise NoSuchUser(owner)
         ownerid = ownerinfo["id"]
 
     packages = session.listPackages(tagID=tagid,
-                                    inherited=options.inherit)
+                                    inherited=inherit)
     packages = set(pkg["package_id"] for pkg in packages)
 
-    nvrs = read_builds(options)
+
+    # load the buildinfo for all of the NVRs
     debug("fed with %i builds", len(nvrs))
 
-    if options.cont:
+    if strict:
         nsbfn = partial(debug, "no such build: %s")
     else:
-        nsbfn = raise_nsb
+        def raise_nsb(nvr):
+            raise NoSuchBuild(nvr)
+
     builds = mass_load_builds(session, nvrs, nsbfn)
 
-    if options.nvr_sort:
+    # sort as requested
+    if sorting == SORT_BY_NVR:
         debug("NVR sorting specified")
         builds = build_nvr_sort(builds)
-    elif options.id_sort:
+    elif sorting == SORT_BY_ID:
         debug("ID sorting specified")
         builds = build_id_sort(builds)
     else:
         debug("no sorting specified, preserving feed order")
         builds = build_dedup(builds)
 
-    if options.debug:
+    if verbose:
         debug("sorted and trimmed duplicates to %i builds", len(builds))
         for build in builds:
             debug(" %s %i", build["nvr"], build["id"])
@@ -224,57 +214,67 @@ def cli_mass_tag(options):
     debug("All done!")
 
 
-def options_mass_tag(name):
-    """
-    [admin] Quickly tag a large number of builds
-    """
+class cli(AdminSmokyDingo):
 
-    parser = ArgumentParser(prog=name)
-    addarg = parser.add_argument
-
-    addarg("tag", action="store", metavar="TAGNAME",
-           help="Tag to associate builds with")
-
-    addarg("--debug", action="store_true", default=False,
-           help="Print debugging information")
-
-    addarg("--test", action="store_true", default=False,
-           help="Print write operatons to stderr without actually"
-           " calling the RPC function")
-
-    addarg("--owner", action="store", default=None,
-           help="Force missing package listings to be created"
-           " with the specified owner")
-
-    addarg("--no-inherit", action="store_false", default=True,
-           dest="inherit", help="Do not use parent tags to"
-           " determine existing package listing.")
-
-    addarg("--file", action="store", default=None,
-           help="Read list of builds from file, one NVR per line."
-           " Omit for default behavior: read build NVRs from stdin")
-
-    addarg("--continue", action="store_true", default=False,
-           dest="cont", help="Continue with tagging operations,"
-           " even after encountering a malformed or non-existing"
-           " NVR")
-
-    group = parser.add_mutually_exclusive_group()
-    addarg = group.add_argument
-
-    addarg("--nvr-sort", action="store_true", default=False,
-           help="pre-sort build list by NVR, so highest NVR is"
-           " tagged last")
-
-    addarg("--id-sort", action="store_true", default=False,
-           help="pre-sort build list by build ID, so most recently"
-           " completed build is tagged last")
-
-    return parser
+    description = "Quickly tag a large number of builds"
 
 
-# provide the function that entry_points will want
-cli = koji_cli_plugin(options_mass_tag, cli_mass_tag)
+    def parser(self):
+
+        parser = super(cli, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Tag to associate builds with")
+
+        addarg("--verbose", action="store_true", default=False,
+               help="Print debugging information")
+
+        addarg("--test", action="store_true", default=False,
+               help="Print write operatons to stderr without actually"
+               " calling the RPC function")
+
+        addarg("--owner", action="store", default=None,
+               help="Force missing package listings to be created"
+               " with the specified owner")
+
+        addarg("--no-inherit", action="store_false", default=True,
+               dest="inherit", help="Do not use parent tags to"
+               " determine existing package listing.")
+
+        addarg("--file", action="store", default=None,
+               help="Read list of builds from file, one NVR per line."
+               " Omit for default behavior: read build NVRs from stdin")
+
+        addarg("--continue", action="store_true", default=False,
+               dest="cont", help="Continue with tagging operations,"
+               " even after encountering a malformed or non-existing"
+               " NVR")
+
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--nvr-sort", action="store_const",
+               dest="sorting", const=SORT_BY_NVR, default=None,
+               help="pre-sort build list by NVR, so highest NVR is"
+               " tagged last")
+
+        addarg("--id-sort", action="store_const",
+               dest="sorting", const=SORT_BY_ID, default=None,
+               help="pre-sort build list by build ID, so most recently"
+               " completed build is tagged last")
+
+        return parser
 
 
+    def handle(self, options):
+        nvrs = read_builds(options)
+
+        return cli_mass_tag(options.session, options.tagname, nvrs,
+                            options.sorting, options.strict,
+                            options.owner, options.inherit,
+                            options.verbose, options.test)
+
+
+#
 # The end.

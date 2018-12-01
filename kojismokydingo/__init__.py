@@ -16,10 +16,12 @@ from __future__ import print_function
 
 import sys
 
+from argparse import ArgumentParser
 from functools import partial
 from koji import GenericError
 from koji.plugin import export_cli
 from koji_cli.lib import activate_session
+from os.path import basename
 
 
 class NoSuchTag(Exception):
@@ -178,6 +180,100 @@ def koji_anon_cli_plugin(parser_factory, cli_fn):
         return export_cli(handler)
 
     return anon_cli_plugin
+
+
+class SmokyDingo(object):
+
+    group = None
+    description = "A CLI Plugin"
+
+    exported_cli = True
+
+
+    def __init__(self, name):
+        self.name = name
+        self.__name__ = "handle_" + self.name.replace("-", "_")
+        self.__doc__ = "[%s] %s" % (self.group, self.description)
+
+
+    def parser(self):
+        invoke = " ".join((basename(sys.argv[0]), self.name))
+        return ArgumentParser(prog=invoke)
+
+
+    def pre_handle(self, options):
+        pass
+
+
+    def handle(self, options):
+        pass
+
+
+    def validate(self, parser, options):
+        pass
+
+
+    def __call__(self, goptions, session, args):
+        parser = self.parser()
+        options = parser.parse_args(args)
+
+        options.session = session
+        options.goptions = goptions
+
+        self.validate(parser, options)
+
+        try:
+            activate_session(session, goptions)
+            self.pre_handle(options)
+            return self.handle(options) or 0
+
+        except KeyboardInterrupt:
+            print(file=sys.stderr)
+            return 130
+
+        except GenericError as kge:
+            printerr(kge)
+            return -1
+
+        except PermissionException as perms:
+            printerr("Insufficient permissions:", perms)
+            return -2
+
+        except NoSuchTag as nst:
+            printerr("No such tag:", nst)
+            return -3
+
+        except NoSuchBuild as nsb:
+            printerr("No such build:", nsb)
+            return -4
+
+        except NoSuchUser as nsu:
+            printerr("No such user:", nsu)
+            return -5
+
+
+class AdminSmokyDingo(SmokyDingo):
+
+    group = "admin"
+
+
+    def pre_handle(self, options):
+        session = options.session
+
+        userinfo = session.getLoggedInUser()
+        userperms = session.getUserPerms(userinfo["id"]) or ()
+
+        if "admin" not in userperms:
+            raise PermissionException()
+
+
+class AnonSmokyDingo(SmokyDingo):
+
+    group = "info"
+
+    def __init__(self, name):
+        super(AnonSmokyDingo, self).__init__(name)
+        self.__name__ = "handle_anon_" + self.name.replace("-", "_")
 
 
 #
