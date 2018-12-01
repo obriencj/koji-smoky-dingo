@@ -14,7 +14,7 @@ The name "smoky-dingo" was provided by [coolname] and has no particular relevanc
 The following client-side commands are included with koji-smoky-dingo
 
 
-### Admin CLI Command: mass-tag
+### mass-tag
 
 Quickly tag a large amount of builds, bypassing the creation of
 individual tasks.
@@ -35,13 +35,13 @@ Additional options allow sorting of the builds prior to being tagged,
 and overriding an owner for any new package listings being created.
 
 
-### Admin CLI Command: renum-tag (coming soon)
+### renum-tag
 
 Adjust the priority values of a tag to maintain the same inheritance
 order, but to create an even amount of space between each entry.
 
 
-### Admin CLI Command: swap-inheritance (coming soon)
+### swap-inheritance
 
 Adjust the inheritance of a tag by replacing one entry for another. If
 both entries are already parents of a tag, then swap the priority of
