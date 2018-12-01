@@ -84,18 +84,18 @@ class cli(AdminSmokyDingo):
         addarg("tag", action="store", metavar="TAGNAME",
                help="Tag to renumber")
 
-        addarg("--verbose", action="store_true", default=False,
+        addarg("--verbose", "-v", action="store_true", default=False,
                help="Print information about what's changing")
 
-        addarg("--test", action="store_true", default=False,
+        addarg("--test", "-t", action="store_true", default=False,
                help="Calculate the new priorities, but don't commit"
                " the changes")
 
-        addarg("--begin", action="store", type=int, default=10,
+        addarg("--begin", "-b", action="store", type=int, default=10,
                help="New priority for first inheritance link"
                " (default: 10)")
 
-        addarg("--step", action="store", type=int, default=10,
+        addarg("--step", "-s", action="store", type=int, default=10,
                help="Priority increment for each subsequent"
                " inheritance link after the first (default: 10)")
 

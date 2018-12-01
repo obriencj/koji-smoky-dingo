@@ -24,20 +24,24 @@ from koji_cli.lib import activate_session
 from os.path import basename
 
 
-class NoSuchTag(Exception):
-    pass
+class BadDingo(Exception):
+    complaint = "Something bad"
 
 
-class NoSuchBuild(Exception):
-    pass
+class NoSuchTag(BadDingo):
+    complaint = "No such tag"
 
 
-class NoSuchUser(Exception):
-    pass
+class NoSuchBuild(BadDingo):
+    complaint = "No such build"
 
 
-class PermissionException(Exception):
-    pass
+class NoSuchUser(BadDingo):
+    complaint = "No such user"
+
+
+class PermissionException(BadDingo):
+    complaint = "Insufficient permissions"
 
 
 printerr = partial(print, file=sys.stderr)
@@ -98,21 +102,9 @@ def handle_cli(name, parser_factory, handler_fn, goptions, session, args):
         printerr(kge)
         return -1
 
-    except PermissionException as perms:
-        printerr("Insufficient permissions:", perms)
+    except BadDingo as bad:
+        printerr(": ".join((bad.complaint, bad)))
         return -2
-
-    except NoSuchTag as nst:
-        printerr("No such tag:", nst)
-        return -3
-
-    except NoSuchBuild as nsb:
-        printerr("No such build:", nsb)
-        return -4
-
-    except NoSuchUser as nsu:
-        printerr("No such user:", nsu)
-        return -5
 
 
 def koji_cli_plugin(parser_factory, cli_fn):
@@ -235,21 +227,9 @@ class SmokyDingo(object):
             printerr(kge)
             return -1
 
-        except PermissionException as perms:
-            printerr("Insufficient permissions:", perms)
+        except BadDingo as bad:
+            printerr(": ".join((bad.complaint, bad)))
             return -2
-
-        except NoSuchTag as nst:
-            printerr("No such tag:", nst)
-            return -3
-
-        except NoSuchBuild as nsb:
-            printerr("No such build:", nsb)
-            return -4
-
-        except NoSuchUser as nsu:
-            printerr("No such user:", nsu)
-            return -5
 
 
 class AdminSmokyDingo(SmokyDingo):
