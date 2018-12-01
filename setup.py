@@ -56,6 +56,7 @@ setup(
         'koji_cli_plugins': [
             'mass-tag = kojismokydingo.mass_tag:cli',
             'renum-tag = kojismokydingo.renum_tag:cli',
+            'swap-inheritance = kojismokydingo.swap_inheritance:cli',
         ],
     },
 
