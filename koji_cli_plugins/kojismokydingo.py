@@ -6,22 +6,24 @@
 # This library is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
+# General Public License for more details.
 #
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, see
-# <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
 """
-Meta plugin for Koji Smoky Dingo. Uses python entry_points to load
-the actual koji command-line plugins handler functions.
+Koji Smoky Dingo - entry_points cli meta plugin
 
-Koji Smoky Dingo provides some handlers, but more handlers can be
-defined this way using other installed packages with entry_points.
+Uses python entry_points to load the actual koji command-line plugins
+handler functions.
 
-author: cobrien@redhat.com
-license: GPL version 3
+Koji Smoky Dingo provides some of its own handlers this way, but more
+handlers can be defined this way using other installed packages with
+entry_points.
+
+:author: cobrien@redhat.com
+"license: GPL version 3
 """
 
 
