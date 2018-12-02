@@ -1,3 +1,0 @@
-[submodule "wiki"]
-	path = wiki
-	url = git@github.com:obriencj/koji-smoky-dingo.wiki.git
