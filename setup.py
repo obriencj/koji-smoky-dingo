@@ -57,6 +57,7 @@ setup(
             'mass-tag = kojismokydingo.mass_tag:cli',
             'renum-tag = kojismokydingo.renum_tag:cli',
             'swap-inheritance = kojismokydingo.swap_inheritance:cli',
+            'userinfo = kojismokydingo.userinfo:cli',
         ],
     },
 

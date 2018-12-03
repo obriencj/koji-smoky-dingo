@@ -253,7 +253,7 @@ class AnonSmokyDingo(SmokyDingo):
 
     def __init__(self, name):
         super(AnonSmokyDingo, self).__init__(name)
-        self.__name__ = "handle_anon_" + self.name.replace("-", "_")
+        self.__name__ = "anon_handle_" + self.name.replace("-", "_")
 
 
 #
