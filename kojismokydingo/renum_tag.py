@@ -54,7 +54,7 @@ def cli_renum_tag(session, tagname, begin=10, step=10,
     original = session.getInheritanceData(tagname)
     renumbered = renum_inheritance(original, begin, step)
 
-    if verbose:
+    if test or verbose:
         print("Renumbering inheritance priorities for", tagname)
         for left, right in izip(original, renumbered):
             name = left['name']
