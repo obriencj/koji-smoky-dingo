@@ -78,9 +78,9 @@ def get_userstatus_str(userinfo):
         return "Unknown (%i)" % val
 
 
-def cli_userinfo(session, name, json=False):
+def cli_userinfo(session, user, json=False):
 
-    userinfo = collect_userinfo(session, options.user)
+    userinfo = collect_userinfo(session, user)
 
     if json:
         dump(userinfo, sys.stdout, **PRETTY_OPTIONS)
@@ -116,7 +116,7 @@ class cli(AnonSmokyDingo):
 
     def parser(self):
         parser = super(cli, self).parser()
-        addarg = ap.add_argument
+        addarg = parser.add_argument
 
         addarg("user", action="store", metavar="USER",
                help="User name or principal")

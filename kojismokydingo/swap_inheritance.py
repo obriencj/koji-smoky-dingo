@@ -30,8 +30,6 @@ will have their priorities swapped.
 
 from __future__ import print_function
 
-import sys
-
 from six.moves import zip as izip
 
 from . import AdminSmokyDingo, BadDingo, NoSuchTag
@@ -104,7 +102,7 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
     if test:
         print("Changes not committed in test mode.")
     else:
-        results = brewhub.setInheritanceData(tagname, swapped, clear=True)
+        results = session.setInheritanceData(tagname, swapped, clear=True)
         if verbose and results:
             print(results)
 
@@ -137,7 +135,7 @@ class cli(AdminSmokyDingo):
         addarg("--verbose", "-v", action="store_true", default=False,
                help="Print information about what's changing")
 
-        addarg("--test", "-t", action="store_true",  default=False,
+        addarg("--test", "-t", action="store_true", default=False,
                help="Calculate the new inheritance, but don't commit"
                " the changes.")
 
