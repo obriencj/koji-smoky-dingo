@@ -143,7 +143,7 @@ class cli(AdminSmokyDingo):
 
 
     def handle(self, options):
-        return cli_swap_inheritance(options.session, options.tagname,
+        return cli_swap_inheritance(options.session, options.tag,
                                     options.old_parent, options.new_parent,
                                     options.verbose, options.test)
 

@@ -120,7 +120,7 @@ class cli(AdminSmokyDingo):
 
 
     def handle(self, options):
-        return cli_renum_tag(options.session, options.tagname,
+        return cli_renum_tag(options.session, options.tag,
                              options.begin, options.step,
                              options.verbose, options.test)
 

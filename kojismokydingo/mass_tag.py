@@ -270,7 +270,7 @@ class cli(AdminSmokyDingo):
     def handle(self, options):
         nvrs = read_builds(options)
 
-        return cli_mass_tag(options.session, options.tagname, nvrs,
+        return cli_mass_tag(options.session, options.tag, nvrs,
                             options.sorting, options.strict,
                             options.owner, options.inherit,
                             options.verbose, options.test)
