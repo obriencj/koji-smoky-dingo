@@ -15,6 +15,7 @@ The following client commands are included with koji-smoky-dingo and
 require admin permissions to function.
 
 | Command | Description |
+|---------|-------------|
 |`koji mass-tag` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
 |`koji renum-tag` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
 |`koji swap-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
@@ -26,6 +27,7 @@ The following client commands are included with koji-smoky-dingo and
 do not require any special permissions to function.853774
 
 | Command | Description |
+|---------|-------------|
 |`koji userinfo` |Show information and permissions for a koji user account |
 
 
