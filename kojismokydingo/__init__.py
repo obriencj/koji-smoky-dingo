@@ -103,7 +103,7 @@ def handle_cli(name, parser_factory, handler_fn, goptions, session, args):
         return -1
 
     except BadDingo as bad:
-        printerr(": ".join((bad.complaint, bad)))
+        printerr(": ".join((bad.complaint, str(bad))))
         return -2
 
 
@@ -228,7 +228,7 @@ class SmokyDingo(object):
             return -1
 
         except BadDingo as bad:
-            printerr(": ".join((bad.complaint, bad)))
+            printerr(": ".join((bad.complaint, str(bad))))
             return -2
 
 
