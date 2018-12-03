@@ -9,43 +9,24 @@ The name "smoky-dingo" was provided by [coolname] and has no particular relevanc
 [coolname]: https://pypi.org/project/coolname/
 
 
-## Contents
+## Admin Commands
 
-The following client-side commands are included with koji-smoky-dingo
+The following client commands are included with koji-smoky-dingo and
+require admin permissions to function.
 
-
-### mass-tag
-
-Quickly tag a large amount of builds, bypassing the creation of
-individual tasks.
-
-```bash
-cat product-1.0-nvr-list.txt | koji mass-tag my-product-1.0-released --debug
-```
-
-This utility uses tagBuildBypass to tag the given builds without using
-a full tagBuild task for each one. It will queue 100 builds at a time
-up via multicalls as well. Prior to tagging, the command will verify
-that a package listing exists for each given build name. If a matching
-package entry isn't found, then one will be created, with ownership
-belonging to the user that created the first build of that name in the
-list of NVRs to be tagged.
-
-Additional options allow sorting of the builds prior to being tagged,
-and overriding an owner for any new package listings being created.
+| Command | Description |
+|`koji mass-tag` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
+|`koji renum-tag` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
+|`koji swap-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
 
 
-### renum-tag
+## Anon Commands
 
-Adjust the priority values of a tag to maintain the same inheritance
-order, but to create an even amount of space between each entry.
+The following client commands are included with koji-smoky-dingo and
+do not require any special permissions to function.853774
 
-
-### swap-inheritance
-
-Adjust the inheritance of a tag by replacing one entry for another. If
-both entries are already parents of a tag, then swap the priority of
-the two.
+| Command | Description |
+|`koji userinfo` |Show information and permissions for a koji user account |
 
 
 ## Install
