@@ -16,19 +16,19 @@ require admin permissions to function.
 
 | Command | Description |
 |---------|-------------|
-|<nobr>`koji mass-tag`</nobr> |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
-|<nobr>`koji renum-tag`</nobr> |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
-|<nobr>`koji swap-inheritance`</nobr> |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
+|`mass-tag` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
+|`renum-tag` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
+|`swap-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
 
 
 ## Anon Commands
 
 The following client commands are included with koji-smoky-dingo and
-do not require any special permissions to function.853774
+do not require any special permissions to function.
 
 | Command | Description |
 |---------|-------------|
-|<nobr>`koji userinfo` </nobr>|Show information and permissions for a koji user account |
+|`userinfo` |Show information and permissions for a koji user account |
 
 
 ## Install
