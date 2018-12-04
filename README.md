@@ -28,6 +28,7 @@ do not require any special permissions to function.
 
 | Command | Description |
 |---------|-------------|
+|`check-hosts` |Show builder hosts which haven't been checking in lately |
 |`userinfo` |Show information and permissions for a koji user account |
 
 
