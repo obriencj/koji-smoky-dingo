@@ -106,6 +106,11 @@ def handle_cli(name, parser_factory, handler_fn, goptions, session, args):
         printerr(": ".join((bad.complaint, str(bad))))
         return -2
 
+    except Exception as err:
+        import traceback
+        traceback.print_exc()
+        raise
+
 
 def koji_cli_plugin(parser_factory, cli_fn):
     """
@@ -230,6 +235,11 @@ class SmokyDingo(object):
         except BadDingo as bad:
             printerr(": ".join((bad.complaint, str(bad))))
             return -2
+
+        except Exception as err:
+            import traceback
+            traceback.print_exc()
+            raise
 
 
 class AdminSmokyDingo(SmokyDingo):
