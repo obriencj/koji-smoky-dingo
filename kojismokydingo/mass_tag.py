@@ -154,7 +154,7 @@ def cli_mass_tag(session, tagname, nvrs,
     if strict:
         nsbfn = partial(debug, "no such build: %s")
     else:
-        def raise_nsb(nvr):
+        def nsbfn(nvr):
             raise NoSuchBuild(nvr)
 
     builds = mass_load_builds(session, nvrs, nsbfn)
@@ -227,7 +227,7 @@ class cli(AdminSmokyDingo):
         addarg("tag", action="store", metavar="TAGNAME",
                help="Tag to associate builds with")
 
-        addarg("--verbose", action="store_true", default=False,
+        addarg("-v", "--verbose", action="store_true", default=False,
                help="Print debugging information")
 
         addarg("--test", action="store_true", default=False,
@@ -246,10 +246,9 @@ class cli(AdminSmokyDingo):
                help="Read list of builds from file, one NVR per line."
                " Omit for default behavior: read build NVRs from stdin")
 
-        addarg("--continue", action="store_true", default=False,
-               dest="cont", help="Continue with tagging operations,"
-               " even after encountering a malformed or non-existing"
-               " NVR")
+        addarg("--strict", action="store_true", default=False,
+               help="Continue with tagging operations, even after"
+               " encountering a malformed or non-existing NVR")
 
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
