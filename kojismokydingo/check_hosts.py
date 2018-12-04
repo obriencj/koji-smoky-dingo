@@ -25,9 +25,6 @@ enabled but which are not checking in.
 
 from __future__ import print_function
 
-
-import sys
-
 from datetime import datetime, timedelta
 from fnmatch import fnmatchcase
 from functools import partial
@@ -85,7 +82,7 @@ def get_hosts_checkins(session, arches=None, channel=None, skiplist=None):
 
 
 def cli_check_hosts(session, timeout=60, arches=(), channel=None,
-                    ignore=(), quiet=False, sush=False):
+                    ignore=(), quiet=False, shush=False):
 
     timeout = datetime.utcnow() - timedelta(seconds=(timeout * 60))
 
