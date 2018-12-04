@@ -72,6 +72,8 @@ def get_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     mc = session.multiCall()
 
     for bid, data in izip(bldr_ids, mc):
+        data = data[0] if data else None
+
         if data:
             data = data + " UTC"
             data = datetime.strptime(data, "%Y-%m-%d %H:%M:%S.%f %Z")
