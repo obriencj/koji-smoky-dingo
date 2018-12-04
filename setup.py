@@ -54,6 +54,7 @@ setup(
 
     entry_points = {
         'koji_cli_plugins': [
+            'check-hosts = kojismokydingo.check_hosts:cli',
             'mass-tag = kojismokydingo.mass_tag:cli',
             'renum-tag = kojismokydingo.renum_tag:cli',
             'swap-inheritance = kojismokydingo.swap_inheritance:cli',
