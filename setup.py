@@ -18,13 +18,16 @@
 Koji Smoky Dingo - a collection of koji command-line features for
 advanced users.
 
-Note that this package needs to be installed using either:
+Note that in order for the meta-plugin in koji_cli_plugins to be
+installed in a way that the koji CLI will be able to see, this package
+needs to be installed using either:
 
   python setup.py install --root=/
 
 or
 
   python setup.py install --old-and-unmanageable
+
 
 :author: Christopher O'Brien  <obriencj@gmail.com>
 :license: GPL version 3
@@ -39,16 +42,15 @@ setup(
     version = '0.9.0',
 
     packages = [
+        # the koji meta-plugin
         'koji_cli_plugins',
+
+        # everything else
         'kojismokydingo',
     ],
 
     requires = [
-        # Note that koji currently isn't installed in a way that
-        # setuptools can see, so we shouldn't have a hard requires on
-        # it.
-        # "koji",
-
+        "koji",
         "six",
     ],
 
