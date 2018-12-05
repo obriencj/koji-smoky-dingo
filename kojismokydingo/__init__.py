@@ -106,7 +106,7 @@ def handle_cli(name, parser_factory, handler_fn, goptions, session, args):
         printerr(": ".join((bad.complaint, str(bad))))
         return -2
 
-    except Exception as err:
+    except Exception:
         import traceback
         traceback.print_exc()
         raise
@@ -236,7 +236,7 @@ class SmokyDingo(object):
             printerr(": ".join((bad.complaint, str(bad))))
             return -2
 
-        except Exception as err:
+        except Exception:
             import traceback
             traceback.print_exc()
             raise
