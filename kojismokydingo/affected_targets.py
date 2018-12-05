@@ -28,11 +28,9 @@ collect any targets on each child.
 
 from __future__ import print_function
 
-import sys
-from functools import partial
 from itertools import chain
 
-from . import SmokyDingo, NoSuchTag
+from . import AnonSmokyDingo, NoSuchTag, printerr
 
 
 def cli_affected_targets(session, tag_list,
@@ -40,10 +38,7 @@ def cli_affected_targets(session, tag_list,
                          quiet=False):
 
     if quiet:
-        debug = partial(print, file=sys.stderr)
-    else:
-        def debug(*m):
-            pass
+        debug = printerr if quiet else lambda *m: None
 
     tags = list()
     for tname in tag_list:
@@ -87,13 +82,13 @@ def cli_affected_targets(session, tag_list,
             print(o)
 
 
-class cli(SmokyDingo):
+class cli(AnonSmokyDingo):
 
     description = "Show targets impacted by changes to the given tag(s)"
 
 
     def parser(self):
-        parser = super(SmokyDingo, self).parser()
+        parser = super(AnonSmokyDingo, self).parser()
         addarg = parser.add_argument
 
         addarg("tags", nargs="+", metavar="TAGNAME",
