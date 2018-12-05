@@ -28,6 +28,7 @@ do not require any special permissions to function.
 
 | Command | Description |
 |---------|-------------|
+|`affected-targets` |Show targets which would be impacted by modifications to the given tag |
 |`check-hosts` |Show builder hosts which haven't been checking in lately |
 |`userinfo` |Show information and permissions for a koji user account |
 
