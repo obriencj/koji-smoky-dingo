@@ -36,7 +36,7 @@ from . import AnonSmokyDingo, NoSuchTag, printerr
 def get_affected_targets(session, tagname_list):
 
     tags = list()
-    for tname in tagname_list:
+    for tname in set(tagname_list):
         tag = session.getTag(tname)
         if not tag:
             raise NoSuchTag(tname)
@@ -49,10 +49,11 @@ def get_affected_targets(session, tagname_list):
     parents = [p[0] for p in session.multiCall() if p]
 
     tagids = set(chain(*((ch['tag_id'] for ch in ti) for ti in parents)))
+    tagids.update(tag['id'] for tag in tags)
 
     session.multicall = True
     for ti in tagids:
-        session.getBuildTargets(buildTagID=tagids)
+        session.getBuildTargets(buildTagID=ti)
 
     return list(chain(*(t[0] for t in session.multiCall() if t)))
 
@@ -63,8 +64,7 @@ def cli_affected_targets(session, tag_list,
 
     targets = get_affected_targets(session, tag_list)
 
-    if quiet:
-        debug = printerr if quiet else lambda *m: None
+    debug = printerr if not quiet else lambda *m: None
 
     if info:
         # convert the targets into info tuples
