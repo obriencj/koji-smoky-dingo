@@ -33,15 +33,10 @@ from itertools import chain
 from . import AnonSmokyDingo, NoSuchTag, printerr
 
 
-def cli_affected_targets(session, tag_list,
-                         build_tags=False, info=False,
-                         quiet=False):
-
-    if quiet:
-        debug = printerr if quiet else lambda *m: None
+def get_affected_targets(session, tagname_list):
 
     tags = list()
-    for tname in tag_list:
+    for tname in tagname_list:
         tag = session.getTag(tname)
         if not tag:
             raise NoSuchTag(tname)
@@ -51,20 +46,35 @@ def cli_affected_targets(session, tag_list,
     session.multicall = True
     for tag in tags:
         session.getFullInheritance(tag['id'], reverse=True)
-    parents = session.multiCall()
+    parents = [p[0] for p in session.multiCall() if p]
+
+    tagids = set(chain(*((ch['tag_id'] for ch in ti) for ti in parents)))
 
     session.multicall = True
-    for ti in parents:
-        for child in ti:
-            session.getBuildTargets(buildTagID=child['tag_id'])
-    targets = chain(*session.multiCall())
+    for ti in tagids:
+        session.getBuildTargets(buildTagID=tagids)
+
+    return list(chain(*(t[0] for t in session.multiCall() if t)))
+
+
+def cli_affected_targets(session, tag_list,
+                         build_tags=False, info=False,
+                         quiet=False):
+
+    targets = get_affected_targets(session, tag_list)
+
+    if quiet:
+        debug = printerr if quiet else lambda *m: None
 
     if info:
-        targets = ((t['name'], t['build_tag_name'], t['dest_tag_name'])
-                   for t in targets)
-        output = [" ".join(t) for t in sorted(targets)]
+        # convert the targets into info tuples
+        infos = sorted((t['name'], t['build_tag_name'], t['dest_tag_name'])
+                       for t in targets)
+        output = [" ".join(t) for t in infos]
 
     else:
+        # get a unique sorted list of either the target names or the
+        # build tag names for the targets
         attr = 'build_tag_name' if build_tags else 'name'
         output = sorted(set(targ[attr] for targ in targets))
 
@@ -73,7 +83,8 @@ def cli_affected_targets(session, tag_list,
     else:
         debug("Found %i affected targets inheriting:" % len(output))
 
-    for tag in sorted(set(tag['name'] for tag in tags)):
+    # for debugging we re-print the tags we operated on
+    for tag in sorted(set(tag_list)):
         debug(" ", tag)
 
     if output:
