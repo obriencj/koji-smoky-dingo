@@ -1,23 +1,32 @@
-#!/usr/bin/env python2
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
 """
+Koji Smoky Dingo - info command identify-imported
 
-Given a tag, check for imported builds.
+Given a tag or a list of builds, identify which of those were imported
+(vs. actually build in koji)
 
-author: cobrien@redhat.com
-
+:author: cobrien@redhat.com
+:license: GPL version 3
 """
+
+
+from __future__ import print_function
 
 
 import sys
-
-from optparse import OptionParser
-from socket import gaierror
-from xmlrpclib import Fault, MultiCall, ServerProxy
-
-
-BREW_SERVICE = "https://brewhub.engineering.redhat.com/brewhub"
 
 
 def identify_imports(build_infos, reverse=False, by_cg=set()):
@@ -63,14 +72,14 @@ def chunk(seq, chunksize):
             offset in xrange(0, len(seq), chunksize))
 
 
-def chunk_load(brewhub, build_ids):
+def chunk_load(session, build_ids):
     """
     Try not to be cruel to brew, and only request 100 build info at a
     time
     """
 
     for bid_chunk in chunk(build_ids, 100):
-        multicall = MultiCall(brewhub)
+        multicall = MultiCall(session)
         for bid in bid_chunk:
             multicall.getBuild(bid)
         for binfo in multicall():
@@ -79,16 +88,16 @@ def chunk_load(brewhub, build_ids):
 
 def cli(options, nvr_list):
 
-    brewhub = ServerProxy(options.brewhub)
+    session = ServerProxy(options.session)
 
     if len(nvr_list) == 1 and nvr_list[0] == "-":
         # special case, read list of NVRs from stdin
         nvr_list = (line.strip() for line in sys.stdin)
         nvr_list = [line for line in nvr_list if line]
-        found_builds = list(chunk_load(brewhub, nvr_list))
+        found_builds = list(chunk_load(session, nvr_list))
 
     elif nvr_list:
-        found_builds = list(chunk_load(brewhub, nvr_list))
+        found_builds = list(chunk_load(session, nvr_list))
 
     else:
         found_builds = list()
@@ -98,7 +107,7 @@ def cli(options, nvr_list):
                      'latest': False,
                      'inherit': options.inherit, }
 
-        more_builds = brewhub.listTagged(options.tag, call_args)
+        more_builds = session.listTagged(options.tag, call_args)
 
         if not options.reverse:
             # the listTagged call doesn't return the extra information
@@ -107,7 +116,7 @@ def cli(options, nvr_list):
             # first.  However we happen to know that in reverse mode
             # we don't actually care about that, so we'll skip the
             # loading in that case.
-            more_builds = chunk_load(brewhub, [b["id"] for b in more_builds])
+            more_builds = chunk_load(session, [b["id"] for b in more_builds])
 
         found_builds.extend(more_builds)
 
@@ -119,60 +128,42 @@ def cli(options, nvr_list):
         print build["nvr"]
 
 
-def create_optparser():
-    parse = OptionParser("%prog [OPTIONS] [NVR [NVR...]]",
-                         description="Find imported builds by NVR. Specify"
-                         " a single NVR of - to read list from stdin")
+class cli(AnonSmokyDingo):
 
-    parse.add_option("--brewhub", action="store", default=BREW_SERVICE,
-                     help="URI for the brewhub service")
+    def parser(self):
+        argp = super(AnonSmokyDingo, self).parser()
+        addarg = argp.add_argument
 
-    parse.add_option("--tag", action="store", default=None,
-                     help="look through a tag to find builds to filter")
+        addarg("tag", nargs="*", action="append", default=[],
+               metavar="TAGNAME",
+               help="Tag containing builds to check.")
 
-    parse.add_option("--inherit", action="store_true", default=False,
-                     help="use with --tag=TAG to follow inheritance"
-                     " when searching for imported builds")
+        addarg("-f", "--file", action="store", default=None,
+               help="Read list of builds from file, one NVR per line."
+               " Set to - to read from stdin.")
 
-    parse.add_option("--reverse", action="store_true", default=False,
-                     help="reverse behavior, list non-imports instead"
-                     " of imports")
+        addarg("-i", "--inherit", action="store_true", default=False,
+               help="use with --tag=TAG to follow inheritance"
+               " when searching for imported builds")
 
-    parse.add_option("--cg", action="append", default=list(),
-                     help="show content generator imports by build"
-                     " system name. Default: display no CG builds."
-                     " Specify 'all' to see CG imports from any system."
-                     " May be specified more than once.")
+        addarg("-n", "--negate", action="store_true", default=False,
+               help="inverted behavior, list non-imports instead"
+               " of imports")
 
-    return parse
+        addarg("-c", "--content-generator", action="append", default=list(),
+               help="show content generator imports by build"
+               " system name. Default: display no CG builds."
+               " Specify 'all' to see CG imports from any system."
+               " May be specified more than once.")
 
-
-def main(args):
-    parser = create_optparser()
-    options, args = parser.parse_args(args)
-
-    try:
-        cli(options, args[1:])
-
-    except KeyboardInterrupt:
-        print
-        return 130
-
-    except Fault as xmlf:
-        print >> sys.stderr, xmlf.faultString
-        return -1
-
-    except gaierror as dns:
-        print >> sys.stderr, dns.message
-        print >> sys.stderr, "Try using --brewhub with an IP address"
-        return -2
-
-    else:
-        return 0
+        return parse
 
 
-if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    def handle(self, options):
+        nvrs = read_builds(options)
+
+        return cli_identify_imported(options.session, options.nvrs,
+                                     options.
 
 
 #
