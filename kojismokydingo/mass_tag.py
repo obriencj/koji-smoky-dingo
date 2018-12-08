@@ -152,10 +152,10 @@ def cli_mass_tag(session, tagname, nvrs,
     debug("fed with %i builds", len(nvrs))
 
     if strict:
-        nsbfn = partial(debug, "no such build: %s")
-    else:
         def nsbfn(nvr):
             raise NoSuchBuild(nvr)
+    else:
+        nsbfn = partial(debug, "no such build: %s")
 
     builds = mass_load_builds(session, nvrs, nsbfn)
 
@@ -247,8 +247,7 @@ class cli(AdminSmokyDingo):
                " Omit for default behavior: read build NVRs from stdin")
 
         addarg("--strict", action="store_true", default=False,
-               help="Continue with tagging operations, even after"
-               " encountering a malformed or non-existing NVR")
+               help="Ensure all NVRs are valid before tagging any.")
 
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
