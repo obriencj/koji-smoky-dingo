@@ -127,7 +127,7 @@ class SmokyDingo(object):
 
     def parser(self):
         invoke = " ".join((basename(sys.argv[0]), self.name))
-        return ArgumentParser(prog=invoke, help=self.description)
+        return ArgumentParser(prog=invoke, description=self.description)
 
 
     def pre_handle(self, options):
