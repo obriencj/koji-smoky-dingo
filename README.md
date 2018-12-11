@@ -30,6 +30,7 @@ do not require any special permissions to function.
 |---------|-------------|
 |`affected-targets` |Show targets which would be impacted by modifications to the given tag |
 |`check-hosts` |Show builder hosts which haven't been checking in lately |
+|`identify-imported` |Show builds which were imported into koji |
 |`userinfo` |Show information and permissions for a koji user account |
 
 
