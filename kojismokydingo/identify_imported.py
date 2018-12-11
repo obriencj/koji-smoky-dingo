@@ -25,15 +25,15 @@ Given a tag or a list of builds, identify which of those were imported
 
 from __future__ import print_function
 
+from . import AnonSmokyDingo, NoSuchTag, \
+    mass_load_builds, read_clean_lines, unique
 
-import sys
 
-
-def identify_imports(build_infos, reverse=False, by_cg=set()):
+def identify_imported(build_infos, negate=False, by_cg=set()):
     """
-    Given a sequence of build info dicts, emit those which are imports.
+    Given a sequence of build info dicts, yield those which are imports.
 
-    if reverse is True, then behavior is flipped and only non-imports
+    if negate is True, then behavior is flipped and only non-imports
     are emitted (and the by_cg parameter is ignored)
 
     If by_cg is not specified, then only non CG imports are emitted.
@@ -50,7 +50,7 @@ def identify_imports(build_infos, reverse=False, by_cg=set()):
 
         is_import = build.get("task_id", None) is None
 
-        if reverse:
+        if negate:
             # looking for non-imports, regardless of CG or not
             if not is_import:
                 yield build
@@ -67,103 +67,92 @@ def identify_imports(build_infos, reverse=False, by_cg=set()):
                 yield build
 
 
-def chunk(seq, chunksize):
-    return (seq[offset:offset+chunksize] for
-            offset in xrange(0, len(seq), chunksize))
+def cli_identify_imported(session, tagname=None, nvr_list=None,
+                          inherit=False, negate=False,
+                          cg_list=()):
 
+    if nvr_list:
+        builds = mass_load_builds(session, unique(nvr_list))
 
-def chunk_load(session, build_ids):
-    """
-    Try not to be cruel to brew, and only request 100 build info at a
-    time
-    """
+    elif tagname:
+        taginfo = session.getTag(tagname)
+        if not taginfo:
+            raise NoSuchTag(tagname)
 
-    for bid_chunk in chunk(build_ids, 100):
-        multicall = MultiCall(session)
-        for bid in bid_chunk:
-            multicall.getBuild(bid)
-        for binfo in multicall():
-            yield binfo
+        builds = session.listTagged(taginfo["id"], inherit=inherit)
 
-
-def cli(options, nvr_list):
-
-    session = ServerProxy(options.session)
-
-    if len(nvr_list) == 1 and nvr_list[0] == "-":
-        # special case, read list of NVRs from stdin
-        nvr_list = (line.strip() for line in sys.stdin)
-        nvr_list = [line for line in nvr_list if line]
-        found_builds = list(chunk_load(session, nvr_list))
-
-    elif nvr_list:
-        found_builds = list(chunk_load(session, nvr_list))
-
-    else:
-        found_builds = list()
-
-    if options.tag:
-        call_args = {'__starstar': True,
-                     'latest': False,
-                     'inherit': options.inherit, }
-
-        more_builds = session.listTagged(options.tag, call_args)
-
-        if not options.reverse:
+        if not negate:
             # the listTagged call doesn't return the extra information
             # we need to determine which CG something came from, so we
             # need to gather up full buildinfo data from those results
-            # first.  However we happen to know that in reverse mode
+            # first.  However we happen to know that in negate mode
             # we don't actually care about that, so we'll skip the
             # loading in that case.
-            more_builds = chunk_load(session, [b["id"] for b in more_builds])
+            bids = (b["id"] for b in builds)
+            builds = mass_load_builds(session, bids)
 
-        found_builds.extend(more_builds)
+    else:
+        # from the CLI, one of these should be specified.
+        builds = ()
 
-    matching = identify_imports(found_builds,
-                                options.reverse,
-                                set(options.cg))
-
-    for build in matching:
-        print build["nvr"]
+    for build in identify_imported(builds, negate, cg_list):
+        print(build["nvr"])
 
 
 class cli(AnonSmokyDingo):
 
+    description = "Detect imported builds"
+
+
     def parser(self):
         argp = super(AnonSmokyDingo, self).parser()
-        addarg = argp.add_argument
 
-        addarg("tag", nargs="*", action="append", default=[],
+        group = argp.mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("tag", nargs="?", action="store", default=None,
                metavar="TAGNAME",
                help="Tag containing builds to check.")
 
         addarg("-f", "--file", action="store", default=None,
+               dest="nvr_file", metavar="NVR_FILE",
                help="Read list of builds from file, one NVR per line."
                " Set to - to read from stdin.")
 
+        addarg = argp.add_argument
+
         addarg("-i", "--inherit", action="store_true", default=False,
-               help="use with --tag=TAG to follow inheritance"
-               " when searching for imported builds")
+               help="also scan any parent tags when checking"
+               " for imported builds")
 
         addarg("-n", "--negate", action="store_true", default=False,
                help="inverted behavior, list non-imports instead"
                " of imports")
 
-        addarg("-c", "--content-generator", action="append", default=list(),
+        addarg("-c", "--content-generator", dest="cg_list",
+               action="append", default=list(),
+               metavar="CG_NAME",
                help="show content generator imports by build"
                " system name. Default: display no CG builds."
                " Specify 'all' to see CG imports from any system."
                " May be specified more than once.")
 
-        return parse
+        return argp
+
+
+    def validate(self, parser, options):
+        if not (options.tag or options.nvr_file):
+            parser.error("Please specify either a tag to scan, or"
+                         " --file=NVR_FILE")
 
 
     def handle(self, options):
-        nvrs = read_builds(options)
+        nvr_list = read_clean_lines(options.nvr_file)
 
-        return cli_identify_imported(options.session, options.nvrs,
-                                     options.
+        return cli_identify_imported(options.session, options.tag,
+                                     nvr_list,
+                                     options.inherit, options.negate,
+                                     options.cg_list)
 
 
 #
