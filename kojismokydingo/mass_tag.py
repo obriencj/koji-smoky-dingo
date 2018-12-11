@@ -27,60 +27,13 @@ from __future__ import print_function
 
 import sys
 from functools import partial
-from six.moves import range as xrange, zip as izip
 
-from . import AdminSmokyDingo, NoSuchBuild, NoSuchTag, NoSuchUser
+from . import AdminSmokyDingo, NoSuchBuild, NoSuchTag, NoSuchUser, \
+    chunkseq, mass_load_builds, read_clean_lines
 
 
 SORT_BY_ID = "sort-by-id"
 SORT_BY_NVR = "sort-by-nvr"
-
-
-def chunk_seq(seq, chunksize):
-    return (seq[offset:offset + chunksize] for
-            offset in xrange(0, len(seq), chunksize))
-
-
-def iter_mass_load_builds(session, nvrs, nsbfn):
-    for nvr_chunk in chunk_seq(nvrs, 100):
-        session.multicall = True
-
-        for nvr in nvr_chunk:
-            session.getBuild(nvr)
-
-        for nvr, binfo in izip(nvr_chunk, session.multiCall()):
-            if binfo:
-                if "faultCode" in binfo:
-                    # koji returned an error dict instead of a list of
-                    # builds
-                    nsbfn(nvr)
-                else:
-                    # otherwise it returned a list of matching builds
-                    # (usually just 1, but let's make sure)
-                    for b in binfo:
-                        if not b:
-                            nsbfn(nvr)
-                        else:
-                            yield b
-            else:
-                nsbfn(nvr)
-
-
-def mass_load_builds(session, nvrs, nsbfn):
-    return list(iter_mass_load_builds(session, nvrs, nsbfn))
-
-
-def read_builds(options):
-    fin = open(options.file, "r") if options.file else sys.stdin
-
-    # note we don't do any de-duping or re-ordering here, just cleaning
-    # whitespace and dropping blank lines
-    builds = [line for line in (l.strip() for l in fin) if line]
-
-    if options.file:
-        fin.close()
-
-    return builds
 
 
 def build_dedup(builds):
@@ -197,7 +150,7 @@ def cli_mass_tag(session, tagname, nvrs,
     # and finally, tag them all in chunks of 100
     debug("begining mass tagging")
     counter = 0
-    for build_chunk in chunk_seq(builds, 100):
+    for build_chunk in chunkseq(builds, 100):
         multiCallEnable()
         for build in build_chunk:
             pkg = build["package_id"]
@@ -242,7 +195,8 @@ class cli(AdminSmokyDingo):
                dest="inherit", help="Do not use parent tags to"
                " determine existing package listing.")
 
-        addarg("--file", action="store", default=None,
+        addarg("--file", action="store", default="-",
+               dest="nvr_file", metavar="NVR_FILE",
                help="Read list of builds from file, one NVR per line."
                " Omit for default behavior: read build NVRs from stdin")
 
@@ -266,7 +220,7 @@ class cli(AdminSmokyDingo):
 
 
     def handle(self, options):
-        nvrs = read_builds(options)
+        nvrs = read_clean_lines(options.nvr_file)
 
         return cli_mass_tag(options.session, options.tag, nvrs,
                             options.sorting, options.strict,

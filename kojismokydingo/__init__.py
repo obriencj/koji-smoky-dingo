@@ -17,11 +17,12 @@ from __future__ import print_function
 import sys
 
 from argparse import ArgumentParser
+from collections import OrderedDict
 from functools import partial
 from koji import GenericError
-from koji.plugin import export_cli
 from koji_cli.lib import activate_session
 from os.path import basename
+from six.moves import range as xrange, zip as izip
 
 
 class BadDingo(Exception):
@@ -47,136 +48,67 @@ class PermissionException(BadDingo):
 printerr = partial(print, file=sys.stderr)
 
 
-def int_range(start, stop=None):
-    """
-    For use as a type in an ArgumentParser argument, raises a
-    TypeError if the given integer argument is not within the start
-    and stop values provided
-    """
-
-    errname = "int (out of range start=%i, stop=%i)" % (start, stop)
-
-    def rint(val):
-        rint.__name__ = "int"
-        val = int(val)
-
-        if start < val <= stop:
-            return val
-        else:
-            rint.__name__ = errname
-            raise TypeError(val)
-
-    return rint
+def unique(sequence):
+    return list(OrderedDict((s, None) for s in sequence))
 
 
-def handle_cli(name, parser_factory, handler_fn, goptions, session, args):
-    """
-    Helper function which is used by koji_cli_plugin and
-    koji_anon_cli_plugin to combine a command name, an option parser
-    factory, and a handler function with the parameters passed by koji
-    to command handlers.
-
-    This function will create the parser using the given name, parse the
-    arguments from the koji cli invocation, activate the session using
-    the global options, and then invoke the handler_fn.
-
-    A number of basic exception types are caught by default, providing
-    polite output and a return code, but without a traceback.
-    """
-
-    parser = parser_factory(name)
-    options = parser.parse_args(args)
-
-    options.session = session
-    options.goptions = goptions
-
-    try:
-        activate_session(session, goptions)
-        return handler_fn(options) or 0
-
-    except KeyboardInterrupt:
-        print(file=sys.stderr)
-        return 130
-
-    except GenericError as kge:
-        printerr(kge)
-        return -1
-
-    except BadDingo as bad:
-        printerr(": ".join((bad.complaint, str(bad))))
-        return -2
-
-    except Exception:
-        import traceback
-        traceback.print_exc()
-        raise
+def chunkseq(seq, chunksize):
+    return (seq[offset:offset + chunksize] for
+            offset in xrange(0, len(seq), chunksize))
 
 
-def koji_cli_plugin(parser_factory, cli_fn):
-    """
-    Helper to combine a function that creates an ArgumentParser with a
-    function to handle the parsed args, and produce a unary function
-    that takes its invocation name to produce a koji cli handler
-    function.
+def mass_load_builds(session, nvrs, nsbfn=None, size=100):
 
-    :parser_factory: unary function accepting the name of the command as
-    invoked. Should return an ArgumentParser instance
+    results = []
 
-    :cli_fn: unary function accepting an options object as produced by
-    the parser_factor's parser.
+    # nsbfn is a unary function meant to deal with an NVR which didn't
+    # return a build info. Calling functions can use this to collect
+    # malformed or missing builds, or to raise an exception. If
+    # unspecified, then missing builds are just skipped.
 
-    :return: partial combining the handler_cli function, the name, the
-    parser_factory, and the cli_fn. Will be marked as a cli command
-    handler for koji, and will present a name appropriate for the koji
-    cli.
-    """
+    for nvr_chunk in chunkseq(nvrs, size):
+        session.multicall = True
 
-    def cli_plugin(name):
-        wonkyname = "handle_%s" % name.replace("-", "_")
+        for nvr in nvr_chunk:
+            session.getBuild(nvr)
 
-        handler = partial(handle_cli, name, parser_factory, cli_fn)
-        handler.__doc__ = parser_factory.__doc__.strip()
-        handler.__name__ = wonkyname
-        handler.export_alias = wonkyname
+        for nvr, binfo in izip(nvr_chunk, session.multiCall()):
+            if binfo:
+                if "faultCode" in binfo:
+                    # koji returned an error dict instead of a list of
+                    # builds
+                    nsbfn and nsbfn(nvr)
+                else:
+                    # otherwise it returned a list of matching builds
+                    # (usually just 1, but let's make sure)
+                    for b in binfo:
+                        if not b:
+                            nsbfn and nsbfn(nvr)
+                        else:
+                            results.append(b)
+            else:
+                nsbfn and nsbfn(nvr)
 
-        return export_cli(handler)
-
-    return cli_plugin
+    return results
 
 
-def koji_anon_cli_plugin(parser_factory, cli_fn):
-    """
-    Helper to combine a function that creates an ArgumentParser with a
-    function to handle the parsed args, and produce a unary function
-    that takes its invocation name to produce a koji cli handler
-    function.
+def read_clean_lines(filename="-"):
 
-    Identical to koji_cli_plugin but the session will not be
-    authenticated.
+    if not filename:
+        return []
 
-    :parser_factory: unary function accepting the name of the command as
-    invoked. Should return an ArgumentParser instance
+    elif filename == "-":
+        fin = sys.stdin
 
-    :cli_fn: unary function accepting an options object as produced by
-    the parser_factor's parser.
+    else:
+        fin = open(filename, "r")
 
-    :return: partial combining the handler_cli function, the name, the
-    parser_factory, and the cli_fn. Will be marked as a cli command
-    handler for koji, and will present a name appropriate for the koji
-    cli.
-    """
+    lines = [line for line in (l.strip() for l in fin) if line]
 
-    def anon_cli_plugin(name):
-        wonkyname = "anon_handle_%s" % name.replace("-", "_")
+    if filename != "-":
+        fin.close()
 
-        handler = partial(handle_cli, name, parser_factory, cli_fn)
-        handler.__doc__ = parser_factory.__doc__.strip()
-        handler.__name__ = wonkyname
-        handler.export_alias = wonkyname
-
-        return export_cli(handler)
-
-    return anon_cli_plugin
+    return lines
 
 
 class SmokyDingo(object):
@@ -195,7 +127,7 @@ class SmokyDingo(object):
 
     def parser(self):
         invoke = " ".join((basename(sys.argv[0]), self.name))
-        return ArgumentParser(prog=invoke)
+        return ArgumentParser(prog=invoke, help=self.description)
 
 
     def pre_handle(self, options):
