@@ -58,6 +58,7 @@ setup(
         'koji_cli_plugins': [
             'affected-targets = kojismokydingo.affected_targets:cli',
             'check-hosts = kojismokydingo.check_hosts:cli',
+            'identify-imported = kojismokydingo.identify_imported:cli',
             'mass-tag = kojismokydingo.mass_tag:cli',
             'renum-tag = kojismokydingo.renum_tag:cli',
             'swap-inheritance = kojismokydingo.swap_inheritance:cli',

@@ -88,7 +88,7 @@ def cli_identify_imported(session, tagname=None, nvr_list=None,
             # first.  However we happen to know that in negate mode
             # we don't actually care about that, so we'll skip the
             # loading in that case.
-            bids = (b["id"] for b in builds)
+            bids = [b["id"] for b in builds]
             builds = mass_load_builds(session, bids)
 
     else:
@@ -107,7 +107,7 @@ class cli(AnonSmokyDingo):
     def parser(self):
         argp = super(AnonSmokyDingo, self).parser()
 
-        group = argp.mutually_exclusive_group()
+        group = argp.add_mutually_exclusive_group()
         addarg = group.add_argument
 
         addarg("tag", nargs="?", action="store", default=None,
