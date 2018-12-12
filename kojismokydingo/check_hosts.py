@@ -63,7 +63,7 @@ def get_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     if skiplist:
         bldrs = ifilterfalse(partial(namematch, skiplist), bldrs)
 
-    bldrs = {b["id"]: b for b in bldrs}
+    bldrs = dict((b["id"], b) for b in bldrs)
     bldr_ids = list(bldrs.keys())
 
     session.multicall = True
