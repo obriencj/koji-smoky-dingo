@@ -33,8 +33,8 @@ from __future__ import print_function
 def __plugin__(glbls):
 
     import koji
+    import sys
     from pkg_resources import iter_entry_points
-    from sys import stderr
 
     # in situations where koji.config is present and cli_entry_points
     # is explicitly set to False, we'll effective disable this
@@ -47,21 +47,21 @@ def __plugin__(glbls):
     commands = {}
 
     for entry_point in iter_entry_points('koji_cli_plugins'):
-        name = entry_point.name
-
         try:
-            handler_fn = entry_point.load()
-            handler = handler_fn(name)
+            entry_fn = entry_point.load()
+            handler = entry_fn(entry_point.name) if entry_fn else None
 
         except Exception as ex:
             message = "Error loading plugin %r" % entry_point
-            print(message, ex, file=stderr)
+            print(message, ex, file=sys.stderr)
 
         else:
-            commands[handler.__name__] = handler
+            if handler:
+                commands[handler.__name__] = handler
 
-    glbls.update(commands)
-    glbls["__all__"] = tuple(sorted(commands))
+    if commands:
+        glbls.update(commands)
+        glbls["__all__"] = tuple(sorted(commands))
 
 
 __plugin__(globals())
