@@ -16,9 +16,9 @@ require admin permissions to function.
 
 | Command | Description |
 |---------|-------------|
-|`mass-tag` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
-|`renum-tag` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
-|`swap-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
+|`bulk-tag-builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
+|`renum-tag-inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
+|`swap-tag-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
 
 
 ## Anon Commands
@@ -30,7 +30,7 @@ do not require any special permissions to function.
 |---------|-------------|
 |`affected-targets` |Show targets which would be impacted by modifications to the given tag |
 |`check-hosts` |Show builder hosts which haven't been checking in lately |
-|`identify-imported` |Show builds which were imported into koji |
+|`list-imported` |Show builds which were imported into koji |
 |`userinfo` |Show information and permissions for a koji user account |
 
 
