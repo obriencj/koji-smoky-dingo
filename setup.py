@@ -57,7 +57,7 @@ setup(
     # these are used by the koji meta-plugin to provide additional
     # commands, one per entry_point
     entry_points = {
-        'koji-smoky-dingo': [
+        'koji_smoky_dingo': [
             'affected-targets = kojismokydingo.affected_targets:cli',
             'check-hosts = kojismokydingo.check_hosts:cli',
             'list-imported = kojismokydingo.identify_imported:cli',

@@ -23,7 +23,7 @@ handlers can be defined this way using other installed packages with
 entry_points.
 
 To define additional commands, register an entry_point with the
-koji-smoky-dingo group, using the name of the plugin. The entry point
+koji_smoky_dingo group, using the name of the plugin. The entry point
 should be a unary function which takes the name and returns a callable
 object with the attributes that koji expects in a cli plugin handler.
 
@@ -53,7 +53,7 @@ def __plugin__(glbls):
 
     # we sort the entry points by module name so that duplicate
     # commands have a predicable resolution order
-    points = sorted(iter_entry_points('koji-smoky-dingo'),
+    points = sorted(iter_entry_points('koji_smoky_dingo'),
                     key=lambda e: e.module_name)
 
     for entry_point in points:
