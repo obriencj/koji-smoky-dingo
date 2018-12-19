@@ -16,12 +16,14 @@ from __future__ import print_function
 
 import sys
 
+from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
 from collections import OrderedDict
 from functools import partial
 from koji import GenericError
 from koji_cli.lib import activate_session
 from os.path import basename
+from six import add_metaclass
 from six.moves import range as xrange, zip as izip
 
 
@@ -76,17 +78,22 @@ def mass_load_builds(session, nvrs, nsbfn=None, size=100):
             if binfo:
                 if "faultCode" in binfo:
                     # koji returned an error dict instead of a list of
-                    # builds
+                    # builds, invoke the nsbfn if it exists, to signal
+                    # no such build was found
                     nsbfn and nsbfn(nvr)
                 else:
                     # otherwise it returned a list of matching builds
                     # (usually just 1, but let's make sure)
                     for b in binfo:
                         if not b:
+                            # invoke the nsbfn if it exists, to signal
+                            # no such build was found
                             nsbfn and nsbfn(nvr)
                         else:
                             results.append(b)
             else:
+                # koji's multicall shouldn't return an empty list, but
+                # just in case, treat it as a missing build
                 nsbfn and nsbfn(nvr)
 
     return results
@@ -111,18 +118,32 @@ def read_clean_lines(filename="-"):
     return lines
 
 
+@add_metaclass(ABCMeta)
 class SmokyDingo(object):
 
-    group = None
+    group = "cli"
     description = "A CLI Plugin"
 
+    # this is necessary for koji to recognize us as a cli command
     exported_cli = True
 
 
     def __init__(self, name):
         self.name = name
-        self.__name__ = "handle_" + self.name.replace("-", "_")
-        self.__doc__ = "[%s] %s" % (self.group, self.description)
+
+        # these will be populated once the command instance is
+        # actually called
+        self.goptions = None
+        self.session = None
+
+        # this is used to register the command with koji in a manner
+        # that it expects to deal with
+        self.__name__ = "handle_" + name.replace("-", "_")
+
+        # allow a docstr to be specified on subclasses, but if absent
+        # let's set it based on the group and description.
+        if getattr(self, "__doc__", None) is None:
+            self.__doc__ = "[%s] %s" % (self.group, self.description)
 
 
     def parser(self):
@@ -134,6 +155,7 @@ class SmokyDingo(object):
         pass
 
 
+    @abstractmethod
     def handle(self, options):
         pass
 
@@ -143,16 +165,17 @@ class SmokyDingo(object):
 
 
     def __call__(self, goptions, session, args):
+        self.goptions = goptions
+        self.session = session
+
         parser = self.parser()
         options = parser.parse_args(args)
-
-        options.session = session
-        options.goptions = goptions
 
         self.validate(parser, options)
 
         try:
             activate_session(session, goptions)
+
             self.pre_handle(options)
             return self.handle(options) or 0
 
@@ -180,18 +203,24 @@ class AdminSmokyDingo(SmokyDingo):
 
 
     def pre_handle(self, options):
-        session = options.session
+        # before attempting to actually perform the command task,
+        # ensure that the user has the appropriate admin permissions,
+        # to prevent it failing at a strange point
+
+        session = self.session
 
         userinfo = session.getLoggedInUser()
         userperms = session.getUserPerms(userinfo["id"]) or ()
 
         if "admin" not in userperms:
-            raise PermissionException()
+            msg = "command %s requires admin permissions" % self.name
+            raise PermissionException(msg)
 
 
 class AnonSmokyDingo(SmokyDingo):
 
     group = "info"
+
 
     def __init__(self, name):
         super(AnonSmokyDingo, self).__init__(name)

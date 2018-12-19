@@ -99,8 +99,8 @@ class cli(AnonSmokyDingo):
 
 
     def parser(self):
-        parser = super(AnonSmokyDingo, self).parser()
-        addarg = parser.add_argument
+        argp = super(cli, self).parser()
+        addarg = argp.add_argument
 
         addarg("tags", nargs="+", metavar="TAGNAME",
                help="Tag to check")
@@ -108,7 +108,7 @@ class cli(AnonSmokyDingo):
         addarg("-q", "--quiet", action="store_true", default=False,
                help="Don't print summary information")
 
-        group = parser.add_mutually_exclusive_group()
+        group = argp.add_mutually_exclusive_group()
         addarg = group.add_argument
 
         addarg("-i", "--info", action="store_true", default=False,
@@ -117,11 +117,11 @@ class cli(AnonSmokyDingo):
         addarg("-b", "--build-tags", action="store_true", default=False,
                help="Print build tag names rather than target names")
 
-        return parser
+        return argp
 
 
     def handle(self, options):
-        return cli_affected_targets(options.session, options.tags,
+        return cli_affected_targets(self.session, options.tags,
                                     options.build_tags, options.info,
                                     options.quiet)
 

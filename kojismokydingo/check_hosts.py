@@ -28,6 +28,7 @@ from __future__ import print_function
 from datetime import datetime, timedelta
 from fnmatch import fnmatchcase
 from functools import partial
+from six import iterkeys, itervalues
 from six.moves import filterfalse as ifilterfalse, zip as izip
 
 from . import AnonSmokyDingo, BadDingo
@@ -63,8 +64,11 @@ def get_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     if skiplist:
         bldrs = ifilterfalse(partial(namematch, skiplist), bldrs)
 
+    # collect a mapping of builder ids to builder info
     bldrs = dict((b["id"], b) for b in bldrs)
-    bldr_ids = list(bldrs.keys())
+
+    # correlate the update timestamps with the builder info
+    bldr_ids = list(iterkeys(bldrs))
 
     session.multicall = True
     for bid in bldr_ids:
@@ -95,7 +99,7 @@ def cli_check_hosts(session, timeout=60, arches=(), channel=None,
 
     collected = []
 
-    for bldr in bldr_data.values():
+    for bldr in itervalues(bldr_data):
         lup = bldr["last_update"]
 
         if lup:
@@ -129,8 +133,8 @@ class cli(AnonSmokyDingo):
 
 
     def parser(self):
-        parser = super(cli, self).parser()
-        addarg = parser.add_argument
+        argp = super(cli, self).parser()
+        addarg = argp.add_argument
 
         addarg("--timeout", action="store", default=60, type=int,
                help="Timeout in minutes before builder is considered"
@@ -159,7 +163,7 @@ class cli(AnonSmokyDingo):
                help="Only print summary when 1 or more builders are failing"
                " to check in (cron-job friendly)")
 
-        return parser
+        return argp
 
 
     def handle(self, options):
@@ -172,7 +176,7 @@ class cli(AnonSmokyDingo):
                     if line:
                         ignore.append(line)
 
-        return cli_check_hosts(options.session, options.timeout,
+        return cli_check_hosts(self.session, options.timeout,
                                options.arches, options.channel,
                                ignore,
                                options.quiet, options.shush)

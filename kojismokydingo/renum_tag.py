@@ -78,8 +78,8 @@ class cli(AdminSmokyDingo):
 
 
     def parser(self):
-        parser = super(cli, self).parser()
-        addarg = parser.add_argument
+        argp = super(cli, self).parser()
+        addarg = argp.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
                help="Tag to renumber")
@@ -99,7 +99,7 @@ class cli(AdminSmokyDingo):
                help="Priority increment for each subsequent"
                " inheritance link after the first (default: 10)")
 
-        return parser
+        return argp
 
 
     def validate(self, parser, options):
@@ -120,7 +120,7 @@ class cli(AdminSmokyDingo):
 
 
     def handle(self, options):
-        return cli_renum_tag(options.session, options.tag,
+        return cli_renum_tag(self.session, options.tag,
                              options.begin, options.step,
                              options.verbose, options.test)
 

@@ -27,6 +27,7 @@ from __future__ import print_function
 
 import sys
 from functools import partial
+from six import iteritems, itervalues
 
 from . import AdminSmokyDingo, NoSuchBuild, NoSuchTag, NoSuchUser, \
     chunkseq, mass_load_builds, read_clean_lines
@@ -40,7 +41,7 @@ def build_dedup(builds):
     dedup = dict()
     for index, b in enumerate(builds):
         dedup.setdefault(b["id"], (index, b))
-    return [b for index, b in sorted(dedup.itervalues())]
+    return [b for index, b in sorted(itervalues(dedup))]
 
 
 def nvrcmp(left, right):
@@ -57,14 +58,14 @@ def build_nvr_sort(builds):
     for b in builds:
         nevrb = (b["name"], b["epoch"] or "0", b["version"], b["release"], b)
         dedup.setdefault(b["id"], nevrb)
-    return [b for n, e, v, r, b in sorted(dedup.itervalues(), cmp=nvrcmp)]
+    return [b for n, e, v, r, b in sorted(itervalues(dedup), cmp=nvrcmp)]
 
 
 def build_id_sort(builds):
     dedup = dict()
     for b in builds:
         dedup.setdefault(b["id"], b)
-    return [b for bid, b in sorted(dedup.iteritems())]
+    return [b for bid, b in sorted(iteritems(dedup))]
 
 
 def cli_mass_tag(session, tagname, nvrs,
@@ -173,9 +174,8 @@ class cli(AdminSmokyDingo):
 
 
     def parser(self):
-
-        parser = super(cli, self).parser()
-        addarg = parser.add_argument
+        argp = super(cli, self).parser()
+        addarg = argp.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
                help="Tag to associate builds with")
@@ -203,7 +203,7 @@ class cli(AdminSmokyDingo):
         addarg("--strict", action="store_true", default=False,
                help="Ensure all NVRs are valid before tagging any.")
 
-        group = parser.add_mutually_exclusive_group()
+        group = argp.add_mutually_exclusive_group()
         addarg = group.add_argument
 
         addarg("--nvr-sort", action="store_const",
@@ -216,13 +216,13 @@ class cli(AdminSmokyDingo):
                help="pre-sort build list by build ID, so most recently"
                " completed build is tagged last")
 
-        return parser
+        return argp
 
 
     def handle(self, options):
         nvrs = read_clean_lines(options.nvr_file)
 
-        return cli_mass_tag(options.session, options.tag, nvrs,
+        return cli_mass_tag(self.session, options.tag, nvrs,
                             options.sorting, options.strict,
                             options.owner, options.inherit,
                             options.verbose, options.test)

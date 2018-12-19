@@ -105,7 +105,7 @@ class cli(AnonSmokyDingo):
 
 
     def parser(self):
-        argp = super(AnonSmokyDingo, self).parser()
+        argp = super(cli, self).parser()
 
         group = argp.add_mutually_exclusive_group()
         addarg = group.add_argument
@@ -149,7 +149,7 @@ class cli(AnonSmokyDingo):
     def handle(self, options):
         nvr_list = read_clean_lines(options.nvr_file)
 
-        return cli_identify_imported(options.session, options.tag,
+        return cli_identify_imported(self.session, options.tag,
                                      nvr_list,
                                      options.inherit, options.negate,
                                      options.cg_list)
