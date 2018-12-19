@@ -54,8 +54,10 @@ setup(
         "six",
     ],
 
+    # these are used by the koji meta-plugin to provide additional
+    # commands, one per entry_point
     entry_points = {
-        'koji_cli_plugins': [
+        'koji-smoky-dingo': [
             'affected-targets = kojismokydingo.affected_targets:cli',
             'check-hosts = kojismokydingo.check_hosts:cli',
             'list-imported = kojismokydingo.identify_imported:cli',
@@ -66,15 +68,17 @@ setup(
         ],
     },
 
+    # the koji_cli_plugins namespace package needs to be a plain
+    # directory that koji will look through
+    zip_safe = False,
+
+    # PyPI metadata
     description = "A collection of koji command-line plugins",
 
-    # PyPI information
     author = "Christopher O'Brien",
     author_email = "obriencj@gmail.com",
     url = "https://github.com/obriencj/koji-smoky-dingo",
     license = "GNU General Public License",
-
-    zip_safe = False,
 
     classifiers = [
         "Intended Audience :: Developers",
