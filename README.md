@@ -36,12 +36,18 @@ do not require any special permissions to function.
 
 ## Install
 
-Because of how koji loads client plugins, this package needs to be
+Because of how koji loads client plugins, the meta plugin needs to be
 installed with either the `--old-and-unmanageable` flag or with
 `--root=/` specified.
 
 ```bash
-sudo python setup.py clean build install --root=/
+sudo python setup-meta.py clean build install --root=/
+```
+
+However the rest of koji-smoky-dingo can be installed normally
+
+```bash
+sudo python setup.py clean build install-wheel
 ```
 
 

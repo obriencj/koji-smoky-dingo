@@ -18,6 +18,17 @@
 Koji Smoky Dingo - a collection of koji command-line features for
 advanced users.
 
+Note that in order for the meta-plugin in koji_cli_plugins to be
+installed in a way that the koji CLI will be able to see, this package
+needs to be installed using either:
+
+  python setup.py install --root=/
+
+or
+
+  python setup.py install --old-and-unmanageable
+
+
 :author: Christopher O'Brien  <obriencj@gmail.com>
 :license: GPL version 3
 """
@@ -27,34 +38,17 @@ from setuptools import setup
 
 
 setup(
-    name = 'koji-smoky-dingo',
+    name = 'koji-smoky-dingo-meta',
     version = '0.9.0',
 
     packages = [
-        # everything else
-        'kojismokydingo',
+        # the koji meta-plugin
+        'koji_cli_plugins',
     ],
 
-    requires = [
-        "koji",
-        "six",
-    ],
-
-    # these are used by the koji meta-plugin to provide additional
-    # commands, one per entry_point
-    entry_points = {
-        'koji_smoky_dingo': [
-            'affected-targets = kojismokydingo.affected_targets:cli',
-            'check-hosts = kojismokydingo.check_hosts:cli',
-            'list-imported = kojismokydingo.identify_imported:cli',
-            'bulk-tag-builds = kojismokydingo.mass_tag:cli',
-            'renum-tag-inheritance = kojismokydingo.renum_tag:cli',
-            'swap-tag-inheritance = kojismokydingo.swap_inheritance:cli',
-            'userinfo = kojismokydingo.userinfo:cli',
-        ],
-    },
-
-    zip_safe = True,
+    # the koji_cli_plugins namespace package needs to be a plain
+    # directory that koji will look through
+    zip_safe = False,
 
     # PyPI metadata
     description = "A collection of koji command-line plugins",

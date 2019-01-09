@@ -44,11 +44,11 @@ def __plugin__(glbls):
     import sys
     from pkg_resources import iter_entry_points
 
-    # in situations where koji.config is present and cli_entry_points
+    # in situations where koji.config is present and koji_smoky_dingo
     # is explicitly set to False, we'll effective disable this
     # meta-plugin and not load any of the entry point cli commands.
     kconfig = getattr(koji, "config", None)
-    if kconfig and not kconfig.getboolean("cli_entry_points", True):
+    if kconfig and not kconfig.getboolean("koji_smoky_dingo", True):
         return
 
     # we sort the entry points by module name so that duplicate
