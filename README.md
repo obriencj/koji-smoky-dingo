@@ -16,9 +16,9 @@ require admin permissions to function.
 
 | Command | Description |
 |---------|-------------|
-|`bulk—tag—builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
-|`renum—tag—inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
-|`swap—tag—inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
+|`bulk—tag&#x2011;builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
+|`renum—tag&#x2011;inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
+|`swap—tag&#x2011;inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
 
 
 ## Anon Commands
