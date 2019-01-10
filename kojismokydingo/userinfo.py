@@ -128,7 +128,7 @@ class cli(AnonSmokyDingo):
 
 
     def handle(self, options):
-        return cli_userinfo(options.session, options.user,
+        return cli_userinfo(self.session, options.user,
                             options.json)
 
 
