@@ -16,8 +16,8 @@ require admin permissions to function.
 
 | Command | Description |
 |---------|-------------|
-|`<nobr>bulk—tag-builds</nobr>` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
-|`<nobr>renum—tag-inheritance</nobr>` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
+|`bulk—tag-builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
+|`renum—tag-inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
 |`swap—tag-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
 
 
