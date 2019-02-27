@@ -15,11 +15,11 @@
 
 
 """
-Koji Smoky Dingo - a collection of koji command-line features for
-advanced users.
+Koji Smoky Dingo Meta - an entry_points adapter for Koji's CLI
+plugin loading mechanism
 
-Note that in order for the meta-plugin in koji_cli_plugins to be
-installed in a way that the koji CLI will be able to see, this package
+Note that in order for this meta-plugin in koji_cli_plugins to be
+installed in a way that the Koji CLI will be able to see, this package
 needs to be installed using either:
 
   python setup.py install --root=/ --prefix=/usr
@@ -46,7 +46,7 @@ setup(
     zip_safe = False,
 
     # PyPI metadata
-    description = "A collection of koji command-line plugins",
+    description = "An entry_points adapter for Koji's CLI plugin system",
 
     author = "Christopher O'Brien",
     author_email = "obriencj@gmail.com",

@@ -15,8 +15,13 @@
 
 
 """
-Koji Smoky Dingo - a collection of koji command-line features for
+Koji Smoky Dingo - a collection of Koji command-line features for
 advanced users.
+
+Note that this package needs the kojismokydingometa plugin to be
+installed in order for the plugins to be loaded by the Koji CLI.
+However the individual modules can be of use as well, so it's not a
+hard dependency.
 
 :author: Christopher O'Brien  <obriencj@gmail.com>
 :license: GPL version 3
@@ -58,7 +63,7 @@ setup(
     zip_safe = True,
 
     # PyPI metadata
-    description = "A collection of koji command-line plugins",
+    description = "A collection of Koji command-line plugins",
 
     author = "Christopher O'Brien",
     author_email = "obriencj@gmail.com",
