@@ -1,5 +1,4 @@
 
-
 %global srcname kojismokydingo
 %global srcver 0.9.0
 
@@ -62,7 +61,7 @@ Koji Smoky Dingo
 %files -n python2-%{srcname}
 %defattr(-,root,root,-)
 %{python2_sitelib}/kojismokydingo/
-%{python2_sitelib}/koji_smoky_dingo-%{version}.dist-info/
+%{python2_sitelib}/kojismokydingo-%{version}.dist-info/
 
 
 %package -n python2-%{srcname}-meta
@@ -92,7 +91,7 @@ Koji Smoky Dingo
 %files -n python3-%{srcname}
 %defattr(-,root,root,-)
 %{python3_sitelib}/kojismokydingo/
-%{python3_sitelib}/koji_smoky_dingo-%{version}.dist-info/
+%{python3_sitelib}/kojismokydingo-%{version}.dist-info/
 
 
 %package -n python3-%{srcname}-meta
