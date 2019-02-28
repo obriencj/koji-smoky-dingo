@@ -8,7 +8,7 @@
 # T484 relative imports are good. don't tell me ..lib is bad
 
 ignore = E303,N801,N813,T484
-exclude = setup.py,build,dist,.git
+exclude = setup.py,setup-meta.py,build,dist,todo,.git
 
 #
 # The end.
