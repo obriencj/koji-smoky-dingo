@@ -26,7 +26,9 @@ to tagBuildBypass
 from __future__ import print_function
 
 import sys
+from collections import OrderedDict
 from functools import partial
+from rpmUtils.miscutils import compareEVR
 from six import iteritems, itervalues
 
 from . import AdminSmokyDingo, NoSuchBuild, NoSuchTag, NoSuchUser, \
@@ -37,40 +39,62 @@ SORT_BY_ID = "sort-by-id"
 SORT_BY_NVR = "sort-by-nvr"
 
 
-def build_dedup(builds):
-    dedup = dict()
-    for index, b in enumerate(builds):
-        dedup.setdefault(b["id"], (index, b))
-    return [b for index, b in sorted(itervalues(dedup))]
+try:
+    cmp
+
+except NameError:
+    def cmp(left, right):
+        if left == right:
+            return 0
+        elif left < right:
+            return -1
+        else:
+            return 1
 
 
-def nvrcmp(left, right):
-    from rpmUtils.miscutils import compareEVR
+class NEVRCompare(object):
 
-    ln, le, lv, lr, lb = left
-    rn, re, rv, rr, rb = right
+    def __init__(binfo):
+        self.build = binfo
+        self.n = binfo["name"]
+        self.e = binfo["epoch"] or "0"
+        self.v = binfo["version"]
+        self.r = binfo["release"]
 
-    return cmp(ln, rn) or compareEVR((le, lv, lr), (re, rv, rr))
+    def __cmp__(self, other):
+        return cmp(self.n, other.n) or \
+            compareEVR((self.e, self.v, self.r), (other.e, other.v, other.r))
+
+    def __eq__(self, other):
+        return (self.n, self.e, self.v, self.r) == \
+            (other.n, other.e, other.v, other.r)
+
+    def __lt__(self, other):
+        return self.__cmp__(other) == -1
+
+    def __gt__(self, other):
+        return self.__cmp__(other) == 1
 
 
 def build_nvr_sort(builds):
-    dedup = dict()
-    for b in builds:
-        nevrb = (b["name"], b["epoch"] or "0", b["version"], b["release"], b)
-        dedup.setdefault(b["id"], nevrb)
-    return [b for n, e, v, r, b in sorted(itervalues(dedup), cmp=nvrcmp)]
+    dedup = {b["id"]:b for b in builds}
+    return sorted(itervalues(dedup), key=NEVRCompare)
 
 
 def build_id_sort(builds):
-    dedup = dict()
-    for b in builds:
-        dedup.setdefault(b["id"], b)
-    return [b for bid, b in sorted(iteritems(dedup))]
+    dedup = {b["id"]:b for b in builds}
+    return [b for _bid, b in sorted(iteritems(dedup))]
+
+
+def build_dedup(builds):
+    dedup = OrderedDict((b["id"], b) for b in builds)
+    return list(itervalues(dedup))
 
 
 def cli_mass_tag(session, tagname, nvrs,
                  sorting=None, strict=False,
                  owner=None, inherit=False,
+                 notify=False,
                  verbose=False, test=False):
 
     # set up the verbose debugging output function
@@ -139,7 +163,7 @@ def cli_mass_tag(session, tagname, nvrs,
     if test:
         multiCallEnable = partial(debug, "multicall = True")
         packageListAdd = partial(debug, "packageListAdd %r %r %r %r %r %r")
-        tagBuildBypass = partial(debug, "tagBuildBypass %r %r %r")
+        tagBuildBypass = partial(debug, "tagBuildBypass %r %r %r %r")
         multiCall = partial(debug, "multiCall()")
     else:
         def multiCallEnable():
@@ -160,7 +184,7 @@ def cli_mass_tag(session, tagname, nvrs,
                 packageListAdd(tagid, pkg,
                                ownerid or build["owner_id"],
                                None, None, True)
-            tagBuildBypass(tagid, build["id"], True)
+            tagBuildBypass(tagid, build["id"], True, notify)
         multiCall()
         counter += len(build_chunk)
         debug(" tagged %i/%i", counter, len(builds))
@@ -203,6 +227,9 @@ class cli(AdminSmokyDingo):
         addarg("--strict", action="store_true", default=False,
                help="Ensure all NVRs are valid before tagging any.")
 
+        addarg("--notify", action="store_true", default=False,
+               help="Send tagging notifications.")
+
         group = argp.add_mutually_exclusive_group()
         addarg = group.add_argument
 
@@ -225,6 +252,7 @@ class cli(AdminSmokyDingo):
         return cli_mass_tag(self.session, options.tag, nvrs,
                             options.sorting, options.strict,
                             options.owner, options.inherit,
+                            options.notify,
                             options.verbose, options.test)
 
 
