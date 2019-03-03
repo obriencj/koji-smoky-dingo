@@ -37,6 +37,7 @@ setup(
 
     requires = [
         "koji",
+        "rpm",
         "six",
     ],
 

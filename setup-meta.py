@@ -22,12 +22,7 @@ Note that in order for the meta-plugin in koji_cli_plugins to be
 installed in a way that the koji CLI will be able to see, this package
 needs to be installed using either:
 
-  python setup.py install --root=/
-
-or
-
-  python setup.py install --old-and-unmanageable
-
+  python setup.py install --root=/ --prefix=/usr
 
 :author: Christopher O'Brien  <obriencj@gmail.com>
 :license: GPL version 3

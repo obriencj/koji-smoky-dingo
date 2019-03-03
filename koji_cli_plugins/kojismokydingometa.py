@@ -44,6 +44,8 @@ def __plugin__(glbls):
     import sys
     from pkg_resources import iter_entry_points
 
+    # print("=== enter kojismokydingometa plugin ===", file=sys.stderr)
+
     # in situations where koji.config is present and koji_smoky_dingo
     # is explicitly set to False, we'll effective disable this
     # meta-plugin and not load any of the entry point cli commands.
@@ -57,6 +59,8 @@ def __plugin__(glbls):
                     key=lambda e: e.module_name)
 
     for entry_point in points:
+        # print(entry_point, file=sys.stderr)
+
         try:
             # each entry point should result in a unary function which
             # is fed the name, which should result in either None or a

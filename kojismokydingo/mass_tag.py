@@ -28,11 +28,10 @@ from __future__ import print_function
 import sys
 from collections import OrderedDict
 from functools import partial
-from rpmUtils.miscutils import compareEVR
 from six import iteritems, itervalues
 
 from . import AdminSmokyDingo, NoSuchTag, NoSuchUser, \
-    chunkseq, bulk_load_builds, read_clean_lines
+    chunkseq, compareEVR, bulk_load_builds, read_clean_lines
 
 
 SORT_BY_ID = "sort-by-id"
@@ -129,7 +128,10 @@ def cli_mass_tag(session, tagname, nvrs,
     # load the buildinfo for all of the NVRs
     debug("fed with %i builds", len(nvrs))
 
-    builds = list(itervalues(bulk_load_builds(session, nvrs, err=True)))
+    builds = bulk_load_builds(session, nvrs, err=True)
+    print(builds)
+
+    builds = itervalues(builds)
 
     # sort as requested
     if sorting == SORT_BY_NVR:

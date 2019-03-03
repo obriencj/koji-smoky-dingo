@@ -20,9 +20,10 @@ from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
 from collections import OrderedDict
 from functools import partial
-from koji import Fault, GenericError
+from koji import convertFault, Fault, GenericError
 from koji_cli.lib import activate_session
 from os.path import basename
+from rpm import labelCompare
 from six import add_metaclass
 from six.moves import range as xrange, zip as izip
 
@@ -69,14 +70,35 @@ def chunkseq(seq, chunksize):
             offset in xrange(0, seqlen, chunksize))
 
 
+def compareEVR(evr_1, evr_2):
+    """
+    Compares two (Epoch, Version, Release) tuples
+
+    returns 1: a is newer than b
+            0: a and b are the same version
+           -1: b is newer than a
+    """
+
+    evr_1 = tuple(('0' if x is None else str(x)) for x in evr_1)
+    evr_2 = tuple(('0' if x is None else str(x)) for x in evr_2)
+
+    return labelCompare(evr_1, evr_2)
+
+
 def _bulk_load(session, loadfn, keys, size):
     for key_chunk in chunkseq(keys, size):
         session.multicall = True
 
+        for key in key_chunk:
+            print(key, file=sys.stderr)
+            loadfn(key)
+
         for key, info in izip(key_chunk, session.multiCall()):
+            print(key, info, file=sys.stderr)
+
             if info:
                 if "faultCode" in info:
-                    raise session.convertFault(Fault(**info))
+                    raise convertFault(Fault(**info))
                 else:
                     yield key, info[0]
             else:
@@ -87,6 +109,7 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, session.getBuild, nvrs, size):
+        print(key, info, file=sys.stderr)
         if err and not info:
             raise NoSuchBuild(key)
         else:
