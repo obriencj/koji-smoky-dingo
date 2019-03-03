@@ -20,7 +20,7 @@ from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
 from collections import OrderedDict
 from functools import partial
-from koji import GenericError
+from koji import Fault, GenericError
 from koji_cli.lib import activate_session
 from os.path import basename
 from six import add_metaclass
@@ -33,6 +33,10 @@ class BadDingo(Exception):
 
 class NoSuchTag(BadDingo):
     complaint = "No such tag"
+
+
+class NoSuchTask(BadDingo):
+    complaint = "No such task"
 
 
 class NoSuchBuild(BadDingo):
@@ -55,46 +59,62 @@ def unique(sequence):
 
 
 def chunkseq(seq, chunksize):
+    try:
+        seqlen = len(seq)
+    except TypeError:
+        seq = list(seq)
+        seqlen = len(seq)
+
     return (seq[offset:offset + chunksize] for
-            offset in xrange(0, len(seq), chunksize))
+            offset in xrange(0, seqlen, chunksize))
 
 
-def mass_load_builds(session, nvrs, nsbfn=None, size=100):
-
-    results = []
-
-    # nsbfn is a unary function meant to deal with an NVR which didn't
-    # return a build info. Calling functions can use this to collect
-    # malformed or missing builds, or to raise an exception. If
-    # unspecified, then missing builds are just skipped.
-
-    for nvr_chunk in chunkseq(nvrs, size):
+def _bulk_load(session, loadfn, keys, size):
+    for key_chunk in chunkseq(keys, size):
         session.multicall = True
 
-        for nvr in nvr_chunk:
-            session.getBuild(nvr)
-
-        for nvr, binfo in izip(nvr_chunk, session.multiCall()):
-            if binfo:
-                if "faultCode" in binfo:
-                    # koji returned an error dict instead of a list of
-                    # builds, invoke the nsbfn if it exists, to signal
-                    # no such build was found
-                    nsbfn and nsbfn(nvr)
+        for key, info in izip(key_chunk, session.multiCall()):
+            if info:
+                if "faultCode" in info:
+                    raise session.convertFault(Fault(**info))
                 else:
-                    # otherwise it returned a list of matching builds
-                    # (usually just 1, but let's make sure)
-                    for b in binfo:
-                        if not b:
-                            # invoke the nsbfn if it exists, to signal
-                            # no such build was found
-                            nsbfn and nsbfn(nvr)
-                        else:
-                            results.append(b)
+                    yield key, info[0]
             else:
-                # koji's multicall shouldn't return an empty list, but
-                # just in case, treat it as a missing build
-                nsbfn and nsbfn(nvr)
+                yield key, None
+
+
+def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, session.getBuild, nvrs, size):
+        if err and not info:
+            raise NoSuchBuild(key)
+        else:
+            results[key] = info
+
+    return results
+
+
+def bulk_load_tasks(session, tasks, err=True, size=100, results=None):
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, session.getTask, tasks, size):
+        if err and not info:
+            raise NoSuchTask(key)
+        else:
+            results[key] = info
+
+    return results
+
+
+def bulk_load_tags(session, tags, err=True, size=100, results=None):
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, session.getTag, tags, size):
+        if err and not info:
+            raise NoSuchTag(key)
+        else:
+            results[key] = info
 
     return results
 

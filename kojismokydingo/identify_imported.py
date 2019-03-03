@@ -25,8 +25,10 @@ Given a tag or a list of builds, identify which of those were imported
 
 from __future__ import print_function
 
+from six import itervalues
+
 from . import AnonSmokyDingo, NoSuchTag, \
-    mass_load_builds, read_clean_lines, unique
+    bulk_load_builds, read_clean_lines, unique
 
 
 def identify_imported(build_infos, negate=False, by_cg=set()):
@@ -72,7 +74,9 @@ def cli_identify_imported(session, tagname=None, nvr_list=None,
                           cg_list=()):
 
     if nvr_list:
-        builds = mass_load_builds(session, unique(nvr_list))
+        nvr_list = unique(nvr_list)
+        builds = bulk_load_builds(session, nvr_list, err=True)
+        builds = list(itervalues(builds))
 
     elif tagname:
         taginfo = session.getTag(tagname)
@@ -89,7 +93,7 @@ def cli_identify_imported(session, tagname=None, nvr_list=None,
             # we don't actually care about that, so we'll skip the
             # loading in that case.
             bids = [b["id"] for b in builds]
-            builds = mass_load_builds(session, bids)
+            builds = itervalues(bulk_load_builds(session, bids))
 
     else:
         # from the CLI, one of these should be specified.

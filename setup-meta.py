@@ -38,7 +38,7 @@ from setuptools import setup
 
 
 setup(
-    name = 'koji-smoky-dingo-meta',
+    name = 'kojismokydingo-meta',
     version = '0.9.0',
 
     packages = [

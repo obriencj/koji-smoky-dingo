@@ -27,7 +27,7 @@ from setuptools import setup
 
 
 setup(
-    name = 'koji-smoky-dingo',
+    name = 'kojismokydingo',
     version = '0.9.0',
 
     packages = [

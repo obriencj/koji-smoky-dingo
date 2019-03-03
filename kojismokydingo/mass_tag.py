@@ -31,8 +31,8 @@ from functools import partial
 from rpmUtils.miscutils import compareEVR
 from six import iteritems, itervalues
 
-from . import AdminSmokyDingo, NoSuchBuild, NoSuchTag, NoSuchUser, \
-    chunkseq, mass_load_builds, read_clean_lines
+from . import AdminSmokyDingo, NoSuchTag, NoSuchUser, \
+    chunkseq, bulk_load_builds, read_clean_lines
 
 
 SORT_BY_ID = "sort-by-id"
@@ -54,7 +54,7 @@ except NameError:
 
 class NEVRCompare(object):
 
-    def __init__(binfo):
+    def __init__(self, binfo):
         self.build = binfo
         self.n = binfo["name"]
         self.e = binfo["epoch"] or "0"
@@ -77,12 +77,12 @@ class NEVRCompare(object):
 
 
 def build_nvr_sort(builds):
-    dedup = {b["id"]:b for b in builds}
+    dedup = dict((b["id"], b) for b in builds)
     return sorted(itervalues(dedup), key=NEVRCompare)
 
 
 def build_id_sort(builds):
-    dedup = {b["id"]:b for b in builds}
+    dedup = dict((b["id"], b) for b in builds)
     return [b for _bid, b in sorted(iteritems(dedup))]
 
 
@@ -129,13 +129,7 @@ def cli_mass_tag(session, tagname, nvrs,
     # load the buildinfo for all of the NVRs
     debug("fed with %i builds", len(nvrs))
 
-    if strict:
-        def nsbfn(nvr):
-            raise NoSuchBuild(nvr)
-    else:
-        nsbfn = partial(debug, "no such build: %s")
-
-    builds = mass_load_builds(session, nvrs, nsbfn)
+    builds = list(itervalues(bulk_load_builds(session, nvrs, err=True)))
 
     # sort as requested
     if sorting == SORT_BY_NVR:
