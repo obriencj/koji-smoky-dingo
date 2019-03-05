@@ -31,53 +31,16 @@ from functools import partial
 from six import iteritems, itervalues
 
 from . import AdminSmokyDingo, NoSuchTag, NoSuchUser, \
-    chunkseq, compareEVR, bulk_load_builds, read_clean_lines
+    nevr_sort_builds, chunkseq, bulk_load_builds, read_clean_lines
 
 
 SORT_BY_ID = "sort-by-id"
 SORT_BY_NVR = "sort-by-nvr"
 
 
-try:
-    cmp
-
-except NameError:
-    def cmp(left, right):
-        if left == right:
-            return 0
-        elif left < right:
-            return -1
-        else:
-            return 1
-
-
-class NEVRCompare(object):
-
-    def __init__(self, binfo):
-        self.build = binfo
-        self.n = binfo["name"]
-        self.e = binfo["epoch"] or "0"
-        self.v = binfo["version"]
-        self.r = binfo["release"]
-
-    def __cmp__(self, other):
-        return cmp(self.n, other.n) or \
-            compareEVR((self.e, self.v, self.r), (other.e, other.v, other.r))
-
-    def __eq__(self, other):
-        return (self.n, self.e, self.v, self.r) == \
-            (other.n, other.e, other.v, other.r)
-
-    def __lt__(self, other):
-        return self.__cmp__(other) == -1
-
-    def __gt__(self, other):
-        return self.__cmp__(other) == 1
-
-
 def build_nvr_sort(builds):
     dedup = dict((b["id"], b) for b in builds)
-    return sorted(itervalues(dedup), key=NEVRCompare)
+    return nevr_sort_builds(itervalues(dedup))
 
 
 def build_id_sort(builds):

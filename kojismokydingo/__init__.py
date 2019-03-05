@@ -56,7 +56,7 @@ printerr = partial(print, file=sys.stderr)
 
 
 def unique(sequence):
-    return list(OrderedDict((s, None) for s in sequence))
+    return list(OrderedDict.fromkeys(sequence))
 
 
 def chunkseq(seq, chunksize):
@@ -70,19 +70,39 @@ def chunkseq(seq, chunksize):
             offset in xrange(0, seqlen, chunksize))
 
 
-def compareEVR(evr_1, evr_2):
-    """
-    Compares two (Epoch, Version, Release) tuples
+class NEVRCompare(object):
 
-    returns 1: a is newer than b
-            0: a and b are the same version
-           -1: b is newer than a
-    """
+    def __init__(self, binfo):
+        self.build = binfo
+        self.n = binfo["name"]
 
-    evr_1 = tuple(('0' if x is None else str(x)) for x in evr_1)
-    evr_2 = tuple(('0' if x is None else str(x)) for x in evr_2)
+        evr = (binfo["epoch"], binfo["version"], binfo["release"])
+        self.evr = tuple(("0" if x is None else str(x)) for x in evr)
 
-    return labelCompare(evr_1, evr_2)
+    def __cmp__(self, other):
+        # cmp is a python2-ism, and has no replacement in python3 via
+        # six, so we'll have to create our own simplistic behavior
+        # similarly
+
+        if self.n == other.n:
+            return labelCompare(self.evr, other.evr)
+        elif self.n < other.n:
+            return -1
+        else:
+            return 1
+
+    def __eq__(self, other):
+        return self.n == other.n and self.evr == other.evr
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+
+
+def nevr_sort_builds(build_infos):
+    return sorted(build_infos, key=NEVRCompare)
 
 
 def _bulk_load(session, loadfn, keys, size):
@@ -154,6 +174,7 @@ def read_clean_lines(filename="-"):
         fin = open(filename, "r")
 
     lines = [line for line in (l.strip() for l in fin) if line]
+    # lines = list(filter(None, map(str.strip, fin)))
 
     if filename != "-":
         fin.close()
