@@ -91,9 +91,7 @@ def cli_mass_tag(session, tagname, nvrs,
     # load the buildinfo for all of the NVRs
     debug("fed with %i builds", len(nvrs))
 
-    builds = bulk_load_builds(session, nvrs, err=True)
-    print(builds)
-
+    builds = bulk_load_builds(session, unique(nvrs), err=True)
     builds = itervalues(builds)
 
     # sort as requested

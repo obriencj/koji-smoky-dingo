@@ -32,16 +32,16 @@ class BadDingo(Exception):
     complaint = "Something bad"
 
 
+class NoSuchBuild(BadDingo):
+    complaint = "No such build"
+
+
 class NoSuchTag(BadDingo):
     complaint = "No such tag"
 
 
 class NoSuchTask(BadDingo):
     complaint = "No such task"
-
-
-class NoSuchBuild(BadDingo):
-    complaint = "No such build"
 
 
 class NoSuchUser(BadDingo):
@@ -79,6 +79,7 @@ class NEVRCompare(object):
         evr = (binfo["epoch"], binfo["version"], binfo["release"])
         self.evr = tuple(("0" if x is None else str(x)) for x in evr)
 
+
     def __cmp__(self, other):
         # cmp is a python2-ism, and has no replacement in python3 via
         # six, so we'll have to create our own simplistic behavior
@@ -91,11 +92,14 @@ class NEVRCompare(object):
         else:
             return 1
 
+
     def __eq__(self, other):
         return self.n == other.n and self.evr == other.evr
 
+
     def __lt__(self, other):
         return self.__cmp__(other) < 0
+
 
     def __gt__(self, other):
         return self.__cmp__(other) > 0
