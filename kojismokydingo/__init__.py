@@ -129,7 +129,6 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, session.getBuild, nvrs, size):
-        print(key, info, file=sys.stderr)
         if err and not info:
             raise NoSuchBuild(key)
         else:
