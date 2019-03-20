@@ -44,10 +44,15 @@ installed with either the `--old-and-unmanageable` flag or with
 sudo python setup-meta.py clean build install --root=/
 ```
 
-However the rest of koji-smoky-dingo can be installed normally
+However the rest of koji-smoky-dingo can be installed normally, either
+as a system-level or user-level package
 
 ```bash
-sudo python setup.py clean build install-wheel
+# system install
+sudo python setup.py install-wheel
+
+# user only
+python setup.py install --user
 ```
 
 
