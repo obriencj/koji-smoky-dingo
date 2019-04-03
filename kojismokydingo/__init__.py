@@ -12,6 +12,16 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+"""
+Koji Smoky Dingo
+
+Utility functions and command line plugins for Koji administrators.
+
+author: Christopher O'Brien <obriencj@gmail.com>
+license: GPL v3
+"""
+
+
 from __future__ import print_function
 
 import sys
@@ -23,9 +33,15 @@ from functools import partial
 from koji import convertFault, Fault, GenericError
 from koji_cli.lib import activate_session
 from os.path import basename
-from rpm import labelCompare
 from six import add_metaclass
 from six.moves import range as xrange, zip as izip
+
+
+try:
+    from rpm import labelCompare
+except ImportError as ie:
+    def labelCompare(left, right):
+        raise ie
 
 
 class BadDingo(Exception):
@@ -110,6 +126,18 @@ def nevr_sort_builds(build_infos):
 
 
 def _bulk_load(session, loadfn, keys, size):
+    """
+    Generator utility for multicall loading data from a koji client
+    session.
+
+    loadfn is a bound method which will be called with each key in the
+    keys sequence. Up to size calls will be made at a time.
+
+    Yields key, result pairs.
+
+    Will convert any koji faults to exceptions and raise them.
+    """
+
     for key_chunk in chunkseq(keys, size):
         session.multicall = True
 
@@ -130,6 +158,22 @@ def _bulk_load(session, loadfn, keys, size):
 
 
 def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
+    """
+    Load many buildinfo dicts from a koji client session and a
+    sequence of NVRs.
+
+    Returns an OrderedDict associating the individual NVRs with their
+    resulting buildinfo.
+
+    If err is True (default) then any missing build info will raise a
+    NoSuchBuild exception. If err is False, then a None will be
+    substituted into the ordered dict for the result.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, session.getBuild, nvrs, size):
