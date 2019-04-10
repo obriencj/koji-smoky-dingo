@@ -31,7 +31,7 @@ from functools import partial
 from six import iteritems, itervalues
 
 from . import AdminSmokyDingo, NoSuchTag, NoSuchUser, \
-    nevr_sort_builds, chunkseq, bulk_load_builds, read_clean_lines
+    nevr_sort_builds, chunkseq, bulk_load_builds, read_clean_lines, unique
 
 
 SORT_BY_ID = "sort-by-id"
