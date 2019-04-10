@@ -40,8 +40,8 @@ from six.moves import range as xrange, zip as izip
 try:
     from rpm import labelCompare
 except ImportError as ie:
-    def labelCompare(left, right):
-        raise ie
+    def labelCompare(left, right, _ie=ie):
+        raise _ie
 
 
 class BadDingo(Exception):
