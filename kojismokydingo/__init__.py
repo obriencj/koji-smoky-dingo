@@ -24,6 +24,7 @@ license: GPL v3
 
 from __future__ import print_function
 
+import re
 import sys
 
 from abc import ABCMeta, abstractmethod
@@ -34,18 +35,20 @@ from koji import convertFault, Fault, GenericError
 from koji_cli.lib import activate_session
 from os.path import basename
 from six import add_metaclass
-from six.moves import range as xrange, zip as izip
-
-
-try:
-    from rpm import labelCompare
-except ImportError as ie:
-    def labelCompare(left, right, _ie=ie):
-        raise _ie
+from six.moves import \
+    filter as ifilter, \
+    map as imap, \
+    range as xrange, \
+    zip as izip, \
+    zip_longest as izip_longest
 
 
 class BadDingo(Exception):
     complaint = "Something bad"
+
+    def __str__(self):
+        orig = super(BadDingo, self).__str__()
+        return ": ".join([self.complaint, orig])
 
 
 class NoSuchBuild(BadDingo):
@@ -86,6 +89,80 @@ def chunkseq(seq, chunksize):
             offset in xrange(0, seqlen, chunksize))
 
 
+def rpm_str_split(s, _split=re.compile("(~?(?:\d+|[a-zA-Z]+))").split):
+    return tuple(i.lstrip("0") for i in _split(s)
+                 if i and (i[0].isalnum() or i[0] in "~^"))
+
+
+def rpm_str_compare(left, right):
+    left = rpm_str_split(left)
+    right = rpm_str_split(right)
+
+    for l, r in izip_longest(left, right, fillvalue=""):
+        # print("comparing", l, r)
+
+        if l and l[0] == "~":
+            # left is tilde
+
+            if r and r[0] == "~":
+                # right also is tilde, let's just chop off the tilde
+                l = l[1:]
+                r = r[1:]
+
+                # fall through to non-tilde comparisons below
+
+            else:
+                # right is not tilde, therefore right is greater
+                return -1
+
+        elif r and r[0] == "~":
+            # left is not tilde, but right is, therefore left is greater
+            return 1
+
+        if l and l[0].isdigit():
+            # left is numeric
+
+            if r and r[0].isdigit():
+                l = int(l)
+                r = int(r)
+                if l == r:
+                    continue
+                else:
+                    return 1 if l > r else -1
+
+            else:
+                # right is alphabetical or absent, left is greater
+                return 1
+
+        elif r and r[0].isdigit():
+            # left is alphabetical but right is not, right is greater
+            return -1
+
+        if l == r:
+            # left and right are equivalent, check next segment
+            continue
+        else:
+            # left and right are not equivalent
+            return 1 if l > r else -1
+
+    else:
+        # ran out of segments to check, must be equivalent
+        return 0
+
+
+def rpm_evr_compare(left_evr, right_evr):
+    for l, r in izip(left_evr, right_evr):
+        if l == r:
+            continue
+
+        compared = rpm_str_compare(l, r)
+        if compared:
+            return compared
+
+    else:
+        return 0
+
+
 class NEVRCompare(object):
 
     def __init__(self, binfo):
@@ -102,15 +179,17 @@ class NEVRCompare(object):
         # similarly
 
         if self.n == other.n:
-            return labelCompare(self.evr, other.evr)
+            return rpm_evr_compare(self.evr, other.evr)
+
         elif self.n < other.n:
             return -1
+
         else:
             return 1
 
 
     def __eq__(self, other):
-        return self.n == other.n and self.evr == other.evr
+        return self.__cmp__(other) == 0
 
 
     def __lt__(self, other):
@@ -299,7 +378,7 @@ class SmokyDingo(object):
             return -1
 
         except BadDingo as bad:
-            printerr(": ".join((bad.complaint, str(bad))))
+            printerr(bad)
             return -2
 
         except Exception:
