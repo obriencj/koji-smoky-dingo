@@ -36,8 +36,6 @@ from koji_cli.lib import activate_session
 from os.path import basename
 from six import add_metaclass
 from six.moves import \
-    filter as ifilter, \
-    map as imap, \
     range as xrange, \
     zip as izip, \
     zip_longest as izip_longest
@@ -89,7 +87,7 @@ def chunkseq(seq, chunksize):
             offset in xrange(0, seqlen, chunksize))
 
 
-def rpm_str_split(s, _split=re.compile("(~?(?:\d+|[a-zA-Z]+))").split):
+def rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
     return tuple(i.lstrip("0") for i in _split(s)
                  if i and (i[0].isalnum() or i[0] in "~^"))
 
@@ -98,16 +96,16 @@ def rpm_str_compare(left, right):
     left = rpm_str_split(left)
     right = rpm_str_split(right)
 
-    for l, r in izip_longest(left, right, fillvalue=""):
-        # print("comparing", l, r)
+    for lp, rp in izip_longest(left, right, fillvalue=""):
+        # print("comparing", lp, rp)
 
-        if l and l[0] == "~":
+        if lp and lp[0] == "~":
             # left is tilde
 
-            if r and r[0] == "~":
+            if rp and rp[0] == "~":
                 # right also is tilde, let's just chop off the tilde
-                l = l[1:]
-                r = r[1:]
+                lp = lp[1:]
+                rp = rp[1:]
 
                 # fall through to non-tilde comparisons below
 
@@ -115,35 +113,35 @@ def rpm_str_compare(left, right):
                 # right is not tilde, therefore right is greater
                 return -1
 
-        elif r and r[0] == "~":
+        elif rp and rp[0] == "~":
             # left is not tilde, but right is, therefore left is greater
             return 1
 
-        if l and l[0].isdigit():
+        if lp and lp[0].isdigit():
             # left is numeric
 
-            if r and r[0].isdigit():
-                l = int(l)
-                r = int(r)
-                if l == r:
+            if rp and rp[0].isdigit():
+                lp = int(lp)
+                rp = int(rp)
+                if lp == rp:
                     continue
                 else:
-                    return 1 if l > r else -1
+                    return 1 if lp > rp else -1
 
             else:
                 # right is alphabetical or absent, left is greater
                 return 1
 
-        elif r and r[0].isdigit():
+        elif rp and rp[0].isdigit():
             # left is alphabetical but right is not, right is greater
             return -1
 
-        if l == r:
+        if lp == rp:
             # left and right are equivalent, check next segment
             continue
         else:
             # left and right are not equivalent
-            return 1 if l > r else -1
+            return 1 if lp > rp else -1
 
     else:
         # ran out of segments to check, must be equivalent
@@ -151,11 +149,11 @@ def rpm_str_compare(left, right):
 
 
 def rpm_evr_compare(left_evr, right_evr):
-    for l, r in izip(left_evr, right_evr):
-        if l == r:
+    for lp, rp in izip_longest(left_evr, right_evr, fillvalue="0"):
+        if lp == rp:
             continue
 
-        compared = rpm_str_compare(l, r)
+        compared = rpm_str_compare(lp, rp)
         if compared:
             return compared
 
