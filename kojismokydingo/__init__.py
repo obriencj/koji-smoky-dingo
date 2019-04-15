@@ -358,20 +358,38 @@ class SmokyDingo(object):
 
 
     def parser(self):
+        """
+        Override to provide an ArgumentParser instance with all the
+        relevant positional arguments and options added.
+        """
+
         invoke = " ".join((basename(sys.argv[0]), self.name))
         return ArgumentParser(prog=invoke, description=self.description)
 
 
+    def validate(self, parser, options):
+        """
+        Override to perform validation on options values. Return value is
+        ignored, use parser.error if needed.
+        """
+
+        pass
+
+
     def pre_handle(self, options):
+        """
+        Used by admin commands to authenticate. Does nothing normally.
+        """
+
         pass
 
 
     @abstractmethod
     def handle(self, options):
-        pass
+        """
+        Perform the full set of actions for this command.
+        """
 
-
-    def validate(self, parser, options):
         pass
 
 
