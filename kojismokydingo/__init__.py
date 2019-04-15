@@ -87,55 +87,58 @@ def chunkseq(seq, chunksize):
             offset in xrange(0, seqlen, chunksize))
 
 
-def rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
-    return tuple(i.lstrip("0") for i in _split(s)
-                 if i and (i[0].isalnum() or i[0] in "~^"))
+def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
+    """
+    Split an E, V, or R string for comparison by its segments
+    """
+
+    return tuple(i for i in _split(s) if (i.isalnum() or i.startswith("~")))
 
 
-def rpm_str_compare(left, right):
-    left = rpm_str_split(left)
-    right = rpm_str_split(right)
+def _rpm_str_compare(left, right):
+    left = _rpm_str_split(left)
+    right = _rpm_str_split(right)
 
     for lp, rp in izip_longest(left, right, fillvalue=""):
-        # print("comparing", lp, rp)
 
-        if lp and lp[0] == "~":
+        # Special comparison for tilde segments
+        if lp.startswith("~"):
             # left is tilde
 
-            if rp and rp[0] == "~":
+            if rp.startswith("~"):
                 # right also is tilde, let's just chop off the tilde
+                # and fall through to non-tilde comparisons below
+
                 lp = lp[1:]
                 rp = rp[1:]
-
-                # fall through to non-tilde comparisons below
 
             else:
                 # right is not tilde, therefore right is greater
                 return -1
 
-        elif rp and rp[0] == "~":
+        elif rp.startswith("~"):
             # left is not tilde, but right is, therefore left is greater
             return 1
 
-        if lp and lp[0].isdigit():
+        # Special comparison for digits vs. alphabetical
+        if lp.isdigit():
             # left is numeric
 
-            if rp and rp[0].isdigit():
+            if rp.isdigit():
+                # left and right are both numeric, convert and fall
+                # through
                 lp = int(lp)
                 rp = int(rp)
-                if lp == rp:
-                    continue
-                else:
-                    return 1 if lp > rp else -1
 
             else:
                 # right is alphabetical or absent, left is greater
                 return 1
 
-        elif rp and rp[0].isdigit():
+        elif rp.isdigit():
             # left is alphabetical but right is not, right is greater
             return -1
 
+        # Final comparison for segment
         if lp == rp:
             # left and right are equivalent, check next segment
             continue
@@ -149,19 +152,34 @@ def rpm_str_compare(left, right):
 
 
 def rpm_evr_compare(left_evr, right_evr):
+    """
+    Compare two (Epoch, Version, Release) tuples.
+
+    Returns  1 if left_evr is greater-than right_evr
+             0 if left_evr is equal-to right_evr
+            -1 if left_evr is less-than right_evr
+    """
+
     for lp, rp in izip_longest(left_evr, right_evr, fillvalue="0"):
         if lp == rp:
+            # fast check to potentially skip all the matching
             continue
 
-        compared = rpm_str_compare(lp, rp)
+        compared = _rpm_str_compare(lp, rp)
         if compared:
+            # non zero comparison for segment, done checking
             return compared
 
     else:
+        # ran out of segments to check, must be equivalent
         return 0
 
 
 class NEVRCompare(object):
+    """
+    An adapter for Name, Epoch, Version, Release comparisons of a
+    build info dictionary. Used by the nevr_sort_builds function.
+    """
 
     def __init__(self, binfo):
         self.build = binfo
@@ -199,6 +217,11 @@ class NEVRCompare(object):
 
 
 def nevr_sort_builds(build_infos):
+    """
+    Given a sequence of build info dictionaries, sort them by Name,
+    Epoch, Version, and Release using RPM's variation of comparison
+    """
+
     return sorted(build_infos, key=NEVRCompare)
 
 
