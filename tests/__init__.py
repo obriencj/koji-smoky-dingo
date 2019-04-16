@@ -5,6 +5,18 @@ from unittest import TestCase
 from kojismokydingo import _rpm_str_compare
 
 
+try:
+    from rpm import labelCompare
+
+except ImportError:
+    labelCompare = None
+    compareVer = None
+
+else:
+    def compareVer(v1, v2):
+        return labelCompare(('', v1, ''), ('', v2, ''))
+
+
 # these all cmp to 0
 RPM_STR_CMP_0 = [
     ("", ""),
@@ -51,6 +63,24 @@ RPM_STR_CMP_1 = [
 
 
 class TestNEVRSort(TestCase):
+
+
+    if compareVer:
+        # these tests just validate that we're behaving the same as
+        # rpm lib. However, not all systems have rpmlib available, so
+        # we omit these tests in those environments.
+
+        def test_rpm_compare_ver_0(self):
+            for vl, vr in RPM_STR_CMP_0:
+                self.assertEqual(compareVer(vl, vr), 0)
+                self.assertEqual(compareVer(vr, vl), 0)
+
+
+        def test_rpm_compare_ver_1(self):
+            for vl, vr in RPM_STR_CMP_1:
+                self.assertEqual(compareVer(vl, vr), 1)
+                self.assertEqual(compareVer(vr, vl), -1)
+
 
     def test_rpm_str_cmp_0(self):
         for vl, vr in RPM_STR_CMP_0:
