@@ -36,13 +36,11 @@ setup(
     version = '0.9.0',
 
     packages = [
-        # everything else
         'kojismokydingo',
     ],
 
     requires = [
         "koji",
-        "rpm",
         "six",
     ],
 

@@ -9,6 +9,7 @@
 *.tar
 *~
 .#*
+.DS_Store
 .coverage
 .eggs
 .venv
