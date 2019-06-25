@@ -55,6 +55,7 @@ setup(
             'renum-tag-inheritance = kojismokydingo.renum_tag:cli',
             'swap-tag-inheritance = kojismokydingo.swap_inheritance:cli',
             'userinfo = kojismokydingo.userinfo:cli',
+            'perminfo = kojismokydingo.perminfo:cli',
         ],
     },
 

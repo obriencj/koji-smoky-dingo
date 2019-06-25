@@ -65,6 +65,10 @@ class NoSuchUser(BadDingo):
     complaint = "No such user"
 
 
+class NoSuchPermission(BadDingo):
+    complaint = "No such permission"
+
+
 class PermissionException(BadDingo):
     complaint = "Insufficient permissions"
 
