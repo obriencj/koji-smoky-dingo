@@ -20,8 +20,6 @@ advanced users.
 
 Note that this package needs the kojismokydingometa plugin to be
 installed in order for the plugins to be loaded by the Koji CLI.
-However the individual modules can be of use as well, so it's not a
-hard dependency.
 
 :author: Christopher O'Brien  <obriencj@gmail.com>
 :license: GPL version 3
@@ -41,6 +39,7 @@ setup(
 
     requires = [
         "koji",
+        "kojismokydingometa",
         "six",
     ],
 

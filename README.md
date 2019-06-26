@@ -9,6 +9,21 @@ The name "smoky-dingo" was provided by [coolname] and has no particular relevanc
 [coolname]: https://pypi.org/project/coolname/
 
 
+## Meta Plugin
+
+This project is broken into two parts. The first part is a relatively
+tiny CLI plugin for koji which acts as an adapter to load commands
+registered via python's entry points. The second and larger part is a
+collection of commands that are be loaded by that meta plugin.
+
+The meta plugin can be used to load commands other than those provided
+by koji-smoky-dingo. Simply register your commands with the
+`"koji\_smoky\_dingo"` entry point key and install your package. See
+[setup.py] for direct examples.
+
+[setup.py]: https://github.com/obriencj/koji-smoky-dingo/blob/master/setup.py
+
+
 ## Admin Commands
 
 The following client commands are included with koji-smoky-dingo and
