@@ -51,7 +51,7 @@ rm -rf $RPM_BUILD_ROOT
 %package -n python2-%{srcname}
 Summary:        %{summary}
 BuildRequires:  python2-devel python2-setuptools python2-wheel python2-pip
-Requires:	python2 python2-koji python2-rpm python2-six
+Requires:	python2 python2-koji python2-six
 Requires:	python2-%{srcname}-meta
 %{?python_provide:%python_provide python2-%{srcname}}
 
@@ -81,7 +81,7 @@ Koji Smoky Dingo Meta Plugin
 %package -n python3-%{srcname}
 Summary:        %{summary}
 BuildRequires:  python3-devel python3-wheel python3-pip
-Requires:	python3 python3-koji python3-rpm python3-six
+Requires:	python3 python3-koji python3-six
 Requires:	python3-%{srcname}-meta
 %{?python_provide:%python_provide python3-%{srcname}}
 
