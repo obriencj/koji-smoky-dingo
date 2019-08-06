@@ -25,10 +25,10 @@ entry_points.
 To define additional commands, register an entry_point with the
 koji_smoky_dingo group, using the name of the plugin. The entry point
 should be a unary function which takes the name and returns a callable
-object with the attributes that koji expects in a cli plugin handler.
+object with the attributes that koji expects in a CLI plugin handler.
 
 :author: cobrien@redhat.com
-"license: GPL version 3
+:license: GPL version 3
 """
 
 
@@ -54,7 +54,7 @@ def __plugin__(glbls):
         return
 
     # we sort the entry points by module name so that duplicate
-    # commands have a predicable resolution order
+    # commands have a predictable resolution order
     points = sorted(iter_entry_points('koji_smoky_dingo'),
                     key=lambda e: e.module_name)
 
