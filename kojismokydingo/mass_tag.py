@@ -87,7 +87,6 @@ def cli_mass_tag(session, tagname, nvrs,
                                     inherited=inherit)
     packages = set(pkg["package_id"] for pkg in packages)
 
-
     # load the buildinfo for all of the NVRs
     debug("fed with %i builds", len(nvrs))
 
