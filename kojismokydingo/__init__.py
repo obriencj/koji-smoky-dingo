@@ -342,6 +342,9 @@ class SmokyDingo(object):
     # this is necessary for koji to recognize us as a cli command
     exported_cli = True
 
+    # set of permissions required by this command. None for anonymous.
+    permissions = None
+
 
     def __init__(self, name):
         self.name = name
@@ -382,10 +385,11 @@ class SmokyDingo(object):
 
     def pre_handle(self, options):
         """
-        Used by admin commands to authenticate. Does nothing normally.
+        Perform permissions checks if needed prior to running command.
         """
 
-        pass
+        if self.permission:
+            self.session.assertPerm(self.permission)
 
 
     @abstractmethod
@@ -430,34 +434,44 @@ class SmokyDingo(object):
             raise
 
 
-class AdminSmokyDingo(SmokyDingo):
-
-    group = "admin"
-
-
-    def pre_handle(self, options):
-        # before attempting to actually perform the command task,
-        # ensure that the user has the appropriate admin permissions,
-        # to prevent it failing at a strange point
-
-        session = self.session
-
-        userinfo = session.getLoggedInUser()
-        userperms = session.getUserPerms(userinfo["id"]) or ()
-
-        if "admin" not in userperms:
-            msg = "command %s requires admin permissions" % self.name
-            raise PermissionException(msg)
-
-
 class AnonSmokyDingo(SmokyDingo):
 
     group = "info"
+    permission = None
 
 
     def __init__(self, name):
         super(AnonSmokyDingo, self).__init__(name)
+
+        # koji won't even bother fully authenticating our session for
+        # this command if we tweak the name like this. Since
+        # subclasses of this are meant to be anonymous commands
+        # anyway, we may as well omit the session init
         self.__name__ = "anon_handle_" + self.name.replace("-", "_")
+
+
+class AdminSmokyDingo(SmokyDingo):
+
+    group = "admin"
+    permission = "admin"
+
+
+class TagSmokyDingo(SmokyDingo):
+
+    group = "tag"
+    permission = "admin"
+
+
+class TargetSmokyDingo(SmokyDingo):
+
+    group = "target"
+    permission = "target"
+
+
+class HostSmokyDingo(SmokyDingo):
+
+    group = "host"
+    permission = "host"
 
 
 #
