@@ -342,7 +342,8 @@ class SmokyDingo(object):
     # this is necessary for koji to recognize us as a cli command
     exported_cli = True
 
-    # set of permissions required by this command. None for anonymous.
+    # set of permission names that can grant use of this command. None
+    # or empty for anonymous access. Checked in pre_handle
     permissions = None
 
 
@@ -385,11 +386,20 @@ class SmokyDingo(object):
 
     def pre_handle(self, options):
         """
-        Perform permissions checks if needed prior to running command.
+        Verify necessary permissions are in place before attempting any
+        further calls.
         """
 
-        if self.permission:
-            self.session.assertPerm(self.permission)
+        if self.permissions:
+            session = self.session
+            userinfo = session.getLoggedInUser()
+            userperms = session.getUserPerms(userinfo["id"]) or ()
+
+            if not (self.permissions & set(userperms)):
+                msg = "Insufficient permissions for command %s" % self.name
+                raise PermissionException(msg)
+
+        return super(SmokyDingo, self).pre_handle(options)
 
 
     @abstractmethod
@@ -429,6 +439,8 @@ class SmokyDingo(object):
             return -2
 
         except Exception:
+            # koji CLI hides tracebacks from us. If something goes
+            # wrong, we want to see it
             import traceback
             traceback.print_exc()
             raise
@@ -437,7 +449,7 @@ class SmokyDingo(object):
 class AnonSmokyDingo(SmokyDingo):
 
     group = "info"
-    permission = None
+    permissions = None
 
 
     def __init__(self, name):
@@ -453,25 +465,25 @@ class AnonSmokyDingo(SmokyDingo):
 class AdminSmokyDingo(SmokyDingo):
 
     group = "admin"
-    permission = "admin"
+    permissions = {"admin", }
 
 
 class TagSmokyDingo(SmokyDingo):
 
     group = "tag"
-    permission = "admin"
+    permissions = {"admin", "tag", }
 
 
 class TargetSmokyDingo(SmokyDingo):
 
     group = "target"
-    permission = "target"
+    permissions = {"admin", "target", }
 
 
 class HostSmokyDingo(SmokyDingo):
 
     group = "host"
-    permission = "host"
+    permissions = {"admin", "host", }
 
 
 #
