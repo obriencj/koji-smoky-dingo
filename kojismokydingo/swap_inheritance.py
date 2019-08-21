@@ -77,16 +77,37 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
 
     if found_old is None:
         raise NoSuchInheritance(tagname, old_parent)
+
+    # this looks convoluted, because we're doing two things at
+    # once. First, we're duplicating the whole inheritance structure
+    # so we can show what's changed. Second, we're collecting the
+    # changes as either two edits, or a delete and an addition.
+
+    if found_new is None:
+        # the new inheritance isn't in the current inheritance
+        # structure, therefore duplicate the old inheritance link and
+        # mark it as a deletion, and then modify the old inheritance
+        # link later.
+        changes = [dict(found_old, 'delete link'=True),
+                   found_old]
+
     else:
-        found_old["name"] = new_p["name"]
-        found_old["parent_id"] = new_p["id"]
-
-    if found_new is not None:
-        # perform the optional behavior if both new and old are
-        # parents, and effectively swap their priorities.
-
+        # the new inheritance link is also within the current
+        # inheritance structure, therefore this is an action to make
+        # two edits. Mix in the updated new inheritance data now, and
+        # the old inheritance link will be updated at the end.
+        changes = [found_old, found_new]
         found_new["name"] = old_p["name"]
         found_new["parent_id"] = old_p["id"]
+
+    # we do this last so that we'll have a chance to duplicate the
+    # original if needed
+    found_old["name"] = new_p["name"]
+    found_old["parent_id"] = new_p["id"]
+
+    # at this point the swapped list represents the fully modified
+    # inheritance structure we'd like to see, and changes represents
+    # just the two edits we're making.
 
     if test or verbose:
         print("Swapping inheritance data for", tagname)
@@ -102,7 +123,7 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
     if test:
         print("Changes not committed in test mode.")
     else:
-        results = session.setInheritanceData(tagname, swapped, clear=True)
+        results = session.setInheritanceData(tagname, changes)
         if verbose and results:
             print(results)
 
