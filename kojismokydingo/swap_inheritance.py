@@ -88,8 +88,9 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
         # structure, therefore duplicate the old inheritance link and
         # mark it as a deletion, and then modify the old inheritance
         # link later.
-        changes = [dict(found_old, 'delete link'=True),
-                   found_old]
+        changed_old = dict(found_old)
+        changed_old['delete link'] = True
+        changes = [changed_old, found_old]
 
     else:
         # the new inheritance link is also within the current
