@@ -55,7 +55,7 @@ permissions in koji.
 |`check—hosts` |Show builder hosts which haven't been checking in lately |
 |`list—imported` |Show builds which were imported into koji |
 |`perminfo` |Show information about a permission |
-|`userinfo` |Show information and permissions for a koji user account |
+|`userinfo` |Show information about a user account |
 
 
 ## Install
