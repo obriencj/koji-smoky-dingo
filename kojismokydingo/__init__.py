@@ -344,7 +344,7 @@ class SmokyDingo(object):
 
     # set of permission names that can grant use of this command. None
     # or empty for anonymous access. Checked in pre_handle
-    permissions = None
+    permission = None
 
 
     def __init__(self, name):
@@ -390,12 +390,13 @@ class SmokyDingo(object):
         further calls.
         """
 
-        if self.permissions:
+        if self.permission:
             session = self.session
             userinfo = session.getLoggedInUser()
             userperms = session.getUserPerms(userinfo["id"]) or ()
 
-            if not (self.permissions & set(userperms)):
+            if not (self.permissions in userperms or
+                    "admin" in userperms):
                 msg = "Insufficient permissions for command %s" % self.name
                 raise PermissionException(msg)
 
@@ -465,25 +466,25 @@ class AnonSmokyDingo(SmokyDingo):
 class AdminSmokyDingo(SmokyDingo):
 
     group = "admin"
-    permissions = {"admin", }
+    permission = "admin"
 
 
 class TagSmokyDingo(SmokyDingo):
 
     group = "tag"
-    permissions = {"admin", "tag", }
+    permission = "tag"
 
 
 class TargetSmokyDingo(SmokyDingo):
 
     group = "target"
-    permissions = {"admin", "target", }
+    permission = "target"
 
 
 class HostSmokyDingo(SmokyDingo):
 
     group = "host"
-    permissions = {"admin", "host", }
+    permission = "host"
 
 
 #
