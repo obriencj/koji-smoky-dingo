@@ -32,7 +32,7 @@ from __future__ import print_function
 
 from six.moves import zip as izip
 
-from . import AdminSmokyDingo, BadDingo, NoSuchTag
+from . import TagSmokyDingo, BadDingo, NoSuchTag
 
 
 class BadSwap(BadDingo):
@@ -129,7 +129,7 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
             print(results)
 
 
-class cli(AdminSmokyDingo):
+class cli(TagSmokyDingo):
 
     description = "Swap a tag's inheritance"
 

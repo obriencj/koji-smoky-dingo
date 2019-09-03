@@ -342,6 +342,10 @@ class SmokyDingo(object):
     # this is necessary for koji to recognize us as a cli command
     exported_cli = True
 
+    # set of permission names that can grant use of this command. None
+    # or empty for anonymous access. Checked in pre_handle
+    permission = None
+
 
     def __init__(self, name):
         self.name = name
@@ -382,10 +386,20 @@ class SmokyDingo(object):
 
     def pre_handle(self, options):
         """
-        Used by admin commands to authenticate. Does nothing normally.
+        Verify necessary permissions are in place before attempting any
+        further calls.
         """
 
-        pass
+        if self.permission:
+            session = self.session
+            userinfo = session.getLoggedInUser()
+            userperms = session.getUserPerms(userinfo["id"]) or ()
+
+            if not (self.permissions in userperms or "admin" in userperms):
+                msg = "Insufficient permissions for command %s" % self.name
+                raise PermissionException(msg)
+
+        return super(SmokyDingo, self).pre_handle(options)
 
 
     @abstractmethod
@@ -425,39 +439,51 @@ class SmokyDingo(object):
             return -2
 
         except Exception:
+            # koji CLI hides tracebacks from us. If something goes
+            # wrong, we want to see it
             import traceback
             traceback.print_exc()
             raise
 
 
-class AdminSmokyDingo(SmokyDingo):
-
-    group = "admin"
-
-
-    def pre_handle(self, options):
-        # before attempting to actually perform the command task,
-        # ensure that the user has the appropriate admin permissions,
-        # to prevent it failing at a strange point
-
-        session = self.session
-
-        userinfo = session.getLoggedInUser()
-        userperms = session.getUserPerms(userinfo["id"]) or ()
-
-        if "admin" not in userperms:
-            msg = "command %s requires admin permissions" % self.name
-            raise PermissionException(msg)
-
-
 class AnonSmokyDingo(SmokyDingo):
 
     group = "info"
+    permissions = None
 
 
     def __init__(self, name):
         super(AnonSmokyDingo, self).__init__(name)
+
+        # koji won't even bother fully authenticating our session for
+        # this command if we tweak the name like this. Since
+        # subclasses of this are meant to be anonymous commands
+        # anyway, we may as well omit the session init
         self.__name__ = "anon_handle_" + self.name.replace("-", "_")
+
+
+class AdminSmokyDingo(SmokyDingo):
+
+    group = "admin"
+    permission = "admin"
+
+
+class TagSmokyDingo(SmokyDingo):
+
+    group = "tag"
+    permission = "tag"
+
+
+class TargetSmokyDingo(SmokyDingo):
+
+    group = "target"
+    permission = "target"
+
+
+class HostSmokyDingo(SmokyDingo):
+
+    group = "host"
+    permission = "host"
 
 
 #

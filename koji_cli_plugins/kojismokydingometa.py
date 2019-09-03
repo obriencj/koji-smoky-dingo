@@ -62,9 +62,11 @@ def __plugin__(glbls):
         # print(entry_point, file=sys.stderr)
 
         try:
-            # each entry point should result in a unary function which
-            # is fed the name, which should result in either None or a
-            # callable appropriate for use as a koji command handler.
+            # each entry point when loaded should resolve to a unary
+            # function. This function is then invoked with the name of
+            # the entry point. The return value should be either None
+            # or a callable appropriate for use as a koji command
+            # handler.
             entry_fn = entry_point.load()
             handler = entry_fn(entry_point.name) if entry_fn else None
 
@@ -87,6 +89,7 @@ def __plugin__(glbls):
 
 
 __plugin__(globals())
+del __plugin__
 
 
 #

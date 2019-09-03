@@ -18,7 +18,7 @@ collection of commands that are be loaded by that meta plugin.
 
 The meta plugin can be used to load commands other than those provided
 by koji-smoky-dingo. Simply register your commands with the
-`"koji\_smoky\_dingo"` entry point key and install your package. See
+`"koji_smoky_dingo"` entry point key and install your package. See
 [setup.py] for direct examples.
 
 [setup.py]: https://github.com/obriencj/koji-smoky-dingo/blob/master/setup.py
@@ -26,20 +26,28 @@ by koji-smoky-dingo. Simply register your commands with the
 
 ## Admin Commands
 
-The following client commands are included with koji-smoky-dingo and
-require admin permissions to function.
+These commands require the admin permission.
 
 | Command | Description |
 |---------|-------------|
 |`bulk—tag-builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
+
+
+## Tag Commands
+
+These commands modify tag features, requiring either the tag
+permission (koji >= [1.18]) or the admin permission.
+
+| Command | Description |
+|---------|-------------|
 |`renum—tag-inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
 |`swap—tag-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
 
 
-## Anon Commands
+## Informational Commands
 
-The following client commands are included with koji-smoky-dingo and
-do not require any special permissions to function.
+These commands are informational only, and do not require any special
+permissions in koji.
 
 | Command | Description |
 |---------|-------------|
@@ -47,10 +55,12 @@ do not require any special permissions to function.
 |`check—hosts` |Show builder hosts which haven't been checking in lately |
 |`list—imported` |Show builds which were imported into koji |
 |`perminfo` |Show information about a permission |
-|`userinfo` |Show information and permissions for a koji user account |
+|`userinfo` |Show information about a user account |
 
 
 ## Install
+
+### Meta Plugin
 
 Because of how koji loads client plugins, the meta plugin needs to be
 installed with either the `--old-and-unmanageable` flag or with
@@ -60,12 +70,24 @@ installed with either the `--old-and-unmanageable` flag or with
 sudo python setup-meta.py clean build install --root=/
 ```
 
+With koji >= [1.18], the meta plugin can also be installed into
+`~/.koji_cli_plugins`
+
+[1.18]: https://docs.pagure.org/koji/release_notes_1.18/
+
+```bash
+mkdir -p ~/.koji/plugins
+cp koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+```
+
+### Package kojismokydingo
+
 However the rest of koji-smoky-dingo can be installed normally, either
 as a system-level or user-level package
 
 ```bash
 # system install
-sudo python setup.py install-wheel
+sudo python setup.py install
 
 # user only
 python setup.py install --user

@@ -39,7 +39,6 @@ setup(
 
     requires = [
         "koji",
-        "kojismokydingometa",
         "six",
     ],
 

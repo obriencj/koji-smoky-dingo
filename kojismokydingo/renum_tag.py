@@ -27,7 +27,7 @@ from __future__ import print_function
 
 from six.moves import zip as izip
 
-from . import AdminSmokyDingo, NoSuchTag
+from . import TagSmokyDingo, NoSuchTag
 
 
 def renum_inheritance(inheritance, begin, step):
@@ -71,7 +71,7 @@ def cli_renum_tag(session, tagname, begin=10, step=10,
             print(results)
 
 
-class cli(AdminSmokyDingo):
+class cli(TagSmokyDingo):
 
     description = "Renumbers inheritance priorities of a tag," \
                   " preserving order"
