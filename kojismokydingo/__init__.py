@@ -336,7 +336,7 @@ def read_clean_lines(filename="-"):
 @add_metaclass(ABCMeta)
 class SmokyDingo(object):
 
-    group = "cli"
+    group = "misc"
     description = "A CLI Plugin"
 
     # this is necessary for koji to recognize us as a cli command

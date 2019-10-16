@@ -59,12 +59,10 @@ def collect_userinfo(session, user):
 
     if userinfo.get("usertype", USER_NORMAL) == USER_GROUP:
         try:
-            members = session.getGroupMembers(uid)
-        except Exception as e:
-            print(e)
+            userinfo["members"] = session.getGroupMembers(uid)
+        except Exception:
+            # non-admin accounts cannot query group membership, so omit
             userinfo["members"] = None
-        else:
-            userinfo["members"] = members
 
     return userinfo
 
@@ -124,6 +122,7 @@ def cli_userinfo(session, user, json=False):
 
 class cli(SmokyDingo):
 
+    group = "info"
     description = "Show information about a user"
 
 
