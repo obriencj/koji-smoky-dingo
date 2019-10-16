@@ -28,7 +28,7 @@ import sys
 
 from json import dump
 
-from . import AnonSmokyDingo, NoSuchUser
+from . import SmokyDingo, NoSuchUser
 
 
 PRETTY_OPTIONS = {
@@ -36,6 +36,14 @@ PRETTY_OPTIONS = {
     "separators": (",", ": "),
     "sort_keys": True,
 }
+
+
+USER_NORMAL = 0
+USER_HOST = 1
+USER_GROUP = 2
+
+STATUS_NORMAL = 0
+STATUS_BLOCKED = 1
 
 
 def collect_userinfo(session, user):
@@ -49,30 +57,35 @@ def collect_userinfo(session, user):
     perms = session.getUserPerms(uid)
     userinfo["permissions"] = perms
 
-    if userinfo.get("usertype", 0) == 3:
-        members = session.getGroupMembers(uid)
-        userinfo["members"] = members
+    if userinfo.get("usertype", USER_NORMAL) == USER_GROUP:
+        try:
+            members = session.getGroupMembers(uid)
+        except Exception as e:
+            print(e)
+            userinfo["members"] = None
+        else:
+            userinfo["members"] = members
 
     return userinfo
 
 
 def get_usertype_str(userinfo):
     val = userinfo.get("usertype", 0) or 0
-    if val == 0:
+    if val == USER_NORMAL:
         return "NORMAL (user)"
-    elif val == 1:
+    elif val == USER_HOST:
         return "HOST (builder)"
-    elif val == 2:
+    elif val == USER_GROUP:
         return "GROUP"
     else:
         return "Unknown (%i)" % val
 
 
 def get_userstatus_str(userinfo):
-    val = userinfo.get("userstatus", 0) or 0
-    if val == 0:
+    val = userinfo.get("userstatus", STATUS_NORMAL) or STATUS_NORMAL
+    if val == STATUS_NORMAL:
         return "NORMAL (enabled)"
-    elif val == 1:
+    elif val == STATUS_BLOCKED:
         return "BLOCKED (disabled)"
     else:
         return "Unknown (%i)" % val
@@ -105,11 +118,11 @@ def cli_userinfo(session, user, json=False):
     members = userinfo.get("members", None)
     if members:
         print("Members:")
-        for member in sorted(members):
-            print(" ", member)
+        for member in sorted(members, key=lambda m: m.get("name")):
+            print(" {name} [{id}]".format(**member))
 
 
-class cli(AnonSmokyDingo):
+class cli(SmokyDingo):
 
     description = "Show information about a user"
 
