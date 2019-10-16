@@ -150,6 +150,7 @@ def cli_mass_tag(session, tagname, nvrs,
 
 class cli(AdminSmokyDingo):
 
+    group = "bind"
     description = "Quickly tag a large number of builds"
 
 
