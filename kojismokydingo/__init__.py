@@ -399,8 +399,6 @@ class SmokyDingo(object):
                 msg = "Insufficient permissions for command %s" % self.name
                 raise PermissionException(msg)
 
-        return super(SmokyDingo, self).pre_handle(options)
-
 
     @abstractmethod
     def handle(self, options):
@@ -470,19 +468,19 @@ class AdminSmokyDingo(SmokyDingo):
 
 class TagSmokyDingo(SmokyDingo):
 
-    group = "tag"
+    group = "misc"
     permission = "tag"
 
 
 class TargetSmokyDingo(SmokyDingo):
 
-    group = "target"
+    group = "misc"
     permission = "target"
 
 
 class HostSmokyDingo(SmokyDingo):
 
-    group = "host"
+    group = "misc"
     permission = "host"
 
 
