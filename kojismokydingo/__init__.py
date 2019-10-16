@@ -468,19 +468,19 @@ class AdminSmokyDingo(SmokyDingo):
 
 class TagSmokyDingo(SmokyDingo):
 
-    group = "misc"
+    group = "admin"
     permission = "tag"
 
 
 class TargetSmokyDingo(SmokyDingo):
 
-    group = "misc"
+    group = "admin"
     permission = "target"
 
 
 class HostSmokyDingo(SmokyDingo):
 
-    group = "misc"
+    group = "admin"
     permission = "host"
 
 
