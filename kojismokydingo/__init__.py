@@ -395,7 +395,7 @@ class SmokyDingo(object):
             userinfo = session.getLoggedInUser()
             userperms = session.getUserPerms(userinfo["id"]) or ()
 
-            if not (self.permissions in userperms or "admin" in userperms):
+            if not (self.permission in userperms or "admin" in userperms):
                 msg = "Insufficient permissions for command %s" % self.name
                 raise PermissionException(msg)
 
@@ -447,7 +447,7 @@ class SmokyDingo(object):
 class AnonSmokyDingo(SmokyDingo):
 
     group = "info"
-    permissions = None
+    permission = None
 
 
     def __init__(self, name):
