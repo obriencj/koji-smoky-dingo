@@ -13,7 +13,7 @@
 
 
 """
-Koji Smoky Dingo - admin command mass-tag
+Koji Smoky Dingo - tag command mass-tag
 
 Allows for large numbers of builds to be tagged rapidly, via multicall
 to tagBuildBypass
@@ -30,7 +30,7 @@ from collections import OrderedDict
 from functools import partial
 from six import iteritems, itervalues
 
-from . import AdminSmokyDingo, NoSuchTag, NoSuchUser, \
+from . import TagSmokyDingo, NoSuchTag, NoSuchUser, \
     nevr_sort_builds, chunkseq, bulk_load_builds, read_clean_lines, unique
 
 
@@ -148,7 +148,7 @@ def cli_mass_tag(session, tagname, nvrs,
     debug("All done!")
 
 
-class cli(AdminSmokyDingo):
+class cli(TagSmokyDingo):
 
     group = "bind"
     description = "Quickly tag a large number of builds"
