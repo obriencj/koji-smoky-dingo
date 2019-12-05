@@ -27,6 +27,7 @@ from __future__ import print_function
 import sys
 
 from json import dump
+from koji import ParameterError
 
 from . import SmokyDingo, NoSuchUser
 
@@ -47,10 +48,28 @@ STATUS_BLOCKED = 1
 
 
 def collect_userinfo(session, user):
-    userinfo = session.getUser(user)
+    """
+    A collection of user information merged into the getUser dict
+    structure.
+    """
+
+    try:
+        userinfo = session.getUser(user, True, True)
+    except ParameterError:
+        userinfo = session.getUser(user, True)
 
     if userinfo is None:
         raise NoSuchUser(user)
+
+    # depending on koji version, getUser resulted in either a
+    # krb_principal or krb_principals entry (or neither if it's not
+    # set up for kerberos). Let's normalize on the newer
+    # krb_principals one by converting. See
+    # https://pagure.io/koji/issue/1629
+
+    if "krb_principal" in userinfo:
+        krb = userinfo.pop("krb_principal")
+        userinfo["krb_principals"] = [krb] if krb else []
 
     uid = userinfo["id"]
 
@@ -100,9 +119,11 @@ def cli_userinfo(session, user, json=False):
 
     print("User: {name} [{id}]".format(**userinfo))
 
-    krb = userinfo.get("krb_principal", None)
-    if krb:
-        print("Kerberos principal:", krb)
+    krb_princs = userinfo.get("krb_principals", None)
+    if krb_princs:
+        print("Kerberos principals:")
+        for kp in sorted(krb_princs):
+            print(" ", kp)
 
     print("Type:", get_usertype_str(userinfo))
     print("Status:", get_userstatus_str(userinfo))
