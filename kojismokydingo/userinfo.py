@@ -24,19 +24,10 @@ Get information about a user or kerberos principal from brew
 
 from __future__ import print_function
 
-import sys
-
-from json import dump
 from koji import ParameterError
 
 from . import SmokyDingo, NoSuchUser
-
-
-PRETTY_OPTIONS = {
-    "indent": 4,
-    "separators": (",", ": "),
-    "sort_keys": True,
-}
+from .common import pretty_json
 
 
 USER_NORMAL = 0
@@ -113,8 +104,7 @@ def cli_userinfo(session, user, json=False):
     userinfo = collect_userinfo(session, user)
 
     if json:
-        dump(userinfo, sys.stdout, **PRETTY_OPTIONS)
-        print()
+        pretty_json(userinfo)
         return
 
     print("User: {name} [{id}]".format(**userinfo))

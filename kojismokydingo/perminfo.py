@@ -24,20 +24,12 @@ Get information about a permission
 
 from __future__ import print_function
 
-import sys
-
 from operator import itemgetter
 from json import dump
 from time import asctime, localtime
 
 from . import AnonSmokyDingo, NoSuchPermission
-
-
-PRETTY_OPTIONS = {
-    "indent": 4,
-    "separators": (",", ": "),
-    "sort_keys": True,
-}
+from .common import pretty_json
 
 
 def collect_perminfo(session, permission):
@@ -70,8 +62,7 @@ def cli_perminfo(session, permission,
     perminfo = collect_perminfo(session, permission)
 
     if json:
-        dump(perminfo, sys.stdout, **PRETTY_OPTIONS)
-        print()
+        pretty_json(perminfo)
         return
 
     print("Permission: {name} [{id}]".format(**perminfo))
