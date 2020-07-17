@@ -76,6 +76,7 @@ def cli_client_config(goptions, session,
 
     print()
 
+
 class cli(AnonSmokyDingo):
 
     group = "info"
