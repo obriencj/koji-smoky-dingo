@@ -14,16 +14,84 @@
 
 from __future__ import print_function
 
+from fnmatch import fnmatch
 from koji import PathInfo
 from os.path import join
 
-from . import AnonSmokyDingo
+from . import AnonSmokyDingo, NoSuchBuild, NoSuchTag
 
 
-def gather_build_artifacts(session, nvr,
-                           btype=None, path=None,
+def gather_build_artifacts(session, binfo, btype, path=None,
                            pattern=None, signature=None):
-    pass
+
+    pathinfo = PathInfo(path or "")
+
+    if btype == "rpm":
+        build_path = pathinfo.typedir(binfo, btype)
+        found = session.listArchives(buildID=binfo["id"], type=btype)
+        for f in found:
+            f["filepath"] = join(build_path, pathinfo.rpm(f))
+
+    elif btype == "maven":
+        build_path = pathinfo.typedir(binfo, btype)
+        found = session.listArchives(buildID=binfo["id"], type=btype)
+        for f in found:
+            f["filepath"] = join(build_path, pathinfo.mavenfile(f))
+
+    elif btype == "win":
+        build_path = pathinfo.typedir(binfo, btype)
+        found = session.listArchives(buildID=binfo["id"], type=btype)
+        for f in found:
+            f["filepath"] = join(build_path, pathinfo.winfile(f))
+
+    else:
+        found = []
+
+        known_btypes = ("rpm", "maven", "win")
+        for btype in known_btypes:
+            # this may look redundant, but the specifying the
+            # individual btypes to the listArchives call will result
+            # in additional data for some types. Therefore we need to
+            # call those types first. Later we'll use a btype of None
+            # to get all the artifacts, and will omit the special ones
+            found.extend(gather_build_artifacts(session, binfo, btype,
+                                                path, pattern, signature))
+
+        archives = session.listArchives(buildID=binfo["id"], type=btype)
+        for f in archives:
+            abtype = f["btype"]
+            if abtype in known_types:
+                continue
+
+            build_path = pathinfo.typedir(binfo, abtype)
+            f["filepath"] = join(build_path, apath)
+
+            found.append(archive)
+
+    # TODO: additional filtering
+    return found
+
+
+def _fake_maven_build(info, pathinfo, cache={}, btype="maven"):
+    bid = info["build_id"]
+    if bid in cache:
+        return cache[bid]
+
+    bld = {
+        "id": bid,
+        "name": info["build_name"],
+        "version": info["build_version"],
+        "release": info["build_release"],
+        "epoch": info["build_epoch"],
+        "volume_id": info["volume_id"],
+        "volume_name": info["volume_name"],
+        "package_id": info["pkg_id"],
+        "package_name": info["build_name"],
+    }
+    bld["build_path"] = pathinfo.typedir(bld, btype)
+    cache[bid] = bld
+
+    return bld
 
 
 def gather_tag_artifacts(session, tagname, btype, path=None,
@@ -41,35 +109,72 @@ def gather_tag_artifacts(session, tagname, btype, path=None,
         builds = dict((bld["id"], bld) for bld in builds)
 
         for f in found:
-            bld = builds["build_id"]
+            bld = builds[f["build_id"]]
             f["filepath"] = join(bld["build_path"], pathinfo.rpm(f))
 
     elif btype == "maven":
         found = session.getLatestMavenArchives(tagname)
         for f in found:
-            f["filepath"] = pathinfo.mavenfile(f)
+            bld = _fake_maven_build(f, pathinfo)
+            f["filepath"] = join(bld["build_path"], pathinfo.mavenfile(f))
 
-    else:
-        builds = session.getLatestBuilds(tagname)
+    elif btype == "win":
+        builds = session.getLatestBuilds(tagname, type=btype)
         found = []
         for bld in builds:
-            build_path = pathinfo.typedir(bld, btype)
             archives = session.listArchives(buildID=bld["id"], type=btype)
-            for archive in archives:
-                archive["filepath"] = join(build_path, archive["filename"])
-
+            for f in archives:
+                build_path = pathinfo.typedir(bld, btype)
+                f["filepath"] = join(build_path, pathinfo.winfile(f))
             found.extend(archives)
+
+    elif btype == None:
+        found = []
+
+        # these types have special path handling, so let's get them out of
+        # the way first.
+        known_btypes = ("rpm", "maven", "win")
+        for btype in known_btypes:
+            found.extend(gather_tag_artifacts(session, tagname, btype,
+                                              path, pattern, signature))
+
+        # now only gather archives that are not in the known_types
+        builds = session.getLatestBuilds(tagname)
+        for bld in builds:
+            archives = session.listArchives(buildID=bld["id"])
+            for archive in archives:
+                abtype = archive["btype"]
+                if abtype in known_btypes:
+                    continue
+
+                build_path = pathinfo.typedir(bld, abtype)
+                archive["filepath"] = join(build_path, archive["filename"])
+                found.append(archive)
 
     # TODO: additional filtering
     return found
 
 
-def cli_list_build_artifacts(session, nvr):
-    pass
+def cli_list_build_artifacts(session, nvr, btype,
+                             path=None, pattern=None, signature=None):
+
+    binfo = session.getBuild(nvr)
+    if not binfo:
+        raise NoSuchBuild(nvr)
+
+    found = gather_build_artifacts(session, binfo, btype,
+                                   path, pattern, signature)
+
+    for f in found:
+        print(f["filepath"])
 
 
 def cli_list_tag_artifacts(session, tagname, btype,
                            path=None, pattern=None, signature=None):
+
+    tinfo = session.getTag(tagname)
+    if not tinfo:
+        raise NoSuchTag(tagname)
 
     found = gather_tag_artifacts(session, tagname, btype,
                                  path, pattern, signature)
