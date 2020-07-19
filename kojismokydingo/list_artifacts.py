@@ -21,8 +21,8 @@ from os.path import join
 from . import AnonSmokyDingo, NoSuchBuild, NoSuchTag
 
 
-def gather_build_artifacts(session, binfo, btype, path=None,
-                           pattern=None, signature=None):
+def gather_build_archives(session, binfo, btype, path=None,
+                          pattern=None, signature=None):
 
     pathinfo = PathInfo(path or "")
 
@@ -45,17 +45,21 @@ def gather_build_artifacts(session, binfo, btype, path=None,
             f["filepath"] = join(build_path, pathinfo.winfile(f))
 
     else:
+        known_btypes = ("rpm", "maven", "win")
         found = []
 
-        known_btypes = ("rpm", "maven", "win")
-        for btype in known_btypes:
-            # this may look redundant, but the specifying the
-            # individual btypes to the listArchives call will result
-            # in additional data for some types. Therefore we need to
-            # call those types first. Later we'll use a btype of None
-            # to get all the artifacts, and will omit the special ones
-            found.extend(gather_build_artifacts(session, binfo, btype,
-                                                path, pattern, signature))
+        if btype is None:
+            # this may look redundant, but specifying the individual
+            # btypes to the listArchives call will result in
+            # additional data returned from koji for some types. Also,
+            # the individual types have different path expansions.
+            # Therefore we call those types first. Later we'll use a
+            # btype of None to get all the archives, and we will
+            # filter out the types we've already processed.
+
+            for btype in known_btypes:
+                found.extend(gather_build_archives(session, binfo, btype,
+                                                   path, pattern, signature))
 
         archives = session.listArchives(buildID=binfo["id"], type=btype)
         for f in archives:
@@ -72,21 +76,26 @@ def gather_build_artifacts(session, binfo, btype, path=None,
     return found
 
 
-def _fake_maven_build(info, pathinfo, cache={}, btype="maven"):
-    bid = info["build_id"]
+def _fake_maven_build(archive, pathinfo, btype="maven", cache={}):
+    """
+    produces something that looks like a build info dict based on the
+    values from within a maven archive dict.
+    """
+
+    bid = archive["build_id"]
     if bid in cache:
         return cache[bid]
 
     bld = {
         "id": bid,
-        "name": info["build_name"],
-        "version": info["build_version"],
-        "release": info["build_release"],
-        "epoch": info["build_epoch"],
-        "volume_id": info["volume_id"],
-        "volume_name": info["volume_name"],
-        "package_id": info["pkg_id"],
-        "package_name": info["build_name"],
+        "name": archive["build_name"],
+        "version": archive["build_version"],
+        "release": archive["build_release"],
+        "epoch": archive["build_epoch"],
+        "volume_id": archive["volume_id"],
+        "volume_name": archive["volume_name"],
+        "package_id": archive["pkg_id"],
+        "package_name": archive["build_name"],
     }
     bld["build_path"] = pathinfo.typedir(bld, btype)
     cache[bid] = bld
@@ -94,8 +103,8 @@ def _fake_maven_build(info, pathinfo, cache={}, btype="maven"):
     return bld
 
 
-def gather_tag_artifacts(session, tagname, btype, path=None,
-                         pattern=None, signature=None):
+def gather_tag_archives(session, tagname, btype, path=None,
+                        pattern=None, signature=None):
 
     pathinfo = PathInfo(path or "")
 
@@ -128,19 +137,22 @@ def gather_tag_artifacts(session, tagname, btype, path=None,
                 f["filepath"] = join(build_path, pathinfo.winfile(f))
             found.extend(archives)
 
-    elif btype == None:
+    elif:
+        known_btypes = ("rpm", "maven", "win")
         found = []
 
-        # these types have special path handling, so let's get them out of
-        # the way first.
-        known_btypes = ("rpm", "maven", "win")
-        for btype in known_btypes:
-            found.extend(gather_tag_artifacts(session, tagname, btype,
-                                              path, pattern, signature))
+        if btype is None:
+            # We're searching for all btypes, but these types have
+            # special path handling, so let's get them out of the way
+            # first.
+            for btype in known_btypes:
+                found.extend(gather_tag_archives(session, tagname, btype,
+                                                 path, pattern, signature))
 
         # now only gather archives that are not in the known_types
         builds = session.getLatestBuilds(tagname)
         for bld in builds:
+            # TODO: convert this into a multicall chunking generator
             archives = session.listArchives(buildID=bld["id"])
             for archive in archives:
                 abtype = archive["btype"]
@@ -155,29 +167,32 @@ def gather_tag_artifacts(session, tagname, btype, path=None,
     return found
 
 
-def cli_list_build_artifacts(session, nvr, btype,
+def cli_list_build_archives(session, nvr, btype,
                              path=None, pattern=None, signature=None):
 
+    # quick sanity check, and we'll work with the build info rather
+    # than the NVR from here on out
     binfo = session.getBuild(nvr)
     if not binfo:
         raise NoSuchBuild(nvr)
 
-    found = gather_build_artifacts(session, binfo, btype,
-                                   path, pattern, signature)
+    found = gather_build_archives(session, binfo, btype,
+                                  path, pattern, signature)
 
     for f in found:
         print(f["filepath"])
 
 
-def cli_list_tag_artifacts(session, tagname, btype,
+def cli_list_tag_archives(session, tagname, btype,
                            path=None, pattern=None, signature=None):
 
+    # quick sanity check
     tinfo = session.getTag(tagname)
     if not tinfo:
         raise NoSuchTag(tagname)
 
-    found = gather_tag_artifacts(session, tagname, btype,
-                                 path, pattern, signature)
+    found = gather_tag_archives(session, tagname, btype,
+                                path, pattern, signature)
 
     for f in found:
         print(f["filepath"])
@@ -189,13 +204,13 @@ def _shared_args(goptions, parser):
     addarg = grp.add_argument
 
     addarg("--btype", action="store", default=None,
-           help="Only show artifacts for the given btype")
+           help="Only show archives for the given btype")
 
     addarg("--glob", action="store", default=None,
-           help="Only show artifacts matching the given filename glob")
+           help="Only show archives matching the given filename glob")
 
     addarg("--signature", "-S", action="append", default=[],
-           help="Only show artifacts signed with the given key. Can"
+           help="Only show archives signed with the given key. Can"
            " be specified multiple times to indicate any of the keys"
            " is valid. Preferrence is in order defined. Only applies"
            " to RPMs")
@@ -224,7 +239,7 @@ def _shared_args(goptions, parser):
 class cli_build(AnonSmokyDingo):
 
     group = "info"
-    description = "List artifacts from a build"
+    description = "List archives from a build"
 
 
     def parser(self):
@@ -232,23 +247,23 @@ class cli_build(AnonSmokyDingo):
         addarg = parser.add_argument
 
         addarg("nvr", metavar="NVR",
-               help="The NVR containing the artifacts")
+               help="The NVR containing the archives")
 
         return _shared_args(self.goptions, parser)
 
 
     def handle(self, options):
-        return cli_list_build_artifacts(self.session, options.nvr,
-                                        btype=options.btype,
-                                        path=options.path,
-                                        pattern=options.glob,
-                                        signature=options.signature)
+        return cli_list_build_archives(self.session, options.nvr,
+                                       btype=options.btype,
+                                       path=options.path,
+                                       pattern=options.glob,
+                                       signature=options.signature)
 
 
 class cli_tag(AnonSmokyDingo):
 
     group = "info"
-    description = "List artifacts from a tag"
+    description = "List archives from a tag"
 
 
     def parser(self):
@@ -256,17 +271,17 @@ class cli_tag(AnonSmokyDingo):
         addarg = parser.add_argument
 
         addarg("tag", metavar="TAGNAME",
-               help="The tag containing the artifacts")
+               help="The tag containing the archives")
 
         return _shared_args(self.goptions, parser)
 
 
     def handle(self, options):
-        return cli_list_tag_artifacts(self.session, options.tag,
-                                      btype=options.btype,
-                                      path=options.path,
-                                      pattern=options.glob,
-                                      signature=options.signature)
+        return cli_list_tag_archives(self.session, options.tag,
+                                     btype=options.btype,
+                                     path=options.path,
+                                     pattern=options.glob,
+                                     signature=options.signature)
 
 
 #
