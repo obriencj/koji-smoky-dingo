@@ -137,7 +137,7 @@ def gather_tag_archives(session, tagname, btype, path=None,
                 f["filepath"] = join(build_path, pathinfo.winfile(f))
             found.extend(archives)
 
-    elif:
+    else:
         known_btypes = ("rpm", "maven", "win")
         found = []
 
