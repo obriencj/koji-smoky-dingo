@@ -21,6 +21,10 @@ from os.path import join
 from . import AnonSmokyDingo, NoSuchBuild, NoSuchTag
 
 
+def gather_signed_rpms(session, archive, signatures):
+    pass
+
+
 def gather_build_archives(session, binfo, btype, path=None,
                           pattern=None, signature=None):
 
@@ -28,7 +32,7 @@ def gather_build_archives(session, binfo, btype, path=None,
 
     if btype == "rpm":
         build_path = pathinfo.typedir(binfo, btype)
-        found = session.listArchives(buildID=binfo["id"], type=btype)
+        found = session.listRPMs(buildID=binfo["id"])
         for f in found:
             f["filepath"] = join(build_path, pathinfo.rpm(f))
 
@@ -72,7 +76,9 @@ def gather_build_archives(session, binfo, btype, path=None,
 
             found.append(archive)
 
-    # TODO: additional filtering
+    if pattern:
+        found = [f for f in found if fnmatch(f["filepath"], pattern)]
+
     return found
 
 
@@ -163,7 +169,9 @@ def gather_tag_archives(session, tagname, btype, path=None,
                 archive["filepath"] = join(build_path, archive["filename"])
                 found.append(archive)
 
-    # TODO: additional filtering
+    if pattern:
+        found = [f for f in found if fnmatch(f["filepath"], pattern)]
+
     return found
 
 
@@ -223,15 +231,14 @@ def _shared_args(goptions, parser):
     grp = parser.add_mutually_exclusive_group()
     addarg = grp.add_argument
 
-    addarg("--path", action="store", default=None)
-
-    addarg("--files", "-F", action="store_const",
-           dest="path", const=goptions.topdir,
-           help="Present as file paths")
+    addarg("--path", action="store", metavar="PATH",
+           default=goptions.topdir,
+           help="Present archives as existing under PATH (default: uses the"
+           " configured topdir value")
 
     addarg("--urls", "-U", action="store_const",
            dest="path", const=goptions.topurl,
-           help="Present as URLs")
+           help="Present archives as URLs using the configured topurl")
 
     return parser
 
