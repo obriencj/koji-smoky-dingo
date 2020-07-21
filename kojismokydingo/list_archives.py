@@ -75,11 +75,12 @@ def gather_signed_rpms(session, archives, sigkeys):
 def gather_build_archives(session, binfo, btype,
                           rpmkeys=(), path=None):
 
+    bid = binfo["id"]
     pathinfo = PathInfo(path or "")
 
     if btype == "rpm":
         build_path = pathinfo.typedir(binfo, btype)
-        found = session.listRPMs(buildID=binfo["id"])
+        found = session.listRPMs(buildID=bid)
         if rpmkeys:
             found = gather_signed_rpms(session, found, rpmkeys)
         for f in found:
@@ -93,13 +94,13 @@ def gather_build_archives(session, binfo, btype,
 
     elif btype == "maven":
         build_path = pathinfo.typedir(binfo, btype)
-        found = session.listArchives(buildID=binfo["id"], type=btype)
+        found = session.listArchives(buildID=bid, type=btype)
         for f in found:
             f["filepath"] = join(build_path, pathinfo.mavenfile(f))
 
     elif btype == "win":
         build_path = pathinfo.typedir(binfo, btype)
-        found = session.listArchives(buildID=binfo["id"], type=btype)
+        found = session.listArchives(buildID=bid, type=btype)
         for f in found:
             f["filepath"] = join(build_path, pathinfo.winfile(f))
 
@@ -116,11 +117,11 @@ def gather_build_archives(session, binfo, btype,
             # btype of None to get all the archives, and we will
             # filter out the types we've already processed.
 
-            for btype in known_btypes:
+            for bt in known_btypes:
                 found.extend(gather_build_archives(session, binfo,
-                                                   btype, rpmkeys, path))
+                                                   bt, rpmkeys, path))
 
-        archives = session.listArchives(buildID=binfo["id"], type=btype)
+        archives = session.listArchives(buildID=bid, type=btype)
         for f in archives:
             abtype = f["btype"]
             if abtype in known_types:
@@ -213,15 +214,15 @@ def gather_latest_archives(session, tagname, btype,
             # We're searching for all btypes, but these types have
             # special path handling, so let's get them out of the way
             # first.
-            for btype in known_btypes:
+            for bt in known_btypes:
                 found.extend(gather_latest_archives(session, tagname,
-                                                    btype, rpmkeys, path))
+                                                    bt, rpmkeys, path))
 
         # now only gather archives that are not in the known_types
         builds = session.getLatestBuilds(tagname)
         for bld in builds:
             # TODO: convert this into a multicall chunking generator
-            archives = session.listArchives(buildID=bld["id"])
+            archives = session.listArchives(buildID=bld["id"], type=btype)
             for archive in archives:
                 abtype = archive["btype"]
                 if abtype in known_btypes:
