@@ -219,18 +219,27 @@ def gather_latest_archives(session, tagname, btype,
                                                     bt, rpmkeys, path))
 
         # now only gather archives that are not in the known_types
-        builds = session.getLatestBuilds(tagname)
-        for bld in builds:
-            # TODO: convert this into a multicall chunking generator
-            archives = session.listArchives(buildID=bld["id"], type=btype)
-            for archive in archives:
-                abtype = archive["btype"]
-                if abtype in known_btypes:
-                    continue
+        archives, builds = session.listTaggedArchives(tagname,
+                                                      inherit=True,
+                                                      latest=True,
+                                                      type=btype)
 
-                build_path = pathinfo.typedir(bld, abtype)
-                archive["filepath"] = join(build_path, archive["filename"])
-                found.append(archive)
+        # decorate the build info with its path data
+        for bld in builds:
+            bld["build_path"] = pathinfo.typedir(bld, btype)
+
+        builds = dict((bld["id"], bld) for bld in builds)
+
+        for archive in archives:
+            bld = builds[archive["build_id"]]
+
+            abtype = archive["btype"]
+            if abtype in known_btypes:
+                continue
+
+            build_path = pathinfo.typedir(bld, abtype)
+            archive["filepath"] = join(build_path, archive["filename"])
+            found.append(archive)
 
     return found
 
