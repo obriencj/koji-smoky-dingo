@@ -27,8 +27,12 @@ JSON_PRETTY_OPTIONS = {
 
 
 def pretty_json(data, output=sys.stdout, pretty=JSON_PRETTY_OPTIONS):
+    """
+    Presents JSON in a pretty way.
+    """
+
     dump(data, output, **pretty)
-    print()
+    print(file=output)
 
 
 def resplit(arglist, sep=","):

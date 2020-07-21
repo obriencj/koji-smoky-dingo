@@ -24,6 +24,15 @@ from .common import pretty_json, resplit
 
 
 def filter_archives(session, archives, archive_types):
+    """
+    Given a list of archives (or RPMs dressed up like archives),
+    return a new list of those archives which are of the given archive
+    types.
+
+    archives - list of archive dicts
+    archive_types - list of str archive extensions
+    """
+
     # convert the list of string extensions from atypes into a set of
     # archive type IDs
     session.multicall = True
@@ -50,6 +59,17 @@ def filter_archives(session, archives, archive_types):
 
 
 def gather_signed_rpms(session, archives, sigkeys):
+    """
+    Given a list of RPM archive dicts, query the session for all the
+    pertinent signature headers, then try and find the best matching
+    signed copy of each RPM. An empty string at the end of sigkeys
+    will allow an unsigned copy to be included if no signed copies
+    match.
+
+    archives - list of RPM archive dicts
+    sigkeys - list of signature fingerprints, in order of precedence
+    """
+
     if not sigkeys:
         return archives
 
@@ -74,6 +94,11 @@ def gather_signed_rpms(session, archives, sigkeys):
 
 def gather_build_archives(session, binfo, btype,
                           rpmkeys=(), path=None):
+
+    """
+    Produce a list of archive dicts associated with a build, filtered by
+    build-type
+    """
 
     bid = binfo["id"]
     pathinfo = PathInfo(path or "")
