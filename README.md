@@ -54,6 +54,8 @@ permissions in koji.
 |`affected—targets` |Show targets which would be impacted by modifications to the given tag |
 |`check—hosts` |Show builder hosts which haven't been checking in lately |
 |`client-config` |Show settings for client profiles |
+|`latest-archives` |Show selected latest archives from a tag |
+|`list-build-archives` |Show selected archives attached to a build |
 |`list—imported` |Show builds which were imported into koji |
 |`perminfo` |Show information about a permission |
 |`userinfo` |Show information about a user account |
