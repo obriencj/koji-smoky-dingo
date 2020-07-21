@@ -17,24 +17,79 @@ from __future__ import print_function
 from fnmatch import fnmatch
 from koji import PathInfo
 from os.path import join
+from six import iterkeys, iteritems
 
-from . import AnonSmokyDingo, NoSuchBuild, NoSuchTag
-
-
-def gather_signed_rpms(session, archive, signatures):
-    pass
+from . import AnonSmokyDingo, NoSuchBuild, NoSuchTag, bulk_load_rpm_sigs
+from .common import pretty_json, resplit
 
 
-def gather_build_archives(session, binfo, btype, path=None,
-                          pattern=None, signature=None):
+def filter_archives(session, archives, archive_types):
+    # convert the list of string extensions from atypes into a set of
+    # archive type IDs
+    session.multicall = True
+    for t in archive_types:
+        session.getArchiveType(t)
+    atypes = session.multiCall()
+    atypes = set(t[0]["id"] for t in atypes if t and t[0])
+
+    # RPM is a special type, which isn't considered an archive but
+    # rather its own first-class type. However, we want to pretend
+    # like it's any other archive type, so we'll give it the otherwise
+    # unused ID of 0
+    if "rpm" in archive_types:
+        atypes.add(0)
+
+    # find only those archives whose type_id is in the set of desired
+    # archive types
+    result = []
+    for archive in archives:
+        if archive["type_id"] in atypes:
+            result.append(archive)
+
+    return result
+
+
+def gather_signed_rpms(session, archives, sigkeys):
+    if not sigkeys:
+        return archives
+
+    results = []
+
+    # an ID: RPM Archive mapping
+    rpms = dict((rpm["id"], rpm) for rpm in archives)
+
+    # now bulk load all the sigs for each RPM ID
+    rpm_sigs = bulk_load_rpm_sigs(session, iterkeys(rpms))
+
+    for rpm_id, rpm in iteritems(rpms):
+        found = set(sig["sigkey"] for sig in rpm_sigs[rpm_id])
+        for wanted in sigkeys:
+            if wanted in found:
+                rpm["sigkey"] = wanted
+                results.append(rpm)
+                break
+
+    return results
+
+
+def gather_build_archives(session, binfo, btype,
+                          rpmkeys=(), path=None):
 
     pathinfo = PathInfo(path or "")
 
     if btype == "rpm":
         build_path = pathinfo.typedir(binfo, btype)
         found = session.listRPMs(buildID=binfo["id"])
+        if rpmkeys:
+            found = gather_signed_rpms(session, found, rpmkeys)
         for f in found:
-            f["filepath"] = join(build_path, pathinfo.rpm(f))
+            key = f["sigkey"] if rpmkeys else None
+            rpmpath = pathinfo.signed(f, key) if key else pathinfo.rpm(f)
+            f["filepath"] = join(build_path, rpmpath)
+
+            # fake some archive members, since RPMs are missing these
+            f["type_id"] = 0
+            f["type_name"] = "rpm"
 
     elif btype == "maven":
         build_path = pathinfo.typedir(binfo, btype)
@@ -62,8 +117,8 @@ def gather_build_archives(session, binfo, btype, path=None,
             # filter out the types we've already processed.
 
             for btype in known_btypes:
-                found.extend(gather_build_archives(session, binfo, btype,
-                                                   path, pattern, signature))
+                found.extend(gather_build_archives(session, binfo,
+                                                   btype, rpmkeys, path))
 
         archives = session.listArchives(buildID=binfo["id"], type=btype)
         for f in archives:
@@ -76,16 +131,14 @@ def gather_build_archives(session, binfo, btype, path=None,
 
             found.append(archive)
 
-    if pattern:
-        found = [f for f in found if fnmatch(f["filepath"], pattern)]
-
     return found
 
 
 def _fake_maven_build(archive, pathinfo, btype="maven", cache={}):
     """
     produces something that looks like a build info dict based on the
-    values from within a maven archive dict.
+    values from within a maven archive dict. This can then be used
+    with a koji.PathInfo instance to determine the path to a build
     """
 
     bid = archive["build_id"]
@@ -109,8 +162,8 @@ def _fake_maven_build(archive, pathinfo, btype="maven", cache={}):
     return bld
 
 
-def gather_tag_archives(session, tagname, btype, path=None,
-                        pattern=None, signature=None):
+def gather_latest_archives(session, tagname, btype,
+                           rpmkeys=(), path=None):
 
     pathinfo = PathInfo(path or "")
 
@@ -123,9 +176,18 @@ def gather_tag_archives(session, tagname, btype, path=None,
 
         builds = dict((bld["id"], bld) for bld in builds)
 
+        if rpmkeys:
+            found = gather_signed_rpms(session, found, rpmkeys)
+
         for f in found:
             bld = builds[f["build_id"]]
-            f["filepath"] = join(bld["build_path"], pathinfo.rpm(f))
+            key = f["sigkey"] if rpmkeys else None
+            rpmpath = pathinfo.signed(f, key) if key else pathinfo.rpm(f)
+            f["filepath"] = join(bld["build_path"], rpmpath)
+
+            # fake some archive members, since RPMs are missing these
+            f["type_id"] = 0
+            f["type_name"] = "rpm"
 
     elif btype == "maven":
         found = session.getLatestMavenArchives(tagname)
@@ -152,8 +214,8 @@ def gather_tag_archives(session, tagname, btype, path=None,
             # special path handling, so let's get them out of the way
             # first.
             for btype in known_btypes:
-                found.extend(gather_tag_archives(session, tagname, btype,
-                                                 path, pattern, signature))
+                found.extend(gather_latest_archives(session, tagname,
+                                                    btype, rpmkeys, path))
 
         # now only gather archives that are not in the known_types
         builds = session.getLatestBuilds(tagname)
@@ -169,14 +231,12 @@ def gather_tag_archives(session, tagname, btype, path=None,
                 archive["filepath"] = join(build_path, archive["filename"])
                 found.append(archive)
 
-    if pattern:
-        found = [f for f in found if fnmatch(f["filepath"], pattern)]
-
     return found
 
 
 def cli_list_build_archives(session, nvr, btype,
-                             path=None, pattern=None, signature=None):
+                            atypes=(), rpmkeys=(),
+                            path=None, json=False):
 
     # quick sanity check, and we'll work with the build info rather
     # than the NVR from here on out
@@ -185,60 +245,102 @@ def cli_list_build_archives(session, nvr, btype,
         raise NoSuchBuild(nvr)
 
     found = gather_build_archives(session, binfo, btype,
-                                  path, pattern, signature)
+                                  rpmkeys, path)
 
-    for f in found:
-        print(f["filepath"])
+    if atypes:
+        found = filter_archives(session, found, atypes)
+
+    if json:
+        pretty_json(found)
+
+    else:
+        for f in found:
+            print(f["filepath"])
 
 
-def cli_list_tag_archives(session, tagname, btype,
-                           path=None, pattern=None, signature=None):
+def cli_latest_tag_archives(session, tagname, btype,
+                            atypes=(), rpmkeys=(),
+                            path=None, json=False):
 
     # quick sanity check
     tinfo = session.getTag(tagname)
     if not tinfo:
         raise NoSuchTag(tagname)
 
-    found = gather_tag_archives(session, tagname, btype,
-                                path, pattern, signature)
+    found = gather_latest_archives(session, tagname, btype,
+                                   rpmkeys, path)
 
-    for f in found:
-        print(f["filepath"])
+    if atypes:
+        found = filter_archives(session, found, atypes)
+
+    if json:
+        pretty_json(found)
+
+    else:
+        for f in found:
+            print(f["filepath"])
 
 
 def _shared_args(goptions, parser):
 
-    grp = parser.add_argument_group("Filtering options")
-    addarg = grp.add_argument
-
-    addarg("--btype", action="store", default=None,
-           help="Only show archives for the given btype")
-
-    addarg("--glob", action="store", default=None,
-           help="Only show archives matching the given filename glob")
-
-    addarg("--signature", "-S", action="append", default=[],
-           help="Only show archives signed with the given key. Can"
-           " be specified multiple times to indicate any of the keys"
-           " is valid. Preferrence is in order defined. Only applies"
-           " to RPMs")
-
-    addarg("--unsigned", dest="signature",
-           action="append_const", const=None,
-           help="Fall-back to unsigned copies if no signed copies are"
-           " found when --signature=[SIG] is specified")
-
-    grp = parser.add_mutually_exclusive_group()
-    addarg = grp.add_argument
-
-    addarg("--path", action="store", metavar="PATH",
-           default=goptions.topdir,
-           help="Present archives as existing under PATH (default: uses the"
-           " configured topdir value")
+    addarg = parser.add_argument
+    addarg("--json", action="store_true", default=False,
+           help="Output archive information as JSON")
 
     addarg("--urls", "-U", action="store_const",
-           dest="path", const=goptions.topurl,
-           help="Present archives as URLs using the configured topurl")
+           dest="path", const=goptions.topurl, default=goptions.topdir,
+           help="Present archives as URLs using the configured topurl."
+           " Default: use the configured topdir")
+
+    grp = parser.add_argument_group("Build Filtering Options")
+    grp = grp.add_mutually_exclusive_group()
+    addarg = grp.add_argument
+
+    addarg("--build-type", action="store", metavar="TYPE",
+           dest="btype", default=None,
+           help="Only show archives for the given build type. Example"
+           " types are rpm, maven, image, win. Default: show all"
+           " archives.")
+
+    addarg("--rpm", action="store_const", dest="btype",
+           const="rpm",
+           help="--build-type=rpm")
+
+    addarg("--maven", action="store_const", dest="btype",
+           const="maven",
+           help="--build-type=maven")
+
+    addarg("--image", action="store_const", dest="btype",
+           const="image",
+           help="--build-type=image")
+
+    addarg("--win", action="store_const", dest="btype",
+           const="win",
+           help="--build-type=win")
+
+    grp = parser.add_argument_group("Archive Filtering Options")
+    addarg = grp.add_argument
+
+    addarg("--archive-type", "-a", action="append", metavar="EXT",
+           dest="atypes", default=[],
+           help="Only show archives with the given archive type."
+           " Can be specified multiple times. Default: show all")
+
+    grp = parser.add_argument_group("RPM Options")
+    addarg = grp.add_argument
+
+    addarg("--key", "-k", dest="keys", metavar="KEY",
+           action="append", default=[],
+           help="Only show RPMs signed with the given key. Can be"
+           " specified multiple times to indicate any of the keys is"
+           " valid. Preferrence is in order defined. Default: show"
+           " unsigned RPMs")
+
+    addarg("--unsigned", action="store_true",
+           help="Allow unsigned copies if no signed copies are"
+           " found when --key=KEY is specified. Otherwise if keys are"
+           " specified, then only RPMs signed with one of those keys"
+           " are shown.")
 
     return parser
 
@@ -259,18 +361,28 @@ class cli_build(AnonSmokyDingo):
         return _shared_args(self.goptions, parser)
 
 
+    def validate(self, parser, options):
+        options.atypes = resplit(options.atypes)
+
+        keys = resplit(options.keys)
+        if keys and options.unsigned:
+            keys.append('')
+        options.keys = keys
+
+
     def handle(self, options):
         return cli_list_build_archives(self.session, options.nvr,
                                        btype=options.btype,
+                                       atypes=options.atypes,
+                                       rpmkeys=options.keys,
                                        path=options.path,
-                                       pattern=options.glob,
-                                       signature=options.signature)
+                                       json=options.json)
 
 
 class cli_tag(AnonSmokyDingo):
 
     group = "info"
-    description = "List archives from a tag"
+    description = "List latest archives from a tag"
 
 
     def parser(self):
@@ -283,12 +395,22 @@ class cli_tag(AnonSmokyDingo):
         return _shared_args(self.goptions, parser)
 
 
+    def validate(self, parser, options):
+        options.atypes = resplit(options.atypes)
+
+        keys = resplit(options.keys)
+        if keys and options.unsigned:
+            keys.append('')
+        options.keys = keys
+
+
     def handle(self, options):
-        return cli_list_tag_archives(self.session, options.tag,
-                                     btype=options.btype,
-                                     path=options.path,
-                                     pattern=options.glob,
-                                     signature=options.signature)
+        return cli_latest_tag_archives(self.session, options.tag,
+                                       btype=options.btype,
+                                       atypes=options.atypes,
+                                       rpmkeys=options.keys,
+                                       path=options.path,
+                                       json=options.json)
 
 
 #
