@@ -31,5 +31,21 @@ def pretty_json(data, output=sys.stdout, pretty=JSON_PRETTY_OPTIONS):
     print()
 
 
+def resplit(arglist, sep=","):
+    """
+    Collapses comma-separated and multi-specified items into a single
+    list. Useful with action="append" in an argparse argument.
+
+    this allows arguments like:
+    -x 1 -x 2, -x 3,4,5 -x ,6,7, -x 8
+
+    to become
+    x = [1, 2, 3, 4, 5, 6, 7, 8]
+    """
+
+    work = (a.strip() for a in sep.join(arglist).split(sep))
+    return [a for a in work if a]
+
+
 #
 # The end.
