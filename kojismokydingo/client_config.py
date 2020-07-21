@@ -26,9 +26,9 @@ from __future__ import print_function
 
 import sys
 
-from configparser import ConfigParser
 from koji import ParameterError
 from six import iterkeys
+from six.moves.configparser import ConfigParser
 
 from . import AnonSmokyDingo
 from .common import pretty_json
