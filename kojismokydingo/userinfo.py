@@ -26,7 +26,7 @@ from __future__ import print_function
 
 from koji import ParameterError
 
-from . import SmokyDingo, NoSuchUser
+from . import AnonSmokyDingo, NoSuchUser
 from .common import pretty_json
 
 
@@ -90,7 +90,7 @@ def get_usertype_str(userinfo):
 
 
 def get_userstatus_str(userinfo):
-    val = userinfo.get("userstatus", STATUS_NORMAL) or STATUS_NORMAL
+    val = userinfo.get("status", STATUS_NORMAL) or STATUS_NORMAL
     if val == STATUS_NORMAL:
         return "NORMAL (enabled)"
     elif val == STATUS_BLOCKED:
@@ -131,7 +131,7 @@ def cli_userinfo(session, user, json=False):
             print(" {name} [{id}]".format(**member))
 
 
-class cli(SmokyDingo):
+class cli(AnonSmokyDingo):
 
     group = "info"
     description = "Show information about a user"
