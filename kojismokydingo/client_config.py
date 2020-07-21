@@ -63,7 +63,8 @@ def cli_client_config(goptions, session,
         return
 
     if config:
-        cfg = ConfigParser(defaults=opts, default_section=profile)
+        cfg = ConfigParser()
+        cfg._sections[profile] = opts
         cfg.write(sys.stdout)
         return
 
