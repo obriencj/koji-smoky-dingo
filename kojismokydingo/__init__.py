@@ -313,6 +313,15 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
     return results
 
 
+def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, session.queryRPMSigs, rpm_ids, size):
+        results[key] = info
+
+    return results
+
+
 def read_clean_lines(filename="-"):
 
     if not filename:
