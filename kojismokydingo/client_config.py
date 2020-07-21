@@ -63,6 +63,9 @@ def cli_client_config(goptions, session,
         return
 
     if config:
+        # under python3 we'd just set defaults and the default section
+        # name, but koji still operates under python2 (see RHEL 6), so
+        # we need to be sure to work under both environments.
         cfg = ConfigParser()
         cfg._sections[profile] = opts
         cfg.write(sys.stdout)
