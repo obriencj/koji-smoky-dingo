@@ -149,7 +149,7 @@ def gather_build_archives(session, binfo, btype,
         archives = session.listArchives(buildID=bid, type=btype)
         for f in archives:
             abtype = f["btype"]
-            if abtype in known_types:
+            if abtype in known_btypes:
                 continue
 
             build_path = pathinfo.typedir(binfo, abtype)
@@ -243,7 +243,7 @@ def gather_latest_archives(session, tagname, btype,
                 found.extend(gather_latest_archives(session, tagname,
                                                     bt, rpmkeys, path))
 
-        # now only gather archives that are not in the known_types
+        # now only gather archives that are not in the known_btypes
         archives, builds = session.listTaggedArchives(tagname,
                                                       inherit=True,
                                                       latest=True,
