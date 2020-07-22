@@ -104,7 +104,7 @@ def gather_build_archives(session, binfo, btype,
     pathinfo = PathInfo(path or "")
 
     if btype == "rpm":
-        build_path = pathinfo.typedir(binfo, btype)
+        build_path = pathinfo.build(binfo)
         found = session.listRPMs(buildID=bid)
         if rpmkeys:
             found = gather_signed_rpms(session, found, rpmkeys)
@@ -198,7 +198,7 @@ def gather_latest_archives(session, tagname, btype,
 
         # decorate the build info with its path data
         for bld in builds:
-            bld["build_path"] = pathinfo.typedir(bld, btype)
+            bld["build_path"] = pathinfo.build(bld)
 
         builds = dict((bld["id"], bld) for bld in builds)
 
