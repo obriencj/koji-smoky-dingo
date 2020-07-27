@@ -31,7 +31,9 @@ from functools import partial
 from six import iteritems, itervalues
 
 from . import TagSmokyDingo, NoSuchTag, NoSuchUser, \
-    nevr_sort_builds, chunkseq, bulk_load_builds, read_clean_lines, unique
+    nevr_sort_builds, bulk_load_builds
+
+from .common import chunkseq, read_clean_lines, unique
 
 
 SORT_BY_ID = "sort-by-id"
@@ -148,14 +150,14 @@ def cli_mass_tag(session, tagname, nvrs,
     debug("All done!")
 
 
-class cli(TagSmokyDingo):
+class BulkTagBuilds(TagSmokyDingo):
 
     group = "bind"
     description = "Quickly tag a large number of builds"
 
 
     def parser(self):
-        argp = super(cli, self).parser()
+        argp = super(BulkTagBuilds, self).parser()
         addarg = argp.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",

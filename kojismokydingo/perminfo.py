@@ -25,7 +25,6 @@ Get information about a permission
 from __future__ import print_function
 
 from operator import itemgetter
-from json import dump
 from time import asctime, localtime
 
 from . import AnonSmokyDingo, NoSuchPermission
@@ -80,13 +79,13 @@ def cli_perminfo(session, permission,
             print(fmt.format(**user))
 
 
-class cli(AnonSmokyDingo):
+class PermissionInfo(AnonSmokyDingo):
 
     description = "Show information about a permission"
 
 
     def parser(self):
-        parser = super(cli, self).parser()
+        parser = super(PermissionInfo, self).parser()
         addarg = parser.add_argument
 
         addarg("permission", action="store", metavar="PERMISSION",

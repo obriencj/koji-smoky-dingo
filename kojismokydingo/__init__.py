@@ -36,9 +36,10 @@ from koji_cli.lib import activate_session
 from os.path import basename
 from six import add_metaclass
 from six.moves import \
-    range as xrange, \
     zip as izip, \
     zip_longest as izip_longest
+
+from .common import chunkseq
 
 
 class BadDingo(Exception):
@@ -74,21 +75,6 @@ class PermissionException(BadDingo):
 
 
 printerr = partial(print, file=sys.stderr)
-
-
-def unique(sequence):
-    return list(OrderedDict.fromkeys(sequence))
-
-
-def chunkseq(seq, chunksize):
-    try:
-        seqlen = len(seq)
-    except TypeError:
-        seq = list(seq)
-        seqlen = len(seq)
-
-    return (seq[offset:offset + chunksize] for
-            offset in xrange(0, seqlen, chunksize))
 
 
 def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
@@ -320,26 +306,6 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
         results[key] = info
 
     return results
-
-
-def read_clean_lines(filename="-"):
-
-    if not filename:
-        return []
-
-    elif filename == "-":
-        fin = sys.stdin
-
-    else:
-        fin = open(filename, "r")
-
-    lines = [line for line in (l.strip() for l in fin) if line]
-    # lines = list(filter(None, map(str.strip, fin)))
-
-    if filename != "-":
-        fin.close()
-
-    return lines
 
 
 @add_metaclass(ABCMeta)

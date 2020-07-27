@@ -129,7 +129,7 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
             print(results)
 
 
-class cli(TagSmokyDingo):
+class SwapTagInheritance(TagSmokyDingo):
 
     description = "Swap a tag's inheritance"
 
@@ -142,7 +142,7 @@ class cli(TagSmokyDingo):
         the two parent priorities.
         """
 
-        parser = super(cli, self).parser()
+        parser = super(SwapTagInheritance, self).parser()
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",

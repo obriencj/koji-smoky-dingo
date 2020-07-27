@@ -26,7 +26,6 @@ from __future__ import print_function
 
 import sys
 
-from koji import ParameterError
 from six import iterkeys
 from six.moves.configparser import ConfigParser
 
@@ -81,14 +80,14 @@ def cli_client_config(goptions, session,
     print()
 
 
-class cli(AnonSmokyDingo):
+class ClientConfig(AnonSmokyDingo):
 
     group = "info"
     description = "Show client profile settings"
 
 
     def parser(self):
-        parser = super(cli, self).parser()
+        parser = super(ClientConfig, self).parser()
         addarg = parser.add_argument
 
         addarg("only", nargs="*", default=(),
