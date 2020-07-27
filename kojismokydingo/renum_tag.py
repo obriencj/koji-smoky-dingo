@@ -71,14 +71,14 @@ def cli_renum_tag(session, tagname, begin=10, step=10,
             print(results)
 
 
-class cli(TagSmokyDingo):
+class RenumTagInheritance(TagSmokyDingo):
 
     description = "Renumbers inheritance priorities of a tag," \
                   " preserving order"
 
 
     def parser(self):
-        argp = super(cli, self).parser()
+        argp = super(RenumTagInheritance, self).parser()
         addarg = argp.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",

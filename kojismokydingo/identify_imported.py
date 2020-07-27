@@ -27,8 +27,8 @@ from __future__ import print_function
 
 from six import itervalues
 
-from . import AnonSmokyDingo, NoSuchTag, \
-    bulk_load_builds, read_clean_lines, unique
+from . import AnonSmokyDingo, NoSuchTag, bulk_load_builds
+from .common import read_clean_lines, unique
 
 
 def identify_imported(build_infos, negate=False, by_cg=set()):
@@ -103,13 +103,13 @@ def cli_identify_imported(session, tagname=None, nvr_list=None,
         print(build["nvr"])
 
 
-class cli(AnonSmokyDingo):
+class ListImported(AnonSmokyDingo):
 
     description = "Detect imported builds"
 
 
     def parser(self):
-        argp = super(cli, self).parser()
+        argp = super(ListImported, self).parser()
 
         group = argp.add_mutually_exclusive_group()
         addarg = group.add_argument

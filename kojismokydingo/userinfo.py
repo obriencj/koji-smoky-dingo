@@ -131,14 +131,14 @@ def cli_userinfo(session, user, json=False):
             print(" {name} [{id}]".format(**member))
 
 
-class cli(AnonSmokyDingo):
+class UserInfo(AnonSmokyDingo):
 
     group = "info"
     description = "Show information about a user"
 
 
     def parser(self):
-        parser = super(cli, self).parser()
+        parser = super(UserInfo, self).parser()
         addarg = parser.add_argument
 
         addarg("user", action="store", metavar="USER",

@@ -29,6 +29,11 @@ installed in order for the plugins to be loaded by the Koji CLI.
 from setuptools import setup
 
 
+def command(name):
+    fn_name = name.replace('-', '_')
+    return "%s = kojismokydingo.cli:%s" % (name, fn_name)
+
+
 setup(
     name = 'kojismokydingo',
     version = '0.9.0',
@@ -46,17 +51,17 @@ setup(
     # commands, one per entry_point
     entry_points = {
         'koji_smoky_dingo': [
-            'affected-targets = kojismokydingo.affected_targets:cli',
-            'check-hosts = kojismokydingo.check_hosts:cli',
-            'client-config = kojismokydingo.client_config:cli',
-            'latest-archives = kojismokydingo.list_archives:cli_tag',
-            'list-build-archives = kojismokydingo.list_archives:cli_build',
-            'list-imported = kojismokydingo.identify_imported:cli',
-            'bulk-tag-builds = kojismokydingo.mass_tag:cli',
-            'renum-tag-inheritance = kojismokydingo.renum_tag:cli',
-            'swap-tag-inheritance = kojismokydingo.swap_inheritance:cli',
-            'userinfo = kojismokydingo.userinfo:cli',
-            'perminfo = kojismokydingo.perminfo:cli',
+            command("affected-targets"),
+            command("bulk-tag-builds"),
+            command("check-hosts"),
+            command("client-config"),
+            command("latest-archives"),
+            command("list-build-archives"),
+            command("list-imported"),
+            command("perminfo"),
+            command("renum-tag-inheritance"),
+            command("swap-tag-inheritance"),
+            command("userinfo"),
         ],
     },
 

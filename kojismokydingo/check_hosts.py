@@ -127,13 +127,13 @@ def cli_check_hosts(session, timeout=60, arches=(), channel=None,
     return 1 if collected else 0
 
 
-class cli(AnonSmokyDingo):
+class CheckHosts(AnonSmokyDingo):
 
     description = "Show enabled builders which aren't checking in"
 
 
     def parser(self):
-        argp = super(cli, self).parser()
+        argp = super(CheckHosts, self).parser()
         addarg = argp.add_argument
 
         addarg("--timeout", action="store", default=60, type=int,

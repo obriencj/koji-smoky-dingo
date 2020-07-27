@@ -16,7 +16,9 @@ from __future__ import print_function
 
 import sys
 
+from collections import OrderedDict
 from json import dump
+from six.moves import range as xrange
 
 
 JSON_PRETTY_OPTIONS = {
@@ -49,6 +51,41 @@ def resplit(arglist, sep=","):
 
     work = (a.strip() for a in sep.join(arglist).split(sep))
     return [a for a in work if a]
+
+
+def read_clean_lines(filename="-"):
+
+    if not filename:
+        return []
+
+    elif filename == "-":
+        fin = sys.stdin
+
+    else:
+        fin = open(filename, "r")
+
+    lines = [line for line in (l.strip() for l in fin) if line]
+    # lines = list(filter(None, map(str.strip, fin)))
+
+    if filename != "-":
+        fin.close()
+
+    return lines
+
+
+def unique(sequence):
+    return list(OrderedDict.fromkeys(sequence))
+
+
+def chunkseq(seq, chunksize):
+    try:
+        seqlen = len(seq)
+    except TypeError:
+        seq = list(seq)
+        seqlen = len(seq)
+
+    return (seq[offset:offset + chunksize] for
+            offset in xrange(0, seqlen, chunksize))
 
 
 #

@@ -93,13 +93,13 @@ def cli_affected_targets(session, tag_list,
             print(o)
 
 
-class cli(AnonSmokyDingo):
+class AffectedTargets(AnonSmokyDingo):
 
     description = "Show targets impacted by changes to the given tag(s)"
 
 
     def parser(self):
-        argp = super(cli, self).parser()
+        argp = super(AffectedTargets, self).parser()
         addarg = argp.add_argument
 
         addarg("tags", nargs="+", metavar="TAGNAME",
