@@ -13,7 +13,7 @@
 
 
 """
-Koji Smoky Dingo - tag command mass-tag
+Koji Smoky Dingo - Bulk tagging commands
 
 Allows for large numbers of builds to be tagged rapidly, via multicall
 to tagBuildBypass
@@ -26,40 +26,26 @@ to tagBuildBypass
 from __future__ import print_function
 
 import sys
-from collections import OrderedDict
+
 from functools import partial
-from six import iteritems, itervalues
+from six import itervalues
 
-from . import TagSmokyDingo, NoSuchTag, NoSuchUser, \
-    nevr_sort_builds, bulk_load_builds
-
-from .common import chunkseq, read_clean_lines, unique
+from . import AnonSmokyDingo, TagSmokyDingo, read_clean_lines
+from .. import NoSuchTag, NoSuchUser, bulk_load_builds
+from ..builds import \
+    build_dedup, build_id_sort, build_nvr_sort, filter_imported
+from ..common import chunkseq, unique
 
 
 SORT_BY_ID = "sort-by-id"
 SORT_BY_NVR = "sort-by-nvr"
 
 
-def build_nvr_sort(builds):
-    dedup = dict((b["id"], b) for b in builds)
-    return nevr_sort_builds(itervalues(dedup))
-
-
-def build_id_sort(builds):
-    dedup = dict((b["id"], b) for b in builds)
-    return [b for _bid, b in sorted(iteritems(dedup))]
-
-
-def build_dedup(builds):
-    dedup = OrderedDict((b["id"], b) for b in builds)
-    return list(itervalues(dedup))
-
-
-def cli_mass_tag(session, tagname, nvrs,
-                 sorting=None, strict=False,
-                 owner=None, inherit=False,
-                 notify=False,
-                 verbose=False, test=False):
+def cli_bulk_tag_builds(session, tagname, nvrs,
+                        sorting=None, strict=False,
+                        owner=None, inherit=False,
+                        notify=False,
+                        verbose=False, test=False):
 
     # set up the verbose debugging output function
     if test or verbose:
@@ -208,11 +194,104 @@ class BulkTagBuilds(TagSmokyDingo):
     def handle(self, options):
         nvrs = read_clean_lines(options.nvr_file)
 
-        return cli_mass_tag(self.session, options.tag, nvrs,
-                            options.sorting, options.strict,
-                            options.owner, options.inherit,
-                            options.notify,
-                            options.verbose, options.test)
+        return cli_bulk_tag_builds(self.session, options.tag, nvrs,
+                                   options.sorting, options.strict,
+                                   options.owner, options.inherit,
+                                   options.notify,
+                                   options.verbose, options.test)
+
+
+
+def cli_list_imported(session, tagname=None, nvr_list=None,
+                      inherit=False, negate=False,
+                      cg_list=()):
+
+    if nvr_list:
+        nvr_list = unique(nvr_list)
+        builds = bulk_load_builds(session, nvr_list, err=True)
+        builds = list(itervalues(builds))
+
+    elif tagname:
+        taginfo = session.getTag(tagname)
+        if not taginfo:
+            raise NoSuchTag(tagname)
+
+        builds = session.listTagged(taginfo["id"], inherit=inherit)
+
+        if not negate:
+            # the listTagged call doesn't return the extra information
+            # we need to determine which CG something came from, so we
+            # need to gather up full buildinfo data from those results
+            # first.  However we happen to know that in negate mode
+            # we don't actually care about that, so we'll skip the
+            # loading in that case.
+            bids = [b["id"] for b in builds]
+            builds = itervalues(bulk_load_builds(session, bids))
+
+    else:
+        # from the CLI, one of these should be specified.
+        builds = ()
+
+    for build in filter_imported(builds, negate, cg_list):
+        print(build["nvr"])
+
+
+class ListImported(AnonSmokyDingo):
+
+    description = "Detect imported builds"
+
+
+    def parser(self):
+        argp = super(ListImported, self).parser()
+
+        group = argp.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("tag", nargs="?", action="store", default=None,
+               metavar="TAGNAME",
+               help="Tag containing builds to check.")
+
+        addarg("-f", "--file", action="store", default=None,
+               dest="nvr_file", metavar="NVR_FILE",
+               help="Read list of builds from file, one NVR per line."
+               " Set to - to read from stdin.")
+
+        addarg = argp.add_argument
+
+        addarg("-i", "--inherit", action="store_true", default=False,
+               help="also scan any parent tags when checking"
+               " for imported builds")
+
+        addarg("-n", "--negate", action="store_true", default=False,
+               help="inverted behavior, list non-imports instead"
+               " of imports")
+
+        addarg("-c", "--content-generator", dest="cg_list",
+               action="append", default=list(),
+               metavar="CG_NAME",
+               help="show content generator imports by build"
+               " system name. Default: display no CG builds."
+               " Specify 'all' to see CG imports from any system."
+               " May be specified more than once.")
+
+        return argp
+
+
+    def validate(self, parser, options):
+        if not (options.tag or options.nvr_file):
+            parser.error("Please specify either a tag to scan, or"
+                         " --file=NVR_FILE")
+
+
+    def handle(self, options):
+        nvr_list = read_clean_lines(options.nvr_file)
+
+        return cli_list_imported(self.session,
+                                 tagname=options.tag,
+                                 nvr_list=nvr_list,
+                                 inherit=options.inherit,
+                                 negate=options.negate,
+                                 cg_list=options.cg_list)
 
 
 #

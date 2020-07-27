@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from kojismokydingo import _rpm_str_compare
+from kojismokydingo.common import _rpm_str_compare
 
 
 try:
