@@ -29,26 +29,14 @@ import sys
 from six import iterkeys
 from six.moves.configparser import ConfigParser
 
-from . import AnonSmokyDingo
-from .common import pretty_json
+from . import AnonSmokyDingo, pretty_json
+from ..clients import rebuild_client_config
 
 
-def rebuild_client_config(goptions, session):
-    opts = {
-        "server": session.baseurl,
-        "weburl": goptions.weburl,
-        "topurl": goptions.topurl,
-        "topdir": goptions.topdir,
-    }
-    opts.update(session.opts)
-
-    return (goptions.profile, opts)
-
-
-def cli_client_config(goptions, session,
+def cli_client_config(session, goptions,
                       only=(), quiet=False, config=False, json=False):
 
-    profile, opts = rebuild_client_config(goptions, session)
+    profile, opts = rebuild_client_config(session, goptions)
 
     if only:
         # supporting RHEL 6 means supporting python 2.6, which doesn't
@@ -109,8 +97,13 @@ class ClientConfig(AnonSmokyDingo):
         return parser
 
 
+    def activate(self):
+        # entirely local, do not even attempt to connect to koji
+        pass
+
+
     def handle(self, options):
-        return cli_client_config(self.goptions, self.session,
+        return cli_client_config(self.session, self.goptions,
                                  only=options.only,
                                  quiet=options.quiet,
                                  config=options.cfg,

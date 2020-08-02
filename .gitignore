@@ -12,6 +12,7 @@
 .DS_Store
 .coverage
 .eggs
+.tox
 .venv
 MANIFEST
 __pycache__

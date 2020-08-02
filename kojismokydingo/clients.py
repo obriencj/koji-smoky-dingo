@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 # This library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -15,31 +13,29 @@
 
 
 """
-Koji Smoky Dingo - a collection of Koji command-line features for
-advanced users.
+Koji Smoky Dingo - client oriented utils
 
-Note that this package needs the kojismokydingometa plugin to be
-installed in order for the plugins to be loaded by the Koji CLI.
-
-:author: Christopher O'Brien  <obriencj@gmail.com>
+:author: cobrien@redhat.com
 :license: GPL version 3
 """
 
 
-import setuptools
+def rebuild_client_config(session, goptions):
+    """
+    Reconstructs a koji client configuration based on the fields of a
+    session and a session's goptions. Returns a tuple containing the
+    active profile's name, and the configuration as a dict.
+    """
 
+    opts = {
+        "server": session.baseurl,
+        "weburl": goptions.weburl,
+        "topurl": goptions.topurl,
+        "topdir": goptions.topdir,
+    }
+    opts.update(session.opts)
 
-def config():
-    conf_dict = setuptools.read_configuration("setup.cfg")
-    return conf_dict
-
-
-def setup():
-    return setuptools.setup()
-
-
-if __name__ == "__main__":
-    setup()
+    return (goptions.profile, opts)
 
 
 #

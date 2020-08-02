@@ -26,65 +26,10 @@ enabled but which are not checking in.
 from __future__ import print_function
 
 from datetime import datetime, timedelta
-from fnmatch import fnmatchcase
-from functools import partial
-from six import iterkeys, itervalues
-from six.moves import filterfalse as ifilterfalse, zip as izip
+from six import itervalues
 
-from . import AnonSmokyDingo, BadDingo
-
-
-class NoSuchChannel(BadDingo):
-    complaint = "No such builder channel"
-
-
-def get_channel_id(session, channel_name):
-    chan_data = session.getChannel(channel_name)
-    if chan_data is None:
-        raise NoSuchChannel(channel_name)
-
-    return chan_data["id"]
-
-
-def namematch(patterns, bldr):
-    bldr = bldr["name"]
-    for pattern in patterns:
-        if fnmatchcase(bldr, pattern):
-            return True
-    return False
-
-
-def get_hosts_checkins(session, arches=None, channel=None, skiplist=None):
-
-    arches = arches or None
-    chan_id = get_channel_id(session, channel) if channel else None
-
-    bldrs = session.listHosts(arches, chan_id, None, True, None, None)
-
-    if skiplist:
-        bldrs = ifilterfalse(partial(namematch, skiplist), bldrs)
-
-    # collect a mapping of builder ids to builder info
-    bldrs = dict((b["id"], b) for b in bldrs)
-
-    # correlate the update timestamps with the builder info
-    bldr_ids = list(iterkeys(bldrs))
-
-    session.multicall = True
-    for bid in bldr_ids:
-        session.getLastHostUpdate(bid)
-    mc = session.multiCall()
-
-    for bid, data in izip(bldr_ids, mc):
-        data = data[0] if data else None
-
-        if data:
-            data = data + " UTC"
-            data = datetime.strptime(data, "%Y-%m-%d %H:%M:%S.%f %Z")
-
-        bldrs[bid]["last_update"] = data
-
-    return bldrs
+from . import AnonSmokyDingo
+from ..hosts import get_hosts_checkins
 
 
 def cli_check_hosts(session, timeout=60, arches=(), channel=None,
