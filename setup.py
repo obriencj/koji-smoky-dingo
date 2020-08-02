@@ -26,9 +26,79 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
+def from_file(fn):
+    with open(fn, "rt") as fin:
+        return fin.read()
+
+
+def config():
+    return dict(
+        name = "kojismokydingo",
+        version = "0.9.0",
+        description = "A collection of Koji command-line plugins",
+        author = "Christopher O'Brien",
+        author_email = "obriencj@gmail.com",
+        url = "https://github.com/obriencj/koji-smoky-dingo",
+
+        license = "GNU General Public License v3 (GPLv3)",
+        license_file = "LICENSE",
+        
+        long_description = from_file("README.md"),
+        long_description_content_type = "text/markdown",
+
+        platform = "any",
+
+        project_urls = {
+            "Source": "https://github.com/obriencj/koji-smoky-dingo",
+            "Bug Reports":"https://github.com/obriencj/koji-smoky-dingo/issues",
+            },
+        
+        classifiers = [
+            "Environment :: Console",
+            "Intended Audience :: Developers",
+            "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+            "Programming Language :: Python :: 2.6",
+            "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Topic :: Software Development :: Build Tools",
+            ],
+        
+        
+        packages = [
+            "kojismokydingo",
+            "kojismokydingo.cli",
+            ],
+
+        install_requires = [
+            "koji",
+            "six",
+            ],
+
+        zip_safe = True,
+
+        entry_points = {
+            "koji_smoky_dingo": [
+                "affected-targets = kojismokydingo.cli.tags:AffectedTargets",
+                "bulk-tag-builds = kojismokydingo.cli.builds:BulkTagBuilds",
+                "check-hosts = kojismokydingo.cli.hosts:CheckHosts",
+                "client-config = kojismokydingo.cli.clients:ClientConfig",
+                "list-cgs = kojismokydingo.cli.users:ListCGs",
+                "list-imported = kojismokydingo.cli.builds:ListImported",
+                "latest-archives = kojismokydingo.cli.archives:LatestArchives",
+                "list-build-archives = kojismokydingo.cli.archives:ListBuildArchives",
+                "perminfo = kojismokydingo.cli.users:PermissionInfo",
+                "renum-tag-inheritance = kojismokydingo.cli.tags:RenumTagInheritance",
+                "swap-tag-inhertance = kojismokydingo.cli.tags:SwapTagInheritance",
+                "userinfo = kojismokydingo.cli.users:UserInfo",
+                ],
+            })
+
+
 def setup():
     import setuptools
-    return setuptools.setup()
+    return setuptools.setup(**config())
 
 
 if __name__ == "__main__":
