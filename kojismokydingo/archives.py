@@ -12,6 +12,14 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+"""
+Koji Smoky Dingo - working with archives and rpms
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
+"""
+
+
 from koji import PathInfo
 from os.path import join
 from six import iterkeys, iteritems
@@ -120,6 +128,8 @@ def gather_build_maven_archives(session, binfo, path=None):
     found = session.listArchives(buildID=bid, type="maven")
     for f in found:
         f["filepath"] = join(build_path, pathinfo.mavenfile(f))
+
+    return found
 
 
 def gather_build_win_archives(session, binfo, path=None):
