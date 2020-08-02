@@ -30,6 +30,9 @@ from six.moves import zip
 from .common import chunkseq
 
 
+VERSION = "0.9.0"
+
+
 class ManagedClientSession(ClientSession):
     """
     A koji.ClientSession that can be used as via the 'with' keyword to

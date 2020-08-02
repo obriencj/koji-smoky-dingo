@@ -26,15 +26,8 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
-import setuptools
-
-
-def config():
-    conf_dict = setuptools.read_configuration("setup.cfg")
-    return conf_dict
-
-
 def setup():
+    import setuptools
     return setuptools.setup()
 
 
