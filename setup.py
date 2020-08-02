@@ -26,11 +26,6 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
-def from_file(fn):
-    with open(fn, "rt") as fin:
-        return fin.read()
-
-
 def config():
     return dict(
         name = "kojismokydingo",
@@ -41,18 +36,7 @@ def config():
         url = "https://github.com/obriencj/koji-smoky-dingo",
 
         license = "GNU General Public License v3 (GPLv3)",
-        license_file = "LICENSE",
-        
-        long_description = from_file("README.md"),
-        long_description_content_type = "text/markdown",
 
-        platform = "any",
-
-        project_urls = {
-            "Source": "https://github.com/obriencj/koji-smoky-dingo",
-            "Bug Reports":"https://github.com/obriencj/koji-smoky-dingo/issues",
-            },
-        
         classifiers = [
             "Environment :: Console",
             "Intended Audience :: Developers",
@@ -64,8 +48,8 @@ def config():
             "Programming Language :: Python :: 3.8",
             "Topic :: Software Development :: Build Tools",
             ],
-        
-        
+
+
         packages = [
             "kojismokydingo",
             "kojismokydingo.cli",
