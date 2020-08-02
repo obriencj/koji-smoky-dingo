@@ -24,7 +24,7 @@ from koji import PathInfo
 from os.path import join
 from six import iterkeys, iteritems
 
-from . import bulk_load_rpm_sigs
+from . import NoSuchTag, bulk_load_rpm_sigs
 
 
 def filter_archives(session, archives, archive_types):
@@ -280,13 +280,25 @@ def gather_latest_win_archives(session, tagname, path=None):
 
     found = []
 
-    builds = session.getLatestBuilds(tagname, type="win")
+    archives, builds = session.listTaggedArchives(tagname,
+                                                  inherit=True,
+                                                  latest=True,
+                                                  type="win")
+
+    # decorate the build infos with the type paths for windows
     for bld in builds:
-        archives = session.listArchives(buildID=bld["id"], type="win")
-        for f in archives:
-            build_path = pathinfo.windir(bld)
-            f["filepath"] = join(build_path, pathinfo.winfile(f))
-        found.extend(archives)
+        bld["build_path"] = pathinfo.winbuild(bld)
+
+    # convert builds to an id:binfo mapping
+    builds = dict((bld["id"], bld) for bld in builds)
+
+    for archive in archives:
+        bld = builds[archive["build_id"]]
+        build_path = bld["build_path"]
+
+        # build an archive filepath from that
+        archive["filepath"] = join(build_path, pathinfo.winfile(archive))
+        found.append(archive)
 
     return found
 
@@ -297,25 +309,13 @@ def gather_latest_image_archives(session, tagname, path=None):
 
     found = []
 
-    # now only gather archives that are not in the known_btypes
-    archives, builds = session.listTaggedArchives(tagname,
-                                                  inherit=True,
-                                                  latest=True,
-                                                  type="image")
-
-    # decorate the build info with its image path data, since all the
-    # archives will be of the same btype
+    builds = session.getLatestBuilds(tagname, type="image")
     for bld in builds:
-        bld["build_path"] = pathinfo.imagebuild(bld, btype)
-
-    # convert builds to an id:binfo mapping
-    builds = dict((bld["id"], bld) for bld in builds)
-
-    for archive in archives:
-        bld = builds[archive["build_id"]]
-        build_path = bld["build_path"]
-        archive["filepath"] = join(build_path, archive["filename"])
-        found.append(archive)
+        build_path = pathinfo.imagebuild(bld)
+        archives = session.listArchives(buildID=bld["id"], type="image")
+        for archive in archives:
+            archive["filepath"] = join(build_path, archive["filename"])
+        found.extend(archives)
 
     return found
 
@@ -329,6 +329,10 @@ def gather_latest_archives(session, tagname, btype,
 
     known_types = ("rpm", "maven", "win", "image")
     found = []
+
+    # the known types have additional metadata when queried, and have
+    # pre-defined path structures. We'll be querying those directly
+    # first.
 
     if btype in (None, "rpm"):
         found.extend(gather_latest_rpms(session, tagname, rpmkeys, path))
@@ -347,28 +351,44 @@ def gather_latest_archives(session, tagname, btype,
 
     pathinfo = PathInfo(path or "")
 
-    # now only gather archives that are not in the known_btypes
-    archives, builds = session.listTaggedArchives(tagname,
-                                                  inherit=True,
-                                                  latest=True,
-                                                  type=btype)
+    if btype is None:
+        # listTaggedArchives is very convenient, but only works with
+        # win, maven, and None
+        archives, builds = session.listTaggedArchives(tagname,
+                                                      inherit=True,
+                                                      latest=True,
+                                                      type=None)
 
-    # convert builds to an id:binfo mapping
-    builds = dict((bld["id"], bld) for bld in builds)
+        # convert builds to an id:binfo mapping
+        builds = dict((bld["id"], bld) for bld in builds)
 
-    for archive in archives:
-        abtype = archive["btype"]
-        if abtype in known_btypes:
-            continue
+        for archive in archives:
+            abtype = archive["btype"]
+            if abtype in known_types:
+                # filter out any of the types we would have queried on
+                # their own earlier. Unfortunately there doesn't seem
+                # to be a way to get around throwing away this
+                # duplicate data for cases where btype is None
+                continue
 
-        # determine the path specific to this build and the discovered
-        # archive btype
-        bld = builds[archive["build_id"]]
-        build_path = pathinfo.typedir(bld, abtype)
+            # determine the path specific to this build and the
+            # discovered archive btype
+            bld = builds[archive["build_id"]]
+            build_path = pathinfo.typedir(bld, abtype)
 
-        # build an archive filepath from that
-        archive["filepath"] = join(build_path, archive["filename"])
-        found.append(archive)
+            # build an archive filepath from that
+            archive["filepath"] = join(build_path, archive["filename"])
+            found.append(archive)
+
+    else:
+        # btype is not one of the known ones, and it's also not None.
+        builds = session.getLatestBuilds(tagname, type=btype)
+        for bld in builds:
+            build_path = pathinfo.typedir(bld, btype)
+            archives = session.listArchives(buildID=bld["id"], type=btype)
+            for archive in archives:
+                archive["filepath"] = join(build_path, archive["filename"])
+            found.extend(archives)
 
     return found
 

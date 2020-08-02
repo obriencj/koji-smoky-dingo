@@ -15,7 +15,7 @@
 from __future__ import print_function
 
 from . import AnonSmokyDingo, pretty_json, resplit
-from .. import NoSuchBuild, NoSuchTag
+from .. import NoSuchBuild
 from ..archives import \
     filter_archives, gather_build_archives, gather_latest_archives
 
@@ -47,11 +47,6 @@ def cli_list_build_archives(session, nvr, btype,
 def cli_latest_tag_archives(session, tagname, btype,
                             atypes=(), rpmkeys=(),
                             path=None, json=False):
-
-    # quick sanity check
-    tinfo = session.getTag(tagname)
-    if not tinfo:
-        raise NoSuchTag(tagname)
 
     found = gather_latest_archives(session, tagname, btype,
                                    rpmkeys, path)
