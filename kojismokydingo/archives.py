@@ -234,83 +234,141 @@ def _fake_maven_build(archive, pathinfo, btype="maven", cache={}):
     return bld
 
 
-def gather_latest_archives(session, tagname, btype,
-                           rpmkeys=(), path=None):
+def gather_latest_rpms(session, tagname, rpmkeys=(), path=None):
 
     pathinfo = PathInfo(path or "")
 
-    if btype == "rpm":
-        found, builds = session.getLatestRPMS(tagname)
+    found, builds = session.getLatestRPMS(tagname)
 
-        # decorate the build info with its path data
-        for bld in builds:
-            bld["build_path"] = pathinfo.build(bld)
+    # decorate the build info with its path data
+    for bld in builds:
+        bld["build_path"] = pathinfo.build(bld)
 
-        builds = dict((bld["id"], bld) for bld in builds)
+    builds = dict((bld["id"], bld) for bld in builds)
 
-        if rpmkeys:
-            found = gather_signed_rpms(session, found, rpmkeys)
+    if rpmkeys:
+        found = gather_signed_rpms(session, found, rpmkeys)
 
-        for f in found:
-            bld = builds[f["build_id"]]
-            key = f["sigkey"] if rpmkeys else None
-            rpmpath = pathinfo.signed(f, key) if key else pathinfo.rpm(f)
-            f["filepath"] = join(bld["build_path"], rpmpath)
+    for f in found:
+        bld = builds[f["build_id"]]
+        key = f["sigkey"] if rpmkeys else None
+        rpmpath = pathinfo.signed(f, key) if key else pathinfo.rpm(f)
+        f["filepath"] = join(bld["build_path"], rpmpath)
 
-            # fake some archive members, since RPMs are missing these
-            f["type_id"] = 0
-            f["type_name"] = "rpm"
+        # fake some archive members, since RPMs are missing these
+        f["type_id"] = 0
+        f["type_name"] = "rpm"
 
-    elif btype == "maven":
-        found = session.getLatestMavenArchives(tagname)
-        for f in found:
-            bld = _fake_maven_build(f, pathinfo)
-            f["filepath"] = join(bld["build_path"], pathinfo.mavenfile(f))
+    return found
 
-    elif btype == "win":
-        builds = session.getLatestBuilds(tagname, type=btype)
-        found = []
-        for bld in builds:
-            archives = session.listArchives(buildID=bld["id"], type=btype)
-            for f in archives:
-                build_path = pathinfo.typedir(bld, btype)
-                f["filepath"] = join(build_path, pathinfo.winfile(f))
-            found.extend(archives)
 
-    else:
-        known_btypes = ("rpm", "maven", "win")
-        found = []
+def gather_latest_maven_archives(session, tagname, path=None):
 
-        if btype is None:
-            # We're searching for all btypes, but these types have
-            # special path handling, so let's get them out of the way
-            # first.
-            for bt in known_btypes:
-                found.extend(gather_latest_archives(session, tagname,
-                                                    bt, rpmkeys, path))
+    pathinfo = PathInfo(path or "")
 
-        # now only gather archives that are not in the known_btypes
-        archives, builds = session.listTaggedArchives(tagname,
-                                                      inherit=True,
-                                                      latest=True,
-                                                      type=btype)
+    found = session.getLatestMavenArchives(tagname)
+    for f in found:
+        bld = _fake_maven_build(f, pathinfo)
+        f["filepath"] = join(bld["build_path"], pathinfo.mavenfile(f))
 
-        # decorate the build info with its path data
-        for bld in builds:
-            bld["build_path"] = pathinfo.typedir(bld, btype)
+    return found
 
-        builds = dict((bld["id"], bld) for bld in builds)
 
-        for archive in archives:
-            bld = builds[archive["build_id"]]
+def gather_latest_win_archives(session, tagname, path=None):
 
-            abtype = archive["btype"]
-            if abtype in known_btypes:
-                continue
+    pathinfo = PathInfo(path or "")
 
-            build_path = pathinfo.typedir(bld, abtype)
-            archive["filepath"] = join(build_path, archive["filename"])
-            found.append(archive)
+    found = []
+
+    builds = session.getLatestBuilds(tagname, type="win")
+    for bld in builds:
+        archives = session.listArchives(buildID=bld["id"], type="win")
+        for f in archives:
+            build_path = pathinfo.windir(bld)
+            f["filepath"] = join(build_path, pathinfo.winfile(f))
+        found.extend(archives)
+
+    return found
+
+
+def gather_latest_image_archives(session, tagname, path=None):
+
+    pathinfo = PathInfo(path or "")
+
+    found = []
+
+    # now only gather archives that are not in the known_btypes
+    archives, builds = session.listTaggedArchives(tagname,
+                                                  inherit=True,
+                                                  latest=True,
+                                                  type="image")
+
+    # decorate the build info with its image path data, since all the
+    # archives will be of the same btype
+    for bld in builds:
+        bld["build_path"] = pathinfo.imagebuild(bld, btype)
+
+    # convert builds to an id:binfo mapping
+    builds = dict((bld["id"], bld) for bld in builds)
+
+    for archive in archives:
+        bld = builds[archive["build_id"]]
+        build_path = bld["build_path"]
+        archive["filepath"] = join(build_path, archive["filename"])
+        found.append(archive)
+
+    return found
+
+
+def gather_latest_archives(session, tagname, btype,
+                           rpmkeys=(), path=None):
+
+    taginfo = session.getTag(tagname)
+    if not taginfo:
+        raise NoSuchTag(tagname)
+
+    known_types = ("rpm", "maven", "win", "image")
+    found = []
+
+    if btype in (None, "rpm"):
+        found.extend(gather_latest_rpms(session, tagname, rpmkeys, path))
+
+    if btype in (None, "maven"):
+        found.extend(gather_latest_maven_archives(session, tagname, path))
+
+    if btype in (None, "win"):
+        found.extend(gather_latest_win_archives(session, tagname, path))
+
+    if btype in (None, "image"):
+        found.extend(gather_latest_image_archives(session, tagname, path))
+
+    if btype in known_types:
+        return found
+
+    pathinfo = PathInfo(path or "")
+
+    # now only gather archives that are not in the known_btypes
+    archives, builds = session.listTaggedArchives(tagname,
+                                                  inherit=True,
+                                                  latest=True,
+                                                  type=btype)
+
+    # convert builds to an id:binfo mapping
+    builds = dict((bld["id"], bld) for bld in builds)
+
+    for archive in archives:
+        abtype = archive["btype"]
+        if abtype in known_btypes:
+            continue
+
+        # determine the path specific to this build and the discovered
+        # archive btype
+        bld = builds[archive["build_id"]]
+        build_path = pathinfo.typedir(bld, abtype)
+
+        # build an archive filepath from that
+        archive["filepath"] = join(build_path, archive["filename"])
+        found.append(archive)
 
     return found
 
