@@ -28,6 +28,7 @@ collect any targets on each child.
 
 from __future__ import print_function
 
+from koji_cli.lib import arg_filter
 from six import iteritems
 from six.moves import zip
 
@@ -378,8 +379,27 @@ class ListTagRPMMacros(AnonSmokyDingo):
                                        json=options.json)
 
 
+class NoSuchMacro(BadDingo):
+    complaint = "Macro is not defined in this tag"
+
+
 def cli_remove_tag_rpm_macro(session, tagname, macro):
-    pass
+    taginfo = session.getTag(tagname)
+    if not taginfo:
+        raise NoSuchTag(tagname)
+
+    extras = taginfo["extra"]
+
+    if macro.startswith("rpm.macro."):
+        key = macro
+        macro = macro[10:]
+    else:
+        key = "rpm.macro." + macro
+
+    if key not in extras:
+        raise NoSuchMacro(macro)
+
+    session.editTag2(taginfo["id"], remove_extra=[key])
 
 
 class RemoveTagRPMMacro(TagSmokyDingo):
@@ -406,7 +426,29 @@ class RemoveTagRPMMacro(TagSmokyDingo):
 
 
 def cli_set_tag_rpm_macro(session, tagname, macro, value):
-    pass
+    taginfo = session.getTag(tagname)
+    if not taginfo:
+        raise NoSuchTag(tagname)
+
+    if macro.startswith("rpm.macro."):
+        key = macro
+        macro = macro[10:]
+    elif macro.startswith("%"):
+        macro = macro.lstrip("%")
+        key = "rpm.macro." + macro
+    else:
+        key = "rpm.macro." + macro
+
+    # converts to numbers, True, False, and None as applicable
+    value = arg_filter(value)
+
+    # an empty string breaks mock and RPM, make it %nil instead.  RPM
+    # macros are not allowed to have an empty body. None is treated as
+    # the string "None" so we leave that alone.
+    if value == '':
+        value = "%nil"
+
+    session.editTag2(taginfo["id"], extra={key: value})
 
 
 class SetTagRPMMacro(TagSmokyDingo):
@@ -424,8 +466,8 @@ class SetTagRPMMacro(TagSmokyDingo):
         addarg("macro", action="store",
                help="Name of the macro")
 
-        addarg("value", action="store",
-               help="Value of the macro")
+        addarg("value", action="store", nargs="?", default="1",
+               help="Value of the macro. Default: 1")
 
         return parser
 

@@ -26,6 +26,38 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
+CLASSIFIERS = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 2.6",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Software Development :: Build Tools",
+]
+
+
+COMMANDS = [
+    "affected-targets = kojismokydingo.cli.tags:AffectedTargets",
+    "bulk-tag-builds = kojismokydingo.cli.builds:BulkTagBuilds",
+    "check-hosts = kojismokydingo.cli.hosts:CheckHosts",
+    "client-config = kojismokydingo.cli.clients:ClientConfig",
+    "latest-archives = kojismokydingo.cli.archives:LatestArchives",
+    "list-build-archives = kojismokydingo.cli.archives:ListBuildArchives",
+    "list-cgs = kojismokydingo.cli.users:ListCGs",
+    "list-imported = kojismokydingo.cli.builds:ListImported",
+    "list-tag-rpm-macros = kojismokydingo.cli.tags:ListTagRPMMacros",
+    "perminfo = kojismokydingo.cli.users:PermissionInfo",
+    "remove-tag-rpm-macro = kojismokydingo.cli.tags:RemoveTagRPMMacro",
+    "renum-tag-inheritance = kojismokydingo.cli.tags:RenumTagInheritance",
+    "set-tag-rpm-macro = kojismokydingo.cli.tags:SetTagRPMMacro",
+    "swap-tag-inheritance = kojismokydingo.cli.tags:SwapTagInheritance",
+    "userinfo = kojismokydingo.cli.users:UserInfo",
+]
+
+
 def config():
     return dict(
         name = "kojismokydingo",
@@ -37,18 +69,7 @@ def config():
 
         license = "GNU General Public License v3 (GPLv3)",
 
-        classifiers = [
-            "Environment :: Console",
-            "Intended Audience :: Developers",
-            "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-            "Programming Language :: Python :: 2.6",
-            "Programming Language :: Python :: 2.7",
-            "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: 3.7",
-            "Programming Language :: Python :: 3.8",
-            "Topic :: Software Development :: Build Tools",
-            ],
-
+        classifiers = CLASSIFIERS,
 
         packages = [
             "kojismokydingo",
@@ -63,22 +84,8 @@ def config():
         zip_safe = True,
 
         entry_points = {
-            "koji_smoky_dingo": [
-                "affected-targets = kojismokydingo.cli.tags:AffectedTargets",
-                "bulk-tag-builds = kojismokydingo.cli.builds:BulkTagBuilds",
-                "check-hosts = kojismokydingo.cli.hosts:CheckHosts",
-                "client-config = kojismokydingo.cli.clients:ClientConfig",
-                "list-cgs = kojismokydingo.cli.users:ListCGs",
-                "list-imported = kojismokydingo.cli.builds:ListImported",
-                "list-tag-rpm-macros = kojismokydingo.cli.tags:ListTagRPMMacros",
-                "latest-archives = kojismokydingo.cli.archives:LatestArchives",
-                "list-build-archives = kojismokydingo.cli.archives:ListBuildArchives",
-                "perminfo = kojismokydingo.cli.users:PermissionInfo",
-                "renum-tag-inheritance = kojismokydingo.cli.tags:RenumTagInheritance",
-                "swap-tag-inheritance = kojismokydingo.cli.tags:SwapTagInheritance",
-                "userinfo = kojismokydingo.cli.users:UserInfo",
-                ],
-            })
+            "koji_smoky_dingo": COMMANDS,
+        })
 
 
 def setup():
