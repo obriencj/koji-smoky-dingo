@@ -30,9 +30,11 @@ from __future__ import print_function
 
 from six.moves import zip
 
-from . import AnonSmokyDingo, TagSmokyDingo, printerr
+from . import AnonSmokyDingo, TagSmokyDingo, printerr, pretty_json
 from .. import BadDingo, NoSuchTag
-from ..tags import get_affected_targets, renum_inheritance, find_inheritance
+from ..tags import (
+    collect_tag_extras, get_affected_targets,
+    renum_inheritance, find_inheritance )
 
 
 def cli_affected_targets(session, tag_list,
@@ -308,6 +310,57 @@ class SwapTagInheritance(TagSmokyDingo):
         return cli_swap_inheritance(self.session, options.tag,
                                     options.old_parent, options.new_parent,
                                     options.verbose, options.test)
+
+
+def cli_list_tag_rpm_macros(session, tagname, quiet=False, json=False):
+
+    macros = []
+
+    for e in collect_tag_extras(session, tagname):
+        if e["name"].startswith("rpm.macro."):
+            e["macro"] = "%" + e["name"][10:]
+            macros.append(e)
+
+    if json:
+        pretty_json(macros)
+        return
+
+    if quiet:
+        fmt = "{macro} {value}"
+    else:
+        fmt = "{macro:<10}  {value:<10}  {tag_name:<20}"
+        print(fmt.format(macro="Macro", value="Value", tag_name="Tag"))
+        print("-" * 10, "", "-" * 10, "", "-" * 20)
+
+    for e in macros:
+        print(fmt.format(**e))
+
+
+class ListTagRPMMacros(AnonSmokyDingo):
+
+    description = "Show RPM Macros for a tag"
+
+
+    def parser(self):
+        parser = super(ListTagRPMMacros, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("--quiet", "-q", action="store_true", default=False,
+               help="Display only the macros and their values")
+
+        addarg("--json", action="store_true", default=False,
+               help="Output as JSON")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_list_tag_rpm_macros(self.session, options.tag,
+                                       quiet=options.quiet,
+                                       json=options.json)
 
 
 #

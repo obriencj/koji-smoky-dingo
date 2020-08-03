@@ -20,7 +20,9 @@ Koji Smoky Dingo - tags and targets
 """
 
 
+from collections import OrderedDict
 from itertools import chain
+from six import iteritems, itervalues
 
 from . import NoSuchTag
 
@@ -71,6 +73,47 @@ def find_inheritance(inheritance, parent_id):
             return i
     else:
         return None
+
+
+def collect_tag_extras(session, tagname):
+    taginfo = session.getTag(tagname)
+    if not taginfo:
+        raise NoSuchTag(tagname)
+
+    # this borrows heavily from the hub implementation of
+    # getBuildConfig, but gives us a chance to record what tag the
+    # setting comes from
+
+    found = OrderedDict()
+
+    for key, val in iteritems(taginfo["extra"]):
+        found[key] = {
+            "name": key,
+            "value": val,
+            "tag_name": taginfo["name"],
+            "tag_id": taginfo["id"],
+        }
+
+    inher = session.getFullInheritance(taginfo["id"])
+
+    session.multicall = True
+    for link in inher:
+        if not link["noconfig"]:
+            session.getTag(link["parent_id"])
+    tags = (t[0] for t in session.multiCall())
+
+    for tag in tags:
+        extra = tag["extra"]
+        for key, val in iteritems(extra):
+            if key not in found:
+                found[key] = {
+                    "name": key,
+                    "value": val,
+                    "tag_name": tag["name"],
+                    "tag_id": tag["id"],
+                }
+
+    return list(itervalues(found))
 
 
 #

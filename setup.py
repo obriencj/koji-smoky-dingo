@@ -70,11 +70,12 @@ def config():
                 "client-config = kojismokydingo.cli.clients:ClientConfig",
                 "list-cgs = kojismokydingo.cli.users:ListCGs",
                 "list-imported = kojismokydingo.cli.builds:ListImported",
+                "list-tag-rpm-macros = kojismokydingo.cli.tags:ListTagRPMMacros",
                 "latest-archives = kojismokydingo.cli.archives:LatestArchives",
                 "list-build-archives = kojismokydingo.cli.archives:ListBuildArchives",
                 "perminfo = kojismokydingo.cli.users:PermissionInfo",
                 "renum-tag-inheritance = kojismokydingo.cli.tags:RenumTagInheritance",
-                "swap-tag-inhertance = kojismokydingo.cli.tags:SwapTagInheritance",
+                "swap-tag-inheritance = kojismokydingo.cli.tags:SwapTagInheritance",
                 "userinfo = kojismokydingo.cli.users:UserInfo",
                 ],
             })
