@@ -35,7 +35,7 @@ from . import AnonSmokyDingo, TagSmokyDingo, printerr, pretty_json
 from .. import BadDingo, NoSuchTag
 from ..tags import (
     collect_tag_extras, get_affected_targets,
-    renum_inheritance, find_inheritance )
+    renum_inheritance, find_inheritance)
 
 
 def cli_affected_targets(session, tag_list,
@@ -382,13 +382,13 @@ def cli_remove_tag_rpm_macro(session, tagname, macro):
     pass
 
 
-class RemoveTagRPMMacros(TagSmokyDingo):
+class RemoveTagRPMMacro(TagSmokyDingo):
 
     description = "Remove an RPM Macro from a tag"
 
 
     def parser(self):
-        parser = super(ListTagRPMMacros, self).parser()
+        parser = super(RemoveTagRPMMacro, self).parser()
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -409,13 +409,13 @@ def cli_set_tag_rpm_macro(session, tagname, macro, value):
     pass
 
 
-class RemoveTagRPMMacros(TagSmokyDingo):
+class SetTagRPMMacro(TagSmokyDingo):
 
-    description = "Remove an RPM Macro from a tag"
+    description = "Set an RPM Macro on a tag"
 
 
     def parser(self):
-        parser = super(ListTagRPMMacros, self).parser()
+        parser = super(SetTagRPMMacro, self).parser()
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
