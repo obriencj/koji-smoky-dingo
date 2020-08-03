@@ -30,10 +30,11 @@ import sys
 from functools import partial
 from six import itervalues
 
-from . import AnonSmokyDingo, TagSmokyDingo, read_clean_lines
+from . import AnonSmokyDingo, TagSmokyDingo, read_clean_lines, resplit
 from .. import NoSuchTag, NoSuchUser, bulk_load_builds
-from ..builds import \
-    build_dedup, build_id_sort, build_nvr_sort, filter_imported
+from ..builds import (
+    build_dedup, build_id_sort, build_nvr_sort,
+    decorate_build_cg_list, filter_imported)
 from ..common import chunkseq, unique
 
 
@@ -218,19 +219,18 @@ def cli_list_imported(session, tagname=None, nvr_list=None,
 
         builds = session.listTagged(taginfo["id"], inherit=inherit)
 
-        if not negate:
-            # the listTagged call doesn't return the extra information
-            # we need to determine which CG something came from, so we
-            # need to gather up full buildinfo data from those results
-            # first.  However we happen to know that in negate mode
-            # we don't actually care about that, so we'll skip the
-            # loading in that case.
-            bids = [b["id"] for b in builds]
-            builds = itervalues(bulk_load_builds(session, bids))
-
     else:
         # from the CLI, one of these should be specified.
         builds = ()
+
+    if not negate:
+        # we'll be trying to match content generators, which will
+        # require us doing some extra work to actually determine what
+        # content generators were used to produce a build. This will
+        # mean digging through every archive in every build, then
+        # finding the buildroots for each... so we only want to do
+        # this if we'll actually be using the additional info!
+        decorate_build_cg_list(session, builds)
 
     for build in filter_imported(builds, negate, cg_list):
         print(build["nvr"])
@@ -271,7 +271,7 @@ class ListImported(AnonSmokyDingo):
                metavar="CG_NAME",
                help="show content generator imports by build"
                " system name. Default: display no CG builds."
-               " Specify 'all' to see CG imports from any system."
+               " Specify 'any' to see CG imports from any system."
                " May be specified more than once.")
 
         return argp
@@ -281,6 +281,8 @@ class ListImported(AnonSmokyDingo):
         if not (options.tag or options.nvr_file):
             parser.error("Please specify either a tag to scan, or"
                          " --file=NVR_FILE")
+
+        options.cg_list = resplit(options.cg_list)
 
 
     def handle(self, options):
