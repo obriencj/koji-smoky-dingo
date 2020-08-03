@@ -313,7 +313,8 @@ class SwapTagInheritance(TagSmokyDingo):
                                     options.verbose, options.test)
 
 
-def cli_list_tag_rpm_macros(session, tagname, defn=False, json=False):
+def cli_list_tag_rpm_macros(session, tagname,
+                            quiet=False, defn=False, json=False):
 
     macros = []
     extras = collect_tag_extras(session, tagname)
@@ -327,11 +328,16 @@ def cli_list_tag_rpm_macros(session, tagname, defn=False, json=False):
         return
 
     if defn:
+        # macro definition mode
         fmt = "%{macro} {value}"
+
     else:
+        # normal mode
         fmt = "{macro:<10}  {value:<10}  {tag_name:<20}"
-        print(fmt.format(macro="Macro", value="Value", tag_name="Tag"))
-        print("-" * 10, "", "-" * 10, "", "-" * 20)
+        if not quiet:
+            # with headings if not quiet
+            print(fmt.format(macro="Macro", value="Value", tag_name="Tag"))
+            print("-" * 10, "", "-" * 10, "", "-" * 20)
 
     for extra in macros:
         print(fmt.format(**extra))
@@ -352,6 +358,9 @@ class ListTagRPMMacros(AnonSmokyDingo):
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
 
+        addarg("--quiet", "-q", action="store_true", default=False,
+               help="Omit headings")
+
         addarg("--macro-definition", "-d", action="store_true",
                dest="defn", default=False,
                help="Output as RPM macro definitions")
@@ -364,6 +373,7 @@ class ListTagRPMMacros(AnonSmokyDingo):
 
     def handle(self, options):
         return cli_list_tag_rpm_macros(self.session, options.tag,
+                                       quiet=options.quiet,
                                        defn=options.defn,
                                        json=options.json)
 
