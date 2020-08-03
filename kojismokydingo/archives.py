@@ -33,8 +33,8 @@ def filter_archives(session, archives, archive_types):
     return a new list of those archives which are of the given archive
     types.
 
-    archives - list of archive dicts
-    archive_types - list of str archive extensions
+    :param: archives - list of archive dicts
+    :param: archive_types - list of str archive extensions
     """
 
     # convert the list of string extensions from atypes into a set of
@@ -70,8 +70,9 @@ def gather_signed_rpms(session, archives, sigkeys):
     will allow an unsigned copy to be included if no signed copies
     match.
 
-    archives - list of RPM archive dicts
-    sigkeys - list of signature fingerprints, in order of precedence
+    :param: archives - list of RPM archive dicts
+    :param: sigkeys - list of signature fingerprints, in order of
+            precedence
     """
 
     if not sigkeys:
