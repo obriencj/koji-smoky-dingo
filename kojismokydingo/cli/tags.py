@@ -28,6 +28,7 @@ collect any targets on each child.
 
 from __future__ import print_function
 
+from six import iteritems
 from six.moves import zip
 
 from . import AnonSmokyDingo, TagSmokyDingo, printerr, pretty_json
@@ -312,28 +313,28 @@ class SwapTagInheritance(TagSmokyDingo):
                                     options.verbose, options.test)
 
 
-def cli_list_tag_rpm_macros(session, tagname, quiet=False, json=False):
+def cli_list_tag_rpm_macros(session, tagname, defn=False, json=False):
 
     macros = []
-
-    for e in collect_tag_extras(session, tagname):
-        if e["name"].startswith("rpm.macro."):
-            e["macro"] = "%" + e["name"][10:]
-            macros.append(e)
+    extras = collect_tag_extras(session, tagname)
+    for name, extra in iteritems(extras):
+        if name.startswith("rpm.macro."):
+            extra["macro"] = name[10:]
+            macros.append(extra)
 
     if json:
         pretty_json(macros)
         return
 
-    if quiet:
-        fmt = "{macro} {value}"
+    if defn:
+        fmt = "%{macro} {value}"
     else:
         fmt = "{macro:<10}  {value:<10}  {tag_name:<20}"
         print(fmt.format(macro="Macro", value="Value", tag_name="Tag"))
         print("-" * 10, "", "-" * 10, "", "-" * 20)
 
-    for e in macros:
-        print(fmt.format(**e))
+    for extra in macros:
+        print(fmt.format(**extra))
 
 
 class ListTagRPMMacros(AnonSmokyDingo):
@@ -348,8 +349,12 @@ class ListTagRPMMacros(AnonSmokyDingo):
         addarg("tag", action="store", metavar="TAGNAME",
                help="Name of tag")
 
-        addarg("--quiet", "-q", action="store_true", default=False,
-               help="Display only the macros and their values")
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--macro-definition", "-d", action="store_true",
+               dest="defn", default=False,
+               help="Output as RPM macro definitions")
 
         addarg("--json", action="store_true", default=False,
                help="Output as JSON")
@@ -359,8 +364,66 @@ class ListTagRPMMacros(AnonSmokyDingo):
 
     def handle(self, options):
         return cli_list_tag_rpm_macros(self.session, options.tag,
-                                       quiet=options.quiet,
+                                       defn=options.defn,
                                        json=options.json)
+
+
+def cli_remove_tag_rpm_macro(session, tagname, macro):
+    pass
+
+
+class RemoveTagRPMMacros(TagSmokyDingo):
+
+    description = "Remove an RPM Macro from a tag"
+
+
+    def parser(self):
+        parser = super(ListTagRPMMacros, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("macro", action="store",
+               help="Name of macro to remove")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_remove_tag_rpm_macro(self.session, options.tag,
+                                        options.macro)
+
+
+def cli_set_tag_rpm_macro(session, tagname, macro, value):
+    pass
+
+
+class RemoveTagRPMMacros(TagSmokyDingo):
+
+    description = "Remove an RPM Macro from a tag"
+
+
+    def parser(self):
+        parser = super(ListTagRPMMacros, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("macro", action="store",
+               help="Name of the macro")
+
+        addarg("value", action="store",
+               help="Value of the macro")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_set_tag_rpm_macro(self.session, options.tag,
+                                     options.macro, options.value)
+
 
 
 #

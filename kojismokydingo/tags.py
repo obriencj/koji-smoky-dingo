@@ -75,24 +75,45 @@ def find_inheritance(inheritance, parent_id):
         return None
 
 
+def get_tag_extras(taginfo, into=None):
+
+    found = OrderedDict() if into is None else into
+
+    for key, val in iteritems(taginfo["extra"]):
+        if key not in found:
+            found[key] = {
+                "name": key,
+                "value": val,
+                "tag_name": taginfo["name"],
+                "tag_id": taginfo["id"],
+            }
+
+    return found
+
+
 def collect_tag_extras(session, tagname):
+    """
+    Similar to session.getBuildConfig but with additional information
+    recording which tag in the inheritance supplied the setting.
+
+    Returns an OrderedDict of tag extra settings, keyed by the name of
+    the setting. Each setting is represented as its own dict composed
+    of the following keys:
+      * name - the extra setting key
+      * value - the extra setting value
+      * tag_name - the name of the tag this setting came from
+      * tag_id - the ID of the tag this setting came from
+    """
+
     taginfo = session.getTag(tagname)
     if not taginfo:
         raise NoSuchTag(tagname)
 
     # this borrows heavily from the hub implementation of
-    # getBuildConfig, but gives us a chance to record what tag the
-    # setting comes from
+    # getBuildConfig, but gives us a chance to record what tag in the
+    # inheritance that the setting is coming from
 
-    found = OrderedDict()
-
-    for key, val in iteritems(taginfo["extra"]):
-        found[key] = {
-            "name": key,
-            "value": val,
-            "tag_name": taginfo["name"],
-            "tag_id": taginfo["id"],
-        }
+    found = get_tag_extras(taginfo)
 
     inher = session.getFullInheritance(taginfo["id"])
 
@@ -103,17 +124,9 @@ def collect_tag_extras(session, tagname):
     tags = (t[0] for t in session.multiCall())
 
     for tag in tags:
-        extra = tag["extra"]
-        for key, val in iteritems(extra):
-            if key not in found:
-                found[key] = {
-                    "name": key,
-                    "value": val,
-                    "tag_name": tag["name"],
-                    "tag_id": tag["id"],
-                }
+        get_tag_extras(tag, into=found)
 
-    return list(itervalues(found))
+    return found
 
 
 #

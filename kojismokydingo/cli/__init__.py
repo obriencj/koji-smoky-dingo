@@ -28,8 +28,9 @@ from six import add_metaclass
 from kojismokydingo import BadDingo, NotPermitted
 
 
+# these mimic the default format for jq output
 JSON_PRETTY_OPTIONS = {
-    "indent": 4,
+    "indent": 2,
     "separators": (",", ": "),
     "sort_keys": True,
 }
