@@ -29,11 +29,11 @@ ENTRY_POINTS = [
     "list-imported = kojismokydingo.cli.builds:ListImported",
     "list-tag-rpm-macros = kojismokydingo.cli.tags:ListTagRPMMacros",
     "perminfo = kojismokydingo.cli.users:PermissionInfo",
-    "remove-tag-rpm-macro = kojismokydingo.cli.tags:RemoveTagRPMMacro",
     "renum-tag-inheritance = kojismokydingo.cli.tags:RenumTagInheritance",
     "set-tag-rpm-macro = kojismokydingo.cli.tags:SetTagRPMMacro",
     "swap-tag-inhertance = kojismokydingo.cli.tags:SwapTagInheritance",
     "userinfo = kojismokydingo.cli.users:UserInfo",
+    "unset-tag-rpm-macro = kojismokydingo.cli.tags:UnsetTagRPMMacro",
 ]
 
 

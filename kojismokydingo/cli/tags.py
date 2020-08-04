@@ -383,7 +383,7 @@ class NoSuchMacro(BadDingo):
     complaint = "Macro is not defined in this tag"
 
 
-def cli_remove_tag_rpm_macro(session, tagname, macro):
+def cli_unset_tag_rpm_macro(session, tagname, macro):
     taginfo = session.getTag(tagname)
     if not taginfo:
         raise NoSuchTag(tagname)
@@ -393,6 +393,9 @@ def cli_remove_tag_rpm_macro(session, tagname, macro):
     if macro.startswith("rpm.macro."):
         key = macro
         macro = macro[10:]
+    elif macro.startswith("%"):
+        macro = macro.lstrip("%")
+        key = "rpm.macro." + macro
     else:
         key = "rpm.macro." + macro
 
@@ -402,27 +405,27 @@ def cli_remove_tag_rpm_macro(session, tagname, macro):
     session.editTag2(taginfo["id"], remove_extra=[key])
 
 
-class RemoveTagRPMMacro(TagSmokyDingo):
+class UnsetTagRPMMacro(TagSmokyDingo):
 
-    description = "Remove an RPM Macro from a tag"
+    description = "Unset an RPM Macro on a tag"
 
 
     def parser(self):
-        parser = super(RemoveTagRPMMacro, self).parser()
+        parser = super(UnsetTagRPMMacro, self).parser()
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
                help="Name of tag")
 
         addarg("macro", action="store",
-               help="Name of macro to remove")
+               help="Name of the macro")
 
         return parser
 
 
     def handle(self, options):
-        return cli_remove_tag_rpm_macro(self.session, options.tag,
-                                        options.macro)
+        return cli_unset_tag_rpm_macro(self.session, options.tag,
+                                       options.macro)
 
 
 def cli_set_tag_rpm_macro(session, tagname, macro, value):
@@ -466,8 +469,8 @@ class SetTagRPMMacro(TagSmokyDingo):
         addarg("macro", action="store",
                help="Name of the macro")
 
-        addarg("value", action="store", nargs="?", default="1",
-               help="Value of the macro. Default: 1")
+        addarg("value", action="store", nargs="?", default="%nil",
+               help="Value of the macro. Default: %nil")
 
         return parser
 
