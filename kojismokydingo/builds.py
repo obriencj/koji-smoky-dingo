@@ -25,6 +25,7 @@ Functions for working with builds and build archives in Koji.
 from collections import OrderedDict
 from six import iteritems, itervalues
 
+from . import bulk_load_build_archives, bulk_load_buildroots
 from .common import NEVRCompare
 
 
@@ -52,7 +53,64 @@ def build_dedup(builds):
     return list(itervalues(dedup))
 
 
-def filter_imported(build_infos, negate=False, by_cg=set()):
+def decorate_build_cg_list(session, build_infos):
+    """
+    Augments a list of build_info dicts with two new keys:
+
+    * archive_cg_ids is a set of content generator IDs for each
+      archive of the build
+
+    * archive_cg_names is a set of content generator names for each
+      archive of the build
+    """
+
+    # convert build_infos into an id:info dict
+    builds = dict((b["id"], b) for b in build_infos)
+
+    # multicall to fetch the artifacts for all build_infos
+    archives = bulk_load_build_archives(session, list(builds))
+
+    # gather all the buildroot IDs
+    root_ids = set()
+    for archive_list in itervalues(archives):
+        for archive in archive_list:
+            broot_id = archive["buildroot_id"]
+            if broot_id:
+                # do NOT allow None or 0
+                root_ids.add(broot_id)
+
+    # multicall to fetch all the buildroots
+    buildroots = bulk_load_buildroots(session, list(root_ids))
+
+    # gather the cg_id and cg_name from each buildroot, and associate
+    # it back with the original build info
+    for build_id, archive_list in iteritems(archives):
+        cg_ids = set()
+        cg_names = set()
+
+        for archive in archive_list:
+            broot_id = archive["buildroot_id"]
+            if not broot_id:
+                continue
+
+            broot = buildroots[broot_id]
+
+            cg_id = broot.get("cg_id")
+            if cg_id:
+                cg_ids.add(cg_id)
+
+            cg_name = broot.get("cg_name")
+            if cg_name:
+                cg_names.add(cg_name)
+
+        bld = builds[build_id]
+        bld["archive_cg_ids"] = cg_ids
+        bld["archive_cg_names"] = cg_names
+
+    return build_infos
+
+
+def filter_imported(build_infos, negate=False, by_cg=()):
     """
     Given a sequence of build info dicts, yield those which are imports.
 
@@ -61,15 +119,30 @@ def filter_imported(build_infos, negate=False, by_cg=set()):
 
     If by_cg is not specified, then only non CG imports are emitted.
     If by_cg is specified, then emit only those imports which are from
-    a content generator in that set (or all content generators if
-    'all' is in the by_cg set).
+    a content generator in that set (or any content generators if
+    'any' is in the by_cg list).
+
+    build_infos may have been decorated by the decorate_build_cg_list
+    function. This provides an accurate listing of the content
+    generators which have been used to import the build (if any). In
+    the event that they have not been thus decorated, the cg filtering
+    will rely on the cg_name setting on the build itself, which will
+    only have been provided if the content generator reserved the
+    build ahead of time.
     """
 
-    all_cg = "all" in by_cg
+    by_cg = set(by_cg)
+    any_cg = "any" in by_cg
+    disjoint = by_cg.isdisjoint
 
     for build in build_infos:
-        extra = build.get("extra", None)
-        build_cg = extra.get("build_system", None) if extra else None
+
+        # either get the decorated archive cg names, or start a fresh
+        # one based on the possible cg_name associated with this build
+        build_cgs = build.get("archive_cg_names", set())
+        cg_name = build.get("cg_name")
+        if cg_name:
+            build_cgs.add(cg_name)
 
         is_import = build.get("task_id", None) is None
 
@@ -79,15 +152,17 @@ def filter_imported(build_infos, negate=False, by_cg=set()):
                 yield build
 
         elif is_import:
-            if build_cg:
-                if all_cg or build_cg in by_cg:
-                    # this is a CG import, and we wanted either this
-                    # specific one or all of them
+            if build_cgs:
+                # this is a CG import
+                if any_cg or not disjoint(build_cgs):
+                    # and we wanted either this specific one or any
                     yield build
 
-            elif not by_cg:
-                # this isn't a CG import, and we didn't want it to be
-                yield build
+            else:
+                # this is not a CG import
+                if not by_cg:
+                    # and we didn't want it to be
+                    yield build
 
 
 #

@@ -196,7 +196,28 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
 def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.queryRPMSigs, rpm_ids, size):
+    for key, info in _bulk_load(session, session.queryRPMSigs,
+                                rpm_ids, size):
+        results[key] = info
+
+    return results
+
+
+def bulk_load_build_archives(session, build_ids, size=100, results=None):
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, session.listArchives,
+                                build_ids, size):
+        results[key] = info
+
+    return results
+
+
+def bulk_load_buildroots(session, broot_ids, size=100, results=None):
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, session.getBuildroot,
+                                broot_ids, size):
         results[key] = info
 
     return results
