@@ -35,8 +35,8 @@ from six.moves import zip
 from . import AnonSmokyDingo, TagSmokyDingo, printerr, pretty_json
 from .. import BadDingo, NoSuchTag
 from ..tags import (
-    collect_tag_extras, get_affected_targets,
-    renum_inheritance, find_inheritance)
+    collect_tag_extras, find_inheritance, get_affected_targets,
+    renum_inheritance, resolve_tag)
 
 
 def cli_affected_targets(session, tag_list,
@@ -314,11 +314,13 @@ class SwapTagInheritance(TagSmokyDingo):
                                     options.verbose, options.test)
 
 
-def cli_list_tag_rpm_macros(session, tagname,
-                            quiet=False, defn=False, json=False):
+def cli_list_rpm_macros(session, tagname, target=False,
+                        quiet=False, defn=False, json=False):
+
+    taginfo = resolve_tag(session, tagname, target)
 
     macros = []
-    extras = collect_tag_extras(session, tagname)
+    extras = collect_tag_extras(session, taginfo)
     for name, extra in iteritems(extras):
         if name.startswith("rpm.macro."):
             extra["macro"] = name[10:]
@@ -344,17 +346,20 @@ def cli_list_tag_rpm_macros(session, tagname,
         print(fmt.format(**extra))
 
 
-class ListTagRPMMacros(AnonSmokyDingo):
+class ListRPMMacros(AnonSmokyDingo):
 
     description = "Show RPM Macros for a tag"
 
 
     def parser(self):
-        parser = super(ListTagRPMMacros, self).parser()
+        parser = super(ListRPMMacros, self).parser()
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
                help="Name of tag")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
 
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
@@ -373,20 +378,20 @@ class ListTagRPMMacros(AnonSmokyDingo):
 
 
     def handle(self, options):
-        return cli_list_tag_rpm_macros(self.session, options.tag,
-                                       quiet=options.quiet,
-                                       defn=options.defn,
-                                       json=options.json)
+        return cli_list_rpm_macros(self.session, options.tag,
+                                   target=options.target,
+                                   quiet=options.quiet,
+                                   defn=options.defn,
+                                   json=options.json)
 
 
 class NoSuchMacro(BadDingo):
     complaint = "Macro is not defined in this tag"
 
 
-def cli_unset_tag_rpm_macro(session, tagname, macro):
-    taginfo = session.getTag(tagname)
-    if not taginfo:
-        raise NoSuchTag(tagname)
+def cli_unset_rpm_macro(session, tagname, macro, target=False):
+
+    taginfo = resolve_tag(session, tagname, target)
 
     extras = taginfo["extra"]
 
@@ -405,13 +410,13 @@ def cli_unset_tag_rpm_macro(session, tagname, macro):
     session.editTag2(taginfo["id"], remove_extra=[key])
 
 
-class UnsetTagRPMMacro(TagSmokyDingo):
+class UnsetRPMMacro(TagSmokyDingo):
 
     description = "Unset an RPM Macro on a tag"
 
 
     def parser(self):
-        parser = super(UnsetTagRPMMacro, self).parser()
+        parser = super(UnsetRPMMacro, self).parser()
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -420,18 +425,21 @@ class UnsetTagRPMMacro(TagSmokyDingo):
         addarg("macro", action="store",
                help="Name of the macro")
 
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
         return parser
 
 
     def handle(self, options):
-        return cli_unset_tag_rpm_macro(self.session, options.tag,
-                                       options.macro)
+        return cli_unset_rpm_macro(self.session,
+                                   options.tag, options.macro,
+                                   target=options.target)
 
 
-def cli_set_tag_rpm_macro(session, tagname, macro, value):
-    taginfo = session.getTag(tagname)
-    if not taginfo:
-        raise NoSuchTag(tagname)
+def cli_set_rpm_macro(session, tagname, macro, value, target=None):
+
+    taginfo = resolve_tag(session, tagname, target)
 
     if macro.startswith("rpm.macro."):
         key = macro
@@ -454,13 +462,13 @@ def cli_set_tag_rpm_macro(session, tagname, macro, value):
     session.editTag2(taginfo["id"], extra={key: value})
 
 
-class SetTagRPMMacro(TagSmokyDingo):
+class SetRPMMacro(TagSmokyDingo):
 
     description = "Set an RPM Macro on a tag"
 
 
     def parser(self):
-        parser = super(SetTagRPMMacro, self).parser()
+        parser = super(SetRPMMacro, self).parser()
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -472,13 +480,16 @@ class SetTagRPMMacro(TagSmokyDingo):
         addarg("value", action="store", nargs="?", default="%nil",
                help="Value of the macro. Default: %nil")
 
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
         return parser
 
 
     def handle(self, options):
-        return cli_set_tag_rpm_macro(self.session, options.tag,
-                                     options.macro, options.value)
-
+        return cli_set_rpm_macro(self.session, options.tag,
+                                 options.macro, options.value,
+                                 target=options.target)
 
 
 #

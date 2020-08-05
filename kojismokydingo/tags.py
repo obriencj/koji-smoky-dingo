@@ -24,7 +24,32 @@ from collections import OrderedDict
 from itertools import chain
 from six import iteritems, itervalues
 
-from . import NoSuchTag
+from . import NoSuchTag, NoSuchTarget
+
+
+def resolve_tag(session, name, target=False):
+    """
+    Given a name, resolve it to a taginfo.
+
+    If target is False, name is treated as a tag's name.
+
+    If target is True, name is treated as a target's name, and the
+    resulting taginfo will be from that target's build tag.
+
+    Raises NoSuchTarget or NoSuchTag as appropriate
+    """
+
+    if target:
+        tinfo = session.getBuildTarget(name)
+        if not tinfo:
+            raise NoSuchTarget(name)
+        name = tinfo["build_tag_name"]
+
+    tinfo = session.getTag(name)
+    if not tinfo:
+        raise NoSuchTag(name)
+
+    return tinfo
 
 
 def get_affected_targets(session, tagname_list):
@@ -75,7 +100,7 @@ def find_inheritance(inheritance, parent_id):
         return None
 
 
-def get_tag_extras(taginfo, into=None):
+def convert_tag_extras(taginfo, into=None):
 
     found = OrderedDict() if into is None else into
 
@@ -91,7 +116,7 @@ def get_tag_extras(taginfo, into=None):
     return found
 
 
-def collect_tag_extras(session, tagname):
+def collect_tag_extras(session, taginfo):
     """
     Similar to session.getBuildConfig but with additional information
     recording which tag in the inheritance supplied the setting.
@@ -105,15 +130,11 @@ def collect_tag_extras(session, tagname):
       * tag_id - the ID of the tag this setting came from
     """
 
-    taginfo = session.getTag(tagname)
-    if not taginfo:
-        raise NoSuchTag(tagname)
-
     # this borrows heavily from the hub implementation of
     # getBuildConfig, but gives us a chance to record what tag in the
     # inheritance that the setting is coming from
 
-    found = get_tag_extras(taginfo)
+    found = convert_tag_extras(taginfo)
 
     inher = session.getFullInheritance(taginfo["id"])
 
@@ -124,7 +145,7 @@ def collect_tag_extras(session, tagname):
     tags = (t[0] for t in session.multiCall())
 
     for tag in tags:
-        get_tag_extras(tag, into=found)
+        convert_tag_extras(tag, into=found)
 
     return found
 

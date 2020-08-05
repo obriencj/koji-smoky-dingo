@@ -15,22 +15,20 @@
 """
 Koji Smoky Dingo
 
-Utility functions and command line plugins for Koji administrators.
+Utility functions and command line plugins for Koji users
 
-author: Christopher O'Brien <obriencj@gmail.com>
-license: GPL v3
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 
 from collections import OrderedDict
+from functools import partial
 from koji import convertFault, read_config, Fault, ClientSession
 from koji_cli.lib import activate_session, ensure_connection
 from six.moves import zip
 
 from .common import chunkseq
-
-
-VERSION = "0.9.0"
 
 
 class ManagedClientSession(ClientSession):
@@ -65,7 +63,11 @@ class AnonClientSession(ManagedClientSession):
     """
 
     def __enter__(self):
-        ensure_connection(self)
+        # we could always set up a connection ahead of time,
+        # but... the connection will be created when we make our first
+        # call, so let's be lazy instead.
+
+        # ensure_connection(self)
         return self
 
 
@@ -91,6 +93,10 @@ class NoSuchContentGenerator(BadDingo):
 
 class NoSuchTag(BadDingo):
     complaint = "No such tag"
+
+
+class NoSuchTarget(BadDingo):
+    complaint = "No such target"
 
 
 class NoSuchTask(BadDingo):
@@ -194,6 +200,18 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
 
 
 def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
+    """
+    Set up a chunking multicall to fetch the signatures for a list of
+    RPM via session.queryRPMSigs for each ID in rpm_ids.
+
+    Returns an OrderedDict associating the individual RPM IDs with their
+    resulting RPM signature lists.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, session.queryRPMSigs,
@@ -203,17 +221,46 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     return results
 
 
-def bulk_load_build_archives(session, build_ids, size=100, results=None):
+def bulk_load_build_archives(session, build_ids, btype=None,
+                             size=100, results=None):
+    """
+    Set up a chunking multicall to fetch the the archives of builds
+    via session.listArchives for each build ID in build_ids.
+
+    Returns an OrderedDict associating the individual build IDs with
+    their resulting archive lists.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.listArchives,
-                                build_ids, size):
+    if btype:
+        fn = partial(session.listArchives, type=btype)
+    else:
+        fn = session.listArchives
+
+    for key, info in _bulk_load(session, fn, build_ids, size):
         results[key] = info
 
     return results
 
 
 def bulk_load_buildroots(session, broot_ids, size=100, results=None):
+    """
+    Set up a chunking multicall to fetch the buildroot data via
+    session.getBuildroot for each ID in broot_ids.
+
+    Returns an OrderedDict associating the individual buildroot IDs
+    with their resulting buildroot info dicts.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, session.getBuildroot,

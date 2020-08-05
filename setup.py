@@ -48,12 +48,12 @@ COMMANDS = [
     "list-build-archives = kojismokydingo.cli.archives:ListBuildArchives",
     "list-cgs = kojismokydingo.cli.users:ListCGs",
     "list-imported = kojismokydingo.cli.builds:ListImported",
-    "list-tag-rpm-macros = kojismokydingo.cli.tags:ListTagRPMMacros",
+    "list-rpm-macros = kojismokydingo.cli.tags:ListRPMMacros",
     "perminfo = kojismokydingo.cli.users:PermissionInfo",
     "renum-tag-inheritance = kojismokydingo.cli.tags:RenumTagInheritance",
-    "set-tag-rpm-macro = kojismokydingo.cli.tags:SetTagRPMMacro",
+    "set-rpm-macro = kojismokydingo.cli.tags:SetRPMMacro",
     "swap-tag-inheritance = kojismokydingo.cli.tags:SwapTagInheritance",
-    "unset-tag-rpm-macro = kojismokydingo.cli.tags:UnsetTagRPMMacro",
+    "unset-rpm-macro = kojismokydingo.cli.tags:UnsetRPMMacro",
     "userinfo = kojismokydingo.cli.users:UserInfo",
 ]
 

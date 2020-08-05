@@ -33,9 +33,9 @@ permission (koji >= [1.18]) or the admin permission.
 |---------|-------------|
 |`bulk—tag-builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
 |`renum—tag-inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
-|`set-tag-rpm-macro` |Sets the value of a mock RPM macro on a tag. |
+|`set-rpm-macro` |Sets the value of a mock RPM macro on a tag. |
 |`swap—tag-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
-|`unset-tag-rpm-macro` |Removes a mock RPM macro from a tag. |
+|`unset-rpm-macro` |Removes a mock RPM macro from a tag. |
 
 
 ## Informational Commands
@@ -52,7 +52,7 @@ permissions in koji.
 |`list-build-archives` |Show selected archives attached to a build |
 |`list-cgs` |Show content generators and their permitted users |
 |`list—imported` |Show builds which were imported into koji |
-|`list-tag-rpm-macros` |Show all inherited mock RPM macros for a tag |
+|`list-rpm-macros` |Show all inherited mock RPM macros for a tag |
 |`perminfo` |Show information about a permission |
 |`userinfo` |Show information about a user account |
 
