@@ -13,12 +13,12 @@
 
 
 """
-Koji Smoky Dingo - Builds module
+Koji Smoky Dingo - Build Utilities
 
-Functions for working with builds and build archives in Koji.
+Functions for working with Koji builds
 
 :author: cobrien@redhat.com
-:license: GPL version 3
+:license: GPL v3
 """
 
 
@@ -29,26 +29,48 @@ from . import bulk_load_build_archives, bulk_load_buildroots
 from .common import NEVRCompare
 
 
-def nevr_sort_builds(build_infos):
-    """
-    Given a sequence of build info dictionaries, sort them by Name,
-    Epoch, Version, and Release using RPM's variation of comparison
-    """
-
-    return sorted(build_infos, key=NEVRCompare)
-
-
 def build_nvr_sort(builds):
+    """
+    Given a sequence of build info dictionaries, deduplicate and then
+    sort them by Name, Epoch, Version, and Release using RPM's
+    variation of comparison
+
+    :param builds: build infos to be sorted and de-duplicated
+    :type builds: list[dict]
+
+    :rtype: list[dict]
+    """
+
     dedup = dict((b["id"], b) for b in builds)
-    return nevr_sort_builds(itervalues(dedup))
+    return sorted(itervalues(dedup), key=NEVRCompare)
 
 
 def build_id_sort(builds):
+    """
+    Given a sequence of build info dictionaries, return a de-duplicated
+    list of same, sorted by the build ID
+
+    :param builds: build infos to be sorted and de-duplicated
+    :type builds: list[dict]
+
+    :rtype: list[dict]
+    """
+
     dedup = dict((b["id"], b) for b in builds)
     return [b for _bid, b in sorted(iteritems(dedup))]
 
 
 def build_dedup(builds):
+    """
+    Given a sequence of build info dictionaries, return a de-duplicated
+    list of same, with order preserved.
+
+    :param builds: build infos to be de-duplicated.
+    :type builds: list[dict]
+
+    :rtype: list[dict]
+    """
+
     dedup = OrderedDict((b["id"], b) for b in builds)
     return list(itervalues(dedup))
 
@@ -62,6 +84,11 @@ def decorate_build_cg_list(session, build_infos):
 
     * archive_cg_names is a set of content generator names for each
       archive of the build
+
+    :param build_infos: list of build infos to decorate and return
+    :type build_infos: list[dict]
+
+    :rtype: list[dict]
     """
 
     # convert build_infos into an id:info dict
@@ -112,7 +139,8 @@ def decorate_build_cg_list(session, build_infos):
 
 def filter_imported(build_infos, negate=False, by_cg=()):
     """
-    Given a sequence of build info dicts, yield those which are imports.
+    Given a sequence of build info dicts, return those which are
+    imports.
 
     if negate is True, then behavior is flipped and only non-imports
     are emitted (and the by_cg parameter is ignored)
@@ -129,11 +157,24 @@ def filter_imported(build_infos, negate=False, by_cg=()):
     will rely on the cg_name setting on the build itself, which will
     only have been provided if the content generator reserved the
     build ahead of time.
+
+    :param build_infos: build infos to filter through
+    :type build_infos: list[dict]
+
+    :param negate: whether to negate the imported test, Default False
+    :type negate: bool, optional
+
+    :param by_cg: Content generator names to filter for
+    :type by_cg: list[str], optional
+
+    :rtype: list[dict]
     """
 
     by_cg = set(by_cg)
     any_cg = "any" in by_cg
     disjoint = by_cg.isdisjoint
+
+    found = []
 
     for build in build_infos:
 
@@ -149,20 +190,22 @@ def filter_imported(build_infos, negate=False, by_cg=()):
         if negate:
             # looking for non-imports, regardless of CG or not
             if not is_import:
-                yield build
+                found.append(build)
 
         elif is_import:
             if build_cgs:
                 # this is a CG import
                 if any_cg or not disjoint(build_cgs):
                     # and we wanted either this specific one or any
-                    yield build
+                    found.append(build)
 
             else:
                 # this is not a CG import
                 if not by_cg:
                     # and we didn't want it to be
-                    yield build
+                    found.append(build)
+
+    return found
 
 
 #

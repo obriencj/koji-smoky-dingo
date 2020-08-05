@@ -13,9 +13,8 @@
 
 
 """
-Koji Smoky Dingo
-
-Utility functions and command line plugins for Koji users
+Koji Smoky Dingo - Utility functions and command line plugins for
+Koji users
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3

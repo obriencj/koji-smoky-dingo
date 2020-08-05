@@ -13,7 +13,10 @@
 
 
 """
-Koji Smoky Dingo - working with archives and rpms
+Koji Smoky Dingo - Archive Utilities
+
+Functions for working with gathering and transforming Koji RPMs and
+archives
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
@@ -27,14 +30,26 @@ from six import iterkeys, iteritems
 from . import NoSuchTag, bulk_load_rpm_sigs
 
 
+def _as_pathinfo(path):
+    if isinstance(path, PathInfo):
+        return path
+    else:
+        return PathInfo(path or "")
+
+
 def filter_archives(session, archives, archive_types):
     """
     Given a list of archives (or RPMs dressed up like archives),
     return a new list of those archives which are of the given archive
     types.
 
-    :param: archives - list of archive dicts
-    :param: archive_types - list of str archive extensions
+    :param archives: Archive infos to be filtered
+    :type archives: list[dict]
+
+    :param archive_types: Desired archive type extensions
+    :type archive_types: list[str]
+
+    :rtype: list[dict]
     """
 
     # convert the list of string extensions from atypes into a set of
@@ -70,9 +85,14 @@ def gather_signed_rpms(session, archives, sigkeys):
     will allow an unsigned copy to be included if no signed copies
     match.
 
-    :param: archives - list of RPM archive dicts
-    :param: sigkeys - list of signature fingerprints, in order of
-            precedence
+    :param archives: list of RPM archive dicts
+    :type archives: list[dict]
+
+    :param sigkeys: list of signature fingerprints, in order of
+    precedence
+    :type sigkeys: list[str]
+
+    :rtype: list[dict]
     """
 
     if not sigkeys:
@@ -100,9 +120,9 @@ def gather_signed_rpms(session, archives, sigkeys):
 def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
 
     bid = binfo["id"]
-    pathinfo = PathInfo(path or "")
+    path = _as_pathinfo(path)
 
-    build_path = pathinfo.build(binfo)
+    build_path = path.build(binfo)
     found = session.listRPMs(buildID=bid)
 
     if rpmkeys:
@@ -110,7 +130,7 @@ def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
 
     for f in found:
         key = f["sigkey"] if rpmkeys else None
-        rpmpath = pathinfo.signed(f, key) if key else pathinfo.rpm(f)
+        rpmpath = path.signed(f, key) if key else path.rpm(f)
         f["filepath"] = join(build_path, rpmpath)
 
         # fake some archive members, since RPMs are missing these
@@ -121,37 +141,76 @@ def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
 
 
 def gather_build_maven_archives(session, binfo, path=None):
+    """
+    Gathers a list of maven archives for a given build_info. The
+    archive records are augmented with an additional "filepath" entry,
+    the value of which is an expanded path to the file itself.
+
+    :param binfo: Build info to fetch archives for
+    :type binfo: dict
+
+    :param path: The root dir for the archive file paths, default None
+    :type path: str, optional
+
+    :rtype: list[dict]
+    """
 
     bid = binfo["id"]
-    pathinfo = PathInfo(path or "")
+    path = _as_pathinfo(path)
 
-    build_path = pathinfo.mavenbuild(binfo)
+    build_path = path.mavenbuild(binfo)
     found = session.listArchives(buildID=bid, type="maven")
     for f in found:
-        f["filepath"] = join(build_path, pathinfo.mavenfile(f))
+        f["filepath"] = join(build_path, path.mavenfile(f))
 
     return found
 
 
 def gather_build_win_archives(session, binfo, path=None):
+    """
+    Gathers a list of Windows archives for a given build_info. The
+    archive records are augmented with an additional "filepath" entry,
+    the value of which is an expanded path to the file itself.
+
+    :param binfo: Build info to fetch archives for
+    :type binfo: dict
+
+    :param path: The root dir for the archive file paths, default None
+    :type path: str, optional
+
+    :rtype: list[dict]
+    """
 
     bid = binfo["id"]
-    pathinfo = PathInfo(path or "")
+    path = _as_pathinfo(path)
 
-    build_path = pathinfo.winbuild(binfo)
+    build_path = path.winbuild(binfo)
     found = session.listArchives(buildID=bid, type="win")
     for f in found:
-        f["filepath"] = join(build_path, pathinfo.winfile(f))
+        f["filepath"] = join(build_path, path.winfile(f))
 
     return found
 
 
 def gather_build_image_archives(session, binfo, path=None):
+    """
+    Gathers a list of image archives for a given build_info. The
+    archive records are augmented with an additional "filepath" entry,
+    the value of which is an expanded path to the file itself.
+
+    :param binfo: Build info to fetch archives for
+    :type binfo: dict
+
+    :param path: The root dir for the archive file paths, default None
+    :type path: str, optional
+
+    :rtype: list[dict]
+    """
 
     bid = binfo["id"]
-    pathinfo = PathInfo(path or "")
+    path = _as_pathinfo(path)
 
-    build_path = pathinfo.imagebuild(binfo)
+    build_path = path.imagebuild(binfo)
     found = session.listArchives(buildID=bid, type="image")
     for f in found:
         f["filepath"] = join(build_path, f["filename"])
@@ -159,16 +218,42 @@ def gather_build_image_archives(session, binfo, path=None):
     return found
 
 
-def gather_build_archives(session, binfo, btype,
+def gather_build_archives(session, binfo, btype=None,
                           rpmkeys=(), path=None):
 
     """
-    Produce a list of archive dicts associated with a build, filtered by
-    build-type
+    Produce a list of archive dicts associated with a build info,
+    optionally filtered by build-type and signing keys (for RPMs). The
+    archives will be decorated with an additional "filepath" entry,
+    the value of which is an expanded path to the file itself.
+
+    This is very similar to the file listing that is baked into the
+    koji buildinfo command.
+
+    Koji does not normally consider RPMs to be archives, but we will
+    attempt to homogenize them together.
+
+    :param binfo: Build info to fetch archives for
+    :type binfo: dict
+
+    :param btype: BType to filter for. Default None for all types.
+    :type btype: str, optional
+
+    :param rpmkeys: RPM signatures to filter for, in order of
+    preference. An empty string matches the unsigned copy. Default ()
+    for no signature filtering.
+    :type rpmkeys: list[str], optional
+
+    :param path: The root dir for the archive file paths, default None
+    :type path: str, optional
+
+    :rtype: list[dict]
     """
 
     known_types = ("rpm", "maven", "win", "image", )
     found = []
+
+    path = _as_pathinfo(path)
 
     if btype in (None, "rpm"):
         found.extend(gather_build_rpms(session, binfo, rpmkeys, path))
@@ -186,7 +271,6 @@ def gather_build_archives(session, binfo, btype,
         return found
 
     bid = binfo["id"]
-    pathinfo = PathInfo(path or "")
 
     # at this point, btype is either None or not one of the known
     # types. Therefore, we'll pass that directly on to the query, and
@@ -199,7 +283,7 @@ def gather_build_archives(session, binfo, btype,
         if abtype in known_types:
             continue
 
-        build_path = pathinfo.typedir(binfo, abtype)
+        build_path = path.typedir(binfo, abtype)
         f["filepath"] = join(build_path, f["filename"])
 
         found.append(f)
@@ -207,12 +291,14 @@ def gather_build_archives(session, binfo, btype,
     return found
 
 
-def _fake_maven_build(archive, pathinfo, btype="maven", cache={}):
+def _fake_maven_build(archive, path=None, btype="maven", cache={}):
     """
     produces something that looks like a build info dict based on the
     values from within a maven archive dict. This can then be used
     with a koji.PathInfo instance to determine the path to a build
     """
+
+    path = _as_pathinfo(path)
 
     bid = archive["build_id"]
     if bid in cache:
@@ -229,21 +315,40 @@ def _fake_maven_build(archive, pathinfo, btype="maven", cache={}):
         "package_id": archive["pkg_id"],
         "package_name": archive["build_name"],
     }
-    bld["build_path"] = pathinfo.typedir(bld, btype)
+    bld["build_path"] = path.typedir(bld, btype)
     cache[bid] = bld
 
     return bld
 
 
 def gather_latest_rpms(session, tagname, rpmkeys=(), path=None):
+    """
+    Similar to session.getLatestRPMS(tagname) but will filter by
+    available signatures, and augments the results to include a new
+    "filepath" entry which will point to the matching RPM file
+    location.
 
-    pathinfo = PathInfo(path or "")
+    :param tagname: Name of the tag to search in for RPMs
+    :type tagname: str
+
+    :param rpmkeys: RPM signatures to filter for, in order of
+    preference. An empty string matches the unsigned copy. Default ()
+    for no signature filtering.
+    :type rpmkeys: list[str], optional
+
+    :param path: The root dir for the archive file paths, default None
+    :type path: str, optional
+
+    :rtype: list[dict]
+    """
+
+    path = _as_pathinfo(path)
 
     found, builds = session.getLatestRPMS(tagname)
 
     # decorate the build info with its path data
     for bld in builds:
-        bld["build_path"] = pathinfo.build(bld)
+        bld["build_path"] = path.build(bld)
 
     builds = dict((bld["id"], bld) for bld in builds)
 
@@ -253,7 +358,7 @@ def gather_latest_rpms(session, tagname, rpmkeys=(), path=None):
     for f in found:
         bld = builds[f["build_id"]]
         key = f["sigkey"] if rpmkeys else None
-        rpmpath = pathinfo.signed(f, key) if key else pathinfo.rpm(f)
+        rpmpath = path.signed(f, key) if key else path.rpm(f)
         f["filepath"] = join(bld["build_path"], rpmpath)
 
         # fake some archive members, since RPMs are missing these
@@ -264,20 +369,30 @@ def gather_latest_rpms(session, tagname, rpmkeys=(), path=None):
 
 
 def gather_latest_maven_archives(session, tagname, path=None):
+    """
+    Similar to session.getLatestMavenArchives(tagname) but augments
+    the results to include a new "filepath" entry which will point to
+    the matching maven artifact's file location.
 
-    pathinfo = PathInfo(path or "")
+    :param tagname: Name of the tag to search in for maven artifacts
+    :type tagname: str
+
+    :rtype: list[dict]
+    """
+
+    path = _as_pathinfo(path)
 
     found = session.getLatestMavenArchives(tagname)
     for f in found:
-        bld = _fake_maven_build(f, pathinfo)
-        f["filepath"] = join(bld["build_path"], pathinfo.mavenfile(f))
+        bld = _fake_maven_build(f, path)
+        f["filepath"] = join(bld["build_path"], path.mavenfile(f))
 
     return found
 
 
 def gather_latest_win_archives(session, tagname, path=None):
 
-    pathinfo = PathInfo(path or "")
+    path = _as_pathinfo(path)
 
     found = []
 
@@ -288,7 +403,7 @@ def gather_latest_win_archives(session, tagname, path=None):
 
     # decorate the build infos with the type paths for windows
     for bld in builds:
-        bld["build_path"] = pathinfo.winbuild(bld)
+        bld["build_path"] = path.winbuild(bld)
 
     # convert builds to an id:binfo mapping
     builds = dict((bld["id"], bld) for bld in builds)
@@ -298,7 +413,7 @@ def gather_latest_win_archives(session, tagname, path=None):
         build_path = bld["build_path"]
 
         # build an archive filepath from that
-        archive["filepath"] = join(build_path, pathinfo.winfile(archive))
+        archive["filepath"] = join(build_path, path.winfile(archive))
         found.append(archive)
 
     return found
@@ -306,13 +421,13 @@ def gather_latest_win_archives(session, tagname, path=None):
 
 def gather_latest_image_archives(session, tagname, path=None):
 
-    pathinfo = PathInfo(path or "")
+    path = _as_pathinfo(path)
 
     found = []
 
     builds = session.getLatestBuilds(tagname, type="image")
     for bld in builds:
-        build_path = pathinfo.imagebuild(bld)
+        build_path = path.imagebuild(bld)
         archives = session.listArchives(buildID=bld["id"], type="image")
         for archive in archives:
             archive["filepath"] = join(build_path, archive["filename"])
@@ -321,8 +436,29 @@ def gather_latest_image_archives(session, tagname, path=None):
     return found
 
 
-def gather_latest_archives(session, tagname, btype,
+def gather_latest_archives(session, tagname, btype=None,
                            rpmkeys=(), path=None):
+
+    """
+    Gather the latest archives from a tag heirarchy. Rules for what
+    constitutes "latest" may change slightly depending on the archive
+    types -- specifically maven.
+
+    :param tagname: Name of the tag to gather archives from
+    :type tagname: str
+
+    :param btype: Name of the BType to gather. Default, gather all
+    :type btype: str, optional
+
+    :param rpmkeys: List of RPM signatures to filter by. Only used when
+    fetching type of rpm or None (all).
+    :type rpmkeys: list[str]
+
+    :param path: Path prefix for archive filepaths.
+    :type path: str
+
+    :rtype: list[dict]
+    """
 
     taginfo = session.getTag(tagname)
     if not taginfo:
@@ -334,6 +470,8 @@ def gather_latest_archives(session, tagname, btype,
     # the known types have additional metadata when queried, and have
     # pre-defined path structures. We'll be querying those directly
     # first.
+
+    path = _as_pathinfo(path)
 
     if btype in (None, "rpm"):
         found.extend(gather_latest_rpms(session, tagname, rpmkeys, path))
@@ -349,8 +487,6 @@ def gather_latest_archives(session, tagname, btype,
 
     if btype in known_types:
         return found
-
-    pathinfo = PathInfo(path or "")
 
     if btype is None:
         # listTaggedArchives is very convenient, but only works with
@@ -375,7 +511,7 @@ def gather_latest_archives(session, tagname, btype,
             # determine the path specific to this build and the
             # discovered archive btype
             bld = builds[archive["build_id"]]
-            build_path = pathinfo.typedir(bld, abtype)
+            build_path = path.typedir(bld, abtype)
 
             # build an archive filepath from that
             archive["filepath"] = join(build_path, archive["filename"])
@@ -385,7 +521,7 @@ def gather_latest_archives(session, tagname, btype,
         # btype is not one of the known ones, and it's also not None.
         builds = session.getLatestBuilds(tagname, type=btype)
         for bld in builds:
-            build_path = pathinfo.typedir(bld, btype)
+            build_path = path.typedir(bld, btype)
             archives = session.listArchives(buildID=bld["id"], type=btype)
             for archive in archives:
                 archive["filepath"] = join(build_path, archive["filename"])
