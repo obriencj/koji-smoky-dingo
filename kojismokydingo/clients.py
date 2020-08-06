@@ -13,10 +13,12 @@
 
 
 """
-Koji Smoky Dingo - client oriented utils
+Koji Smoky Dingo - Client Utils
 
-:author: cobrien@redhat.com
-:license: GPL version 3
+Some simple functions for working with the local client configuration
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 
@@ -25,6 +27,8 @@ def rebuild_client_config(session, goptions):
     Reconstructs a koji client configuration based on the fields of a
     session and a session's goptions. Returns a tuple containing the
     active profile's name, and the configuration as a dict.
+
+    :rtype: tuple
     """
 
     opts = {

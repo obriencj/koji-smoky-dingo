@@ -17,7 +17,7 @@ Koji Smoky Dingo - Build Utilities
 
 Functions for working with Koji builds
 
-:author: cobrien@redhat.com
+:author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
 """
 

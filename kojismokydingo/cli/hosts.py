@@ -29,7 +29,7 @@ from datetime import datetime, timedelta
 from six import itervalues
 
 from . import AnonSmokyDingo
-from ..hosts import get_hosts_checkins
+from ..hosts import gather_hosts_checkins
 
 
 def cli_check_hosts(session, timeout=60, arches=(), channel=None,
@@ -37,10 +37,10 @@ def cli_check_hosts(session, timeout=60, arches=(), channel=None,
 
     timeout = datetime.utcnow() - timedelta(seconds=(timeout * 60))
 
-    bldr_data = get_hosts_checkins(session,
-                                   arches=arches,
-                                   channel=channel,
-                                   skiplist=ignore)
+    bldr_data = gather_hosts_checkins(session,
+                                      arches=arches,
+                                      channel=channel,
+                                      skiplist=ignore)
 
     collected = []
 

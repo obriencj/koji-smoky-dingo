@@ -12,6 +12,16 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+"""
+Koji Smoky Dingo - Common Utils
+
+Some simple functions used by the other modules.
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
+"""
+
+
 import re
 
 from collections import OrderedDict
@@ -20,10 +30,31 @@ from six.moves import filter, filterfalse, range, zip_longest
 
 
 def unique(sequence):
+    """
+    Given a sequence, de-duplicate it into a new list, preserving order.
+
+    :param sequence: series of hashable objects
+    :type sequence: list
+
+    :rtype: list
+    """
+
     return list(OrderedDict.fromkeys(sequence))
 
 
 def chunkseq(seq, chunksize):
+    """
+    Chop up a sequence into sub-sequences of up-to chunksize in length.
+
+    :param seq: a sequence to chunk up
+    :type seq: list
+
+    :param chunksize: max length for chunks
+    :type chunksize: int
+
+    :rtype: iterator[list]
+    """
+
     try:
         seqlen = len(seq)
     except TypeError:
@@ -35,6 +66,20 @@ def chunkseq(seq, chunksize):
 
 
 def fnmatches(s, patterns, ignore_case=False):
+    """
+    Checks s against multiple glob patterns. Returns True if any match.
+
+    :param s: string to be matched
+    :type s: str
+
+    :param patterns: list of patterns
+    :type patterns: list[str]
+
+    :param ignore_case: if True case is normalized, Default False
+    :type ignore_case: bool, optional
+
+    :rtype: bool
+    """
 
     match = fnmatch if ignore_case else fnmatchcase
 
@@ -59,16 +104,36 @@ def globfilter(seq, patterns,
     If invert is True, yields the non-matches rather than the matches.
 
     If ignore_case is True, the pattern comparison is case normalized.
+
+    :param seq: series of objects to be filtered. Normally strings, but
+    may be any type provided the key parameter is specified to provide
+    a string for matching based on the given object.
+    :type seq: list
+
+    :param patterns: list of glob-style pattern strings. Members of
+    seq which match any of these patterns are yielded.
+    :type patterns: list[str]
+
+    :param key: A unary callable which translates individual items on
+    seq into the value to be matched against the patterns. Default, None
+    :type key: Callable[[obj], str], optional
+
+    :param invert: Invert the logic, yield the non-matches rather than
+    the matches. Default, False
+    :type invert: bool, optional
+
+    :param ignore_case: pattern comparison is case normalized if
+    True. Default, False
+    :type ignore_case: bool, optional
+
+    :rtype: Iterable[obj]
     """
 
     def test(s):
         return fnmatches(key(s) if key else s,
                          patterns, ignore_case=ignore_case)
 
-    if invert:
-        return filterfalse(seq, test)
-    else:
-        return filter(seq, test)
+    return filterfalse(seq, test) if invert else filter(seq, test)
 
 
 def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
@@ -142,6 +207,8 @@ def rpm_evr_compare(left_evr, right_evr):
     Returns  1 if left_evr is greater-than right_evr
              0 if left_evr is equal-to right_evr
             -1 if left_evr is less-than right_evr
+
+    :rtype: int
     """
 
     for lp, rp in zip_longest(left_evr, right_evr, fillvalue="0"):

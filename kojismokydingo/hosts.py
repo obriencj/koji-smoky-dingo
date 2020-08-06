@@ -13,10 +13,12 @@
 
 
 """
-Koji Smoky Dingo - hosts utilities
+Koji Smoky Dingo - Host Utilities
 
-:author: cobrien@redhat.com
-:license: GPL version 3
+Functions for working with Koji hosts
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 from datetime import datetime
@@ -28,7 +30,27 @@ from . import NoSuchChannel
 from .common import globfilter
 
 
-def get_hosts_checkins(session, arches=None, channel=None, skiplist=None):
+def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
+    """
+    Similar to session.listHosts, but results are decorated with a new
+    "last_update" entry, which is the timestamp for the host's most
+    recent check-in with the hub. This can be used to identify
+    builders which are enabled, but no longer responding.
+
+    :param arches: List of architecture names to filter builders by.
+    Default, all arches
+    :type arches: list[str], optional
+
+    :param channel: Channel name to filter builders by. Default,
+    builders in any channel.
+    :type channel: str, optional
+
+    :param skiplist: List of glob-style patterns of builders to
+    omit. Default, all builders included
+    :type skiplist: list[str], optional
+
+    :rtype: list[dict]
+    """
 
     arches = arches or None
 
