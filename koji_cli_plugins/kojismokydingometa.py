@@ -67,7 +67,14 @@ def __plugin__(glbls):
             # the entry point. The return value should be either None
             # or a callable appropriate for use as a koji command
             # handler.
-            entry_fn = entry_point.load()
+
+            # Note we do not enforce the requirements for the entry
+            # point packages -- those NEED to have been installed
+            # ahead of time. We do this because we have a requirement
+            # on koji, and in some cases koji is installed in a way
+            # that the environment can find it, but pkg_resources is
+            # oblivious to it.
+            entry_fn = entry_point.load(require=False)
             handler = entry_fn(entry_point.name) if entry_fn else None
 
         except Exception as ex:
@@ -76,8 +83,8 @@ def __plugin__(glbls):
             # function that the entry point provided. We just announce
             # than an error happened and continue with the next
             # plugin.
-            message = "Error loading plugin %r" % entry_point
-            print(message, ex, file=sys.stderr)
+            message = "Error loading plugin %r: %r" % (entry_point, ex)
+            print(message, file=sys.stderr)
 
         else:
             # the handler, if available, is then combined into the
