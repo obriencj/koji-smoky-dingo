@@ -13,7 +13,7 @@
 
 
 """
-Koji Smoky Dingo - entry_points cli meta plugin
+Koji Smoky Dingo Meta Plugin
 
 Uses python entry_points to load the actual koji command-line plugins
 handler functions.
@@ -27,8 +27,8 @@ koji_smoky_dingo group, using the name of the plugin. The entry point
 should be a unary function which takes the name and returns a callable
 object with the attributes that koji expects in a CLI plugin handler.
 
-:author: cobrien@redhat.com
-:license: GPL version 3
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 

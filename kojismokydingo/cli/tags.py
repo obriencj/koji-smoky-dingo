@@ -13,16 +13,10 @@
 
 
 """
-Koji Smoky Dingo - info command affected-targets
+Koji Smoky Dingo - CLI Tag and Target Commands
 
-Given a tag (or tags) display all of the targets that will be affected
-if the tag changes.
-
-In other words, look through the reversed inheritance of the tag, and
-collect any targets on each child.
-
-:author: cobrien@redhat.com
-:license: GPL version 3
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 

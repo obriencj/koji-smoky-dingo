@@ -12,16 +12,23 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+"""
+Koji Smoky Dingo - CLI User Commands
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
+"""
+
+
 from __future__ import print_function
 
 from operator import itemgetter
 
 from . import AnonSmokyDingo, pretty_json
-
-from ..users import \
-    USER_NORMAL, USER_HOST, USER_GROUP, \
-    STATUS_NORMAL, STATUS_BLOCKED, \
-    collect_cgs, collect_perminfo, collect_userinfo
+from ..users import (
+    USER_NORMAL, USER_HOST, USER_GROUP,
+    STATUS_NORMAL, STATUS_BLOCKED,
+    collect_cgs, collect_perminfo, collect_userinfo)
 
 
 def get_usertype_str(userinfo):
