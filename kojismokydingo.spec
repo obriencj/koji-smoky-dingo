@@ -3,10 +3,12 @@
 %global srcver 0.9.0
 
 
-%if 0%{?rhel} < 7 || 0%{?fedora} < 19
+%if ( 0%{?rhel} && 0%{?rhel} < 8 ) || ( 0%{?fedora} && 0%{?fedora} < 22 )
 %define old_python 1
 %else
 %define old_python 0
+%bcond_with python2
+%bcond_without python3
 %endif
 
 
@@ -36,14 +38,23 @@ Koji Smoky Dingo
 %build
 
 %if %{old_python}
+# old python 2.6 support
 %{__python} setup.py build
 %{__python} setup-meta.py build
 
 %else
+# newer python support, with optional settings for python2 and python3
+
+%if %{with python2}
 %py2_build_wheel
+%{__python2} setup-meta.py bdist_wheel %{?py_setup_args}
+%endif
+
+%if %{with python3}
 %py3_build_wheel
-%{python2} setup-meta.py build %{?py_setup_args}
-%{python3} setup-meta.py build %{?py_setup_args}
+%{__python3} setup-meta.py bdist_wheel %{?py_setup_args}
+%endif
+
 %endif
 
 
@@ -55,10 +66,19 @@ rm -rf $RPM_BUILD_ROOT
 %{__python} setup-meta.py install --skip-build --root %{buildroot}
 
 %else
+
+%if %{with python2}
 %py2_install_wheel %{srcname}-%{version}-py2-none-any.whl
+%py2_install_wheel %{srcname}_meta-%{version}-py2-none-any.whl
+# %{__python2} setup-meta.py install --skip-build --root %{buildroot}
+%endif
+
+%if %{with python3}
 %py3_install_wheel %{srcname}-%{version}-py3-none-any.whl
-%{python2} setup-meta.py install --skip-build --root %{buildroot}
-%{python3} setup-meta.py install --skip-build --root %{buildroot}
+%py3_install_wheel %{srcname}_meta-%{version}-py3-none-any.whl
+# %{__python3} setup-meta.py install --skip-build --root %{buildroot}
+%endif
+
 %endif
 
 
@@ -103,9 +123,11 @@ Koji Smoky Dingo Meta Plugin
 %else
 # package support for more modern python2 & python3 environments
 
+%if %{with python2}
+
 %package -n python2-%{srcname}
 Summary:        %{summary}
-BuildRequires:  python2-setuptools python2-wheel python2-pip
+BuildRequires:  python2-devel python2-setuptools python2-wheel python2-pip
 Requires:	python2 python2-koji python2-six
 Requires:	python2-%{srcname}-meta
 %{?python_provide:%python_provide python2-%{srcname}}
@@ -121,7 +143,7 @@ Koji Smoky Dingo
 
 %package -n python2-%{srcname}-meta
 Summary:        Koji Smoky Dingo Meta Plugin
-BuildRequires:  python2-setuptools
+BuildRequires:  python2-devel python2-setuptools
 Requires:	python2 python2-setuptools python2-koji
 %{?python_provide:%python_provide python2-%{srcname}-meta}
 
@@ -130,13 +152,16 @@ Koji Smoky Dingo Meta Plugin
 
 %files -n python2-%{srcname}-meta
 %defattr(-,root,root,-)
-%{python2_sitelib}/koji_cli_plugins/kojismokydingometa.*
+%{python2_sitelib}/koji_cli_plugins/
 %{python2_sitelib}/kojismokydingo_meta-*.dist-info/
 
+%endif
+
+%if %{with python3}
 
 %package -n python3-%{srcname}
 Summary:        %{summary}
-BuildRequires:  python3-setuptools python3-wheel python3-pip
+BuildRequires:  python3-devel python3-setuptools python3-wheel python3-pip
 Requires:	python3 python3-koji python3-six
 Requires:	python3-%{srcname}-meta
 %{?python_provide:%python_provide python3-%{srcname}}
@@ -152,7 +177,7 @@ Koji Smoky Dingo
 
 %package -n python3-%{srcname}-meta
 Summary:        Koji Smoky Dingo Meta Plugin
-BuildRequires:  python3-setuptools
+BuildRequires:  python3-devel python3-setuptools
 Requires:	python3 python3-setuptools python3-koji
 %{?python_provide:%python_provide python3-%{srcname}-meta}
 
@@ -161,9 +186,10 @@ Koji Smoky Dingo Meta Plugin
 
 %files -n python3-%{srcname}-meta
 %defattr(-,root,root,-)
-%{python3_sitelib}/koji_cli_plugins/kojismokydingometa.*
+%{python3_sitelib}/koji_cli_plugins/
 %{python3_sitelib}/kojismokydingo_meta-*.dist-info/
 
+%endif
 
 %endif
 
