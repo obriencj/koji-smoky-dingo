@@ -12,6 +12,14 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+"""
+Koji Smoky Dingo - CLI Archive and RPM Commands
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
+"""
+
+
 from __future__ import print_function
 
 from . import AnonSmokyDingo, pretty_json, resplit

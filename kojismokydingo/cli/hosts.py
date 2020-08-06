@@ -13,13 +13,13 @@
 
 
 """
-Koji Smoky Dingo - info command check-hosts
+Koji Smoky Dingo - CLI Host Commands
 
 Simple utility for querying brew to check for builders which are
 enabled but which are not checking in.
 
-:author: cobrien@redhat.com
-:license: GPL version 3
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 

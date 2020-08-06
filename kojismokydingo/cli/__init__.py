@@ -12,6 +12,18 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+"""
+Koji Smoky Dingo - CLI
+
+This package contains mechanisms for more easily adding new
+command-line features to the Koji client, in coordination with the
+kojismokydingometa plugin.
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
+"""
+
+
 from __future__ import print_function
 
 import sys
@@ -86,6 +98,29 @@ printerr = partial(print, file=sys.stderr)
 
 @add_metaclass(ABCMeta)
 class SmokyDingo(object):
+    """
+    Base class for new sub-commands in Koji. Subclasses may be
+    referenced via an entry point under the koji_smoky_dingo group to
+    be loaded at runtime by the kojismokydingometa Koji client plugin.
+
+    Summary:
+    * kojismokydingometa installed in koji_cli_plugins loads when koji
+      client launches
+    * the meta plugin loads all koji_smoky_dingo entry points
+    * each entry point name is a command name, and the reference should
+      resolve to a subclass of SmokyDingo
+    * each entry point is instantiated, and provided to the koji cli as
+      a new sub-command
+    * if the sub-command is invoked, then the SmokyDingo instance is
+      called, this triggers the following:
+    ** the SmokyDingo.parser method provides additional argument
+       parsing
+    ** the SmokyDingo.validate method provides a chance to validate
+       and/or manipulate the parsed arguments
+    ** the SmokyDingo.activate method authenticates with the hub
+    ** the SmokyDingo.handle method invokes the actual work of the
+       sub-command
+    """
 
     group = "misc"
     description = "A CLI Plugin"
@@ -161,6 +196,10 @@ class SmokyDingo(object):
 
 
     def activate(self):
+        """
+        Activate the session
+        """
+
         return activate_session(self.session, self.goptions)
 
 
@@ -184,7 +223,7 @@ class SmokyDingo(object):
             return self.handle(options) or 0
 
         except KeyboardInterrupt:
-            print(file=sys.stderr)
+            printerr()
             return 130
 
         except GenericError as kge:
@@ -204,6 +243,12 @@ class SmokyDingo(object):
 
 
 class AnonSmokyDingo(SmokyDingo):
+    """
+    A SmokyDingo which upon activation will connect to koji hub, but
+    will not authenticate. This means only hub RPC endpoints which do
+    not enforce require some permission will work. This is normal for
+    many information-only endpoints.
+    """
 
     group = "info"
     permission = None
@@ -230,24 +275,40 @@ class AnonSmokyDingo(SmokyDingo):
 
 
 class AdminSmokyDingo(SmokyDingo):
+    """
+    A SmokyDingo which checks for the 'admin' permission after
+    activation.
+    """
 
     group = "admin"
     permission = "admin"
 
 
 class TagSmokyDingo(SmokyDingo):
+    """
+    A SmokyDingo which checks for the 'tag' or 'admin' permission after
+    activation.
+    """
 
     group = "admin"
     permission = "tag"
 
 
 class TargetSmokyDingo(SmokyDingo):
+    """
+    A SmokyDingo which checks for the 'target' or 'admin' permission
+    after activation.
+    """
 
     group = "admin"
     permission = "target"
 
 
 class HostSmokyDingo(SmokyDingo):
+    """
+    A SmokyDingo which checks for the 'host' or 'admin' permisson
+    after activation.
+    """
 
     group = "admin"
     permission = "host"

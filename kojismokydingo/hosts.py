@@ -21,6 +21,7 @@ Functions for working with Koji hosts
 :license: GPL v3
 """
 
+
 from datetime import datetime
 from operator import itemgetter
 from six import iterkeys
