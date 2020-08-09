@@ -144,7 +144,7 @@ Koji Smoky Dingo
 %package -n python2-%{srcname}-meta
 Summary:        Koji Smoky Dingo Meta Plugin
 BuildRequires:  python2-devel python2-setuptools
-Requires:	python2 python2-setuptools python2-koji
+Requires:	python2 python2-setuptools python2-koji koji
 %{?python_provide:%python_provide python2-%{srcname}-meta}
 
 %description -n python2-%{srcname}-meta
@@ -178,7 +178,7 @@ Koji Smoky Dingo
 %package -n python3-%{srcname}-meta
 Summary:        Koji Smoky Dingo Meta Plugin
 BuildRequires:  python3-devel python3-setuptools
-Requires:	python3 python3-setuptools python3-koji
+Requires:	python3 python3-setuptools python3-koji koji
 %{?python_provide:%python_provide python3-%{srcname}-meta}
 
 %description -n python3-%{srcname}-meta
