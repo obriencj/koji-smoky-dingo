@@ -45,7 +45,7 @@ class TestCommands(TestCase):
         for cmd in ENTRY_POINTS:
             ep = EntryPoint.parse(cmd)
 
-            cmd_cls = ep.resolve()
+            cmd_cls = ep.load(require=False)
             self.assertTrue(issubclass(cmd_cls, SmokyDingo))
 
             cmd_inst = cmd_cls(ep.name)
