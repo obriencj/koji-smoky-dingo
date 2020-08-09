@@ -24,7 +24,14 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildArch: noarch
 
+# Some older koji fedora packages don't declare their python_provide
+# even though the feature was available in the packaging macros. This
+# means if we trying to rely on it, we'll produce a requires for a
+# python3.6dist(koji) and no package will ever provide it. Seems to be
+# good from fedora 28 onwards.
+%if ( 0%{?fedora} && 0%{?fedora} > 28 )
 %{?python_enable_dependency_generator}
+%endif
 
 
 %description
@@ -70,13 +77,11 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with python2}
 %py2_install_wheel %{srcname}-%{version}-py2-none-any.whl
 %py2_install_wheel %{srcname}_meta-%{version}-py2-none-any.whl
-# %{__python2} setup-meta.py install --skip-build --root %{buildroot}
 %endif
 
 %if %{with python3}
 %py3_install_wheel %{srcname}-%{version}-py3-none-any.whl
 %py3_install_wheel %{srcname}_meta-%{version}-py3-none-any.whl
-# %{__python3} setup-meta.py install --skip-build --root %{buildroot}
 %endif
 
 %endif
