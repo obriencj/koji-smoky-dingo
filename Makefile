@@ -11,7 +11,12 @@ clean:
 	rm -f $(ARCHIVE)
 	find -H . \
 		\( -iname .tox -prune \) -o \
-		\( -type d -iname __pycache__ -exec rm -rf {} \; \)
+		\( -type d -iname __pycache__ -exec rm -rf {} + \)
+
+
+container-test: clean archive
+	rm -rf logs/*.log
+	./tests/container/launch.sh
 
 
 test: clean
@@ -36,7 +41,7 @@ $(ARCHIVE):
 		-o $(ARCHIVE)
 
 
-.PHONY: all archive clean default rpm srpm test
+.PHONY: all archive clean container-test default rpm srpm test
 
 
 # The end.
