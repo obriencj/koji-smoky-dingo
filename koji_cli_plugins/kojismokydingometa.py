@@ -73,8 +73,18 @@ def __plugin__(glbls):
             # ahead of time. We do this because we have a requirement
             # on koji, and in some cases koji is installed in a way
             # that the environment can find it, but pkg_resources is
-            # oblivious to it.
-            entry_fn = entry_point.load(require=False)
+            # oblivious to it. Also, since we support back to RHEL6,
+            # we may or may not have a resolve method, and might have
+            # to fall back on the now-deprecated load(require=False)
+            # invocation instead. Python packaging kinda sucks, eh?
+            if hasattr(entry_point, "resolve"):
+                entry_fn = entry_point.resolve()
+            else:
+                # we'd happily just call this in all situations, if it
+                # didn't start spitting out DeprecationWarning
+                # messages.
+                entry_fn = entry_point.load(require=False)
+
             handler = entry_fn(entry_point.name) if entry_fn else None
 
         except Exception as ex:

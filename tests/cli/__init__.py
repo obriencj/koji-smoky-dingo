@@ -45,7 +45,13 @@ class TestCommands(TestCase):
         for cmd in ENTRY_POINTS:
             ep = EntryPoint.parse(cmd)
 
-            cmd_cls = ep.load(require=False)
+            if hasattr(ep, "resolve"):
+                #new environments
+                cmd_cls = ep.resolve()
+            else:
+                # old environments
+                cmd_cls = ep.load(require=False)
+
             self.assertTrue(issubclass(cmd_cls, SmokyDingo))
 
             cmd_inst = cmd_cls(ep.name)
