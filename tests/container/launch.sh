@@ -7,14 +7,26 @@ function launch-test() {
 
     local NAME=ksd-test:"$PLATFORM"
 
+    local PODMAN=$(which podman || which docker)
+    if [ $? != 0 ] ; then
+       echo "Neither podman not docker available, exiting"
+       return 1
+    else
+	echo "Using $PODMAN"
+    fi
+
     echo "Building $NAME from $CFILE"
-    podman build -t "$NAME" -f "$CFILE" . || return 1
+    $PODMAN build -t "$NAME" -f "$CFILE" "$PWD" || return 1
 
     echo "Running tests for $NAME"
-    podman run --volume .:/ksd --rm "$NAME" \
+    $PODMAN run --volume "$PWD":/ksd --rm "$NAME" \
            "/ksd/tests/container/tests.sh" "$PLATFORM"
 
-    podman image rm -f "$NAME"
+    local RESULT=$?
+
+    $PODMAN image rm -f "$NAME"
+
+    return "$RESULT"
 }
 
 

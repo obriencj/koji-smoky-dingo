@@ -7,7 +7,7 @@ RUN \
     pip install -q nose
 
 RUN mkdir -p /src
-COPY Makefile setup.py kojismokydingo-*.tar.gz /src
+COPY Makefile setup.py kojismokydingo-*.tar.gz /src/
 
 RUN \
     cd /src && make srpm && \
