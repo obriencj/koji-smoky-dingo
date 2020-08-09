@@ -1,0 +1,22 @@
+
+FROM fedora:28
+
+RUN \
+    dnf install -y \
+        findutils git make rpm-build \
+        dnf-plugins-core python3-pip && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    pip3 install -q nose
+
+RUN mkdir -p /src
+COPY Makefile setup.py kojismokydingo-*.tar.gz /src
+
+RUN \
+    cd /src && make srpm && \
+    dnf builddep -y /root/rpmbuild/SRPMS/kojismokydingo-*.src.rpm && \
+    rpmbuild --rebuild /root/rpmbuild/SRPMS/kojismokydingo-*.src.rpm && \
+    dnf install -y /root/rpmbuild/RPMS/noarch/*kojismokydingo*.rpm && \
+    cd / && rm -rf /src
+
+
+# The end.
