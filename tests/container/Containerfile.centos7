@@ -1,9 +1,9 @@
 
-FROM centos:6
+FROM centos:7
 
 RUN \
     yum install -ty findutils git make rpm-build yum-utils epel-release && \
-    yum install -ty python-pip  && \
+    yum install -ty python-pip && \
     pip install -q nose
 
 RUN mkdir -p /src

@@ -2,7 +2,7 @@
 
 
 function run_nose() {
-    nosetests -v -w tests --all-modules
+    nosetests -v --all-modules
 }
 
 
@@ -32,22 +32,31 @@ function verify_koji_cli() {
 
 
 function test() {
+    local PLATFORM="$1"
+
     local BASEDIR=/ksd
     local LOGDIR="$BASEDIR"/logs
 
-    local TESTNAME=$(rpm --eval '%{dist}')
-    local LOGFILE="$LOGDIR"/test"$TESTNAME".log
+    local LOGFILE="$LOGDIR"/test-"$PLATFORM".log
 
     mkdir -p "$LOGDIR"
     cd "$BASEDIR"
 
-    echo "Results for $TESTNAME" > "$LOGFILE"
+    echo "==== BEGIN RESULTS FOR $PLATFORM ====" > "$LOGFILE"
     run_nose >> "$LOGFILE" 2>&1
     verify_koji_cli >> "$LOGFILE" 2>&1
+    echo "==== END RESULTS FOR $PLATFORM ====" >> "$LOGFILE"
+
+    # grab a copy of the built SRPM and RPMs as well
+    local RPMOUT="dist/$PLATFORM"
+    mkdir -p "$RPMOUT"
+    cp /root/rpmbuild/SRPMS/*.src.rpm \
+       /root/rpmbuild/RPMS/noarch/*.rpm \
+       "$RPMOUT"
 }
 
 
-test
+test "$@"
 
 
 #
