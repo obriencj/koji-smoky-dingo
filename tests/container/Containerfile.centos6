@@ -1,0 +1,18 @@
+
+FROM centos:6
+
+RUN mkdir -p /src
+COPY Makefile setup.py kojismokydingo-*.tar.gz /src
+
+RUN \
+    yum install -ty findutils git rpm-build yum-utils epel-release && \
+    cd /src && make srpm && \
+    yum-builddep -ty /root/rpmbuild/SRPMS/kojismokydingo-*.src.rpm && \
+    rpmbuild --rebuild /root/rpmbuild/SRPMS/kojismokydingo-*.src.rpm && \
+    yum install -ty /root/rpmbuild/RPMS/noarch/*kojismokydingo*.rpm && \
+    yum install -ty python-pip  && \
+    pip install -q nose && \
+    cd / && rm -rf /src
+
+
+# The end.
