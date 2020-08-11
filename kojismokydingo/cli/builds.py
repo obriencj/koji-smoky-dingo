@@ -30,7 +30,9 @@ import sys
 from functools import partial
 from six import itervalues
 
-from . import AnonSmokyDingo, TagSmokyDingo, read_clean_lines, resplit
+from . import (
+    AnonSmokyDingo, TagSmokyDingo,
+    read_clean_lines, printerr, resplit)
 from .. import NoSuchTag, NoSuchUser, bulk_load_builds
 from ..builds import (
     build_dedup, build_id_sort, build_nvr_sort,
@@ -43,15 +45,15 @@ SORT_BY_NVR = "sort-by-nvr"
 
 
 def cli_bulk_tag_builds(session, tagname, nvrs,
-                        sorting=None, strict=False,
+                        sorting=None,
                         owner=None, inherit=False,
-                        notify=False,
+                        force=False, notify=False,
                         verbose=False, test=False):
 
     # set up the verbose debugging output function
     if test or verbose:
         def debug(message, *args):
-            print(message % args, file=sys.stderr)
+            printerr(message % args)
     else:
         def debug(message, *args):
             pass
@@ -129,8 +131,14 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
                 packageListAdd(tagid, pkg,
                                ownerid or build["owner_id"],
                                None, None, True)
-            tagBuildBypass(tagid, build["id"], True, notify)
-        multiCall()
+            tagBuildBypass(tagid, build["id"], force, notify)
+        res = multiCall()
+        if res:
+            for build, r in zip(build_chunk, res):
+                if "faultCode" in r:
+                    printerr("Error tagging", build["nvr"], ":",
+                             r["faultString"])
+
         counter += len(build_chunk)
         debug(" tagged %i/%i", counter, len(builds))
 
@@ -170,8 +178,8 @@ class BulkTagBuilds(TagSmokyDingo):
                help="Read list of builds from file, one NVR per line."
                " Omit for default behavior: read build NVRs from stdin")
 
-        addarg("--strict", action="store_true", default=False,
-               help="Ensure all NVRs are valid before tagging any.")
+        addarg("--force", action="store_true", default=False,
+               help="Force tagging.")
 
         addarg("--notify", action="store_true", default=False,
                help="Send tagging notifications.")
@@ -196,11 +204,13 @@ class BulkTagBuilds(TagSmokyDingo):
         nvrs = read_clean_lines(options.nvr_file)
 
         return cli_bulk_tag_builds(self.session, options.tag, nvrs,
-                                   options.sorting, options.strict,
-                                   options.owner, options.inherit,
-                                   options.notify,
-                                   options.verbose, options.test)
-
+                                   sorting=options.sorting,
+                                   owner=options.owner,
+                                   inherit=options.inherit,
+                                   force=options.force,
+                                   notify=options.notify,
+                                   verbose=options.verbose,
+                                   test=options.test)
 
 
 def cli_list_imported(session, tagname=None, nvr_list=None,
