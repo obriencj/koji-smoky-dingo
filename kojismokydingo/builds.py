@@ -26,53 +26,114 @@ from collections import OrderedDict
 from six import iteritems, itervalues
 
 from . import bulk_load_build_archives, bulk_load_buildroots
-from .common import NEVRCompare
+from .common import NEVRCompare, chunkseq
 
 
-def build_nvr_sort(builds):
+def build_nvr_sort(build_infos):
     """
     Given a sequence of build info dictionaries, deduplicate and then
     sort them by Name, Epoch, Version, and Release using RPM's
     variation of comparison
 
-    :param builds: build infos to be sorted and de-duplicated
-    :type builds: list[dict]
+    :param build_infos: build infos to be sorted and de-duplicated
+    :type build_infos: list[dict]
 
     :rtype: list[dict]
     """
 
-    dedup = dict((b["id"], b) for b in builds)
+    dedup = dict((b["id"], b) for b in build_infos if b)
     return sorted(itervalues(dedup), key=NEVRCompare)
 
 
-def build_id_sort(builds):
+def build_id_sort(build_infos):
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, sorted by the build ID
 
-    :param builds: build infos to be sorted and de-duplicated
-    :type builds: list[dict]
+    :param build_infos: build infos to be sorted and de-duplicated
+    :type build_infos: list[dict]
 
     :rtype: list[dict]
     """
 
-    dedup = dict((b["id"], b) for b in builds)
+    dedup = dict((b["id"], b) for b in build_infos if b)
     return [b for _bid, b in sorted(iteritems(dedup))]
 
 
-def build_dedup(builds):
+def build_dedup(build_infos):
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, with order preserved.
 
-    :param builds: build infos to be de-duplicated.
-    :type builds: list[dict]
+    :param build_infos: build infos to be de-duplicated.
+    :type build_infos: list[dict]
 
     :rtype: list[dict]
     """
 
-    dedup = OrderedDict((b["id"], b) for b in builds)
+    dedup = OrderedDict((b["id"], b) for b in build_infos if b)
     return list(itervalues(dedup))
+
+
+def iter_bulk_tag_builds(session, tagid, build_infos,
+                         force=False, notify=False,
+                         size=100, strict=False):
+
+    """
+    Tags a large number of builds using multicall invocations of
+    tagBuildBypass. Builds are specified by build info dicts.
+
+    yields lists of tuples containing a build info dict and the result
+    of the tagBuildBypass call for that build. This gives the caller a
+    chance to record the results of each multicall, and to present
+    feedback to a user to indicate that the operations are continuing.
+    """
+
+    for build_chunk in chunkseq(build_infos, size):
+        session.multicall = True
+        for build in build_chunk:
+                session.tagBuildBypass(tagid, build["id"], force, notify)
+        results = session.multiCall(strict=strict)
+        yield list(zip(build_chunk, results))
+
+
+def bulk_tag_builds(session, tagname, build_infos,
+                    force=False, notify=False,
+                    size=100, strict=False):
+
+    results = []
+    for done in iter_bulk_tag_builds(session, tagname, build_infos,
+                                     force=force, notify=notify,
+                                     size=size, strict=strict):
+        results.extend(done)
+    return results
+
+
+def bulk_tag_nvrs(session, tagname, nvrs,
+                  force=False, notify=False,
+                  size=100, strict=False):
+
+    """
+    Tags a large number of builds using multicall invocations of
+    tagBuildBypass.
+
+    The entire list of NVRs is validated first, checking that such
+    a build exists. If strict is True then a missing build will cause a
+    NoSuchBuild exception to be raised. If strict is False, then missing
+    builds will be omitted from the tagging operation.
+
+    The list of builds is de-duplicated, preserving order of the first
+    instance found in the list of NVRs.
+
+    Returns a list of build info dicts
+    """
+
+    builds = bulk_load_builds(session, unique(nvrs), err=strict)
+    builds = build_dedup(itervalues(builds))
+
+    return bulk_tag_builds(session, tagname, builds,
+                           force=force, notify=notify,
+                           size=size, strict=strict)
 
 
 def decorate_build_cg_list(session, build_infos):

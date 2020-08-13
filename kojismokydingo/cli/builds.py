@@ -36,7 +36,7 @@ from . import (
 from .. import NoSuchTag, NoSuchUser, bulk_load_builds
 from ..builds import (
     build_dedup, build_id_sort, build_nvr_sort,
-    decorate_build_cg_list, filter_imported)
+    decorate_build_cg_list, iter_bulk_tag_builds, filter_imported)
 from ..common import chunkseq, unique
 
 
@@ -48,10 +48,10 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
                         sorting=None,
                         owner=None, inherit=False,
                         force=False, notify=False,
-                        verbose=False, test=False):
+                        verbose=False, strict=False):
 
     # set up the verbose debugging output function
-    if test or verbose:
+    if verbose:
         def debug(message, *args):
             printerr(message % args)
     else:
@@ -74,17 +74,14 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
             raise NoSuchUser(owner)
         ownerid = ownerinfo["id"]
 
-    packages = session.listPackages(tagID=tagid,
-                                    inherited=inherit)
-    packages = set(pkg["package_id"] for pkg in packages)
-
     # load the buildinfo for all of the NVRs
-    debug("fed with %i builds", len(nvrs))
+    debug("Fed with %i builds", len(nvrs))
 
-    builds = bulk_load_builds(session, unique(nvrs), err=True)
+    # validate our list of NVRs first by attempting to load them
+    builds = bulk_load_builds(session, unique(nvrs), err=strict)
     builds = itervalues(builds)
 
-    # sort as requested
+    # sort/dedup as requested
     if sorting == SORT_BY_NVR:
         debug("NVR sorting specified")
         builds = build_nvr_sort(builds)
@@ -92,11 +89,12 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
         debug("ID sorting specified")
         builds = build_id_sort(builds)
     else:
-        debug("no sorting specified, preserving feed order")
+        debug("No sorting specified, preserving feed order")
         builds = build_dedup(builds)
 
+    # at this point builds is a list of build info dicts
     if verbose:
-        debug("sorted and trimmed duplicates to %i builds", len(builds))
+        debug("Sorted and trimmed duplicates to %i builds", len(builds))
         for build in builds:
             debug(" %s %i", build["nvr"], build["id"])
 
@@ -104,42 +102,56 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
         debug("Nothing to do!")
         return
 
-    # set up the four actions we'll take on the session client. If
-    # this is test mode, we don't want to actually call anything, just
-    # print some debugging info.
-    if test:
-        multiCallEnable = partial(debug, "multicall = True")
-        packageListAdd = partial(debug, "packageListAdd %r %r %r %r %r %r")
-        tagBuildBypass = partial(debug, "tagBuildBypass %r %r %r %r")
-        multiCall = partial(debug, "multiCall()")
-    else:
-        def multiCallEnable():
-            session.multicall = True
-        packageListAdd = session.packageListAdd
-        tagBuildBypass = session.tagBuildBypass
-        multiCall = session.multiCall
+    # check for missing package listings, and add as necessary
+    packages = session.listPackages(tagID=tagid,
+                                    inherited=inherit)
+    packages = set(pkg["package_id"] for pkg in packages)
 
-    # and finally, tag them all in chunks of 100
-    debug("begining mass tagging")
+    package_todo = []
+
+    for build in builds:
+        pkgid = build["package_id"]
+        if pkgid not in packages:
+            packages.add(pkgid)
+            package_todo.append((pkgid, ownerid or build["owner_id"]))
+
+    if package_todo:
+        # we've got some package listings that need adding
+
+        debug("Beginning package additions")
+        session.multicall = True
+        for pkgid, oid in package_todo:
+            session.packageListAdd(tagid, pkgid, owner=oid,
+                                   force=force, update=True)
+        done = session.multiCall(strict=strict)
+
+        # verify the results of our add-pkg calls. If strict was set
+        # then the multicall would have raised an exception, but we
+        # need to present any issues for the non-strict cases as well
+        for res, pad in zip(done, package_todo):
+            if "faultCode" in res:
+                printerr("Error adding package", pad[0],
+                         ":", res["faultString"])
+        debug("Package additions completed")
+
+    # and finally, tag the builds themselves in chunks of 100
+    debug("Begining build tagging")
     counter = 0
-    for build_chunk in chunkseq(builds, 100):
-        multiCallEnable()
-        for build in build_chunk:
-            pkg = build["package_id"]
-            if pkg not in packages:
-                packages.add(pkg)
-                packageListAdd(tagid, pkg,
-                               ownerid or build["owner_id"],
-                               None, None, True)
-            tagBuildBypass(tagid, build["id"], force, notify)
-        res = multiCall()
-        if res:
-            for build, r in zip(build_chunk, res):
-                if "faultCode" in r:
-                    printerr("Error tagging", build["nvr"], ":",
-                             r["faultString"])
+    for done in iter_bulk_tag_builds(session, tagid, builds,
+                                     force=force, notify=notify,
+                                     size=100, strict=strict):
 
-        counter += len(build_chunk)
+        for build, res in done:
+            # same as with the add-pkg -- if strict was True then any
+            # issues would raise an exception, but for non-strict
+            # invocations we need to present the error messages
+            if "faultCode" in res:
+                printerr("Error tagging build", build["nvr"],
+                         ":", res["faultString"])
+
+        # and of course display the courtesy counter so the user
+        # knows we're actually doing something
+        counter += len(done)
         debug(" tagged %i/%i", counter, len(builds))
 
     debug("All done!")
@@ -161,10 +173,6 @@ class BulkTagBuilds(TagSmokyDingo):
         addarg("-v", "--verbose", action="store_true", default=False,
                help="Print debugging information")
 
-        addarg("--test", action="store_true", default=False,
-               help="Print write operatons to stderr without actually"
-               " calling the RPC function")
-
         addarg("--owner", action="store", default=None,
                help="Force missing package listings to be created"
                " with the specified owner")
@@ -177,6 +185,9 @@ class BulkTagBuilds(TagSmokyDingo):
                dest="nvr_file", metavar="NVR_FILE",
                help="Read list of builds from file, one NVR per line."
                " Omit for default behavior: read build NVRs from stdin")
+
+        addarg("--strict", action="store_true", default=False,
+               help="Stop processing at the first failure")
 
         addarg("--force", action="store_true", default=False,
                help="Force tagging.")
@@ -210,7 +221,7 @@ class BulkTagBuilds(TagSmokyDingo):
                                    force=options.force,
                                    notify=options.notify,
                                    verbose=options.verbose,
-                                   test=options.test)
+                                   strict=options.strict)
 
 
 def cli_list_imported(session, tagname=None, nvr_list=None,
