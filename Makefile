@@ -14,7 +14,7 @@ clean:
 		\( -type d -iname __pycache__ -exec rm -rf {} + \)
 
 
-container-test: clean archive
+packaging-test: clean archive
 	rm -rf logs/*.log
 	./tests/container/launch.sh
 
@@ -41,7 +41,7 @@ $(ARCHIVE):
 		-o $(ARCHIVE)
 
 
-.PHONY: all archive clean container-test default rpm srpm test
+.PHONY: all archive clean default packaging-test rpm srpm test
 
 
 # The end.
