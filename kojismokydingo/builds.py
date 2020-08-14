@@ -25,8 +25,10 @@ Functions for working with Koji builds
 from collections import OrderedDict
 from six import iteritems, itervalues
 
-from . import bulk_load_build_archives, bulk_load_buildroots
-from .common import NEVRCompare, chunkseq
+from . import (
+    bulk_load_build_archives, bulk_load_builds,
+    bulk_load_buildroots)
+from .common import NEVRCompare, chunkseq, unique
 
 
 def build_nvr_sort(build_infos):
@@ -92,7 +94,7 @@ def iter_bulk_tag_builds(session, tagid, build_infos,
     for build_chunk in chunkseq(build_infos, size):
         session.multicall = True
         for build in build_chunk:
-                session.tagBuildBypass(tagid, build["id"], force, notify)
+            session.tagBuildBypass(tagid, build["id"], force, notify)
         results = session.multiCall(strict=strict)
         yield list(zip(build_chunk, results))
 
