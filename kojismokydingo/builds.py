@@ -89,6 +89,29 @@ def iter_bulk_tag_builds(session, tagid, build_infos,
     of the tagBuildBypass call for that build. This gives the caller a
     chance to record the results of each multicall, and to present
     feedback to a user to indicate that the operations are continuing.
+
+    :param tagid: Destination tag's ID
+    :type tagid: int
+
+    :param build_infos: Build infos to be tagged
+    :type build_infos: list[dict]
+
+    :param force: Force tagging. Re-tags if necessary, bypasses
+    policy. Default, False
+    :type force: bool, optional
+
+    :param notify: Send tagging notifications. Default, False
+    :type notify: bool, optional
+
+    :param size: Count of tagging operations to perform in a single
+    multicall. Default, 100
+    :type size: int, optional
+
+    :param strict: Raise an exception and discontinue execution at the
+    first error. Default, False
+    :type strict: bool, optional
+
+    :rtype: Generator[list[tuple]]
     """
 
     for build_chunk in chunkseq(build_infos, size):
@@ -102,6 +125,31 @@ def iter_bulk_tag_builds(session, tagid, build_infos,
 def bulk_tag_builds(session, tagname, build_infos,
                     force=False, notify=False,
                     size=100, strict=False):
+
+    """
+    :param tagid: Destination tag's ID
+    :type tagid: int
+
+    :param build_infos: Build infos to be tagged
+    :type build_infos: list[dict]
+
+    :param force: Force tagging. Re-tags if necessary, bypasses
+    policy. Default, False
+    :type force: bool, optional
+
+    :param notify: Send tagging notifications. Default, False
+    :type notify: bool, optional
+
+    :param size: Count of tagging operations to perform in a single
+    multicall. Default, 100
+    :type size: int, optional
+
+    :param strict: Raise an exception and discontinue execution at the
+    first error. Default, False
+    :type strict: bool, optional
+
+    :rtype: list[tuple]
+    """
 
     results = []
     for done in iter_bulk_tag_builds(session, tagname, build_infos,
@@ -127,7 +175,8 @@ def bulk_tag_nvrs(session, tagname, nvrs,
     The list of builds is de-duplicated, preserving order of the first
     instance found in the list of NVRs.
 
-    Returns a list of build info dicts
+    Returns a list of tuples, pairing build info dicts with the result of
+    a tagBuildBypass call for that build.
     """
 
     builds = bulk_load_builds(session, unique(nvrs), err=strict)
