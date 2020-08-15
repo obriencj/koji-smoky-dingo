@@ -75,7 +75,7 @@ RPM_STR_CMP_1 = [
 ]
 
 
-class TestNEVRSort(TestCase):
+class TestEVRSort(TestCase):
 
     if compareVer:
         # these tests just validate that we're behaving the same as
