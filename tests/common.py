@@ -22,13 +22,12 @@ from kojismokydingo.common import (
 try:
     from rpm import labelCompare
 
+    def compareVer(v1, v2):
+        return labelCompare(('', v1, ''), ('', v2, ''))
+
 except ImportError:
     labelCompare = None
     compareVer = None
-
-else:
-    def compareVer(v1, v2):
-        return labelCompare(('', v1, ''), ('', v2, ''))
 
 
 # these all cmp to 0

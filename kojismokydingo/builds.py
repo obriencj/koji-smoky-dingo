@@ -28,7 +28,48 @@ from six import iteritems, itervalues
 from . import (
     bulk_load_build_archives, bulk_load_builds,
     bulk_load_buildroots)
-from .common import NEVRCompare, chunkseq, unique
+from .common import chunkseq, rpm_evr_compare, unique
+
+
+class BuildNEVRCompare(object):
+    """
+    An adapter for Name, Epoch, Version, Release comparisons of a
+    build info dictionary. Used by the nevr_sort_builds function.
+    """
+
+    def __init__(self, binfo):
+        self.build = binfo
+        self.n = binfo["name"]
+
+        evr = (binfo["epoch"], binfo["version"], binfo["release"])
+        self.evr = tuple(("0" if x is None else str(x)) for x in evr)
+
+
+    def __cmp__(self, other):
+        # cmp is a python2-ism, and has no replacement in python3 via
+        # six, so we'll have to create our own simplistic behavior
+        # similarly
+
+        if self.n == other.n:
+            return rpm_evr_compare(self.evr, other.evr)
+
+        elif self.n < other.n:
+            return -1
+
+        else:
+            return 1
+
+
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+
+
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
 
 
 def build_nvr_sort(build_infos):
@@ -44,7 +85,7 @@ def build_nvr_sort(build_infos):
     """
 
     dedup = dict((b["id"], b) for b in build_infos if b)
-    return sorted(itervalues(dedup), key=NEVRCompare)
+    return sorted(itervalues(dedup), key=BuildNEVRCompare)
 
 
 def build_id_sort(build_infos):

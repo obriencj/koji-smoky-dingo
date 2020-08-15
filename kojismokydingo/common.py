@@ -29,17 +29,10 @@ from fnmatch import fnmatchcase
 from six.moves import filter, filterfalse, range, zip_longest
 
 
-def unique(sequence):
-    """
-    Given a sequence, de-duplicate it into a new list, preserving order.
-
-    :param sequence: series of hashable objects
-    :type sequence: list
-
-    :rtype: list
-    """
-
-    return list(OrderedDict.fromkeys(sequence))
+__all__ = (
+    "chunkseq", "fnmatches", "globfilter",
+    "rpm_evr_compare", "unique",
+)
 
 
 def chunkseq(seq, chunksize):
@@ -228,45 +221,21 @@ def rpm_evr_compare(left_evr, right_evr):
         return 0
 
 
-class NEVRCompare(object):
+def unique(sequence):
     """
-    An adapter for Name, Epoch, Version, Release comparisons of a
-    build info dictionary. Used by the nevr_sort_builds function.
+    Given a sequence, de-duplicate it into a new list, preserving order.
+
+    :param sequence: series of hashable objects
+    :type sequence: list
+
+    :rtype: list
     """
 
-    def __init__(self, binfo):
-        self.build = binfo
-        self.n = binfo["name"]
-
-        evr = (binfo["epoch"], binfo["version"], binfo["release"])
-        self.evr = tuple(("0" if x is None else str(x)) for x in evr)
-
-
-    def __cmp__(self, other):
-        # cmp is a python2-ism, and has no replacement in python3 via
-        # six, so we'll have to create our own simplistic behavior
-        # similarly
-
-        if self.n == other.n:
-            return rpm_evr_compare(self.evr, other.evr)
-
-        elif self.n < other.n:
-            return -1
-
-        else:
-            return 1
-
-
-    def __eq__(self, other):
-        return self.__cmp__(other) == 0
-
-
-    def __lt__(self, other):
-        return self.__cmp__(other) < 0
-
-
-    def __gt__(self, other):
-        return self.__cmp__(other) > 0
+    # in python 3.6+ OrderedDict is not necessary here, but we're
+    # supporting 2.6, 2.7 as well. At some point Python will likely do
+    # something bad and deprecate OrderedDict, at that point we'll
+    # have to begin detecting the version and using just plain dict
+    return list(OrderedDict.fromkeys(sequence))
 
 
 #
