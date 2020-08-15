@@ -1,0 +1,190 @@
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
+
+
+from unittest import TestCase
+
+from kojismokydingo.common import (
+    unique, chunkseq, fnmatches, globfilter,
+    _rpm_str_compare)
+
+
+try:
+    from rpm import labelCompare
+
+except ImportError:
+    labelCompare = None
+    compareVer = None
+
+else:
+    def compareVer(v1, v2):
+        return labelCompare(('', v1, ''), ('', v2, ''))
+
+
+# these all cmp to 0
+RPM_STR_CMP_0 = [
+    ("", ""),
+    ("1", "1"),
+    ("1.0", "1.0"),
+    ("1.1", "1..1"),
+    ("1.1", "1._._._.!!!.1"),
+    ("1.1", "1_1"),
+    ("1.", "1"),
+    ("001", "1"),
+    ("010", "10"),
+    ("1.Z.0", "1Z0"),
+    ("1.0Z", "1_0_Z"),
+    ("2~beta", "2..~beta"),
+    ("2~beta", "2_~beta!"),
+    ("2~beta2", "2~beta02"),
+    ("2~beta2", "2~beta.02"),
+]
+
+# these all cmp to 1
+RPM_STR_CMP_1 = [
+    ("0", ""),
+    ("A", ""),
+    ("1", "0"),
+    ("2", "1"),
+    ("0", "A"),
+    ("0", "Z"),
+    ("B", "A"),
+    ("1.1", "1.0"),
+    ("1.1", "1.A"),
+    ("1.B", "1.A"),
+    ("1.1", "1.0~beta"),
+    ("1.1", "1.1~beta"),
+    ("1.2~beta", "1.1"),
+    ("1.2~beta0", "1.2~beta"),
+    ("1.2~beta.2", "1.2~beta.1"),
+    ("1.2~beta02", "1.2~beta01"),
+    ("1.1", "1"),
+    ("2", "1.1"),
+    ("2.0", "2"),
+    ("2.0", "2~beta"),
+    ("2beta", "2~beta"),
+]
+
+
+class TestNEVRSort(TestCase):
+
+    if compareVer:
+        # these tests just validate that we're behaving the same as
+        # rpm lib. However, not all systems have rpmlib available, so
+        # we omit these tests in those environments.
+
+        def test_rpm_compare_ver_0(self):
+            for vl, vr in RPM_STR_CMP_0:
+                self.assertEqual(compareVer(vl, vr), 0)
+                self.assertEqual(compareVer(vr, vl), 0)
+
+
+        def test_rpm_compare_ver_1(self):
+            for vl, vr in RPM_STR_CMP_1:
+                self.assertEqual(compareVer(vl, vr), 1)
+                self.assertEqual(compareVer(vr, vl), -1)
+
+
+    def test_rpm_str_cmp_0(self):
+        for vl, vr in RPM_STR_CMP_0:
+            self.assertEqual(_rpm_str_compare(vl, vr), 0)
+            self.assertEqual(_rpm_str_compare(vr, vl), 0)
+
+
+    def test_rpm_str_cmp_1(self):
+        for vl, vr in RPM_STR_CMP_1:
+            self.assertEqual(_rpm_str_compare(vl, vr), 1)
+            self.assertEqual(_rpm_str_compare(vr, vl), -1)
+
+
+class TestCommon(TestCase):
+
+
+    def test_unique(self):
+        data = ["one", "two", "one", "two", "three",
+                "three", "three", "one", "two", "three", "four",
+                "four", "three", "two", "one"]
+
+        expect = ["one", "two", "three", "four"]
+
+        self.assertEqual(unique(data), expect)
+
+
+    def test_chunkseq(self):
+        data = list(range(0, 25))
+        expect = [list(range(0, 5)),
+                  list(range(5, 10)),
+                  list(range(10, 15)),
+                  list(range(15, 20)),
+                  list(range(20, 25))]
+
+        result = list(chunkseq(data, 5))
+        self.assertEqual(result, expect)
+
+        data = list(range(0, 27))
+        expect = [list(range(0, 5)),
+                  list(range(5, 10)),
+                  list(range(10, 15)),
+                  list(range(15, 20)),
+                  list(range(20, 25)),
+                  list(range(25, 27))]
+
+        result = list(chunkseq(data, 5))
+        self.assertEqual(result, expect)
+
+
+    def test_fnmatches(self):
+        data_matches = [
+            ("hello", ["hello"], True),
+            ("hello", ["hello"], False),
+            ("hello", ["HELLO"], True),
+            ("hello", ["h*"], True),
+            ("hello", ["h*"], False),
+            ("hello", ["H*"], True),
+            ("hello", ["world", "h*"], True),
+            ("hello", ["world", "h*"], False),
+            ("hello", ["WORLD", "H*"], True),
+            ("hello", ["*"], True),
+            ("hello", ["*"], False),
+            ("hello", ["?*"], True),
+            ("hello", ["?*"], False),
+            ("h", ["?"], True),
+            ("h", ["?"], False),
+        ]
+
+        data_mismatches = [
+            ("Hello", ["hello"], False),
+            ("Hello", ["HELLO"], False),
+            ("hello", ["world"], True),
+            ("hello", ["world"], False),
+            ("hello", ["w*"], True),
+            ("hello", ["w*"], False),
+            ("hello", ["H*"], False),
+            ("Hello", ["h*"], False),
+            ("hello", ["tacos", "w*"], True),
+            ("hello", ["tacos", "w*"], False),
+        ]
+
+        for s, p, i in data_matches:
+            self.assertTrue(fnmatches(s, p, i), (s, p, i))
+
+        for s, p, i in data_mismatches:
+            self.assertFalse(fnmatches(s, p, i), (s, p, i))
+
+
+    def test_globfilter(self):
+        pass
+
+
+#
+# The end.

@@ -15,7 +15,8 @@
 from pkg_resources import EntryPoint
 from unittest import TestCase
 
-from kojismokydingo.cli import SmokyDingo
+from kojismokydingo.cli import (
+    SmokyDingo, clean_lines, resplit)
 
 
 ENTRY_POINTS = [
@@ -37,7 +38,7 @@ ENTRY_POINTS = [
 ]
 
 
-class TestCommands(TestCase):
+class TestExpectedEntryPoints(TestCase):
 
     def test_entry_points(self):
         # verify the expected entry points resolve and can be
@@ -56,6 +57,60 @@ class TestCommands(TestCase):
 
             cmd_inst = cmd_cls(ep.name)
             self.assertTrue(isinstance(cmd_inst, SmokyDingo))
+
+
+class TestUtils(TestCase):
+
+
+    def test_resplit(self):
+        data = ["a", "b,c", "", "d,", ",e", "f, g, h", ",", "i", "  "]
+        expect = list("abcdefghi")
+
+        self.assertEqual(resplit(data), expect)
+
+
+    def test_clean_lines(self):
+        data = [
+            "This is a  ",
+            "# skip me",
+            "list of strings  # yup",
+            "",
+            "  We are testing #",
+            "     for cleaning up   ",
+            "     ",
+            "#long pause",
+            "#",
+            " #",
+            " # ",
+            "Thanks",
+        ]
+
+        expect_1 = [
+            "This is a",
+            "list of strings",
+            "We are testing",
+            "for cleaning up",
+            "Thanks",
+        ]
+        self.assertEqual(clean_lines(data, True), expect_1)
+
+        expect_2 = [
+            "This is a",
+            "# skip me",
+            "list of strings  # yup",
+            "We are testing #",
+            "for cleaning up",
+            "#long pause",
+            "#",
+            "#",
+            "#",
+            "Thanks",
+        ]
+        self.assertEqual(clean_lines(data, False), expect_2)
+
+        self.assertEqual(clean_lines(expect_1, True), expect_1)
+        self.assertEqual(clean_lines(expect_2, True), expect_1)
+        self.assertEqual(clean_lines(expect_2, False), expect_2)
 
 
 #
