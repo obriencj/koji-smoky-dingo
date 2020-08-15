@@ -140,6 +140,14 @@ def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
 
 
 def _rpm_str_compare(left, right):
+    """
+    Comparison of left and right by RPM version comparison rules.
+
+    Either string should be *one* element of the EVR tuple (ie. either the
+    epoch, version, or release). Comparison will split the element on RPM's
+    special delimeters.
+    """
+
     left = _rpm_str_split(left)
     right = _rpm_str_split(right)
 
@@ -198,6 +206,9 @@ def _rpm_str_compare(left, right):
 def rpm_evr_compare(left_evr, right_evr):
     """
     Compare two (Epoch, Version, Release) tuples.
+
+    This is an alternative implementation of the rpm lib's
+    labelCompare function.
 
     Returns  1 if left_evr is greater-than right_evr
              0 if left_evr is equal-to right_evr
