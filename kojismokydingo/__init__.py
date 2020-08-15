@@ -114,7 +114,7 @@ class NotPermitted(BadDingo):
     complaint = "Insufficient permissions"
 
 
-def _bulk_load(session, loadfn, keys, size):
+def _bulk_load(session, loadfn, keys, size=100):
     """
     Generator utility for multicall loading data from a koji client
     session.
