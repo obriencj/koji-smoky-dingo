@@ -74,12 +74,18 @@ def config():
         packages = [
             "kojismokydingo",
             "kojismokydingo.cli",
-            ],
+        ],
 
         install_requires = [
             "koji",
             "six",
-            ],
+        ],
+
+        test_requires = [
+            "koji",
+            "mock",
+            "six",
+        ],
 
         zip_safe = True,
 
