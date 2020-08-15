@@ -81,10 +81,12 @@ def fnmatches(s, patterns, ignore_case=False):
     :rtype: bool
     """
 
-    match = fnmatch if ignore_case else fnmatchcase
+    if ignore_case:
+        s = s.lower()
+        patterns = [p.lower() for p in patterns]
 
     for pattern in patterns:
-        if match(s, pattern):
+        if fnmatch(s, pattern):
             return True
 
     return False
