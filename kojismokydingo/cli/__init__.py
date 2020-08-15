@@ -73,24 +73,67 @@ def resplit(arglist, sep=","):
     return [a for a in work if a]
 
 
-def read_clean_lines(filename="-"):
+def clean_lines(lines, skip_comments=True):
+    """
+    Filters clean lines from a sequence.
+
+    Each line will be stripped of leading and trailing whitespace.
+
+    If skip_comments is True (the default), then any line with a
+    leading hash ('#') will be considered a comment and omitted from
+    the output.
+
+    :param lines: Sequence of lines to process
+    :type lines: Iterator[str]
+
+    :param skip_comments: Skip over lines with leading # characters.
+    Default, True
+    :type skip_comments: bool, optional
+
+    :rtype: list[str]
+    """
+
+    if skip_comments:
+        lines = (l.split('#', 1)[0].strip() for l in lines)
+    else:
+        lines = (l.strip() for l in lines)
+    return [l for l in lines if l]
+
+
+def read_clean_lines(filename="-", skip_comments=True):
+    """
+    Reads clean lines from a named file. If filename is '-' then read
+    from sys.stdin instead.
+
+    Each line will be stripped of leading and trailing whitespace.
+
+    If skip_comments is True (the default), then any line with a
+    leading hash ('#') will be considered a comment and omitted from
+    the output.
+
+    Content will be fully collected into a list and the file (if not
+    sys.stdin) will be closed before returning.
+
+    :param filename: File name to read lines from, or - to indicate
+    stdin. Default, -
+    :type filename: str, optional
+
+    :param skip_comments: Skip over lines with leading # characters.
+    Default, True
+    :type skip_comments: bool, optional
+
+    :rtype: list[str]
+    """
 
     if not filename:
         return []
 
     elif filename == "-":
-        fin = sys.stdin
+        return clean_lines(sys.stdin)
 
     else:
-        fin = open(filename, "r")
-
-    lines = [line for line in (l.strip() for l in fin) if line]
-    # lines = list(filter(None, map(str.strip, fin)))
-
-    if filename != "-":
-        fin.close()
-
-    return lines
+        with open(filename, "rt") as fin:
+            return clean_lines(fin)
 
 
 printerr = partial(print, file=sys.stderr)
