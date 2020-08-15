@@ -25,7 +25,7 @@ Some simple functions used by the other modules.
 import re
 
 from collections import OrderedDict
-from fnmatch import fnmatch, fnmatchcase
+from fnmatch import fnmatchcase
 from six.moves import filter, filterfalse, range, zip_longest
 
 
@@ -86,7 +86,7 @@ def fnmatches(s, patterns, ignore_case=False):
         patterns = [p.lower() for p in patterns]
 
     for pattern in patterns:
-        if fnmatch(s, pattern):
+        if fnmatchcase(s, pattern):
             return True
 
     return False
