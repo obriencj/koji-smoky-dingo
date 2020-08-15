@@ -36,7 +36,7 @@ from . import (
 from .. import NoSuchTag, NoSuchUser, bulk_load_builds
 from ..builds import (
     build_dedup, build_id_sort, build_nvr_sort,
-    decorate_build_cg_list, iter_bulk_tag_builds, filter_imported)
+    decorate_build_archive_data, iter_bulk_tag_builds, filter_imported)
 from ..common import chunkseq, unique
 
 
@@ -228,6 +228,10 @@ def cli_list_imported(session, tagname=None, nvr_list=None,
                       inherit=False, negate=False,
                       cg_list=()):
 
+    """
+    CLI handler for `koji list-imported`
+    """
+
     if nvr_list:
         nvr_list = unique(nvr_list)
         builds = bulk_load_builds(session, nvr_list, err=True)
@@ -251,7 +255,7 @@ def cli_list_imported(session, tagname=None, nvr_list=None,
         # mean digging through every archive in every build, then
         # finding the buildroots for each... so we only want to do
         # this if we'll actually be using the additional info!
-        decorate_build_cg_list(session, builds)
+        decorate_build_archive_data(session, builds)
 
     for build in filter_imported(builds, negate, cg_list):
         print(build["nvr"])
@@ -304,6 +308,11 @@ class ListImported(AnonSmokyDingo):
                          " --file=NVR_FILE")
 
         options.cg_list = resplit(options.cg_list)
+
+        try:
+            options.nvr_list = read_clean_lines(options.nvr_file)
+        except IOError as ioe:
+            parser.error("Unable to read NVR list %s" % ioe)
 
 
     def handle(self, options):

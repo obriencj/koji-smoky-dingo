@@ -187,15 +187,21 @@ def bulk_tag_nvrs(session, tagname, nvrs,
                            size=size, strict=strict)
 
 
-def decorate_build_cg_list(session, build_infos):
+def decorate_build_archive_data(session, build_infos):
     """
-    Augments a list of build_info dicts with two new keys:
+    Augments a list of build_info dicts with four new keys:
 
     * archive_cg_ids is a set of content generator IDs for each
       archive of the build
 
     * archive_cg_names is a set of content generator names for each
       archive of the build
+
+    * archive_btype_ids is a set of btype IDs for each archive of the
+      build
+
+    * archive_btype_names is a set of btype names for each archive of
+      the build
 
     :param build_infos: list of build infos to decorate and return
     :type build_infos: list[dict]
@@ -206,7 +212,7 @@ def decorate_build_cg_list(session, build_infos):
     # convert build_infos into an id:info dict
     builds = dict((b["id"], b) for b in build_infos)
 
-    # multicall to fetch the artifacts for all build_infos
+    # multicall to fetch the artifacts for all build IDs
     archives = bulk_load_build_archives(session, list(builds))
 
     # gather all the buildroot IDs
@@ -224,10 +230,17 @@ def decorate_build_cg_list(session, build_infos):
     # gather the cg_id and cg_name from each buildroot, and associate
     # it back with the original build info
     for build_id, archive_list in iteritems(archives):
-        cg_ids = set()
-        cg_names = set()
+
+        bld = builds[build_id]
+        bld["archive_cg_ids"] = cg_ids = set()
+        bld["archive_cg_names"] = cg_names = set()
+        bld["archive_btype_ids"] = btype_ids = set()
+        bld["archive_btype_names"] = btype_names = set()
 
         for archive in archive_list:
+            btype_ids.add(archive["btype_id"])
+            btype_names.add(archive["btype"])
+
             broot_id = archive["buildroot_id"]
             if not broot_id:
                 continue
@@ -241,10 +254,6 @@ def decorate_build_cg_list(session, build_infos):
             cg_name = broot.get("cg_name")
             if cg_name:
                 cg_names.add(cg_name)
-
-        bld = builds[build_id]
-        bld["archive_cg_ids"] = cg_ids
-        bld["archive_cg_names"] = cg_names
 
     return build_infos
 
