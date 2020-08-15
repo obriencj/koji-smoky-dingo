@@ -135,7 +135,7 @@ def globfilter(seq, patterns,
         return fnmatches(key(s) if key else s,
                          patterns, ignore_case=ignore_case)
 
-    return filterfalse(seq, test) if invert else filter(seq, test)
+    return filterfalse(test, seq) if invert else filter(test, seq)
 
 
 def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):

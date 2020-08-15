@@ -183,7 +183,34 @@ class TestCommon(TestCase):
 
 
     def test_globfilter(self):
-        pass
+        data = ["one", "two", "three", "tacos", "pizza", "beer"]
+
+        def gf(patterns, invert, ignore_case):
+            return list(globfilter(data, patterns, key=None,
+                                   invert=invert, ignore_case=ignore_case))
+
+        self.assertEqual(gf(["*"], False, False), data)
+        self.assertEqual(gf(["*"], False, True), data)
+        self.assertEqual(gf(["*"], True, False), [])
+        self.assertEqual(gf(["*"], True, True), [])
+
+        self.assertEqual(gf(["?"], False, False), [])
+        self.assertEqual(gf(["?"], False, True), [])
+        self.assertEqual(gf(["?"], True, False), data)
+        self.assertEqual(gf(["?"], True, True), data)
+
+        self.assertEqual(gf(["t*"], False, True),
+                         ["two", "three", "tacos"])
+        self.assertEqual(gf(["t*"], False, False),
+                         ["two", "three", "tacos"])
+
+        self.assertEqual(gf(["T*"], False, True),
+                         ["two", "three", "tacos"])
+        self.assertEqual(gf(["T*"], False, False), [])
+
+        self.assertEqual(gf(["T*"], True, True),
+                         ["one", "pizza", "beer"])
+        self.assertEqual(gf(["T*"], True, False), data)
 
 
 #
