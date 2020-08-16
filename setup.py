@@ -81,7 +81,7 @@ def config():
             "six",
         ],
 
-        test_requires = [
+        tests_require = [
             "koji",
             "mock",
             "six",
