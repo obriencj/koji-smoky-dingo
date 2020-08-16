@@ -2,19 +2,20 @@
 FROM centos:6
 
 RUN \
-    yum install -ty findutils git make rpm-build yum-utils epel-release && \
-    yum install -ty python-pip  && \
-    pip install -q nose
+    yum install -q -y epel-release && \
+    yum install -q -y \
+        make rpm-build which yum-utils \
+        python-pip python2-mock && \
+    python -W "ignore:a true SSLContext" -m pip.__main__ install -q nose
 
 RUN mkdir -p /src
 COPY Makefile setup.py kojismokydingo-*.tar.gz /src/
 
 RUN \
     cd /src && make srpm && \
-    yum-builddep -ty /root/rpmbuild/SRPMS/kojismokydingo-*.src.rpm && \
+    yum-builddep -q -y /root/rpmbuild/SRPMS/kojismokydingo-*.src.rpm && \
     rpmbuild --rebuild /root/rpmbuild/SRPMS/kojismokydingo-*.src.rpm && \
-    yum install -ty /root/rpmbuild/RPMS/noarch/*kojismokydingo*.rpm && \
+    yum install -q -y /root/rpmbuild/RPMS/noarch/*kojismokydingo*.rpm && \
     cd / && rm -rf /src
-
 
 # The end.

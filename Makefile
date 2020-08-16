@@ -1,6 +1,8 @@
 
-VERSION ?= $(shell python -Bc "import setup; print(setup.config()['version'])")
-ARCHIVE = kojismokydingo-$(VERSION).tar.gz
+
+PROJECT = kojismokydingo
+VERSION = 0.9.0
+ARCHIVE = $(PROJECT)-$(VERSION).tar.gz
 
 
 default: test
@@ -36,9 +38,8 @@ archive: $(ARCHIVE)
 
 $(ARCHIVE):
 	git archive HEAD \
-		--format tar.gz \
-		--prefix kojismokydingo-$(VERSION)/ \
-		-o $(ARCHIVE)
+		--format tar --prefix $(PROJECT)-$(VERSION)/ \
+		| gzip > $(ARCHIVE)
 
 
 .PHONY: all archive clean default packaging-test rpm srpm test

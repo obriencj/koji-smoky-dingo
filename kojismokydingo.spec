@@ -3,15 +3,6 @@
 %global srcver 0.9.0
 
 
-%if ( 0%{?rhel} && 0%{?rhel} < 8 ) || ( 0%{?fedora} && 0%{?fedora} < 22 )
-%define old_python 1
-%else
-%define old_python 0
-%bcond_with python2
-%bcond_without python3
-%endif
-
-
 Summary: Koji Smoky Dingo
 Name: %{srcname}
 Version: %{srcver}
@@ -24,13 +15,30 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildArch: noarch
 
+
+# There's two distinct eras of RPM packaging for python, with
+# different macros and different expectations. Generally speaking the
+# new features are available in RHEL 8+ and Fedora 22+
+
+%define old_rhel ( 0%{?rhel} && 0%{?rhel} < 8 )
+%define old_fedora ( 0%{?fedora} && 0%{?fedora} < 22 )
+
+%if %{old_rhel} || %{old_fedora}
+  %define old_python 1
+%else
+  %define old_python 0
+  %bcond_with python2
+  %bcond_without python3
+%endif
+
+
 # Some older koji fedora packages don't declare their python_provide
 # even though the feature was available in the packaging macros. This
-# means if we trying to rely on it, we'll produce a requires for a
+# means if we trying to rely on it, we'll produce a Requires for a
 # python3.6dist(koji) and no package will ever provide it. Seems to be
-# good from fedora 28 onwards.
+# fixed from fedora 28 onwards.
 %if ( 0%{?fedora} && 0%{?fedora} > 28 )
-%{?python_enable_dependency_generator}
+  %{?python_enable_dependency_generator}
 %endif
 
 
@@ -45,22 +53,23 @@ Koji Smoky Dingo
 %build
 
 %if %{old_python}
-# old python 2.6 support
-%{__python} setup.py build
-%{__python} setup-meta.py build
+  # old python 2.6 support
+  %{__python} setup.py build
+  %{__python} setup-meta.py build
 
 %else
-# newer python support, with optional settings for python2 and python3
+  # newer python support, with optional settings for python2 and
+  # python3
 
-%if %{with python2}
-%py2_build_wheel
-%{__python2} setup-meta.py bdist_wheel %{?py_setup_args}
-%endif
+  %if %{with python2}
+    %py2_build_wheel
+    %{__python2} setup-meta.py bdist_wheel %{?py_setup_args}
+  %endif
 
-%if %{with python3}
-%py3_build_wheel
-%{__python3} setup-meta.py bdist_wheel %{?py_setup_args}
-%endif
+  %if %{with python3}
+    %py3_build_wheel
+    %{__python3} setup-meta.py bdist_wheel %{?py_setup_args}
+  %endif
 
 %endif
 
@@ -69,20 +78,19 @@ Koji Smoky Dingo
 rm -rf $RPM_BUILD_ROOT
 
 %if %{old_python}
-%{__python} setup.py install --skip-build --root %{buildroot}
-%{__python} setup-meta.py install --skip-build --root %{buildroot}
+  %{__python} setup.py install --skip-build --root %{buildroot}
+  %{__python} setup-meta.py install --skip-build --root %{buildroot}
 
 %else
+  %if %{with python2}
+    %py2_install_wheel %{srcname}-%{version}-py2-none-any.whl
+    %py2_install_wheel %{srcname}_meta-%{version}-py2-none-any.whl
+  %endif
 
-%if %{with python2}
-%py2_install_wheel %{srcname}-%{version}-py2-none-any.whl
-%py2_install_wheel %{srcname}_meta-%{version}-py2-none-any.whl
-%endif
-
-%if %{with python3}
-%py3_install_wheel %{srcname}-%{version}-py3-none-any.whl
-%py3_install_wheel %{srcname}_meta-%{version}-py3-none-any.whl
-%endif
+  %if %{with python3}
+    %py3_install_wheel %{srcname}-%{version}-py3-none-any.whl
+    %py3_install_wheel %{srcname}_meta-%{version}-py3-none-any.whl
+  %endif
 
 %endif
 
