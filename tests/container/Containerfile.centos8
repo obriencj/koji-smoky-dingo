@@ -1,6 +1,8 @@
 
 FROM centos:8
 
+RUN mkdir -p /src
+
 RUN \
     dnf install -qy epel-release && \
     dnf install -qy \
@@ -8,7 +10,6 @@ RUN \
         python3-nose python3-pip && \
     pip3 install -q mock
 
-RUN mkdir -p /src
 COPY Makefile setup.py kojismokydingo-*.tar.gz /src/
 
 RUN \

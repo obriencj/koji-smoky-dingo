@@ -80,18 +80,25 @@ function ksd_launch_container_test() {
 	echo "Using $PODMAN"
     fi
 
+    # let's see if there was a previous image with this tag. We won't
+    # remove it yet, we want to try and take cache advantage of any
+    # layers in it.
+    local PREV=$(podman images -a -q "$NAME")
+
     echo "Building $NAME from $CFILE"
-    $PODMAN build -t "$NAME" -f "$CFILE" "$PWD" || return 1
+    $PODMAN build --layers -t "$NAME" -f "$CFILE" "$PWD" || return 1
+
+    # now let's see what the new image's ID is. If we had a previous
+    # image, and the new image isn't identical, we can safely discard
+    # the old to conserve some space.
+    local CURR=$(podman images -a -q "$NAME")
+    if [ "$PREV" -a "$PREV" != "$CURR" ] ; then
+        $PODMAN image rm -f "$PREV"
+    fi
 
     echo "Running tests for $NAME"
     $PODMAN run --volume "$PWD":/ksd --rm "$NAME" \
-           "/ksd/tests/container/tests.sh" "$PLATFORM"
-
-    local RESULT=$?
-
-    $PODMAN image rm -f "$NAME"
-
-    return "$RESULT"
+           "/ksd/tests/container/tests.sh" "$PLATFORM" || return 1
 }
 
 

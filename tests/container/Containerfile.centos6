@@ -1,6 +1,8 @@
 
 FROM centos:6
 
+RUN mkdir -p /src
+
 RUN \
     yum install -q -y epel-release && \
     yum install -q -y \
@@ -8,7 +10,6 @@ RUN \
         python-pip python2-mock && \
     python -W "ignore:a true SSLContext" -m pip.__main__ install -q nose
 
-RUN mkdir -p /src
 COPY Makefile setup.py kojismokydingo-*.tar.gz /src/
 
 RUN \

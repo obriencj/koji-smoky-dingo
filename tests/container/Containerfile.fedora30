@@ -1,12 +1,13 @@
 
 FROM fedora:30
 
+RUN mkdir -p /src
+
 RUN \
     dnf install -qy \
         dnf-plugins-core make rpm-build which \
         python3-mock python3-nose
 
-RUN mkdir -p /src
 COPY Makefile setup.py kojismokydingo-*.tar.gz /src/
 
 RUN \
