@@ -498,7 +498,6 @@ def gather_latest_image_archives(session, tagname,
     :param inherit: Follow tag inheritance, default True
 
     :type inherit: bool, optional
-
     """
 
     path = as_pathinfo(path)
