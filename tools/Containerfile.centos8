@@ -1,0 +1,20 @@
+
+FROM centos:8
+
+WORKDIR /src
+
+RUN \
+    dnf install -qy epel-release && \
+    dnf install -qy \
+        dnf-plugins-core make rpm-build which \
+        python3-nose python3-pip && \
+    pip3 install -q mock
+
+ARG VERSION
+
+COPY kojismokydingo-${VERSION}.tar.gz tools/*.sh /src/
+
+RUN /src/rpmbuild.sh \
+        /src /src/kojismokydingo-${VERSION}.tar.gz
+
+# The end.

@@ -1,0 +1,18 @@
+
+FROM fedora:28
+
+WORKDIR /src
+
+RUN \
+    dnf install -qy \
+        dnf-plugins-core make rpm-build which \
+        python3-mock python3-nose
+
+ARG VERSION
+
+COPY kojismokydingo-${VERSION}.tar.gz tools/*.sh /src/
+
+RUN /src/rpmbuild.sh \
+        /src /src/kojismokydingo-${VERSION}.tar.gz
+
+# The end.

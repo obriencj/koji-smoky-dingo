@@ -3,7 +3,7 @@
 
 . $(readlink -f $(dirname "$0"))/common.sh
 
-ksd_launch_container "$@"
+ksd_version
 
 
 # The end.

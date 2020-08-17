@@ -1,7 +1,7 @@
 
 
 PROJECT = kojismokydingo
-VERSION = 0.9.0
+VERSION = $(shell tools/version.sh)
 ARCHIVE = $(PROJECT)-$(VERSION).tar.gz
 
 
@@ -9,16 +9,21 @@ default: test
 
 
 clean:
-	rm -rf *.egg-info dist/* build/*
+	rm -rf *.egg-info dist/* build/* logs/*
 	rm -f $(ARCHIVE)
 	find -H . \
 		\( -iname .tox -prune \) -o \
-		\( -type d -iname __pycache__ -exec rm -rf {} + \)
+		\( -type d -iname __pycache__ -exec rm -rf {} + \) -o \
+		\( -type f -iname *.pyc -exec rm -f {} + \)
 
 
-packaging-test: clean archive
-	rm -rf logs/*.log
-	./tests/container/launch.sh
+packaging-build: archive
+	./tools/launch-build.sh
+
+
+packaging-test: packaging-build
+	rm -rf logs/*
+	./tools/launch-test.sh
 
 
 test: clean
