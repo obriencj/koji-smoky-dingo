@@ -1,25 +1,29 @@
-# Overview of koji-smoky-dingo
+# Overview
 
-This is a collection of simple client command-line plugins for [koji].
+Koji Smoky Dingo is a collection of client command-line plugins for
+[koji], and a set of utility modules for writing your own commands or
+scripts.
 
 [koji]: https://pagure.io/koji
 
-The name "smoky-dingo" was provided by [coolname] and has no particular relevance.
+The phrase "smoky-dingo" was provided by [coolname] and has no
+particular relevance.
 
 [coolname]: https://pypi.org/project/coolname/
 
 
 ## Meta Plugin
 
-This project is broken into two parts. The first part is a relatively
-tiny CLI plugin for koji which acts as an adapter to load commands
-registered via python's entry points. The second and larger part is a
-collection of commands that are be loaded by that meta plugin.
+This project provides a relatively tiny CLI plugin for koji, named
+kojismokydingometa. This plugin acts as an adapter between koji's
+existing CLI framework and Python's entry_points. This adaptive
+behavior is utilized by the rest of the project to add its own
+additional commands to koji.
 
 The meta plugin can be used to load commands other than those provided
-by koji-smoky-dingo. Simply register your commands with the
-`"koji_smoky_dingo"` entry point key and install your package. See
-[setup.py] for direct examples.
+as part of this project. Simply register your commands with the
+`"koji_smoky_dingo"` entry point key. See [setup.py] for direct
+examples.
 
 [setup.py]: https://github.com/obriencj/koji-smoky-dingo/blob/master/setup.py
 
@@ -38,7 +42,7 @@ permission (koji >= [1.18]) or the admin permission.
 |`unset-rpm-macro` |Removes a mock RPM macro from a tag. |
 
 
-## Informational Commands
+## Information Commands
 
 These commands are informational only, and do not require any special
 permissions in koji.
@@ -70,7 +74,7 @@ sudo python setup-meta.py clean build install --root=/
 ```
 
 With koji >= [1.18], the meta plugin can also be installed into
-`~/.koji_cli_plugins`
+`~/.koji/plugins`
 
 [1.18]: https://docs.pagure.org/koji/release_notes_1.18/
 
@@ -98,6 +102,8 @@ python setup.py install --user
 Author: Christopher O'Brien  <obriencj@gmail.com>
 
 Original Git Repository: <https://github.com/obriencj/koji-smoky-dingo>
+
+Documentation: <https://obriencj.github.io/koji-smoky-dingo>
 
 
 ## License
