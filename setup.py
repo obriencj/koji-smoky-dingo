@@ -39,59 +39,61 @@ CLASSIFIERS = [
 ]
 
 
-COMMANDS = [
-    "affected-targets = kojismokydingo.cli.tags:AffectedTargets",
-    "bulk-tag-builds = kojismokydingo.cli.builds:BulkTagBuilds",
-    "check-hosts = kojismokydingo.cli.hosts:CheckHosts",
-    "client-config = kojismokydingo.cli.clients:ClientConfig",
-    "latest-archives = kojismokydingo.cli.archives:LatestArchives",
-    "list-build-archives = kojismokydingo.cli.archives:ListBuildArchives",
-    "list-cgs = kojismokydingo.cli.users:ListCGs",
-    "list-imported = kojismokydingo.cli.builds:ListImported",
-    "list-rpm-macros = kojismokydingo.cli.tags:ListRPMMacros",
-    "perminfo = kojismokydingo.cli.users:PermissionInfo",
-    "renum-tag-inheritance = kojismokydingo.cli.tags:RenumTagInheritance",
-    "set-rpm-macro = kojismokydingo.cli.tags:SetRPMMacro",
-    "swap-tag-inheritance = kojismokydingo.cli.tags:SwapTagInheritance",
-    "unset-rpm-macro = kojismokydingo.cli.tags:UnsetRPMMacro",
-    "userinfo = kojismokydingo.cli.users:UserInfo",
-]
+COMMANDS = {
+    "affected-targets": "kojismokydingo.cli.tags:AffectedTargets",
+    "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
+    "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
+    "client-config": "kojismokydingo.cli.clients:ClientConfig",
+    "latest-archives": "kojismokydingo.cli.archives:LatestArchives",
+    "list-build-archives": "kojismokydingo.cli.archives:ListBuildArchives",
+    "list-cgs": "kojismokydingo.cli.users:ListCGs",
+    "list-imported": "kojismokydingo.cli.builds:ListImported",
+    "list-rpm-macros": "kojismokydingo.cli.tags:ListRPMMacros",
+    "list-tag-extras": "kojismokydingo.cli.tags:ListTagExtras",
+    "perminfo": "kojismokydingo.cli.users:PermissionInfo",
+    "renum-tag-inheritance": "kojismokydingo.cli.tags:RenumTagInheritance",
+    "set-rpm-macro": "kojismokydingo.cli.tags:SetRPMMacro",
+    "swap-tag-inheritance": "kojismokydingo.cli.tags:SwapTagInheritance",
+    "unset-rpm-macro": "kojismokydingo.cli.tags:UnsetRPMMacro",
+    "userinfo": "kojismokydingo.cli.users:UserInfo",
+}
 
 
 def config():
-    return dict(
-        name = "kojismokydingo",
-        version = "0.9.0",
-        description = "A collection of Koji command-line plugins",
-        author = "Christopher O'Brien",
-        author_email = "obriencj@gmail.com",
-        url = "https://github.com/obriencj/koji-smoky-dingo",
+    return {
+        "name": "kojismokydingo",
+        "version": "0.9.0",
+        "description": "A collection of Koji command-line plugins",
+        "author": "Christopher O'Brien",
+        "author_email": "obriencj@gmail.com",
+        "url": "https://github.com/obriencj/koji-smoky-dingo",
 
-        license = "GNU General Public License v3 (GPLv3)",
+        "license": "GNU General Public License v3 (GPLv3)",
 
-        classifiers = CLASSIFIERS,
+        "classifiers": CLASSIFIERS,
 
-        packages = [
+        "packages": [
             "kojismokydingo",
             "kojismokydingo.cli",
         ],
 
-        install_requires = [
+        "install_requires": [
             "koji",
             "six",
         ],
 
-        tests_require = [
+        "tests_require": [
             "koji",
             "mock",
             "six",
         ],
 
-        zip_safe = True,
+        "zip_safe": True,
 
-        entry_points = {
-            "koji_smoky_dingo": COMMANDS,
-        })
+        "entry_points": {
+            "koji_smoky_dingo": ["=".join(c) for c in COMMANDS.items()],
+        },
+    }
 
 
 def setup():

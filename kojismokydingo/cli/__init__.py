@@ -36,6 +36,7 @@ from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os.path import basename
 from six import add_metaclass
+from six.moves import zip_longest
 
 from kojismokydingo import BadDingo, NotPermitted
 
@@ -137,6 +138,44 @@ def read_clean_lines(filename="-", skip_comments=True):
 
 
 printerr = partial(print, file=sys.stderr)
+
+
+def columns(data):
+    if data:
+        for c in range(0, len(data[0])):
+            yield (row[c] for row in data)
+
+
+def tabulate(headings, data, quiet=None, key=None, out=sys.stdout):
+    if quiet is None:
+        quiet = not out.isatty()
+
+    if key:
+        data = [key(row) for row in data]
+    else:
+        data = list(data)
+
+    if data:
+        widths = [max(len(str(v)) for v in col)
+                  for col in columns(data)]
+    else:
+        widths = []
+
+    if headings and not quiet:
+        widths = [max(w or 0, len(h or "")) for w, h in
+                  zip_longest(widths, headings)]
+
+    fmt = "  ".join("{:<%i}" % w for w in widths)
+
+    if headings and not quiet:
+        headings = [(h or "") for w, h in
+                    zip_longest(widths, headings)]
+
+        print(fmt.format(*headings), file=out)
+        print("  ".join(("-" * h) for h in widths), file=out)
+
+    for row in data:
+        print(fmt.format(*row), file=out)
 
 
 @add_metaclass(ABCMeta)
