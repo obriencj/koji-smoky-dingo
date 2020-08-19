@@ -74,12 +74,17 @@ function ksd_build_platform() {
     # let's see if there was a previous image with this tag. We won't
     # remove it yet, we want to try and take cache advantage of any
     # layers in it.
-    local PREV=$(podman images -a -q "$NAME")
+    local PREV=$($PODMAN images -a -q "$NAME")
+
+    local LAYERS=""
+    if [ `which podman 2>/dev/null` ] ; then
+	LAYERS="--layers"
+    fi
 
     echo "Building $NAME from $CFILE"
     $PODMAN build \
             --build-arg VERSION=$(ksd_version) \
-            --layers \
+            $LAYERS \
             -t "$NAME" \
             -f "$CFILE" "$PWD" || return 1
 
