@@ -48,7 +48,7 @@ function verify_koji_cli() {
 
 function verify_installed() {
     echo "Checking to see what is installed:"
-    rpm -qa | grep koji
+    rpm -qa | grep koji | sort
     echo
 }
 
