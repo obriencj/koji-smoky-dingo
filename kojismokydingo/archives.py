@@ -291,37 +291,8 @@ def gather_build_archives(session, binfo, btype=None,
     return found
 
 
-def _fake_maven_build(archive, path=None, btype="maven", cache={}):
-    """
-    produces something that looks like a build info dict based on the
-    values from within a maven archive dict. This can then be used
-    with a koji.PathInfo instance to determine the path to a build
-    """
-
-    path = _as_pathinfo(path)
-
-    bid = archive["build_id"]
-    if bid in cache:
-        return cache[bid]
-
-    bld = {
-        "id": bid,
-        "name": archive["build_name"],
-        "version": archive["build_version"],
-        "release": archive["build_release"],
-        "epoch": archive["build_epoch"],
-        "volume_id": archive["volume_id"],
-        "volume_name": archive["volume_name"],
-        "package_id": archive["pkg_id"],
-        "package_name": archive["build_name"],
-    }
-    bld["build_path"] = path.typedir(bld, btype)
-    cache[bid] = bld
-
-    return bld
-
-
-def gather_latest_rpms(session, tagname, rpmkeys=(), path=None):
+def gather_latest_rpms(session, tagname, rpmkeys=(),
+                       iherit=True, path=None):
     """
     Similar to session.getLatestRPMS(tagname) but will filter by
     available signatures, and augments the results to include a new
@@ -335,6 +306,10 @@ def gather_latest_rpms(session, tagname, rpmkeys=(), path=None):
     preference. An empty string matches the unsigned copy. Default ()
     for no signature filtering.
     :type rpmkeys: list[str], optional
+
+    :param inherit: Follow tag inheritance, default True
+
+    :type inherit: bool, optional
 
     :param path: The root dir for the archive file paths, default None
     :type path: str, optional
@@ -368,7 +343,39 @@ def gather_latest_rpms(session, tagname, rpmkeys=(), path=None):
     return found
 
 
-def gather_latest_maven_archives(session, tagname, path=None):
+def _fake_maven_build(archive, path=None, btype="maven", cache={}):
+    """
+    produces something that looks like a build info dict based on the
+    values from within a maven archive dict. This can then be used
+    with a `koji.PathInfo` instance to determine the path to a build
+    """
+
+    bid = archive["build_id"]
+    bld = cache.get(bid)
+
+    if not bld:
+        bld = {
+            "id": bid,
+            "name": archive["build_name"],
+            "version": archive["build_version"],
+            "release": archive["build_release"],
+            "epoch": archive["build_epoch"],
+            "volume_id": archive["volume_id"],
+            "volume_name": archive["volume_name"],
+            "package_id": archive["pkg_id"],
+            "package_name": archive["build_name"],
+        }
+
+        path = as_pathinfo(path)
+        bld["build_path"] = path.typedir(bld, btype)
+
+        cache[bid] = bld
+
+    return bld
+
+
+def gather_latest_maven_archives(session, tagname,
+                                 inherit=True, path=None):
     """
     Similar to session.getLatestMavenArchives(tagname) but augments
     the results to include a new "filepath" entry which will point to
@@ -377,12 +384,16 @@ def gather_latest_maven_archives(session, tagname, path=None):
     :param tagname: Name of the tag to search in for maven artifacts
     :type tagname: str
 
+    :param inherit: Follow tag inheritance, default True
+
+    :type inherit: bool, optional
+
     :rtype: list[dict]
     """
 
     path = _as_pathinfo(path)
 
-    found = session.getLatestMavenArchives(tagname)
+    found = session.getLatestMavenArchives(tagname, inherit=inherit)
     for f in found:
         bld = _fake_maven_build(f, path)
         f["filepath"] = join(bld["build_path"], path.mavenfile(f))
@@ -390,14 +401,30 @@ def gather_latest_maven_archives(session, tagname, path=None):
     return found
 
 
-def gather_latest_win_archives(session, tagname, path=None):
+def gather_latest_win_archives(session, tagname,
+                               inherit=True, path=None):
+    """
+    Similar to session.listTaggedArchives(tagname, type="win") but
+    augments the results to include a new "filepath" entry which will
+    point to the matching maven artifact's file location.
+
+    :param tagname: Name of the tag to search in for maven artifacts
+
+    :type tagname: str
+
+    :param inherit: Follow tag inheritance, default True
+
+    :type inherit: bool, optional
+
+    :rtype: list[dict]
+    """
 
     path = _as_pathinfo(path)
 
     found = []
 
     archives, builds = session.listTaggedArchives(tagname,
-                                                  inherit=True,
+                                                  inherit=inherit,
                                                   latest=True,
                                                   type="win")
 
@@ -419,13 +446,28 @@ def gather_latest_win_archives(session, tagname, path=None):
     return found
 
 
-def gather_latest_image_archives(session, tagname, path=None):
+def gather_latest_image_archives(session, tagname,
+                                 inherit=True, path=None):
+    """
+
+    :param inherit: Follow tag inheritance, default True
+
+    :type inherit: bool, optional
+
+    """
 
     path = _as_pathinfo(path)
 
     found = []
 
-    builds = session.getLatestBuilds(tagname, type="image")
+    # we cannot use listTaggedArchives here, because it only accepts types
+    # of win and maven. I should submit a patch to upstream.
+
+    if inherit:
+        builds = session.getLatestBuilds(tagname, type="image")
+    else:
+        builds = session.listTagged(tagname, latest=True, type="image")
+
     for bld in builds:
         build_path = path.imagebuild(bld)
         archives = session.listArchives(buildID=bld["id"], type="image")
@@ -437,7 +479,7 @@ def gather_latest_image_archives(session, tagname, path=None):
 
 
 def gather_latest_archives(session, tagname, btype=None,
-                           rpmkeys=(), path=None):
+                           rpmkeys=(), inherit=True, path=None):
 
     """
     Gather the latest archives from a tag heirarchy. Rules for what
@@ -453,6 +495,10 @@ def gather_latest_archives(session, tagname, btype=None,
     :param rpmkeys: List of RPM signatures to filter by. Only used when
     fetching type of rpm or None (all).
     :type rpmkeys: list[str]
+
+    :param inherit: Follow tag inheritance, default True
+
+    :type inherit: bool, optional
 
     :param path: Path prefix for archive filepaths.
     :type path: str
@@ -474,16 +520,20 @@ def gather_latest_archives(session, tagname, btype=None,
     path = _as_pathinfo(path)
 
     if btype in (None, "rpm"):
-        found.extend(gather_latest_rpms(session, tagname, rpmkeys, path))
+        found.extend(gather_latest_rpms(session, tagname, rpmkeys,
+                                        inherit, path))
 
     if btype in (None, "maven"):
-        found.extend(gather_latest_maven_archives(session, tagname, path))
+        found.extend(gather_latest_maven_archives(session, tagname,
+                                                  inherit, path))
 
     if btype in (None, "win"):
-        found.extend(gather_latest_win_archives(session, tagname, path))
+        found.extend(gather_latest_win_archives(session, tagname,
+                                                inherit, path))
 
     if btype in (None, "image"):
-        found.extend(gather_latest_image_archives(session, tagname, path))
+        found.extend(gather_latest_image_archives(session, tagname,
+                                                  inherit, path))
 
     if btype in known_types:
         return found
@@ -492,7 +542,7 @@ def gather_latest_archives(session, tagname, btype=None,
         # listTaggedArchives is very convenient, but only works with
         # win, maven, and None
         archives, builds = session.listTaggedArchives(tagname,
-                                                      inherit=True,
+                                                      inherit=inherit,
                                                       latest=True,
                                                       type=None)
 
@@ -519,7 +569,11 @@ def gather_latest_archives(session, tagname, btype=None,
 
     else:
         # btype is not one of the known ones, and it's also not None.
-        builds = session.getLatestBuilds(tagname, type=btype)
+        if inherit:
+            builds = session.getLatestBuilds(tagname, type=btype)
+        else:
+            builds = session.listTagged(tagname, latest=True, type=btype)
+
         for bld in builds:
             build_path = path.typedir(bld, btype)
             archives = session.listArchives(buildID=bld["id"], type=btype)

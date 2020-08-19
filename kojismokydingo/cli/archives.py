@@ -54,10 +54,11 @@ def cli_list_build_archives(session, nvr, btype,
 
 def cli_latest_tag_archives(session, tagname, btype,
                             atypes=(), rpmkeys=(),
-                            path=None, json=False):
+                            inherit=True, path=None,
+                            json=False):
 
     found = gather_latest_archives(session, tagname, btype,
-                                   rpmkeys, path)
+                                   rpmkeys, inherit, path)
 
     if atypes:
         found = filter_archives(session, found, atypes)
@@ -187,6 +188,10 @@ class LatestArchives(ArchiveDingo):
         addarg("tag", metavar="TAGNAME",
                help="The tag containing the archives")
 
+        addarg("--noinherit", action="store_false",
+               dest="inherit", default=True,
+               help="Do not follow inheritance")
+
         return parser
 
 
@@ -195,6 +200,7 @@ class LatestArchives(ArchiveDingo):
                                        btype=options.btype,
                                        atypes=options.atypes,
                                        rpmkeys=options.keys,
+                                       inherit=options.inherit,
                                        path=options.path,
                                        json=options.json)
 
