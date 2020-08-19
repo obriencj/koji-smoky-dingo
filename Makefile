@@ -10,11 +10,11 @@ default: test
 
 clean:
 	rm -rf *.egg-info dist/* build/* logs/*
-	rm -f $(ARCHIVE)
+	rm -f "$(ARCHIVE)"
 	find -H . \
-		\( -iname .tox -prune \) -o \
-		\( -type d -iname __pycache__ -exec rm -rf {} + \) -o \
-		\( -type f -iname *.pyc -exec rm -f {} + \)
+		\( -iname '.tox' -prune \) -o \
+		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
+		\( -type f -iname '*.pyc' -exec rm -f {} + \)
 
 
 packaging-build: archive
@@ -31,11 +31,11 @@ test: clean
 
 
 srpm: $(ARCHIVE)
-	rpmbuild -ts $(ARCHIVE)
+	rpmbuild -ts "$(ARCHIVE)"
 
 
 rpm: $(ARCHIVE)
-	rpmbuild -tb $(ARCHIVE)
+	rpmbuild -tb "$(ARCHIVE)"
 
 
 archive: $(ARCHIVE)
@@ -43,8 +43,8 @@ archive: $(ARCHIVE)
 
 $(ARCHIVE):
 	git archive HEAD \
-		--format tar --prefix $(PROJECT)-$(VERSION)/ \
-		| gzip > $(ARCHIVE)
+		--format tar --prefix "$(PROJECT)-$(VERSION)/" \
+		| gzip > "$(ARCHIVE)"
 
 
 .PHONY: all archive clean default packaging-test rpm srpm test
