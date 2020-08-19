@@ -30,7 +30,7 @@ from six import iterkeys, iteritems
 from . import NoSuchTag, bulk_load_rpm_sigs
 
 
-def _as_pathinfo(path):
+def as_pathinfo(path):
     if isinstance(path, PathInfo):
         return path
     else:
@@ -120,7 +120,7 @@ def gather_signed_rpms(session, archives, sigkeys):
 def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
 
     bid = binfo["id"]
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     build_path = path.build(binfo)
     found = session.listRPMs(buildID=bid)
@@ -156,7 +156,7 @@ def gather_build_maven_archives(session, binfo, path=None):
     """
 
     bid = binfo["id"]
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     build_path = path.mavenbuild(binfo)
     found = session.listArchives(buildID=bid, type="maven")
@@ -182,7 +182,7 @@ def gather_build_win_archives(session, binfo, path=None):
     """
 
     bid = binfo["id"]
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     build_path = path.winbuild(binfo)
     found = session.listArchives(buildID=bid, type="win")
@@ -208,7 +208,7 @@ def gather_build_image_archives(session, binfo, path=None):
     """
 
     bid = binfo["id"]
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     build_path = path.imagebuild(binfo)
     found = session.listArchives(buildID=bid, type="image")
@@ -253,7 +253,7 @@ def gather_build_archives(session, binfo, btype=None,
     known_types = ("rpm", "maven", "win", "image", )
     found = []
 
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     if btype in (None, "rpm"):
         found.extend(gather_build_rpms(session, binfo, rpmkeys, path))
@@ -317,7 +317,7 @@ def gather_latest_rpms(session, tagname, rpmkeys=(),
     :rtype: list[dict]
     """
 
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     found, builds = session.getLatestRPMS(tagname)
 
@@ -391,7 +391,7 @@ def gather_latest_maven_archives(session, tagname,
     :rtype: list[dict]
     """
 
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     found = session.getLatestMavenArchives(tagname, inherit=inherit)
     for f in found:
@@ -419,7 +419,7 @@ def gather_latest_win_archives(session, tagname,
     :rtype: list[dict]
     """
 
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     found = []
 
@@ -456,7 +456,7 @@ def gather_latest_image_archives(session, tagname,
 
     """
 
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     found = []
 
@@ -517,7 +517,7 @@ def gather_latest_archives(session, tagname, btype=None,
     # pre-defined path structures. We'll be querying those directly
     # first.
 
-    path = _as_pathinfo(path)
+    path = as_pathinfo(path)
 
     if btype in (None, "rpm"):
         found.extend(gather_latest_rpms(session, tagname, rpmkeys,
