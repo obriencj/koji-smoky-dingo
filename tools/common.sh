@@ -76,15 +76,10 @@ function ksd_build_platform() {
     # layers in it.
     local PREV=$($PODMAN images -a -q "$NAME")
 
-    local LAYERS=""
-    if [ `which podman 2>/dev/null` ] ; then
-	LAYERS="--layers"
-    fi
-
     echo "Building $NAME from $CFILE"
+    local BUILDAH_LAYERS=true
     $PODMAN build \
             --build-arg VERSION=$(ksd_version) \
-            $LAYERS \
             -t "$NAME" \
             -f "$CFILE" "$PWD" || return 1
 
