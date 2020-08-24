@@ -335,8 +335,9 @@ def cli_list_rpm_macros(session, tagname, target=False,
     else:
         tabulate(("Macro", "Value", "Tag"),
                  itervalues(extras),
-                 quiet=quiet,
-                 key=itemgetter("macro", "value", "tag_name"))
+                 key=itemgetter("macro", "value", "tag_name"),
+                 sorting=1,
+                 quiet=quiet)
 
 
 class ListRPMMacros(AnonSmokyDingo):
@@ -514,8 +515,9 @@ def cli_list_env_vars(session, tagname, target=False,
     else:
         tabulate(("Variable", "Value", "Tag"),
                  itervalues(extras),
-                 quiet=quiet,
-                 key=itemgetter("var", "value", "tag_name"))
+                 key=itemgetter("var", "value", "tag_name"),
+                 sorting=1,
+                 quiet=quiet)
 
 
 class ListEnvVars(AnonSmokyDingo):
@@ -570,6 +572,7 @@ def cli_list_tag_extras(session, tagname, target=False,
     tabulate(("Setting", "Value", "Tag"),
              itervalues(extras),
              key=itemgetter("name", "value", "tag_name"),
+             sorting=1,
              quiet=quiet)
 
 
