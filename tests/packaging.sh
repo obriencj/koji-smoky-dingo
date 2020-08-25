@@ -22,20 +22,24 @@ function verify_koji_cli() {
     echo 'Checking output of `koji help`:'
     koji help \
         | grep \
-              -e renum-tag-inheritance \
-              -e set-rpm-macro \
-              -e swap-tag-inheritance \
-              -e unset-rpm-macro \
-              -e bulk-tag-builds \
               -e affected-targets \
+              -e bulk-tag-builds \
               -e check-hosts \
               -e client-config \
               -e latest-archives \
               -e list-build-archives \
               -e list-cgs \
+              -e list-env-vars \
               -e list-imported \
               -e list-rpm-macros \
+              -e list-tag-extras \
               -e perminfo \
+              -e renum-tag-inheritance \
+              -e set-env-var \
+              -e set-rpm-macro \
+              -e swap-tag-inheritance \
+              -e unset-env-var \
+              -e unset-rpm-macro \
               -e userinfo
 
     if [ "$?" != 0 ] ; then

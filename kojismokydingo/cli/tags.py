@@ -22,20 +22,49 @@ Koji Smoky Dingo - CLI Tag and Target Commands
 
 from __future__ import print_function
 
+import sys
+
+from json import dumps
 from koji_cli.lib import arg_filter
-from six import iteritems
+from operator import itemgetter
+from six import iteritems, itervalues
 from six.moves import zip
 
-from . import AnonSmokyDingo, TagSmokyDingo, printerr, pretty_json
+from . import (
+    AnonSmokyDingo, TagSmokyDingo,
+    printerr, pretty_json, tabulate)
 from .. import BadDingo, NoSuchTag
 from ..tags import (
-    collect_tag_extras, find_inheritance, get_affected_targets,
+    collect_tag_extras, find_inheritance_parent, get_affected_targets,
     renum_inheritance, resolve_tag)
+
+
+class BadSwap(BadDingo):
+    complaint = "Wonky inheritance swap requested"
+
+
+class NoSuchInheritance(BadDingo):
+    complaint = "No such inheritance link"
+
+
+class NoSuchTagExtra(BadDingo):
+    complaint = "Extra setting is not defined at this tag"
+
+
+class NoSuchMacro(NoSuchTagExtra):
+    complaint = "Macro is not defined at this tag"
+
+
+class NoSuchEnvVar(NoSuchTagExtra):
+    complaint = "Environment variable is not defined at this tag"
 
 
 def cli_affected_targets(session, tag_list,
                          build_tags=False, info=False,
-                         quiet=False):
+                         quiet=None):
+
+    if quiet is None:
+        quiet = not sys.stdout.isatty()
 
     targets = get_affected_targets(session, tag_list)
 
@@ -80,7 +109,7 @@ class AffectedTargets(AnonSmokyDingo):
         addarg("tags", nargs="+", metavar="TAGNAME",
                help="Tag to check")
 
-        addarg("-q", "--quiet", action="store_true", default=False,
+        addarg("-q", "--quiet", action="store_true", default=None,
                help="Don't print summary information")
 
         group = argp.add_mutually_exclusive_group()
@@ -181,14 +210,6 @@ class RenumTagInheritance(TagSmokyDingo):
                              options.verbose, options.test)
 
 
-class BadSwap(BadDingo):
-    complaint = "Wonky inheritance swap requested"
-
-
-class NoSuchInheritance(BadDingo):
-    complaint = "No such inheritance link"
-
-
 def cli_swap_inheritance(session, tagname, old_parent, new_parent,
                          verbose=False, test=False):
 
@@ -210,8 +231,8 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
     # deep copy of original inheritance
     swapped = [dict(i) for i in original]
 
-    found_old = find_inheritance(swapped, old_p["id"])
-    found_new = find_inheritance(swapped, new_p["id"])
+    found_old = find_inheritance_parent(swapped, old_p["id"])
+    found_new = find_inheritance_parent(swapped, new_p["id"])
 
     if found_old is None:
         raise NoSuchInheritance(tagname, old_parent)
@@ -309,35 +330,31 @@ class SwapTagInheritance(TagSmokyDingo):
 
 
 def cli_list_rpm_macros(session, tagname, target=False,
-                        quiet=False, defn=False, json=False):
+                        quiet=None, defn=False, json=False):
 
     taginfo = resolve_tag(session, tagname, target)
 
-    macros = []
-    extras = collect_tag_extras(session, taginfo)
+    extras = collect_tag_extras(session, taginfo, prefix="rpm.macro.")
     for name, extra in iteritems(extras):
-        if name.startswith("rpm.macro."):
-            extra["macro"] = name[10:]
-            macros.append(extra)
+        extra["macro"] = name[10:]
 
     if json:
-        pretty_json(macros)
+        pretty_json(extras)
         return
 
     if defn:
         # macro definition mode
         fmt = "%{macro} {value}"
 
-    else:
-        # normal mode
-        fmt = "{macro:<10}  {value:<10}  {tag_name:<20}"
-        if not quiet:
-            # with headings if not quiet
-            print(fmt.format(macro="Macro", value="Value", tag_name="Tag"))
-            print("-" * 10, "", "-" * 10, "", "-" * 20)
+        for extra in itervalues(extras):
+            print(fmt.format(**extra))
 
-    for extra in macros:
-        print(fmt.format(**extra))
+    else:
+        tabulate(("Macro", "Value", "Tag"),
+                 itervalues(extras),
+                 key=itemgetter("macro", "value", "tag_name"),
+                 sorting=1,
+                 quiet=quiet)
 
 
 class ListRPMMacros(AnonSmokyDingo):
@@ -358,7 +375,7 @@ class ListRPMMacros(AnonSmokyDingo):
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
 
-        addarg("--quiet", "-q", action="store_true", default=False,
+        addarg("--quiet", "-q", action="store_true", default=None,
                help="Omit headings")
 
         addarg("--macro-definition", "-d", action="store_true",
@@ -377,10 +394,6 @@ class ListRPMMacros(AnonSmokyDingo):
                                    quiet=options.quiet,
                                    defn=options.defn,
                                    json=options.json)
-
-
-class NoSuchMacro(BadDingo):
-    complaint = "Macro is not defined in this tag"
 
 
 def cli_unset_rpm_macro(session, tagname, macro, target=False):
@@ -431,7 +444,7 @@ class UnsetRPMMacro(TagSmokyDingo):
                                    target=options.target)
 
 
-def cli_set_rpm_macro(session, tagname, macro, value, target=None):
+def cli_set_rpm_macro(session, tagname, macro, value, target=False):
 
     taginfo = resolve_tag(session, tagname, target)
 
@@ -484,6 +497,218 @@ class SetRPMMacro(TagSmokyDingo):
         return cli_set_rpm_macro(self.session, options.tag,
                                  options.macro, options.value,
                                  target=options.target)
+
+
+def cli_unset_env_var(session, tagname, var, target=False):
+
+    taginfo = resolve_tag(session, tagname, target)
+
+    extras = taginfo["extra"]
+
+    if var.startswith("rpm.env."):
+        key = var
+        var = var[8:]
+    else:
+        key = "rpm.env." + var
+
+    if key not in extras:
+        raise NoSuchEnvVar(var)
+
+    session.editTag2(taginfo["id"], remove_extra=[key])
+
+
+class UnsetEnvVar(TagSmokyDingo):
+
+    description = "Unset a mock environment variable on a tag"
+
+
+    def parser(self):
+        parser = super(UnsetEnvVar, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("var", action="store",
+               help="Name of the environment variable")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_unset_env_var(self.session,
+                                 options.tag, options.var,
+                                 target=options.target)
+
+
+def cli_set_env_var(session, tagname, var, value, target=False):
+
+    taginfo = resolve_tag(session, tagname, target)
+
+    if var.startswith("rpm.env."):
+        key = var
+        var = var[8:]
+    else:
+        key = "rpm.env." + var
+
+    session.editTag2(taginfo["id"], extra={key: value})
+
+
+class SetEnvVar(TagSmokyDingo):
+
+    description = "Set a mock environment variable on a tag"
+
+
+    def parser(self):
+        parser = super(SetEnvVar, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("var", action="store",
+               help="Name of the environment variable")
+
+        addarg("value", action="store", nargs="?", default="",
+               help="Value of the environment var. Default: ''")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_set_env_var(self.session, options.tag,
+                               options.var, options.value,
+                               target=options.target)
+
+
+def cli_list_env_vars(session, tagname, target=False,
+                      quiet=None, defn=False, json=False):
+
+    taginfo = resolve_tag(session, tagname, target)
+
+    extras = collect_tag_extras(session, taginfo, prefix="rpm.env.")
+    for name, extra in iteritems(extras):
+        extra["var"] = name[8:]
+
+    if json:
+        pretty_json(extras)
+        return
+
+    else:
+        # we're going to want to add some escaping safety nets. Let's
+        # have json.dumps do that work for us.
+        for extra in itervalues(extras):
+            extra["value"] = dumps(extra["value"])
+
+    if defn:
+        # macro definition mode
+        fmt = "{var!s}={value!s}"
+
+        for extra in itervalues(extras):
+            print(fmt.format(**extra))
+
+    else:
+        tabulate(("Variable", "Value", "Tag"),
+                 itervalues(extras),
+                 key=itemgetter("var", "value", "tag_name"),
+                 sorting=1,
+                 quiet=quiet)
+
+
+class ListEnvVars(AnonSmokyDingo):
+
+    description = "Show mock environment variables for a tag"
+
+
+    def parser(self):
+        parser = super(ListEnvVars, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--quiet", "-q", action="store_true", default=None,
+               help="Omit headings")
+
+        addarg("--sh-declaration", "-d", action="store_true",
+               dest="defn", default=False,
+               help="Output as sh variable declarations")
+
+        addarg("--json", action="store_true", default=False,
+               help="Output as JSON")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_list_env_vars(self.session, options.tag,
+                                 target=options.target,
+                                 quiet=options.quiet,
+                                 defn=options.defn,
+                                 json=options.json)
+
+
+def cli_list_tag_extras(session, tagname, target=False,
+                        quiet=None, json=False):
+
+    taginfo = resolve_tag(session, tagname, target)
+    extras = collect_tag_extras(session, taginfo)
+
+    if json:
+        pretty_json(extras)
+        return
+
+    tabulate(("Setting", "Value", "Tag"),
+             itervalues(extras),
+             key=itemgetter("name", "value", "tag_name"),
+             sorting=1,
+             quiet=quiet)
+
+
+class ListTagExtras(AnonSmokyDingo):
+
+    description = "Show extra settings for a tag"
+
+
+    def parser(self):
+        parser = super(ListTagExtras, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--quiet", "-q", action="store_true", default=None,
+               help="Omit headings")
+
+        addarg("--json", action="store_true", default=False,
+               help="Output as JSON")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_list_tag_extras(self.session, options.tag,
+                                   target=options.target,
+                                   quiet=options.quiet,
+                                   json=options.json)
 
 
 #

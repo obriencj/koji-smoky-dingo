@@ -1,25 +1,29 @@
-# Overview of koji-smoky-dingo
+# Overview
 
-This is a collection of simple client command-line plugins for [koji].
+Koji Smoky Dingo is a collection of client command-line plugins for
+[koji], and a set of utility modules for writing your own commands or
+scripts.
 
 [koji]: https://pagure.io/koji
 
-The name "smoky-dingo" was provided by [coolname] and has no particular relevance.
+The phrase "smoky-dingo" was provided by [coolname] and has no
+particular relevance.
 
 [coolname]: https://pypi.org/project/coolname/
 
 
 ## Meta Plugin
 
-This project is broken into two parts. The first part is a relatively
-tiny CLI plugin for koji which acts as an adapter to load commands
-registered via python's entry points. The second and larger part is a
-collection of commands that are be loaded by that meta plugin.
+This project provides a relatively tiny CLI plugin for koji, named
+kojismokydingometa. This plugin acts as an adapter between koji's
+existing CLI framework and Python's entry_points. This adaptive
+behavior is utilized by the rest of the project to add its own
+additional commands to koji.
 
 The meta plugin can be used to load commands other than those provided
-by koji-smoky-dingo. Simply register your commands with the
-`"koji_smoky_dingo"` entry point key and install your package. See
-[setup.py] for direct examples.
+as part of this project. Simply register your commands with the
+`"koji_smoky_dingo"` entry point key. See [setup.py] for direct
+examples.
 
 [setup.py]: https://github.com/obriencj/koji-smoky-dingo/blob/master/setup.py
 
@@ -33,12 +37,14 @@ permission (koji >= [1.18]) or the admin permission.
 |---------|-------------|
 |`bulk—tag-builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
 |`renum—tag-inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
+|`set-env-var` |Sets the value of a mock environment variable on a tag. |
 |`set-rpm-macro` |Sets the value of a mock RPM macro on a tag. |
 |`swap—tag-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
+|`unset-env-var` |Removes a mock environment variable from a tag. |
 |`unset-rpm-macro` |Removes a mock RPM macro from a tag. |
 
 
-## Informational Commands
+## Information Commands
 
 These commands are informational only, and do not require any special
 permissions in koji.
@@ -51,38 +57,44 @@ permissions in koji.
 |`latest-archives` |Show selected latest archives from a tag |
 |`list-build-archives` |Show selected archives attached to a build |
 |`list-cgs` |Show content generators and their permitted users |
+|`list-env-vars` |Shows all inherited mock environment variables for a tag |
 |`list—imported` |Show builds which were imported into koji |
 |`list-rpm-macros` |Show all inherited mock RPM macros for a tag |
+|`list-tag-extras` |Show all inherited extra fields for a tag |
 |`perminfo` |Show information about a permission |
 |`userinfo` |Show information about a user account |
 
 
 ## Install
 
-### Meta Plugin
+
+### The Meta Plugin
 
 Because of how koji loads client plugins, the meta plugin needs to be
 installed with either the `--old-and-unmanageable` flag or with
 `--root=/` specified.
 
 ```bash
+# system install
 sudo python setup-meta.py clean build install --root=/
 ```
 
 With koji >= [1.18], the meta plugin can also be installed into
-`~/.koji_cli_plugins`
+`~/.koji/plugins`
 
 [1.18]: https://docs.pagure.org/koji/release_notes_1.18/
 
 ```bash
+# user only
 mkdir -p ~/.koji/plugins
 cp koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 ```
 
-### Package kojismokydingo
+
+### The kojismokydingo Package
 
 However the rest of koji-smoky-dingo can be installed normally, either
-as a system-level or user-level package
+as a system-level or user-level package.
 
 ```bash
 # system install
@@ -92,12 +104,26 @@ sudo python setup.py install
 python setup.py install --user
 ```
 
+If deploying on a Python 3 environment, it's best to install via pip
+
+```bash
+# system insall
+python3 ./setup.py bdist_wheel
+pip3 install --I dist/*.whl
+
+# user only
+python3 ./setup.py bdist_wheel
+pip3 install --user --I dist/*.whl
+```
+
 
 ## Contact
 
 Author: Christopher O'Brien  <obriencj@gmail.com>
 
 Original Git Repository: <https://github.com/obriencj/koji-smoky-dingo>
+
+Documentation: <https://obriencj.github.io/koji-smoky-dingo>
 
 
 ## License

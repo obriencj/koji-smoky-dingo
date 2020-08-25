@@ -36,6 +36,7 @@ from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os.path import basename
 from six import add_metaclass
+from six.moves import zip_longest
 
 from kojismokydingo import BadDingo, NotPermitted
 
@@ -137,6 +138,88 @@ def read_clean_lines(filename="-", skip_comments=True):
 
 
 printerr = partial(print, file=sys.stderr)
+
+
+def tabulate(headings, data, key=None, sorting=0,
+             quiet=None, out=sys.stdout):
+    """
+    Prints tabulated data, with the given headings.
+
+    This function is not resilient -- the headings and data must have
+    the same count of rows, nothing will inject empty values.
+
+    Output will be configured to set the columns to their maximum
+    width necessary for the longest value from all the rows or the
+    heading.
+
+    :param headings: The column titles
+    :type headings: list(str)
+
+    :param data: Rows of data
+    :type data: list
+
+    :param key: Transformation to apply to each row of data to get the
+        actual individual columns. Should be a unary function. Default,
+        data is iterated as-is.
+
+    :type key: Callable[[obj], obj]
+
+    :param sorting: Whether data rows should be sorted and in what
+       direction. 0 for no sorting, 1 for ascending, -1 for
+       descending. If key is specified, then sorting will be based on
+       those transformations. Default, no sorting.
+
+    :type sorting: int, optional
+
+    :param quiet: Whether to print headings or not. Default, only print
+        headings if out is a TTY device.
+
+    :type quiet: bool, optional
+
+    :param out: Stream to write output to. Default, sys.stdout
+
+    :type out: Stream
+
+    :rtype: None
+    """
+
+    # The quiet setting has three values. True meaning no header,
+    # False meaning header, and None meaning no header if out is not a
+    # TTY.
+    if quiet is None:
+        quiet = not out.isatty()
+
+    # convert data to a list, and apply the key if necessary to find
+    # the real columns
+    if key:
+        data = (key(row) for row in data)
+
+    if sorting:
+        data = sorted(data, reverse=(sorting < 0))
+    else:
+        data = list(data)
+
+    # now we need to compute the maximum width of each columns
+    if data:
+        widths = [max(len(str(v)) for v in col)
+                  for col in zip_longest(*data, fillvalue="")]
+    else:
+        widths = []
+
+    if headings and not quiet:
+        widths = [max(w or 0, len(h or "")) for w, h in
+                  zip_longest(widths, headings)]
+
+    # now we create the format string based on the max width of each
+    # column plus some spacing
+    fmt = "  ".join("{:<%i}" % w for w in widths)
+
+    if headings and not quiet:
+        print(fmt.format(*headings), file=out)
+        print("  ".join(("-" * h) for h in widths), file=out)
+
+    for row in data:
+        print(fmt.format(*row), file=out)
 
 
 @add_metaclass(ABCMeta)

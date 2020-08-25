@@ -13,10 +13,8 @@
 
 
 """
-Koji Smoky Dingo - Archive Utilities
-
-Functions for working with gathering and transforming Koji RPMs and
-archives
+Functions for gathering and transforming Koji datastructures
+representing RPMs and build archives
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
@@ -30,7 +28,33 @@ from six import iterkeys, iteritems
 from . import NoSuchTag, bulk_load_rpm_sigs
 
 
+__all__ = (
+    "as_pathinfo",
+    "filter_archives",
+
+    "gather_build_archives",
+    "gather_build_image_archives",
+    "gather_build_maven_archives",
+    "gather_build_rpms",
+    "gather_build_win_archives",
+
+    "gather_latest_archives",
+    "gather_latest_image_archives",
+    "gather_latest_maven_archives",
+    "gather_latest_rpms",
+    "gather_latest_win_archives",
+
+    "gather_signed_rpms",
+)
+
+
 def as_pathinfo(path):
+    """
+    Converts path into a PathInfo if it is not one already
+
+    :rtype: koji.PathInfo
+    """
+
     if isinstance(path, PathInfo):
         return path
     else:
@@ -44,9 +68,11 @@ def filter_archives(session, archives, archive_types):
     types.
 
     :param archives: Archive infos to be filtered
+
     :type archives: list[dict]
 
     :param archive_types: Desired archive type extensions
+
     :type archive_types: list[str]
 
     :rtype: list[dict]
@@ -86,10 +112,12 @@ def gather_signed_rpms(session, archives, sigkeys):
     match.
 
     :param archives: list of RPM archive dicts
+
     :type archives: list[dict]
 
     :param sigkeys: list of signature fingerprints, in order of
     precedence
+
     :type sigkeys: list[str]
 
     :rtype: list[dict]
@@ -147,9 +175,11 @@ def gather_build_maven_archives(session, binfo, path=None):
     the value of which is an expanded path to the file itself.
 
     :param binfo: Build info to fetch archives for
+
     :type binfo: dict
 
     :param path: The root dir for the archive file paths, default None
+
     :type path: str, optional
 
     :rtype: list[dict]
@@ -199,9 +229,11 @@ def gather_build_image_archives(session, binfo, path=None):
     the value of which is an expanded path to the file itself.
 
     :param binfo: Build info to fetch archives for
+
     :type binfo: dict
 
     :param path: The root dir for the archive file paths, default None
+
     :type path: str, optional
 
     :rtype: list[dict]
@@ -234,17 +266,21 @@ def gather_build_archives(session, binfo, btype=None,
     attempt to homogenize them together.
 
     :param binfo: Build info to fetch archives for
+
     :type binfo: dict
 
     :param btype: BType to filter for. Default None for all types.
+
     :type btype: str, optional
 
     :param rpmkeys: RPM signatures to filter for, in order of
     preference. An empty string matches the unsigned copy. Default ()
     for no signature filtering.
+
     :type rpmkeys: list[str], optional
 
     :param path: The root dir for the archive file paths, default None
+
     :type path: str, optional
 
     :rtype: list[dict]
@@ -300,11 +336,13 @@ def gather_latest_rpms(session, tagname, rpmkeys=(),
     location.
 
     :param tagname: Name of the tag to search in for RPMs
+
     :type tagname: str
 
     :param rpmkeys: RPM signatures to filter for, in order of
     preference. An empty string matches the unsigned copy. Default ()
     for no signature filtering.
+
     :type rpmkeys: list[str], optional
 
     :param inherit: Follow tag inheritance, default True
@@ -312,6 +350,7 @@ def gather_latest_rpms(session, tagname, rpmkeys=(),
     :type inherit: bool, optional
 
     :param path: The root dir for the archive file paths, default None
+
     :type path: str, optional
 
     :rtype: list[dict]
@@ -382,6 +421,7 @@ def gather_latest_maven_archives(session, tagname,
     the matching maven artifact's file location.
 
     :param tagname: Name of the tag to search in for maven artifacts
+
     :type tagname: str
 
     :param inherit: Follow tag inheritance, default True
@@ -395,6 +435,11 @@ def gather_latest_maven_archives(session, tagname,
 
     found = session.getLatestMavenArchives(tagname, inherit=inherit)
     for f in found:
+        # unlike getLatestRPMs, getLatestMavenArchives only provides
+        # the archives themselves. We don't want to have to do a bulk
+        # load for all those, so we fake a build info from the values
+        # in the archive itself. Since we're only using it to
+        # determine paths, the missing fields shouldn't be a problem
         bld = _fake_maven_build(f, path)
         f["filepath"] = join(bld["build_path"], path.mavenfile(f))
 
@@ -453,7 +498,6 @@ def gather_latest_image_archives(session, tagname,
     :param inherit: Follow tag inheritance, default True
 
     :type inherit: bool, optional
-
     """
 
     path = as_pathinfo(path)
@@ -487,13 +531,16 @@ def gather_latest_archives(session, tagname, btype=None,
     types -- specifically maven.
 
     :param tagname: Name of the tag to gather archives from
+
     :type tagname: str
 
     :param btype: Name of the BType to gather. Default, gather all
+
     :type btype: str, optional
 
     :param rpmkeys: List of RPM signatures to filter by. Only used when
     fetching type of rpm or None (all).
+
     :type rpmkeys: list[str]
 
     :param inherit: Follow tag inheritance, default True
@@ -501,6 +548,7 @@ def gather_latest_archives(session, tagname, btype=None,
     :type inherit: bool, optional
 
     :param path: Path prefix for archive filepaths.
+
     :type path: str
 
     :rtype: list[dict]
