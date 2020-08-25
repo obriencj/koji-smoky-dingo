@@ -39,6 +39,26 @@ from ..tags import (
     renum_inheritance, resolve_tag)
 
 
+class BadSwap(BadDingo):
+    complaint = "Wonky inheritance swap requested"
+
+
+class NoSuchInheritance(BadDingo):
+    complaint = "No such inheritance link"
+
+
+class NoSuchTagExtra(BadDingo):
+    complaint = "Extra setting is not defined at this tag"
+
+
+class NoSuchMacro(NoSuchTagExtra):
+    complaint = "Macro is not defined at this tag"
+
+
+class NoSuchEnvVar(NoSuchTagExtra):
+    complaint = "Environment variable is not defined at this tag"
+
+
 def cli_affected_targets(session, tag_list,
                          build_tags=False, info=False,
                          quiet=None):
@@ -188,14 +208,6 @@ class RenumTagInheritance(TagSmokyDingo):
         return cli_renum_tag(self.session, options.tag,
                              options.begin, options.step,
                              options.verbose, options.test)
-
-
-class BadSwap(BadDingo):
-    complaint = "Wonky inheritance swap requested"
-
-
-class NoSuchInheritance(BadDingo):
-    complaint = "No such inheritance link"
 
 
 def cli_swap_inheritance(session, tagname, old_parent, new_parent,
@@ -384,10 +396,6 @@ class ListRPMMacros(AnonSmokyDingo):
                                    json=options.json)
 
 
-class NoSuchMacro(BadDingo):
-    complaint = "Macro is not defined in this tag"
-
-
 def cli_unset_rpm_macro(session, tagname, macro, target=False):
 
     taginfo = resolve_tag(session, tagname, target)
@@ -436,7 +444,7 @@ class UnsetRPMMacro(TagSmokyDingo):
                                    target=options.target)
 
 
-def cli_set_rpm_macro(session, tagname, macro, value, target=None):
+def cli_set_rpm_macro(session, tagname, macro, value, target=False):
 
     taginfo = resolve_tag(session, tagname, target)
 
@@ -489,6 +497,94 @@ class SetRPMMacro(TagSmokyDingo):
         return cli_set_rpm_macro(self.session, options.tag,
                                  options.macro, options.value,
                                  target=options.target)
+
+
+def cli_unset_env_var(session, tagname, var, target=False):
+
+    taginfo = resolve_tag(session, tagname, target)
+
+    extras = taginfo["extra"]
+
+    if var.startswith("rpm.env."):
+        key = var
+        var = var[8:]
+    else:
+        key = "rpm.env." + var
+
+    if key not in extras:
+        raise NoSuchEnvVar(var)
+
+    session.editTag2(taginfo["id"], remove_extra=[key])
+
+
+class UnsetEnvVar(TagSmokyDingo):
+
+    description = "Unset a mock environment variable on a tag"
+
+
+    def parser(self):
+        parser = super(UnsetEnvVar, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("var", action="store",
+               help="Name of the environment variable")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_unset_env_var(self.session,
+                                 options.tag, options.var,
+                                 target=options.target)
+
+
+def cli_set_env_var(session, tagname, var, value, target=False):
+
+    taginfo = resolve_tag(session, tagname, target)
+
+    if var.startswith("rpm.env."):
+        key = var
+        var = var[8:]
+    else:
+        key = "rpm.env." + var
+
+    session.editTag2(taginfo["id"], extra={key: value})
+
+
+class SetEnvVar(TagSmokyDingo):
+
+    description = "Set a mock environment variable on a tag"
+
+
+    def parser(self):
+        parser = super(SetEnvVar, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("var", action="store",
+               help="Name of the environment variable")
+
+        addarg("value", action="store", nargs="?", default="",
+               help="Value of the environment var. Default: ''")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_set_env_var(self.session, options.tag,
+                               options.var, options.value,
+                               target=options.target)
 
 
 def cli_list_env_vars(session, tagname, target=False,
