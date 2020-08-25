@@ -22,6 +22,8 @@ Koji Smoky Dingo - CLI Tag and Target Commands
 
 from __future__ import print_function
 
+import sys
+
 from json import dumps
 from koji_cli.lib import arg_filter
 from operator import itemgetter
@@ -39,7 +41,10 @@ from ..tags import (
 
 def cli_affected_targets(session, tag_list,
                          build_tags=False, info=False,
-                         quiet=False):
+                         quiet=None):
+
+    if quiet is None:
+        quiet = not sys.stdout.isatty()
 
     targets = get_affected_targets(session, tag_list)
 
@@ -84,7 +89,7 @@ class AffectedTargets(AnonSmokyDingo):
         addarg("tags", nargs="+", metavar="TAGNAME",
                help="Tag to check")
 
-        addarg("-q", "--quiet", action="store_true", default=False,
+        addarg("-q", "--quiet", action="store_true", default=None,
                help="Don't print summary information")
 
         group = argp.add_mutually_exclusive_group()
@@ -313,7 +318,7 @@ class SwapTagInheritance(TagSmokyDingo):
 
 
 def cli_list_rpm_macros(session, tagname, target=False,
-                        quiet=False, defn=False, json=False):
+                        quiet=None, defn=False, json=False):
 
     taginfo = resolve_tag(session, tagname, target)
 
@@ -358,7 +363,7 @@ class ListRPMMacros(AnonSmokyDingo):
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
 
-        addarg("--quiet", "-q", action="store_true", default=False,
+        addarg("--quiet", "-q", action="store_true", default=None,
                help="Omit headings")
 
         addarg("--macro-definition", "-d", action="store_true",
@@ -487,7 +492,7 @@ class SetRPMMacro(TagSmokyDingo):
 
 
 def cli_list_env_vars(session, tagname, target=False,
-                      quiet=False, defn=False, json=False):
+                      quiet=None, defn=False, json=False):
 
     taginfo = resolve_tag(session, tagname, target)
 
@@ -538,7 +543,7 @@ class ListEnvVars(AnonSmokyDingo):
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
 
-        addarg("--quiet", "-q", action="store_true", default=False,
+        addarg("--quiet", "-q", action="store_true", default=None,
                help="Omit headings")
 
         addarg("--sh-declaration", "-d", action="store_true",
@@ -560,7 +565,7 @@ class ListEnvVars(AnonSmokyDingo):
 
 
 def cli_list_tag_extras(session, tagname, target=False,
-                        quiet=False, json=False):
+                        quiet=None, json=False):
 
     taginfo = resolve_tag(session, tagname, target)
     extras = collect_tag_extras(session, taginfo)
@@ -594,7 +599,7 @@ class ListTagExtras(AnonSmokyDingo):
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
 
-        addarg("--quiet", "-q", action="store_true", default=False,
+        addarg("--quiet", "-q", action="store_true", default=None,
                help="Omit headings")
 
         addarg("--json", action="store_true", default=False,
