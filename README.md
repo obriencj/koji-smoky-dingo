@@ -37,8 +37,10 @@ permission (koji >= [1.18]) or the admin permission.
 |---------|-------------|
 |`bulk—tag-builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
 |`renum—tag-inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
+|`set-env-var` |Sets the value of a mock environment variable on a tag. |
 |`set-rpm-macro` |Sets the value of a mock RPM macro on a tag. |
 |`swap—tag-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
+|`unset-env-var` |Removes a mock environment variable from a tag. |
 |`unset-rpm-macro` |Removes a mock RPM macro from a tag. |
 
 
@@ -55,21 +57,25 @@ permissions in koji.
 |`latest-archives` |Show selected latest archives from a tag |
 |`list-build-archives` |Show selected archives attached to a build |
 |`list-cgs` |Show content generators and their permitted users |
+|`list-env-vars` |Shows all inherited mock environment variables for a tag |
 |`list—imported` |Show builds which were imported into koji |
 |`list-rpm-macros` |Show all inherited mock RPM macros for a tag |
+|`list-tag-extras` |Show all inherited extra fields for a tag |
 |`perminfo` |Show information about a permission |
 |`userinfo` |Show information about a user account |
 
 
 ## Install
 
-### Meta Plugin
+
+### The Meta Plugin
 
 Because of how koji loads client plugins, the meta plugin needs to be
 installed with either the `--old-and-unmanageable` flag or with
 `--root=/` specified.
 
 ```bash
+# system install
 sudo python setup-meta.py clean build install --root=/
 ```
 
@@ -79,14 +85,16 @@ With koji >= [1.18], the meta plugin can also be installed into
 [1.18]: https://docs.pagure.org/koji/release_notes_1.18/
 
 ```bash
+# user only
 mkdir -p ~/.koji/plugins
 cp koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 ```
 
-### Package kojismokydingo
+
+### The kojismokydingo Package
 
 However the rest of koji-smoky-dingo can be installed normally, either
-as a system-level or user-level package
+as a system-level or user-level package.
 
 ```bash
 # system install
@@ -94,6 +102,18 @@ sudo python setup.py install
 
 # user only
 python setup.py install --user
+```
+
+If deploying on a Python 3 environment, it's best to install via pip
+
+```bash
+# system insall
+python3 ./setup.py bdist_wheel
+pip3 install --I dist/*.whl
+
+# user only
+python3 ./setup.py bdist_wheel
+pip3 install --user --I dist/*.whl
 ```
 
 

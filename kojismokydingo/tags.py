@@ -36,31 +36,61 @@ def resolve_tag(session, name, target=False):
     If target is True, name is treated as a target's name, and the
     resulting taginfo will be from that target's build tag.
 
-    Raises NoSuchTarget or NoSuchTag as appropriate
+    :param name: Tag or Target name
+
+    :type name: str
+
+    :param target: name specified a target rather than a tag, fetch
+    the build tag name from the target and look up that. Default, name
+    specifies a tag.
+
+    :type target: bool, optional
+
+    :raise: NoSuchTarget or NoSuchTag as appropriate
+
+    :rtype: dict
     """
 
     if target:
-        tinfo = session.getBuildTarget(name)
-        if not tinfo:
-            raise NoSuchTarget(name)
-        name = tinfo["build_tag_name"]
+        tinfo = as_targetinfo(session, name)
+        name = tinfo.get("build_tag_name", name)
 
-    tinfo = session.getTag(name)
-    if not tinfo:
-        raise NoSuchTag(name)
-
-    return tinfo
+    return as_taginfo(session, name)
 
 
-def get_affected_targets(session, tagname_list):
+def as_taginfo(session, tag):
 
-    tags = list()
-    for tname in set(tagname_list):
-        tag = session.getTag(tname)
-        if not tag:
-            raise NoSuchTag(tname)
-        else:
-            tags.append(tag)
+    if isinstance(tag, (str, int)):
+        info = session.getTag(tag)
+    elif isinstance(tag, dict):
+        info = tag
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchTag(tag)
+
+    return info
+
+
+def as_targetinfo(session, target):
+
+    if isinstance(target, (str, int)):
+        info = session.getBuildTarget(target)
+    elif isinstance(target, dict):
+        info = target
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchTarget(target)
+
+    return info
+
+
+def get_affected_targets(session, tagnames):
+
+    tags = [as_taginfo(session, t) for t in set(tagnames)]
 
     session.multicall = True
     for tag in tags:
@@ -92,7 +122,20 @@ def renum_inheritance(inheritance, begin, step):
     return renumbered
 
 
-def find_inheritance(inheritance, parent_id):
+def find_inheritance_parent(inheritance, parent_id):
+    """
+    :param inheritance: the output of a getFullInheritance call
+    :type inheritance: list(dict)
+
+    :param parent_id: the ID of a parent tag to look for in the
+    inheritance data.
+
+    :returns: matching inheritance link data, or None if none are
+    found with the given parent_id
+
+    :rtype: dict
+    """
+
     for i in inheritance:
         if i["parent_id"] == parent_id:
             return i
@@ -100,11 +143,27 @@ def find_inheritance(inheritance, parent_id):
         return None
 
 
-def convert_tag_extras(taginfo, into=None):
+def convert_tag_extras(taginfo, into=None, prefix=None):
+    """
+    :param into: Existing dict to collect extras into. Default, create
+    a new OrderedDict
+
+    :type into: dict, optional
+
+    :param prefix: Only gather and convert extras with key's having
+    this prefix. Default, gather all keys not already found.
+
+    :type prefix: str, optional
+
+    :rtype: dict
+    """
 
     found = OrderedDict() if into is None else into
 
     for key, val in iteritems(taginfo["extra"]):
+        if prefix and not key.startswith(prefix):
+            continue
+
         if key not in found:
             found[key] = {
                 "name": key,
@@ -116,7 +175,7 @@ def convert_tag_extras(taginfo, into=None):
     return found
 
 
-def collect_tag_extras(session, taginfo):
+def collect_tag_extras(session, taginfo, prefix=None):
     """
     Similar to session.getBuildConfig but with additional information
     recording which tag in the inheritance supplied the setting.
@@ -128,13 +187,27 @@ def collect_tag_extras(session, taginfo):
       * value - the extra setting value
       * tag_name - the name of the tag this setting came from
       * tag_id - the ID of the tag this setting came from
+
+    :param taginfo: koji tag info dict, or tag name
+
+    :type taginfo: Union(str, dict)
+
+    :param prefix: Extra name prefix to select for. If set, only tag
+    extra fields whose key starts with the prefix string will be
+    collected. Default, collect all.
+
+    :type prefix: str, optional
+
+    :rtype: OrderedDict(str, dict)
     """
+
+    taginfo = as_taginfo(session, taginfo)
 
     # this borrows heavily from the hub implementation of
     # getBuildConfig, but gives us a chance to record what tag in the
     # inheritance that the setting is coming from
 
-    found = convert_tag_extras(taginfo)
+    found = convert_tag_extras(taginfo, prefix=prefix)
 
     inher = session.getFullInheritance(taginfo["id"])
 
@@ -145,7 +218,7 @@ def collect_tag_extras(session, taginfo):
     tags = (t[0] for t in session.multiCall())
 
     for tag in tags:
-        convert_tag_extras(tag, into=found)
+        convert_tag_extras(tag, into=found, prefix=prefix)
 
     return found
 
