@@ -46,12 +46,12 @@ def as_userinfo(session, user):
 
     :param user: Name, ID, or User Info describing a koji user
 
-    :type user: Union[str, int, dict]
+    :type user: str or int or dict
 
     :rtype: dict
 
     :raises NoSuchUser: when user cannot be resolved via
-        session.getUser
+        :py:meth:`session.getUser`
     """
 
     if isinstance(user, (str, int)):
@@ -125,15 +125,16 @@ def collect_cg_access(session, user):
 
     :param user: Name, ID, or userinfo dict
 
-    :type user: Union[str, id, dict]
+    :type user: str or int or dict
 
     :rtype: list[dict]
 
-    :raises NoSuchUser:
+    :raises NoSuchUser: if user is an ID or name which cannot be
+      resolved
     """
 
     userinfo = as_userinfo(session, user)
-    user = userinfo["name"]
+    username = userinfo["name"]
 
     found = []
     for cgname, val in iteritems(session.listCGs()):
@@ -151,7 +152,7 @@ def collect_cgs(session, name=None):
     :rtype: list[dict]
 
     :raises NoSuchContentGenerator: if name is specified and no
-        content generator matches
+      content generator matches
     """
 
     cgs = session.listCGs()
@@ -181,10 +182,11 @@ def collect_perminfo(session, permission):
     permission was granted and the user that granted it.
 
     :param permission: the string name of a permission
-
     :type permission: str
 
     :rtype: dict
+
+    :raises NoSuchPermission: if there is no matching permission found
     """
 
     for p in session.getAllPerms():

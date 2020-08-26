@@ -49,12 +49,34 @@ JSON_PRETTY_OPTIONS = {
 }
 
 
-def pretty_json(data, output=sys.stdout, pretty=JSON_PRETTY_OPTIONS):
+def pretty_json(data, output=None, **pretty):
     """
     Presents JSON in a pretty way.
+
+    Keyword arguments are passed along to :py:func:`json.dump` to
+    alter the default output format defined by
+    :py:obj:`JSON_PRETTY_OPTIONS`
+
+    :param data: value to be printed
+
+    :type data: int or str or dict or list or None
+
+    :param output: stream to print to. Default, :py:obj:`sys.stdout`
+
+    :type output: io.TextIOBase, optional
+
+    :rtype: None
     """
 
-    dump(data, output, **pretty)
+    if output is None:
+        output = sys.stdout
+
+    pretty_options = JSON_PRETTY_OPTIONS
+    if pretty:
+        pretty_options = dict(pretty_options)
+        pretty_options.update(pretty)
+
+    dump(data, output, **pretty_options)
     print(file=output)
 
 
@@ -89,11 +111,11 @@ def clean_lines(lines, skip_comments=True):
     :type lines: Iterator[str]
 
     :param skip_comments: Skip over lines with leading # characters.
-        Default, True
+      Default, True
 
     :type skip_comments: bool, optional
 
-    :rtype: list[str]
+    :rtype: List[str]
     """
 
     if skip_comments:
@@ -106,7 +128,7 @@ def clean_lines(lines, skip_comments=True):
 def read_clean_lines(filename="-", skip_comments=True):
     """
     Reads clean lines from a named file. If filename is '-' then read
-    from sys.stdin instead.
+    from :py:obj:`sys.stdin` instead.
 
     Each line will be stripped of leading and trailing whitespace.
 
@@ -115,15 +137,15 @@ def read_clean_lines(filename="-", skip_comments=True):
     the output.
 
     Content will be fully collected into a list and the file (if not
-    sys.stdin) will be closed before returning.
+    stdin) will be closed before returning.
 
     :param filename: File name to read lines from, or - to indicate
-        stdin. Default, -
+      stdin. Default, read from :py:obj:`sys.stdin`
 
     :type filename: str, optional
 
     :param skip_comments: Skip over lines with leading # characters.
-        Default, True
+      Default, True
 
     :type skip_comments: bool, optional
 
@@ -145,7 +167,7 @@ printerr = partial(print, file=sys.stderr)
 
 
 def tabulate(headings, data, key=None, sorting=0,
-             quiet=None, out=sys.stdout):
+             quiet=None, out=None):
     """
     Prints tabulated data, with the given headings.
 
@@ -158,36 +180,39 @@ def tabulate(headings, data, key=None, sorting=0,
 
     :param headings: The column titles
 
-    :type headings: list(str)
+    :type headings: list[str]
 
     :param data: Rows of data
 
     :type data: list
 
     :param key: Transformation to apply to each row of data to get the
-        actual individual columns. Should be a unary function. Default,
-        data is iterated as-is.
+      actual individual columns. Should be a unary function. Default,
+      data is iterated as-is.
 
-    :type key: Callable[[obj], obj]
+    :type key: Callable[[object], object]
 
     :param sorting: Whether data rows should be sorted and in what
-       direction. 0 for no sorting, 1 for ascending, -1 for
-       descending. If key is specified, then sorting will be based on
-       those transformations. Default, no sorting.
+      direction. 0 for no sorting, 1 for ascending, -1 for
+      descending. If key is specified, then sorting will be based on
+      those transformations. Default, no sorting.
 
     :type sorting: int, optional
 
     :param quiet: Whether to print headings or not. Default, only print
-        headings if out is a TTY device.
+      headings if out is a TTY device.
 
     :type quiet: bool, optional
 
-    :param out: Stream to write output to. Default, sys.stdout
+    :param out: Stream to write output to. Default, :py:obj:`sys.stdout`
 
-    :type out: Stream
+    :type out: io.TextIOBase, optional
 
     :rtype: None
     """
+
+    if out is None:
+        out = sys.stdout
 
     # The quiet setting has three values. True meaning no header,
     # False meaning header, and None meaning no header if out is not a
@@ -236,23 +261,31 @@ class SmokyDingo(object):
     referenced via an entry point under the koji_smoky_dingo group to
     be loaded at runtime by the kojismokydingometa Koji client plugin.
 
-    Summary:
-    * kojismokydingometa installed in koji_cli_plugins loads when koji
-      client launches
-    * the meta plugin loads all koji_smoky_dingo entry points
+    Summary of behavior is as follows
+
+    * kojismokydingometa plugin loads when koji client launches
+
+    * the meta plugin loads all `koji_smoky_dingo` entry points
+
     * each entry point name is a command name, and the reference should
-      resolve to a subclass of SmokyDingo
-    * each entry point is instantiated, and provided to the koji cli as
-      a new sub-command
-    * if the sub-command is invoked, then the SmokyDingo instance is
+      resolve to a subclass of `SmokyDingo`
+
+    * each entry point is instantiated, and presented to the koji cli
+      as a new sub-command
+
+    * if the sub-command is invoked, then the `SmokyDingo` instance is
       called, this triggers the following:
-    ** the SmokyDingo.parser method provides additional argument
-       parsing
-    ** the SmokyDingo.validate method provides a chance to validate
-       and/or manipulate the parsed arguments
-    ** the SmokyDingo.activate method authenticates with the hub
-    ** the SmokyDingo.handle method invokes the actual work of the
-       sub-command
+
+      * the `SmokyDingo.parser` method provides additional argument
+        parsing
+
+      * the `SmokyDingo.validate` method provides a chance to validate
+        and/or manipulate the parsed arguments
+
+      * the `SmokyDingo.activate` method authenticates with the hub
+
+      * the `SmokyDingo.handle` method invokes the actual work of the
+        sub-command
     """
 
     group = "misc"

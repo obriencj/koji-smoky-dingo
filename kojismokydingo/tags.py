@@ -41,8 +41,8 @@ def resolve_tag(session, name, target=False):
     :type name: str
 
     :param target: name specified a target rather than a tag, fetch
-        the build tag name from the target and look up that. Default,
-        name specifies a tag.
+      the build tag name from the target and look up that. Default,
+      name specifies a tag.
 
     :type target: bool, optional
 
@@ -186,22 +186,23 @@ def collect_tag_extras(session, taginfo, prefix=None):
     Returns an OrderedDict of tag extra settings, keyed by the name of
     the setting. Each setting is represented as its own dict composed
     of the following keys:
-      * name - the extra setting key
-      * value - the extra setting value
-      * tag_name - the name of the tag this setting came from
-      * tag_id - the ID of the tag this setting came from
+
+    * name - the extra setting key
+    * value - the extra setting value
+    * tag_name - the name of the tag this setting came from
+    * tag_id - the ID of the tag this setting came from
 
     :param taginfo: koji tag info dict, or tag name
 
-    :type taginfo: Union[str, dict]
+    :type taginfo: int or str or dict
 
     :param prefix: Extra name prefix to select for. If set, only tag
-        extra fields whose key starts with the prefix string will be
-        collected. Default, collect all.
+      extra fields whose key starts with the prefix string will be
+      collected. Default, collect all.
 
     :type prefix: str, optional
 
-    :rtype: OrderedDict[str, dict]
+    :rtype: collections.OrderedDict[str, dict]
     """
 
     taginfo = as_taginfo(session, taginfo)

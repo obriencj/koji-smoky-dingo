@@ -116,7 +116,7 @@ def gather_signed_rpms(session, archives, sigkeys):
     :type archives: list[dict]
 
     :param sigkeys: list of signature fingerprints, in order of
-    precedence
+      precedence
 
     :type sigkeys: list[str]
 
@@ -274,8 +274,8 @@ def gather_build_archives(session, binfo, btype=None,
     :type btype: str, optional
 
     :param rpmkeys: RPM signatures to filter for, in order of
-    preference. An empty string matches the unsigned copy. Default ()
-    for no signature filtering.
+        preference. An empty string matches the unsigned copy. Default
+        () for no signature filtering.
 
     :type rpmkeys: list[str], optional
 
@@ -340,8 +340,8 @@ def gather_latest_rpms(session, tagname, rpmkeys=(),
     :type tagname: str
 
     :param rpmkeys: RPM signatures to filter for, in order of
-    preference. An empty string matches the unsigned copy. Default ()
-    for no signature filtering.
+        preference. An empty string matches the unsigned copy. Default
+        () for no signature filtering.
 
     :type rpmkeys: list[str], optional
 
@@ -539,7 +539,7 @@ def gather_latest_archives(session, tagname, btype=None,
     :type btype: str, optional
 
     :param rpmkeys: List of RPM signatures to filter by. Only used when
-    fetching type of rpm or None (all).
+        fetching type of rpm or None (all).
 
     :type rpmkeys: list[str]
 
