@@ -8,4 +8,4 @@ Contents:
 
    overview
    kojismokydingo
-   cli
+   kojismokydingo/cli
