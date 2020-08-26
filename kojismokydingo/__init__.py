@@ -57,8 +57,8 @@ class ManagedClientSession(ClientSession):
 class AnonClientSession(ManagedClientSession):
     """
     A koji.ClientSession that can be used as via the 'with' keyword to
-    provide a managed session that will handle login and logout. Also
-    takes care of loading the relevant profile configuration.
+    provide a managed session. Suitable for working with anonymous
+    commands which do not require authentication.
     """
 
     def __enter__(self):

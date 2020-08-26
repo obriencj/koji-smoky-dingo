@@ -85,10 +85,12 @@ def clean_lines(lines, skip_comments=True):
     the output.
 
     :param lines: Sequence of lines to process
+
     :type lines: Iterator[str]
 
     :param skip_comments: Skip over lines with leading # characters.
-    Default, True
+        Default, True
+
     :type skip_comments: bool, optional
 
     :rtype: list[str]
@@ -116,11 +118,13 @@ def read_clean_lines(filename="-", skip_comments=True):
     sys.stdin) will be closed before returning.
 
     :param filename: File name to read lines from, or - to indicate
-    stdin. Default, -
+        stdin. Default, -
+
     :type filename: str, optional
 
     :param skip_comments: Skip over lines with leading # characters.
-    Default, True
+        Default, True
+
     :type skip_comments: bool, optional
 
     :rtype: list[str]
@@ -153,9 +157,11 @@ def tabulate(headings, data, key=None, sorting=0,
     heading.
 
     :param headings: The column titles
+
     :type headings: list(str)
 
     :param data: Rows of data
+
     :type data: list
 
     :param key: Transformation to apply to each row of data to get the

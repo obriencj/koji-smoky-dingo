@@ -39,15 +39,18 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     builders which are enabled, but no longer responding.
 
     :param arches: List of architecture names to filter builders by.
-    Default, all arches
+        Default, all arches
+
     :type arches: list[str], optional
 
     :param channel: Channel name to filter builders by. Default,
-    builders in any channel.
+        builders in any channel.
+
     :type channel: str, optional
 
     :param skiplist: List of glob-style patterns of builders to
-    omit. Default, all builders included
+        omit. Default, all builders included
+
     :type skiplist: list[str], optional
 
     :rtype: list[dict]
@@ -75,7 +78,6 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     # collect a mapping of builder ids to builder info
     bldrs = dict((b["id"], b) for b in bldrs)
 
-    # correlate the update timestamps with the builder info
     bldr_ids = list(iterkeys(bldrs))
 
     session.multicall = True
@@ -83,6 +85,7 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
         session.getLastHostUpdate(bid)
     mc = session.multiCall()
 
+    # correlate the update timestamps with the builder info
     for bid, data in zip(bldr_ids, mc):
         data = data[0] if data else None
 
