@@ -53,15 +53,14 @@ def pretty_json(data, output=None, **pretty):
     """
     Presents JSON in a pretty way.
 
-    Keyword arguments are passed along to :py:func:`json.dump` to
-    alter the default output format defined by
-    :py:obj:`JSON_PRETTY_OPTIONS`
+    Keyword arguments are passed along to `json.dump` to alter the
+    default output format defined by `JSON_PRETTY_OPTIONS`
 
     :param data: value to be printed
 
     :type data: int or str or dict or list or None
 
-    :param output: stream to print to. Default, :py:obj:`sys.stdout`
+    :param output: stream to print to. Default, `sys.stdout`
 
     :type output: io.TextIOBase, optional
 
@@ -83,13 +82,16 @@ def pretty_json(data, output=None, **pretty):
 def resplit(arglist, sep=","):
     """
     Collapses comma-separated and multi-specified items into a single
-    list. Useful with action="append" in an argparse argument.
+    list. Useful with ``action="append"`` in an argparse
+    argument.
 
-    this allows arguments like:
-    -x 1 -x 2, -x 3,4,5 -x ,6,7, -x 8
+    this allows command-line arguments like
+
+    ``-x 1 -x 2, -x 3,4,5 -x ,6,7, -x 8``
 
     to become
-    x = [1, 2, 3, 4, 5, 6, 7, 8]
+
+    ``x = [1, 2, 3, 4, 5, 6, 7, 8]``
     """
 
     work = (a.strip() for a in sep.join(arglist).split(sep))
@@ -127,8 +129,8 @@ def clean_lines(lines, skip_comments=True):
 
 def read_clean_lines(filename="-", skip_comments=True):
     """
-    Reads clean lines from a named file. If filename is '-' then read
-    from :py:obj:`sys.stdin` instead.
+    Reads clean lines from a named file. If filename is ``-`` then
+    read from `sys.stdin` instead.
 
     Each line will be stripped of leading and trailing whitespace.
 
@@ -139,8 +141,8 @@ def read_clean_lines(filename="-", skip_comments=True):
     Content will be fully collected into a list and the file (if not
     stdin) will be closed before returning.
 
-    :param filename: File name to read lines from, or - to indicate
-      stdin. Default, read from :py:obj:`sys.stdin`
+    :param filename: File name to read lines from, or ``-`` to indicate
+      stdin. Default, read from `sys.stdin`
 
     :type filename: str, optional
 
@@ -204,7 +206,7 @@ def tabulate(headings, data, key=None, sorting=0,
 
     :type quiet: bool, optional
 
-    :param out: Stream to write output to. Default, :py:obj:`sys.stdout`
+    :param out: Stream to write output to. Default, `sys.stdout`
 
     :type out: io.TextIOBase, optional
 
