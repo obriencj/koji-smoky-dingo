@@ -119,12 +119,13 @@ def globfilter(seq, patterns,
     :type patterns: list[str]
 
     :param key: A unary callable which translates individual items on
-      seq into the value to be matched against the patterns. Default, None
+      seq into the value to be matched against the patterns. Default,
+      match against values in seq directly.
 
-    :type key: Callable[[obj], str], optional
+    :type key: Callable[[object], str], optional
 
-    :param invert: Invert the logic, yield the non-matches rather than
-      the matches. Default, False
+    :param invert: Invert the logic, yielding the non-matches rather
+      than the matches. Default, yields matches
 
     :type invert: bool, optional
 
@@ -139,21 +140,15 @@ def globfilter(seq, patterns,
     if ignore_case:
         # rather than passing ignore_case directly on to fnmatches,
         # we'll do the case normalization ourselves. This way it only
-        # needs to happen one time.
+        # needs to happen one time for the patterns
         patterns = [p.lower() for p in patterns]
 
-        # let's borrow the key feature to lazily perform
-        # normalization. If we aren't provided a key, we'll make a key
-        # which simply lower-cases. If we were provided a key, then
-        # we'll compose lower-casing onto it.
-        if key is None:
-            key = str.lower
-        else:
-            real_key = key
-            key = lambda v: real_key(v).lower()
-
-    def test(s):
-        return fnmatches(key(s) if key else s, patterns)
+    def test(val):
+        if key:
+            val = key(val)
+        if ignore_case:
+            val = val.lower()
+        return fnmatches(val, patterns)
 
     return filterfalse(test, seq) if invert else filter(test, seq)
 
@@ -237,7 +232,7 @@ def rpm_evr_compare(left_evr, right_evr):
     This is an alternative implementation of the rpm lib's
     labelCompare function.
 
-    Return values indicate:
+    Return values:
 
     * 1 if left_evr is greater-than right_evr
     * 0 if left_evr is equal-to right_evr
