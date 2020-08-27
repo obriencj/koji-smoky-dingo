@@ -22,6 +22,11 @@ Some simple functions used by the other modules.
 """
 
 
+# Note: features implemented in this module should not be specific to
+# working with koji. ie: nothing should require a session object or
+# work with the koji-specific dict types (build info, tag info, etc)
+
+
 import re
 
 from collections import OrderedDict
@@ -37,7 +42,8 @@ __all__ = (
 
 def chunkseq(seq, chunksize):
     """
-    Chop up a sequence into sub-sequences of up-to chunksize in length.
+    Chop up a sequence into sub-sequences, each up to chunksize in
+    length.
 
     :param seq: a sequence to chunk up
     :type seq: list
@@ -45,7 +51,7 @@ def chunkseq(seq, chunksize):
     :param chunksize: max length for chunks
     :type chunksize: int
 
-    :rtype: iterator[list]
+    :rtype: Iterator[list]
     """
 
     try:
@@ -58,14 +64,15 @@ def chunkseq(seq, chunksize):
             offset in range(0, seqlen, chunksize))
 
 
-def fnmatches(s, patterns, ignore_case=False):
+def fnmatches(value, patterns, ignore_case=False):
     """
-    Checks s against multiple glob patterns. Returns True if any match.
+    Checks value against multiple glob patterns. Returns True if any
+    match.
 
-    :param s: string to be matched
-    :type s: str
+    :param value: string to be matched
+    :type value: str
 
-    :param patterns: list of patterns
+    :param patterns: list of glob-style pattern strings
     :type patterns: list[str]
 
     :param ignore_case: if True case is normalized, Default False
@@ -75,14 +82,14 @@ def fnmatches(s, patterns, ignore_case=False):
     """
 
     if ignore_case:
-        s = s.lower()
+        value = value.lower()
         patterns = [p.lower() for p in patterns]
 
     for pattern in patterns:
-        if fnmatchcase(s, pattern):
+        if fnmatchcase(value, pattern):
             return True
-
-    return False
+    else:
+        return False
 
 
 def globfilter(seq, patterns,
@@ -100,33 +107,53 @@ def globfilter(seq, patterns,
 
     If ignore_case is True, the pattern comparison is case normalized.
 
-    :param seq: series of objects to be filtered. Normally strings, but
-    may be any type provided the key parameter is specified to provide
-    a string for matching based on the given object.
+    :param seq: series of objects to be filtered. Normally strings,
+      but may be any type provided the key parameter is specified to
+      provide a string for matching based on the given object.
+
     :type seq: list
 
     :param patterns: list of glob-style pattern strings. Members of
-    seq which match any of these patterns are yielded.
+      seq which match any of these patterns are yielded.
+
     :type patterns: list[str]
 
     :param key: A unary callable which translates individual items on
-    seq into the value to be matched against the patterns. Default, None
+      seq into the value to be matched against the patterns. Default, None
+
     :type key: Callable[[obj], str], optional
 
     :param invert: Invert the logic, yield the non-matches rather than
-    the matches. Default, False
+      the matches. Default, False
+
     :type invert: bool, optional
 
     :param ignore_case: pattern comparison is case normalized if
-    True. Default, False
+      True. Default, False
+
     :type ignore_case: bool, optional
 
-    :rtype: Iterable[obj]
+    :rtype: Iterable[object]
     """
 
+    if ignore_case:
+        # rather than passing ignore_case directly on to fnmatches,
+        # we'll do the case normalization ourselves. This way it only
+        # needs to happen one time.
+        patterns = [p.lower() for p in patterns]
+
+        # let's borrow the key feature to lazily perform
+        # normalization. If we aren't provided a key, we'll make a key
+        # which simply lower-cases. If we were provided a key, then
+        # we'll compose lower-casing onto it.
+        if key is None:
+            key = str.lower
+        else:
+            real_key = key
+            key = lambda v: real_key(v).lower()
+
     def test(s):
-        return fnmatches(key(s) if key else s,
-                         patterns, ignore_case=ignore_case)
+        return fnmatches(key(s) if key else s, patterns)
 
     return filterfalse(test, seq) if invert else filter(test, seq)
 
@@ -210,9 +237,17 @@ def rpm_evr_compare(left_evr, right_evr):
     This is an alternative implementation of the rpm lib's
     labelCompare function.
 
-    Returns  1 if left_evr is greater-than right_evr
-             0 if left_evr is equal-to right_evr
-            -1 if left_evr is less-than right_evr
+    Return values indicate:
+
+    * 1 if left_evr is greater-than right_evr
+    * 0 if left_evr is equal-to right_evr
+    * -1 if left_evr is less-than right_evr
+
+    :param left_evr: The left Epoch, Version, Release for comparison
+    :type left_evr: (str, str, str)
+
+    :param right_evr: The right Epoch, Version, Release for comparison
+    :type right_evr: (str, str, str)
 
     :rtype: int
     """
