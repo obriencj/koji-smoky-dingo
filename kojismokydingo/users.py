@@ -27,6 +27,7 @@ from time import asctime, localtime
 from . import NoSuchContentGenerator, NoSuchPermission, NoSuchUser
 
 
+# just borrowing from Koji's definitions
 USER_NORMAL = USERTYPES['NORMAL']
 USER_HOST = USERTYPES['HOST']
 USER_GROUP = USERTYPES['GROUP']
@@ -35,22 +36,59 @@ STATUS_NORMAL = USER_STATUS['NORMAL']
 STATUS_BLOCKED = USER_STATUS['BLOCKED']
 
 
+def as_userinfo(session, user):
+    """
+    Resolves user to a userinfo dict.
+
+    If user is a str or int, then getUser will be invoked. If user is
+    already a dict, it's presumed to be a userinfo already and it's
+    returned unaltered.
+
+    :param user: Name, ID, or User Info describing a koji user
+
+    :type user: str or int or dict
+
+    :rtype: dict
+
+    :raises NoSuchUser: when user cannot be resolved via
+        :py:meth:`session.getUser`
+    """
+
+    if isinstance(user, (str, int)):
+        # an API incompatibility emerged at some point in Koji's past,
+        # so we need to try the new way first and fall back to the
+        # older signature if that fails
+        try:
+            info = session.getUser(user, False, True)
+        except ParameterError:
+            info = session.getUser(user)
+
+    elif isinstance(user, dict):
+        info = user
+
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchUser(user)
+
+    return info
+
+
 def collect_userinfo(session, user):
     """
     Gather information about a named user, including the list of
     permissions the user has.
 
-    :param: session - an active koji session
-    :param: user - the string name of a user or their kerberos ID
+    :param user: name of a user or their kerberos ID
+    :type user: str
+
+    :rtype: dict
+
+    :raises NoSuchUser:
     """
 
-    try:
-        userinfo = session.getUser(user, True, True)
-    except ParameterError:
-        userinfo = session.getUser(user, True)
-
-    if userinfo is None:
-        raise NoSuchUser(user)
+    userinfo = as_userinfo(session, user)
 
     # depending on koji version, getUser resulted in either a
     # krb_principal or krb_principals entry (or neither if it's not
@@ -74,17 +112,29 @@ def collect_userinfo(session, user):
             # non-admin accounts cannot query group membership, so omit
             userinfo["members"] = None
 
-    cgs = collect_cg_access(session, userinfo["name"])
+    cgs = collect_cg_access(session, userinfo)
     userinfo["content_generators"] = cgs
 
     return userinfo
 
 
-def collect_cg_access(session, username):
+def collect_cg_access(session, user):
     """
-    List of names of content generators username has access to
-    run CGImport with.
+    List of names of content generators user has access to run
+    CGImport with.
+
+    :param user: Name, ID, or userinfo dict
+
+    :type user: str or int or dict
+
+    :rtype: list[dict]
+
+    :raises NoSuchUser: if user is an ID or name which cannot be
+      resolved
     """
+
+    userinfo = as_userinfo(session, user)
+    username = userinfo["name"]
 
     found = []
     for cgname, val in iteritems(session.listCGs()):
@@ -94,14 +144,25 @@ def collect_cg_access(session, username):
 
 
 def collect_cgs(session, name=None):
+    """
+    :param name: only collect the given CG. Default, collect all
+
+    :type name: str, optional
+
+    :rtype: list[dict]
+
+    :raises NoSuchContentGenerator: if name is specified and no
+      content generator matches
+    """
+
     cgs = session.listCGs()
 
     if name:
         # filter the cgs dict down to just the named one
-        if name not in cgs:
-            raise NoSuchContentGenerator(name)
-        else:
+        if name in cgs:
             cgs = {name: cgs[name]}
+        else:
+            raise NoSuchContentGenerator(name)
 
     result = []
 
@@ -120,8 +181,12 @@ def collect_perminfo(session, permission):
     users granted the permission, as well as the date that the
     permission was granted and the user that granted it.
 
-    :param: session - an active koji session
-    :param: permission - the string name of a permission
+    :param permission: the string name of a permission
+    :type permission: str
+
+    :rtype: dict
+
+    :raises NoSuchPermission: if there is no matching permission found
     """
 
     for p in session.getAllPerms():

@@ -1,9 +1,5 @@
-Koji Smoky Dingo
-================
-
-
-kojismokydingo
---------------
+Package kojismokydingo Contents
+===============================
 
 .. automodule:: kojismokydingo
     :members:
@@ -11,55 +7,16 @@ kojismokydingo
     :show-inheritance:
 
 
-kojismokydingo.archives
------------------------
+Submodules
+----------
 
-.. automodule:: kojismokydingo.archives
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. toctree::
+   :maxdepth: 4
 
-
-kojismokydingo.builds
----------------------
-
-.. automodule:: kojismokydingo.builds
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-kojismokydingo.client
----------------------
-
-.. automodule:: kojismokydingo.clients
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-kojismokydingo.hosts
---------------------
-
-.. automodule:: kojismokydingo.hosts
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-kojismokydingo.tags
--------------------
-
-.. automodule:: kojismokydingo.tags
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-kojismokydingo.users
---------------------
-
-.. automodule:: kojismokydingo.users
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   kojismokydingo/archives
+   kojismokydingo/builds
+   kojismokydingo/clients
+   kojismokydingo/common
+   kojismokydingo/hosts
+   kojismokydingo/tags
+   kojismokydingo/users

@@ -132,24 +132,30 @@ def iter_bulk_tag_builds(session, tagid, build_infos,
     feedback to a user to indicate that the operations are continuing.
 
     :param tagid: Destination tag's ID
+
     :type tagid: int
 
     :param build_infos: Build infos to be tagged
+
     :type build_infos: list[dict]
 
     :param force: Force tagging. Re-tags if necessary, bypasses
-    policy. Default, False
+        policy. Default, False
+
     :type force: bool, optional
 
     :param notify: Send tagging notifications. Default, False
+
     :type notify: bool, optional
 
     :param size: Count of tagging operations to perform in a single
-    multicall. Default, 100
+        multicall. Default, 100
+
     :type size: int, optional
 
     :param strict: Raise an exception and discontinue execution at the
-    first error. Default, False
+        first error. Default, False
+
     :type strict: bool, optional
 
     :rtype: Generator[list[tuple]]
@@ -169,24 +175,30 @@ def bulk_tag_builds(session, tagname, build_infos,
 
     """
     :param tagid: Destination tag's ID
+
     :type tagid: int
 
     :param build_infos: Build infos to be tagged
+
     :type build_infos: list[dict]
 
     :param force: Force tagging. Re-tags if necessary, bypasses
-    policy. Default, False
+      policy. Default, False
+
     :type force: bool, optional
 
     :param notify: Send tagging notifications. Default, False
+
     :type notify: bool, optional
 
     :param size: Count of tagging operations to perform in a single
-    multicall. Default, 100
+      multicall. Default, 100
+
     :type size: int, optional
 
     :param strict: Raise an exception and discontinue execution at the
-    first error. Default, False
+      first error. Default, False
+
     :type strict: bool, optional
 
     :rtype: list[tuple]

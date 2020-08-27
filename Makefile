@@ -1,3 +1,4 @@
+# Sorry that this Makefile is a bit of a disaster.
 
 
 PROJECT = kojismokydingo
@@ -8,7 +9,7 @@ ARCHIVE = $(PROJECT)-$(VERSION).tar.gz
 default: test
 
 
-clean:
+clean: clean-docs
 	rm -rf *.egg-info dist/* build/* logs/*
 	rm -f "$(ARCHIVE)"
 	find -H . \
@@ -31,23 +32,37 @@ test: clean
 
 
 srpm: $(ARCHIVE)
-	rpmbuild -ts "$(ARCHIVE)"
+	rpmbuild --define "_srcrpmdir dist" -ts "$(ARCHIVE)"
 
 
 rpm: $(ARCHIVE)
-	rpmbuild -tb "$(ARCHIVE)"
+	rpmbuild --define "_rpmdir dist" -tb "$(ARCHIVE)"
 
 
 archive: $(ARCHIVE)
 
 
+# newer versions support the --format tar.gz but we're intending to work all
+# the way back to RHEL 6 which does not have that.
 $(ARCHIVE):
 	git archive HEAD \
 		--format tar --prefix "$(PROJECT)-$(VERSION)/" \
 		| gzip > "$(ARCHIVE)"
 
 
-.PHONY: all archive clean default packaging-test rpm srpm test
+docs:
+	make -C docs html
+
+
+deploy-docs:
+	make -C docs deploy
+
+
+clean-docs:
+	make -C docs clean
+
+
+.PHONY: all archive clean default docs deploy-docs packaging-build packaging-test rpm srpm test
 
 
 # The end.

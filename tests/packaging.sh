@@ -1,6 +1,17 @@
 #! /bin/bash
 
 
+# This script is intended to be invoked inside of a container which
+# has had koji and koji-smoky-dingo both installed in it, along with
+# whatever other deps are needed to support them. See
+# tools/launch-build.sh for how such a container is produced, and
+# tools/launch-test.sh for how a built container is launched to invoke
+# this script.
+
+# Author: Christopher O'Brien <obriencj@gmail.com>
+# License: GPL v3
+
+
 function whichever() {
     which "$@" 2>/dev/null | head -n1
 }

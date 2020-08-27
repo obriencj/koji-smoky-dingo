@@ -28,7 +28,7 @@ def rebuild_client_config(session, goptions):
     session and a session's goptions. Returns a tuple containing the
     active profile's name, and the configuration as a dict.
 
-    :rtype: tuple
+    :rtype: (str, dict)
     """
 
     opts = {

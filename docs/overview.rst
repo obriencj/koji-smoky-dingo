@@ -1,24 +1,26 @@
-Overview of koji-smoky-dingo
-============================
+Overview
+========
 
-This is a collection of simple client command-line plugins for
-`koji <https://pagure.io/koji>`__.
+Koji Smoky Dingo is a collection of client command-line plugins for
+`koji <https://pagure.io/koji>`__, and a set of utility modules for
+writing your own commands or scripts.
 
-The name “smoky-dingo” was provided by
+The phrase “smoky-dingo” was provided by
 `coolname <https://pypi.org/project/coolname/>`__ and has no particular
 relevance.
 
 Meta Plugin
 -----------
 
-This project is broken into two parts. The first part is a relatively
-tiny CLI plugin for koji which acts as an adapter to load commands
-registered via python’s entry points. The second and larger part is a
-collection of commands that are be loaded by that meta plugin.
+This project provides a relatively tiny CLI plugin for koji, named
+kojismokydingometa. This plugin acts as an adapter between koji’s
+existing CLI framework and Python’s entry_points. This adaptive behavior
+is utilized by the rest of the project to add its own additional
+commands to koji.
 
 The meta plugin can be used to load commands other than those provided
-by koji-smoky-dingo. Simply register your commands with the
-``"koji_smoky_dingo"`` entry point key and install your package. See
+as part of this project. Simply register your commands with the
+``"koji_smoky_dingo"`` entry point key. See
 `setup.py <https://github.com/obriencj/koji-smoky-dingo/blob/master/setup.py>`__
 for direct examples.
 
@@ -41,6 +43,9 @@ the admin permission.
 |                            | but to create an even amount of space   |
 |                            | between each entry.                     |
 +----------------------------+-----------------------------------------+
+| ``set-env-var``            | Sets the value of a mock environment    |
+|                            | variable on a tag.                      |
++----------------------------+-----------------------------------------+
 | ``set-rpm-macro``          | Sets the value of a mock RPM macro on a |
 |                            | tag.                                    |
 +----------------------------+-----------------------------------------+
@@ -49,11 +54,14 @@ the admin permission.
 |                            | both entries are already parents of a   |
 |                            | tag, then swap the priority of the two. |
 +----------------------------+-----------------------------------------+
+| ``unset-env-var``          | Removes a mock environment variable     |
+|                            | from a tag.                             |
++----------------------------+-----------------------------------------+
 | ``unset-rpm-macro``        | Removes a mock RPM macro from a tag.    |
 +----------------------------+-----------------------------------------+
 
-Informational Commands
-----------------------
+Information Commands
+--------------------
 
 These commands are informational only, and do not require any special
 permissions in koji.
@@ -78,11 +86,17 @@ permissions in koji.
 | ``list-cgs``               | Show content generators and their       |
 |                            | permitted users                         |
 +----------------------------+-----------------------------------------+
+| ``list-env-vars``          | Shows all inherited mock environment    |
+|                            | variables for a tag                     |
++----------------------------+-----------------------------------------+
 | ``list—imported``          | Show builds which were imported into    |
 |                            | koji                                    |
 +----------------------------+-----------------------------------------+
 | ``list-rpm-macros``        | Show all inherited mock RPM macros for  |
 |                            | a tag                                   |
++----------------------------+-----------------------------------------+
+| ``list-tag-extras``        | Show all inherited extra fields for a   |
+|                            | tag                                     |
 +----------------------------+-----------------------------------------+
 | ``perminfo``               | Show information about a permission     |
 +----------------------------+-----------------------------------------+
@@ -92,10 +106,8 @@ permissions in koji.
 Install
 -------
 
-.. _meta-plugin-1:
-
-Meta Plugin
-~~~~~~~~~~~
+The Meta Plugin
+~~~~~~~~~~~~~~~
 
 Because of how koji loads client plugins, the meta plugin needs to be
 installed with either the ``--old-and-unmanageable`` flag or with
@@ -103,22 +115,24 @@ installed with either the ``--old-and-unmanageable`` flag or with
 
 .. code:: bash
 
+   # system install
    sudo python setup-meta.py clean build install --root=/
 
 With koji >=
 `1.18 <https://docs.pagure.org/koji/release_notes_1.18/>`__, the meta
-plugin can also be installed into ``~/.koji_cli_plugins``
+plugin can also be installed into ``~/.koji/plugins``
 
 .. code:: bash
 
+   # user only
    mkdir -p ~/.koji/plugins
    cp koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 
-Package kojismokydingo
-~~~~~~~~~~~~~~~~~~~~~~
+The kojismokydingo Package
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 However the rest of koji-smoky-dingo can be installed normally, either
-as a system-level or user-level package
+as a system-level or user-level package.
 
 .. code:: bash
 
@@ -128,12 +142,26 @@ as a system-level or user-level package
    # user only
    python setup.py install --user
 
+If deploying on a Python 3 environment, it’s best to install via pip
+
+.. code:: bash
+
+   # system insall
+   python3 ./setup.py bdist_wheel
+   pip3 install --I dist/*.whl
+
+   # user only
+   python3 ./setup.py bdist_wheel
+   pip3 install --user --I dist/*.whl
+
 Contact
 -------
 
 Author: Christopher O’Brien obriencj@gmail.com
 
 Original Git Repository: https://github.com/obriencj/koji-smoky-dingo
+
+Documentation: https://obriencj.github.io/koji-smoky-dingo
 
 License
 -------

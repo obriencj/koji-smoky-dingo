@@ -41,12 +41,14 @@ def resolve_tag(session, name, target=False):
     :type name: str
 
     :param target: name specified a target rather than a tag, fetch
-    the build tag name from the target and look up that. Default, name
-    specifies a tag.
+      the build tag name from the target and look up that. Default,
+      name specifies a tag.
 
     :type target: bool, optional
 
-    :raise: NoSuchTarget or NoSuchTag as appropriate
+    :raises NoSuchTag:
+
+    :raises NoSuchTarget:
 
     :rtype: dict
     """
@@ -125,13 +127,14 @@ def renum_inheritance(inheritance, begin, step):
 def find_inheritance_parent(inheritance, parent_id):
     """
     :param inheritance: the output of a getFullInheritance call
+
     :type inheritance: list(dict)
 
     :param parent_id: the ID of a parent tag to look for in the
-    inheritance data.
+        inheritance data.
 
     :returns: matching inheritance link data, or None if none are
-    found with the given parent_id
+        found with the given parent_id
 
     :rtype: dict
     """
@@ -146,12 +149,12 @@ def find_inheritance_parent(inheritance, parent_id):
 def convert_tag_extras(taginfo, into=None, prefix=None):
     """
     :param into: Existing dict to collect extras into. Default, create
-    a new OrderedDict
+        a new OrderedDict
 
     :type into: dict, optional
 
     :param prefix: Only gather and convert extras with key's having
-    this prefix. Default, gather all keys not already found.
+        this prefix. Default, gather all keys not already found.
 
     :type prefix: str, optional
 
@@ -183,22 +186,23 @@ def collect_tag_extras(session, taginfo, prefix=None):
     Returns an OrderedDict of tag extra settings, keyed by the name of
     the setting. Each setting is represented as its own dict composed
     of the following keys:
-      * name - the extra setting key
-      * value - the extra setting value
-      * tag_name - the name of the tag this setting came from
-      * tag_id - the ID of the tag this setting came from
+
+    * name - the extra setting key
+    * value - the extra setting value
+    * tag_name - the name of the tag this setting came from
+    * tag_id - the ID of the tag this setting came from
 
     :param taginfo: koji tag info dict, or tag name
 
-    :type taginfo: Union(str, dict)
+    :type taginfo: int or str or dict
 
     :param prefix: Extra name prefix to select for. If set, only tag
-    extra fields whose key starts with the prefix string will be
-    collected. Default, collect all.
+      extra fields whose key starts with the prefix string will be
+      collected. Default, collect all.
 
     :type prefix: str, optional
 
-    :rtype: OrderedDict(str, dict)
+    :rtype: collections.OrderedDict[str, dict]
     """
 
     taginfo = as_taginfo(session, taginfo)
