@@ -16,6 +16,7 @@ Submodules
    kojismokydingo/archives
    kojismokydingo/builds
    kojismokydingo/clients
+   kojismokydingo/common
    kojismokydingo/hosts
    kojismokydingo/tags
    kojismokydingo/users
