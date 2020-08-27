@@ -1,4 +1,10 @@
 
+# Collection of bash functions for use in building and testing this
+# project.
+
+# Author: Christopher O'Brien <obriencj@gmail.com>
+# License: GPL v3
+
 
 function whichever() {
     which "$@" 2>/dev/null | head -n1
@@ -17,6 +23,11 @@ EOF
 
 
 function ksd_rpmbuild() {
+    # this is intended to be invoked inside of a container.  This
+    # function will produce an SRPM, install its build dependencies,
+    # rebuild the SRPM into RPMS, then install those RPMs and their
+    # dependencies.
+
     local TOPDIR="$1"
     local TARBALL="$2"
 
@@ -53,6 +64,13 @@ function ksd_rpmbuild() {
 
 
 function ksd_build_platform() {
+    # Given a platform, build the relevant container image for it, and
+    # tag the image for use. This should as a side effect produce
+    # SRPMs and RPMs, which we copy out of the image and into the dist
+    # directory.
+
+    # Older rebuilds of the same image will be removed.
+
     local PLATFORM="$1"
     local CFILE=tools/Containerfile."$PLATFORM"
 
@@ -74,7 +92,7 @@ function ksd_build_platform() {
     # let's see if there was a previous image with this tag. We won't
     # remove it yet, we want to try and take cache advantage of any
     # layers in it.
-    local PREV=$($PODMAN images -a -q "$NAME")
+    local PREV=$($PODMAN images -a -q "$NAME" 2>/dev/null)
 
     echo "Building $NAME from $CFILE"
     local BUILDAH_LAYERS=true
@@ -91,7 +109,9 @@ function ksd_build_platform() {
         $PODMAN image rm -f "$PREV"
     fi
 
-    # steal a copy of the RPMs from the image
+    # steal a copy of the RPMs from the image. We have to actually
+    # create a temporary container from the image in order to do this,
+    # which we subsequently remove
     local RPMOUT="$PWD/dist/$PLATFORM"
     mkdir -p "$RPMOUT"
     local TMPID=$($PODMAN create "$NAME")
@@ -103,6 +123,9 @@ function ksd_build_platform() {
 
 
 function ksd_test_platform() {
+    # launch a test platform container and run the packaging.sh test
+    # script in it. Results will be written to the logs directory.
+
     local PLATFORM="$1"
     local NAME=ksd-test:"$PLATFORM"
 
@@ -124,6 +147,12 @@ function ksd_test_platform() {
 
 
 function ksd_platforms() {
+    # hunt through the available platforms and emit the Containerfile
+    # for that platform. These will be denoted by the extension of the
+    # Containerfile itself. So eg. a platform of centos6 will be
+    # Containerfile.centos6. If no arguments are given, emits all the
+    # Containerfiles for all the platforms.
+
     local BASE="tools/Containerfile"
 
     if [ ! "$@" ] ; then
