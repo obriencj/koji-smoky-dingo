@@ -70,10 +70,10 @@ def pretty_json(data, output=None, **pretty):
     if output is None:
         output = sys.stdout
 
-    pretty_options = JSON_PRETTY_OPTIONS
     if pretty:
-        pretty_options = dict(pretty_options)
-        pretty_options.update(pretty)
+        pretty_options = dict(JSON_PRETTY_OPTIONS, **pretty)
+    else:
+        pretty_options = JSON_PRETTY_OPTIONS
 
     dump(data, output, **pretty_options)
     print(file=output)
