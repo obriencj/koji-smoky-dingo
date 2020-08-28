@@ -1,4 +1,4 @@
-# Overview of KSD Example Command
+# Overview of KSD Example Script
 
 This is a trivial example script demonstrating how to use Koji Smoky
 Dingo to write a script that works with a Koji instance.
