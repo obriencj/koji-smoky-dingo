@@ -14,35 +14,31 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-def config():
-    return {
-        "name": "ksd-command",
-        "version": "1.0.0",
+from setuptools import setup
 
-        "description": "Example Koji client command using kojismokydingo",
-        "license": "GNU General Public License v3 (GPLv3)",
 
-        "packages": [
-            "ksd_command",
+setup(
+    name = "ksd-command",
+    version = "1.0.0",
+
+    description = "Example Koji client commands using kojismokydingo",
+    license = "GNU General Public License v3 (GPLv3)",
+
+    packages = [
+        "ksd_command",
+    ],
+
+    install_requires = [
+        "kojismokydingo",
+    ],
+
+    entry_points = {
+        "koji_smoky_dingo": [
+            "boop = ksd_command:BeepBoop",
+            "beep = ksd_command:BeepBoop",
+            "whoami = ksd_command:WhoAmI",
         ],
-
-        "install_requires": [
-            "kojismokydingo",
-        ],
-
-        "entry_points": {
-            "koji_smoky_dingo": [
-                "boop = ksd_command:BeepBoop",
-                "beep = ksd_command:BeepBoop",
-                "whoami = ksd_command:WhoAmI",
-            ],
-        },
-    }
-
-
-if __name__ == "__main__":
-    from setuptools import setup
-    setup(**config())
+    })
 
 
 # The end.
