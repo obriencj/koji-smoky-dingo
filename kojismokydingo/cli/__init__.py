@@ -261,7 +261,7 @@ def space_normalize(txt):
     return " ".join(t for t in lines if t)
 
 
-@Add_metaclass(ABCMeta)
+@add_metaclass(ABCMeta)
 class SmokyDingo(object):
     """
     Base class for new sub-commands in Koji. Subclasses may be
