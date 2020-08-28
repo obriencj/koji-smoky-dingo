@@ -256,7 +256,12 @@ def tabulate(headings, data, key=None, sorting=0,
         print(fmt.format(*row), file=out)
 
 
-@add_metaclass(ABCMeta)
+def space_normalize(txt):
+    lines = (t.strip() for t in txt.split())
+    return " ".join(t for t in lines if t)
+
+
+@Add_metaclass(ABCMeta)
 class SmokyDingo(object):
     """
     Base class for new sub-commands in Koji. Subclasses may be
@@ -305,13 +310,22 @@ class SmokyDingo(object):
         # that it expects to deal with
         self.__name__ = "handle_" + name.replace("-", "_")
 
-        # this is necessary for koji to recognize us as a cli command
+        # this is necessary for koji to recognize us as a cli command.
+        # We only set this on instances, not on the class itself,
+        # because it is only the instances which should be used that
+        # way.
         self.exported_cli = True
 
         # allow a docstr to be specified on subclasses, but if absent
         # let's set it based on the group and description.
         if getattr(self, "__doc__", None) is None:
-            self.__doc__ = "[%s] %s" % (self.group, self.description)
+            desc = space_normalize(self.description)
+            self.__doc__ = "[%s] %s" % (self.group, desc)
+        else:
+            desc = space_normalize(self.__doc__)
+            if not desc.startswith("["):
+                desc = "[%s] %s" % (self.group, desc)
+            self.__doc__ = desc
 
         # these will be populated once the command instance is
         # actually called
