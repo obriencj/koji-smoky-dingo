@@ -63,7 +63,7 @@ class WhoAmI(SmokyDingo):
         collect_userinfo(self.session, myinfo)
 
         if options.json:
-            pretty_print(myinfo)
+            pretty_json(myinfo)
             return
 
         print("User: {name} [{id}]".format(**myinfo))
