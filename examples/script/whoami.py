@@ -60,6 +60,12 @@ def cli_whoami(options):
 
 
 def main(argv=None):
+    # Note that not all script implementations need to be as
+    # compartmentalized as this. However, by writing it this way it
+    # becomes possible to import the underlying functionality easily
+    # for re-use later. It also becomes trivial to convert the script
+    # to a console_scripts entry point hook.
+
     if argv is None:
         argv = sys.argv
 
