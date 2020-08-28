@@ -34,7 +34,6 @@ def cli_argparser(progname):
 
 def cli_whoami(options):
     with ManagedClientSession(options.profile) as session:
-
         myinfo = session.getLoggedInUser()
         collect_userinfo(session, myinfo)
 
