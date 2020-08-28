@@ -60,7 +60,7 @@ class WhoAmI(SmokyDingo):
         # implemented very similarly to the userinfo command
 
         myinfo = self.session.getLoggedInUser()
-        collect_userinfo(self.session, myinfo)
+        myinfo = collect_userinfo(self.session, myinfo)
 
         if options.json:
             pretty_json(myinfo)
