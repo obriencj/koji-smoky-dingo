@@ -6,7 +6,7 @@ Dingo to add a few new commands to the Koji CLI.
 
 ## Commands
 
-The example provides the following example command implementations
+The example provides the following command implementations
 
 | Command | Description |
 |---------|-------------|
