@@ -10,13 +10,15 @@ from kojismokydingo.users import collect_userinfo
 
 class BeepBoop(AnonSmokyDingo):
 
+    # this is similar to setting the group and description
+    # individually
     """
-    [misc] BEEP BOOP
+    [misc] Just some beeps and boops
     """
 
     def handle(self, options):
         # The name of the command is defined by the entry_point hook's
-        # name. This means we can, if so desired, have a single
+        # name. This means we can, if we so desire, have a single
         # command serve multiple purposes.
 
         if self.name == "boop":
