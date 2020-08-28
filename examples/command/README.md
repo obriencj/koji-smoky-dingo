@@ -8,9 +8,11 @@ Dingo to add a few new commands to the Koji CLI.
 
 The example provides the following example command implementations
 
-|beep |Prints "beep boop" |
-|boop |Prints "boop beep" |
-|whoami |Prints information about the currently logged-in user |
+| Command | Description |
+|---------|-------------|
+|`beep` |Prints "beep boop" |
+|`boop` |Prints "boop beep" |
+|`whoami` |Prints information about the currently logged-in user |
 
 
 ## Install
