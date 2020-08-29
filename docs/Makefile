@@ -49,37 +49,37 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
-html: build-project
+html: generate
 	$(SPHINXCMD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
-dirhtml: build-project
+dirhtml: generate
 	@${SPHINXCMD} -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
 
-singlehtml: build-project
+singlehtml: generate
 	$(SPHINXCMD) -b singlehtml $(ALLSPHINXOPTS) $(BUILDDIR)/singlehtml
 	@echo
 	@echo "Build finished. The HTML page is in $(BUILDDIR)/singlehtml."
 
-pickle: build-project
+pickle: generate
 	$(SPHINXCMD) -b pickle $(ALLSPHINXOPTS) $(BUILDDIR)/pickle
 	@echo
 	@echo "Build finished; now you can process the pickle files."
 
-json: build-project
+json: generate
 	$(SPHINXCMD) -b json $(ALLSPHINXOPTS) $(BUILDDIR)/json
 	@echo
 	@echo "Build finished; now you can process the JSON files."
 
-changes: build-project
+changes: generate
 	$(SPHINXCMD) -b changes $(ALLSPHINXOPTS) $(BUILDDIR)/changes
 	@echo
 	@echo "The overview file is in $(BUILDDIR)/changes."
 
-linkcheck: build-project
+linkcheck: generate
 	$(SPHINXCMD) -b linkcheck $(ALLSPHINXOPTS) $(BUILDDIR)/linkcheck
 	@echo
 	@echo "Link check complete; look for any errors in the above output " \
@@ -100,7 +100,7 @@ overview.rst: ../README.md
 	pandoc --from=markdown --to=rst -o "overview.rst" "overview.md"
 	rm -f overview.md
 
-generate: build-project overview.rst $(DEPLOYFORMAT)
+generate: build-project overview.rst
 
 # clones the appropriate git repo and branch in the deploy directory
 # if it isn't already setup
@@ -122,7 +122,7 @@ clean-stage: setup-stage
 	touch .nojekyll ; git add .nojekyll ;\
 	popd
 
-stage: generate clean-stage
+stage: generate clean-stage $(DEPLOYFORMAT)
 	cp -r "$(BUILDDIR)/$(DEPLOYFORMAT)/"* $(DEPLOYDIR)
 	pushd $(DEPLOYDIR) ;\
 	git add . ;\
