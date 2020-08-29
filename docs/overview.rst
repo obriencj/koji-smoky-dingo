@@ -20,9 +20,9 @@ commands to koji.
 
 The meta plugin can be used to load commands other than those provided
 as part of this project. Simply register your commands with the
-``"koji_smoky_dingo"`` entry point key. See
-`setup.py <https://github.com/obriencj/koji-smoky-dingo/blob/master/setup.py>`__
-for direct examples.
+``"koji_smoky_dingo"`` entry point key. See the example command’s
+`setup.py <https://github.com/obriencj/koji-smoky-dingo/blob/master/examples/command/setup.py>`__
+for a direct reference.
 
 Tag Commands
 ------------
