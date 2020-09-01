@@ -17,6 +17,7 @@ from unittest import TestCase
 from kojismokydingo.builds import filter_imported
 
 
+# A CG-imported build
 BUILD_SAMPLE_1 = {
     "id": 1,
     "nvr": "sample-1-1",
@@ -27,6 +28,7 @@ BUILD_SAMPLE_1 = {
     "archive_btype_names": set(["example"]),
 }
 
+# A CG-imported build
 BUILD_SAMPLE_2 = {
     "id": 2,
     "nvr": "sample-2-1",
@@ -37,6 +39,7 @@ BUILD_SAMPLE_2 = {
     "archive_btype_names": set(["other"]),
 }
 
+# A CG-imported build from multiple CGs
 BUILD_SAMPLE_3 = {
     "id": 4,
     "nvr": "sample-4-1",
@@ -47,6 +50,7 @@ BUILD_SAMPLE_3 = {
     "archive_btype_names": set(["example", "other"]),
 }
 
+# An imported, non-CG build
 BUILD_SAMPLE_4 = {
     "id": 4,
     "nvr": "sample-4-1",
@@ -57,6 +61,7 @@ BUILD_SAMPLE_4 = {
     "archive_btype_names": set(["rpm"]),
 }
 
+# A non-imported build
 BUILD_SAMPLE_5 = {
     "id": 5,
     "nvr": "sample-5-1",
@@ -80,80 +85,80 @@ BUILD_SAMPLES = (
 class TestFilterImported(TestCase):
 
 
+    def _filter_imported(self, *args, **kwds):
+        return tuple(filter_imported(BUILD_SAMPLES, *args, **kwds))
+
+
     def test_filter_empty_normal(self):
-        match = filter_imported(BUILD_SAMPLES)
+        match = self._filter_imported()
         expected = (BUILD_SAMPLE_4,)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_empty_negate(self):
-        match = filter_imported(BUILD_SAMPLES, negate=True)
+        match = self._filter_imported(negate=True)
         expected = (BUILD_SAMPLE_5,)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_any_normal(self):
-        match = filter_imported(BUILD_SAMPLES, ("any",))
+        match = self._filter_imported(("any",))
         expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_any_negate(self):
-        match = filter_imported(BUILD_SAMPLES, ("any",), negate=True)
+        match = self._filter_imported(("any",), negate=True)
         expected = ()
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_example_normal(self):
-        match = filter_imported(BUILD_SAMPLES, ("example-cg",))
+        match = self._filter_imported(("example-cg",))
         expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_3)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_example_negate(self):
-        match = filter_imported(BUILD_SAMPLES,
-                                ("example-cg",), negate=True)
+        match = self._filter_imported(("example-cg",), negate=True)
         expected = (BUILD_SAMPLE_2,)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_other_normal(self):
-        match = filter_imported(BUILD_SAMPLES, ("other-cg",))
+        match = self._filter_imported(("other-cg",))
         expected = (BUILD_SAMPLE_2, BUILD_SAMPLE_3)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_other_negate(self):
-        match = filter_imported(BUILD_SAMPLES,
-                                ("other-cg",), negate=True)
+        match = self._filter_imported(("other-cg",), negate=True)
         expected = (BUILD_SAMPLE_1,)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_both_normal(self):
-        match = filter_imported(BUILD_SAMPLES, ("example-cg", "other-cg"))
+        match = self._filter_imported(("example-cg", "other-cg"))
         expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_both_negate(self):
-        match = filter_imported(BUILD_SAMPLES,
-                                ("example-cg", "other-cg"), negate=True)
+        match = self._filter_imported(("example-cg", "other-cg"), negate=True)
         expected = ()
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_neither_normal(self):
-        match = filter_imported(BUILD_SAMPLES, ("absent-cg",))
+        match = self._filter_imported(("absent-cg",))
         expected = ()
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
     def test_filter_neither_negate(self):
-        match = filter_imported(BUILD_SAMPLES,
-                                ("absent-cg",), negate=True)
+        match = self._filter_imported(("absent-cg",), negate=True)
         expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3)
-        self.assertEqual(tuple(match), expected)
+        self.assertEqual(match, expected)
 
 
 
