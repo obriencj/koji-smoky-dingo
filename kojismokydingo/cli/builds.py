@@ -248,16 +248,17 @@ def cli_list_imported(session, tagname=None, nvr_list=None,
         # from the CLI, one of these should be specified.
         builds = ()
 
-    if not negate:
+    if cg_list or not negate:
         # we'll be trying to match content generators, which will
         # require us doing some extra work to actually determine what
         # content generators were used to produce a build. This will
         # mean digging through every archive in every build, then
         # finding the buildroots for each... so we only want to do
         # this if we'll actually be using the additional info!
-        decorate_build_archive_data(session, builds)
+        decorate_build_archive_data(session, builds,
+                                    with_cg=bool(cg_list))
 
-    for build in filter_imported(builds, negate, cg_list):
+    for build in filter_imported(builds, by_cg=cg_list, negate=negate):
         print(build["nvr"])
 
 
