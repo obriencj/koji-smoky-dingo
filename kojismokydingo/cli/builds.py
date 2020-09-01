@@ -327,5 +327,71 @@ class ListImported(AnonSmokyDingo):
                                  cg_list=options.cg_list)
 
 
+def args_filter_builds_by_tag(parser):
+
+    grp = parser.add_group("Filtering by tag")
+    addarg = grp.add_argument
+
+    addarg("--lookaside", action="append", default=list(),
+           help="Omit builds found in this tag or its parent tags")
+
+    addarg("--shallow-lookaside", action="append", default=list(),
+           help="Omit builds found directly in this tag")
+
+    addarg("--limit", action="append", default=list(),
+           help="Limit results to builds found in this tag or its"
+           " parent tags")
+
+    addarg("--shallow-limit", action="append", default=list(),
+           help="Limit results to builds found directly in this tag")
+
+    return parser
+
+
+def args_filter_builds_by_type(parser):
+
+    grp = parser.add_group("Filtering by type")
+    addarg = grp.add_argument
+
+    addarg("--imports", action="store_true", default=None,
+           help="Limit to imports")
+
+    addarg("--no-imports", action="store_true", default=None,
+           help="Limit to non-imports")
+
+    addarg("--type", action="append", default=None,
+           help="Limit to builds of this BType")
+
+    return parser
+
+
+def args_filter_builds(parser):
+    parser = args_filter_builds_by_tag(parser)
+    parser = args_filter_builds_by_type(parser)
+
+    return parser
+
+
+def cli_list_build_components(session, nvr):
+    pass
+
+
+class ListBuildComponents(AnonSmokyDingo):
+
+    description = "List a build's component dependencies"
+
+
+    def parser(self):
+        parser = super(ListBuildComponents, self).parser()
+
+        return parser
+
+
+    def handle(self, options):
+
+        return cli_list_build_components(self.session,
+                                         self.nvr)
+
+
 #
 # The end.
