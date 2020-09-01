@@ -131,12 +131,9 @@ def _bulk_load(session, loadfn, keys, size=100):
         session.multicall = True
 
         for key in key_chunk:
-            # print(key, file=sys.stderr)
             loadfn(key)
 
         for key, info in zip(key_chunk, session.multiCall()):
-            # print(key, info, file=sys.stderr)
-
             if info:
                 if "faultCode" in info:
                     raise convertFault(Fault(**info))

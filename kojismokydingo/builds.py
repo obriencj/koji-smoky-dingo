@@ -29,6 +29,7 @@ from . import (
     bulk_load_build_archives, bulk_load_builds,
     bulk_load_buildroots)
 from .common import chunkseq, rpm_evr_compare, unique
+from .tags import as_taginfo
 
 
 class BuildNEVRCompare(object):
@@ -118,7 +119,7 @@ def build_dedup(build_infos):
     return list(itervalues(dedup))
 
 
-def iter_bulk_tag_builds(session, tagid, build_infos,
+def iter_bulk_tag_builds(session, tag, build_infos,
                          force=False, notify=False,
                          size=100, strict=False):
 
@@ -131,9 +132,9 @@ def iter_bulk_tag_builds(session, tagid, build_infos,
     chance to record the results of each multicall, and to present
     feedback to a user to indicate that the operations are continuing.
 
-    :param tagid: Destination tag's ID
+    :param tag: Destination tag's name or ID
 
-    :type tagid: int
+    :type tag: str or int
 
     :param build_infos: Build infos to be tagged
 
@@ -159,7 +160,12 @@ def iter_bulk_tag_builds(session, tagid, build_infos,
     :type strict: bool, optional
 
     :rtype: Generator[list[tuple]]
+
+    :raises kojismokydingo.NoSuchTag: If tag does not exist
     """
+
+    tag = as_taginfo(session, tag)
+    tagid = tag["id"]
 
     for build_chunk in chunkseq(build_infos, size):
         session.multicall = True
@@ -169,14 +175,18 @@ def iter_bulk_tag_builds(session, tagid, build_infos,
         yield list(zip(build_chunk, results))
 
 
-def bulk_tag_builds(session, tagname, build_infos,
+def bulk_tag_builds(session, tag, build_infos,
                     force=False, notify=False,
                     size=100, strict=False):
 
     """
-    :param tagid: Destination tag's ID
+    :param session: an active koji session
 
-    :type tagid: int
+    :type session: koji.ClientSession
+
+    :param tag: Destination tag's name or ID
+
+    :type tag: str or int
 
     :param build_infos: Build infos to be tagged
 
@@ -202,17 +212,19 @@ def bulk_tag_builds(session, tagname, build_infos,
     :type strict: bool, optional
 
     :rtype: list[tuple]
+
+    :raises kojismokydingo.NoSuchTag: If tag does not exist
     """
 
     results = []
-    for done in iter_bulk_tag_builds(session, tagname, build_infos,
+    for done in iter_bulk_tag_builds(session, tag, build_infos,
                                      force=force, notify=notify,
                                      size=size, strict=strict):
         results.extend(done)
     return results
 
 
-def bulk_tag_nvrs(session, tagname, nvrs,
+def bulk_tag_nvrs(session, tag, nvrs,
                   force=False, notify=False,
                   size=100, strict=False):
 
@@ -220,35 +232,72 @@ def bulk_tag_nvrs(session, tagname, nvrs,
     Tags a large number of builds using multicall invocations of
     tagBuildBypass.
 
-    The entire list of NVRs is validated first, checking that such
-    a build exists. If strict is True then a missing build will cause a
-    NoSuchBuild exception to be raised. If strict is False, then missing
-    builds will be omitted from the tagging operation.
+    The entire list of NVRs is validated first, checking that such a
+    build exists. If strict is True then a missing build will cause a
+    NoSuchBuild exception to be raised. If strict is False, then
+    missing builds will be omitted from the tagging operation.
 
     The list of builds is de-duplicated, preserving order of the first
     instance found in the list of NVRs.
 
-    Returns a list of tuples, pairing build info dicts with the result of
-    a tagBuildBypass call for that build.
+    Returns a list of tuples, pairing build info dicts with the result
+    of a tagBuildBypass call for that build.
+
+    :param session: an active koji session
+
+    :type session: koji.ClientSession
+
+    :param tag: Destination tag's name or ID
+
+    :type tag: str or int
+
+    :param nvrs: list of NVRs
+
+    :type nvrs: list[str]
+
+    :param force: Bypass policy, retag if necessary. Default, follow
+      policy and do not re-tag.
+
+    :type force: bool, optional
+
+    :param notify: Start tagNotification tasks to send a notification
+      email for every tagging event. Default, do not send
+      notifications.  Warning, sending hundreds or thousands of
+      tagNotification tasks can be overwhelming for the hub and may
+      impact the system.
+
+    :type notify: bool, optional
+
+    :param size: Count of tagging calls to make per multicall
+      chunk. Default is 100
+
+    :type size: int, optional
+
+    :param strict: Stop at the first failure. Default, continue after
+      any failures. Errors will be available in the return results.
+
+    :type strict: bool, optional
+
+    :raises kojismokydingo.NoSuchBuild: If strict and an NVR does not
+      exist
+
+    :raises kojismokydingo.NoSuchTag: If tag does not exist
+
+    :raises koji.GenericError: If strict and a tag policy prevents
+      tagging
     """
 
     builds = bulk_load_builds(session, unique(nvrs), err=strict)
     builds = build_dedup(itervalues(builds))
 
-    return bulk_tag_builds(session, tagname, builds,
+    return bulk_tag_builds(session, tag, builds,
                            force=force, notify=notify,
                            size=size, strict=strict)
 
 
-def decorate_build_archive_data(session, build_infos):
+def decorate_build_archive_data(session, build_infos, with_cg=False):
     """
     Augments a list of build_info dicts with four new keys:
-
-    * archive_cg_ids is a set of content generator IDs for each
-      archive of the build
-
-    * archive_cg_names is a set of content generator names for each
-      archive of the build
 
     * archive_btype_ids is a set of btype IDs for each archive of the
       build
@@ -256,11 +305,33 @@ def decorate_build_archive_data(session, build_infos):
     * archive_btype_names is a set of btype names for each archive of
       the build
 
+    * archive_cg_ids is a set of content generator IDs for each
+      archive of the build if with_cg is True, or None if with_cg is
+      False
+
+    * archive_cg_names is a set of content generator names for each
+      archive of the build if with_cg is True, or None if with_cg is
+      False
+
+    :param session: an active koji session
+
+    :type session: koji.ClientSession
+
     :param build_infos: list of build infos to decorate and return
+
     :type build_infos: list[dict]
+
+    :param with_cg: load buildroot data for each archive of each build
+      to determine the CG names and IDs. Default, does not load
+      buildroot data.
+
+    :type with_cg: bool, optional
 
     :rtype: list[dict]
     """
+
+    if not isinstance(build_infos, (tuple, list)):
+        build_infos = list(build_infos)
 
     # convert build_infos into an id:info dict
     builds = dict((b["id"], b) for b in build_infos)
@@ -277,27 +348,39 @@ def decorate_build_archive_data(session, build_infos):
                 # do NOT allow None or 0
                 root_ids.add(broot_id)
 
-    # multicall to fetch all the buildroots
-    buildroots = bulk_load_buildroots(session, list(root_ids))
+    if with_cg:
+        # multicall to fetch all the buildroots
+        buildroots = bulk_load_buildroots(session, list(root_ids))
+    else:
+        # we aren't collecting CG information, so we don't actually
+        # need any buildroots
+        buildroots = None
 
-    # gather the cg_id and cg_name from each buildroot, and associate
-    # it back with the original build info
     for build_id, archive_list in iteritems(archives):
 
         bld = builds[build_id]
-        bld["archive_cg_ids"] = cg_ids = set()
-        bld["archive_cg_names"] = cg_names = set()
+        bld["archive_cg_ids"] = cg_ids = set() if with_cg else None
+        bld["archive_cg_names"] = cg_names = set() if with_cg else None
         bld["archive_btype_ids"] = btype_ids = set()
         bld["archive_btype_names"] = btype_names = set()
 
         for archive in archive_list:
+            # determine the build's BTypes from the archives
             btype_ids.add(archive["btype_id"])
             btype_names.add(archive["btype"])
 
-            broot_id = archive["buildroot_id"]
-            if not broot_id:
+            if not with_cg:
+                # we don't want the CG info, so skip the rest
                 continue
 
+            broot_id = archive["buildroot_id"]
+            if not broot_id:
+                # no buildroot, thus no CG info, skip
+                continue
+
+            # The CG info is stored on the archive's buildroot, so
+            # let's correlate back to a buildroot info from the
+            # archive's buildroot_id
             broot = buildroots[broot_id]
 
             cg_id = broot.get("cg_id")
@@ -311,18 +394,10 @@ def decorate_build_archive_data(session, build_infos):
     return build_infos
 
 
-def filter_imported(build_infos, negate=False, by_cg=()):
+def filter_imported(build_infos, by_cg=(), negate=False):
     """
-    Given a sequence of build info dicts, return those which are
+    Given a sequence of build info dicts, yield those which are
     imports.
-
-    if negate is True, then behavior is flipped and only non-imports
-    are emitted (and the by_cg parameter is ignored)
-
-    If by_cg is not specified, then only non CG imports are emitted.
-    If by_cg is specified, then emit only those imports which are from
-    a content generator in that set (or any content generators if
-    'any' is in the by_cg list).
 
     build_infos may have been decorated by the decorate_build_cg_list
     function. This provides an accurate listing of the content
@@ -332,16 +407,32 @@ def filter_imported(build_infos, negate=False, by_cg=()):
     only have been provided if the content generator reserved the
     build ahead of time.
 
-    :param build_infos: build infos to filter through
-    :type build_infos: list[dict]
+    If by_cg is empty and negate is False, then only builds which are
+    non-CG imports will be emitted.
 
-    :param negate: whether to negate the imported test, Default False
-    :type negate: bool, optional
+    If by_cg is empty and negate is True, then only builds which are
+    non-imports will be emitted (ie. those with a task).
+
+    If by_cg is not empty and negate is False, then only builds which
+    are CG imports from the listed CGs will be emitted.
+
+    If by_cg is not empty and negate is True, then only builds which
+    are CG imports but not from the listed CGs will be emitted.
+
+    by_cg may contain the string "any" to indicate that it matches all
+    content generators. "any" should not be used with negate of True,
+    as it will always result in no matches.
+
+    :param build_infos: build infos to filter through
+    :type build_infos: list[dict] or Iterator[dict]
 
     :param by_cg: Content generator names to filter for
     :type by_cg: list[str], optional
 
-    :rtype: list[dict]
+    :param negate: whether to negate the test, Default False
+    :type negate: bool, optional
+
+    :rtype: Generator[dict]
     """
 
     by_cg = set(by_cg)
@@ -359,27 +450,31 @@ def filter_imported(build_infos, negate=False, by_cg=()):
         if cg_name:
             build_cgs.add(cg_name)
 
-        is_import = build.get("task_id", None) is None
+        is_import = not build.get("task_id", None)
 
         if negate:
-            # looking for non-imports, regardless of CG or not
-            if not is_import:
-                found.append(build)
+            if by_cg:
+                # we wanted imports which are NOT from these CGs. The
+                # case of "any" is weird here -- because that would
+                # mean we're looking for CG imports, and only those
+                # which aren't any... so nothing can match this.
+                if not any_cg and build_cgs and disjoint(build_cgs):
+                    yield build
+            else:
+                # we wanted non-imports
+                if not is_import:
+                    yield build
 
         elif is_import:
-            if build_cgs:
-                # this is a CG import
-                if any_cg or not disjoint(build_cgs):
-                    # and we wanted either this specific one or any
-                    found.append(build)
+            if by_cg:
+                # we wanted imports which are from these CGs
+                if build_cgs and (any_cg or not disjoint(build_cgs)):
+                    yield build
 
             else:
-                # this is not a CG import
-                if not by_cg:
-                    # and we didn't want it to be
-                    found.append(build)
-
-    return found
+                # we wanted imports which are not from any CG
+                if not build_cgs:
+                    yield build
 
 
 #
