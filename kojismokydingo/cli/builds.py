@@ -122,7 +122,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
         session.multicall = True
         for pkgid, oid in package_todo:
             session.packageListAdd(tagid, pkgid, owner=oid,
-                                   force=force, update=True)
+                                   force=force)
         done = session.multiCall(strict=strict)
 
         # verify the results of our add-pkg calls. If strict was set
