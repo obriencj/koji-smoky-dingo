@@ -26,6 +26,9 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
+VERSION = "0.9.1"
+
+
 CLASSIFIERS = [
     "Environment :: Console",
     "Intended Audience :: Developers",
@@ -65,7 +68,7 @@ COMMANDS = {
 def config():
     return {
         "name": "kojismokydingo",
-        "version": "0.9.0",
+        "version": VERSION,
         "description": "A collection of Koji command-line plugins",
         "author": "Christopher O'Brien",
         "author_email": "obriencj@gmail.com",

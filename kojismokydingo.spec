@@ -1,6 +1,6 @@
 
 %global srcname kojismokydingo
-%global srcver 0.9.0
+%global srcver 0.9.1
 
 
 Summary: Koji Smoky Dingo
@@ -210,6 +210,12 @@ Koji Smoky Dingo Meta Plugin
 %changelog
 * Wed Jan 09 2019 Christopher O'Brien <obriencj@gmail.com> - 0.9.0-1
 - Initial build.
+
+* Fri Sep 04 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-1
+- Begin bumping micro for PRs as we work towards version 1.0.0
+- All 0.9.z versions are still considered API untable, this just helps
+  to differentiate
+- Add list-components koji command
 
 
 # The end.

@@ -16,9 +16,9 @@ function ksd_version() {
     read -r -d'\0' SCRIPT <<EOF
 from __future__ import print_function
 import setup
-print(setup.config()["version"])
+print(setup.VERSION)
 EOF
-     "$PYTHON" -B -c "$SCRIPT"
+    "$PYTHON" -B -c "$SCRIPT"
 }
 
 
@@ -76,8 +76,8 @@ function ksd_build_platform() {
 
     local PODMAN=$(whichever podman docker)
     if [ $? != 0 ] ; then
-       echo "Neither podman not docker available, exiting"
-       return 1
+        echo "Neither podman not docker available, exiting"
+        return 1
     else
 	echo "Using $PODMAN"
     fi
@@ -131,8 +131,8 @@ function ksd_test_platform() {
 
     local PODMAN=$(whichever podman docker)
     if [ $? != 0 ] ; then
-       echo "Neither podman not docker available, exiting"
-       return 1
+        echo "Neither podman not docker available, exiting"
+        return 1
     else
 	echo "Using $PODMAN"
     fi
