@@ -5,7 +5,7 @@ WORKDIR /src
 
 RUN dnf install -qy \
         dnf-plugins-core make rpm-build which \
-        python3-mock python3-nose
+        python3-mock python3-nose koji
 
 ARG VERSION
 

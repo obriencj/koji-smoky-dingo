@@ -98,7 +98,7 @@ Summary:        %{summary}
 BuildRequires:  python-setuptools
 Requires:	python python-argparse python-setuptools python-six
 Requires:       python2-koji
-Obsoletes:	python2-%{srcname}-meta
+Obsoletes:	python2-%{srcname}-meta <= 0.9.0
 
 %description -n python2-%{srcname}
 Koji Smoky Dingo
@@ -107,7 +107,7 @@ Koji Smoky Dingo
 %defattr(-,root,root,-)
 %{python_sitelib}/koji_cli_plugins/
 %{python_sitelib}/kojismokydingo/
-%{python_sitelib}/kojismokydingo-%{version}-py2.6.egg-info/
+%{python_sitelib}/kojismokydingo-%{version}-py2.?.egg-info/
 
 %endif
 
@@ -119,7 +119,7 @@ Summary:        %{summary}
 BuildRequires:  python2-devel python2-pip python2-setuptools python2-wheel
 Requires:	python2 python2-setuptools python2-six
 Requires:       python2-koji
-Obsoletes:	python2-%{srcname}-meta
+Obsoletes:	python2-%{srcname}-meta <= 0.9.0
 %{?python_provide:%python_provide python2-%{srcname}}
 
 %description -n python2-%{srcname}
@@ -141,7 +141,7 @@ Summary:        %{summary}
 BuildRequires:  python3-devel python3-pip python3-setuptools python3-wheel
 Requires:	python3 python3-setuptools python3-six
 Requires:       python3-koji
-Obsoletes:	python3-%{srcname}-meta
+Obsoletes:	python3-%{srcname}-meta <= 0.9.0
 %{?python_provide:%python_provide python3-%{srcname}}
 
 %description -n python3-%{srcname}
