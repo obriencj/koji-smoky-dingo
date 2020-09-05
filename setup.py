@@ -33,8 +33,10 @@ CLASSIFIERS = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 2",
     "Programming Language :: Python :: 2.6",
     "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
@@ -69,7 +71,7 @@ def config():
     return {
         "name": "kojismokydingo",
         "version": VERSION,
-        "description": "A collection of Koji command-line plugins",
+        "description": "A collection of Koji client plugins and utils",
         "author": "Christopher O'Brien",
         "author_email": "obriencj@gmail.com",
         "url": "https://github.com/obriencj/koji-smoky-dingo",
@@ -79,6 +81,7 @@ def config():
         "classifiers": CLASSIFIERS,
 
         "packages": [
+            "koji_cli_plugins",
             "kojismokydingo",
             "kojismokydingo.cli",
         ],
@@ -94,7 +97,9 @@ def config():
             "six",
         ],
 
-        "zip_safe": True,
+        # The koji_cli_plugins namespace package needs to be a plain
+        # directory that Koji can look through for individual plugins
+        "zip_safe": False,
 
         "entry_points": {
             "koji_smoky_dingo": ["=".join(c) for c in COMMANDS.items()],
