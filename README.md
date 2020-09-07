@@ -67,55 +67,59 @@ permissions in koji.
 
 ## Install
 
+The kojismokydingo package utilizes setuptools and can be built and
+installed as an egg or wheel.
 
-### The Meta Plugin
+Because of how koji loads client plugins, if you want the meta plugin
+available by default system-wide, then the package needs to be
+installed into the default site-packages for the python installation.
 
-Because of how koji loads client plugins, the meta plugin needs to be
-installed with either the `--old-and-unmanageable` flag or with
-`--root=/` specified.
+The easiest way to achieve this is by building and installing as an
+RPM.
 
 ```bash
-# system install
-sudo python setup-meta.py clean build install --root=/
+# Python 2.6 global install
+sudo python setup.py clean build install --root=/
+
+# Python 2.7 global install
+python3 setup.py bdist_wheel
+pip3 install --prefix /usr -I dist/kojismokydingo-0.9.1-py2-none-any.whl
+
+# Python 3 global install
+python3 setup.py bdist_wheel
+pip3 install --prefix /usr -I dist/kojismokydingo-0.9.1-py3-none-any.whl
 ```
 
-With koji >= [1.18], the meta plugin can also be installed into
+However, if you only want the plugin available for yourself, you can
+install it anywhere and tell koji to look in that particular
+`site-package/koji_cli_plugins` instance
+
+```bash
+# Python 3 user install
+python3 setup.py bdist_wheel
+pip3 install --user -I dist/kojismokydingo-0.9.1-py3-none-any.whl
+```
+
+And the following setting in ~/.koji/config assuming Python version
+3.7 -- read the output of the install command above to verify your
+install path. Note that the section title needs to match your koji
+profile, and that you need to configure this setting for each profile
+you'll want to use the meta plugin with.
+
+```
+[koji]
+plugin_paths = ~/.local/lib/python3.7/site-packages/koji_cli_plugins/
+```
+
+With koji >= [1.18], the meta plugin can also be symlinked into
 `~/.koji/plugins`
 
 [1.18]: https://docs.pagure.org/koji/release_notes_1.18/
 
 ```bash
-# user only
 mkdir -p ~/.koji/plugins
-cp koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+ln -s ~/.local/lib/python3.7/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 ```
-
-
-### The kojismokydingo Package
-
-However the rest of koji-smoky-dingo can be installed normally, either
-as a system-level or user-level package.
-
-```bash
-# system install
-sudo python setup.py install
-
-# user only
-python setup.py install --user
-```
-
-If deploying on a Python 3 environment, it's best to install via pip
-
-```bash
-# system insall
-python3 ./setup.py bdist_wheel
-pip3 install --I dist/*.whl
-
-# user only
-python3 ./setup.py bdist_wheel
-pip3 install --user --I dist/*.whl
-```
-
 
 ## Contact
 
