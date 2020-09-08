@@ -31,6 +31,7 @@ import re
 
 from collections import OrderedDict
 from fnmatch import fnmatchcase
+from six import iteritems
 from six.moves import filter, filterfalse, range, zip_longest
 
 
@@ -90,6 +91,43 @@ def fnmatches(value, patterns, ignore_case=False):
             return True
     else:
         return False
+
+
+def update_extend(dict_orig, dict_additions):
+    """
+    Extend the list values of the original dict with the list values of
+    the additions dict.
+
+    eg.
+    ```
+    A = {'a': [1, 2], 'b': [7], 'c': [10]}
+    B = {'a': [3], 'b': [8, 9], 'd': [11]}
+    update_extend(A, B)
+
+    A
+    >> {'a': [1, 2, 3],
+        'b': [7, 8, 9],
+        'c': [10],
+        'd': [11]}
+    ```
+
+    The values of dict_orig must support an extend method.
+
+    :param dict_orig: The original dict, which may be mutated and whose
+      values will be extended
+
+    :type dict_orig: dict[object, list]
+
+    :param dict_additions: The additions dict. Will not be altered.
+
+    :type dict_additions: dict[object, list]
+
+    :rtype: None
+    """
+
+    for key, val in iteritems(dict_additions):
+        orig = dict_orig.setdefault(key, [])
+        orig.extend(val)
 
 
 def globfilter(seq, patterns,
