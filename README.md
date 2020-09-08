@@ -72,10 +72,19 @@ installed as an egg or wheel.
 
 Because of how koji loads client plugins, if you want the meta plugin
 available by default system-wide, then the package needs to be
-installed into the default site-packages for the python installation.
+installed into the default site-packages for the python
+installation.
 
-The easiest way to achieve this is by building and installing as an
-RPM.
+If using an RPM-based distribution, this is easily achieved using the
+included spec to produce an RPM and install that.
+
+```bash
+make clean rpm
+dnf install dist/noarch/python3-kojismokydingo-0.9.1-1.fc32.noarch.rpm
+```
+
+Using traditional setuptools or pip installation methods can also
+achieve this by specifying the specific root or prefix parameter
 
 ```bash
 # Python 2.6 global install
