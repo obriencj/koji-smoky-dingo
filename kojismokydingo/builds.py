@@ -439,8 +439,6 @@ def filter_imported(build_infos, by_cg=(), negate=False):
     any_cg = "any" in by_cg
     disjoint = by_cg.isdisjoint
 
-    found = []
-
     for build in build_infos:
 
         # either get the decorated archive cg names, or start a fresh
