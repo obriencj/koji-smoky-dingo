@@ -26,9 +26,9 @@ from collections import OrderedDict
 from six import iteritems, itervalues
 
 from . import (
-    bulk_load_build_archives, bulk_load_builds,
+    bulk_load, bulk_load_build_archives, bulk_load_builds,
     bulk_load_buildroots)
-from .common import chunkseq, rpm_evr_compare, unique
+from .common import chunkseq, rpm_evr_compare, unique, update_extend
 from .tags import as_taginfo
 
 
@@ -473,6 +473,106 @@ def filter_imported(build_infos, by_cg=(), negate=False):
                 # we wanted imports which are not from any CG
                 if not build_cgs:
                     yield build
+
+
+def gather_buildroots(session, build_ids):
+    if not isinstance(build_ids, (tuple, list)):
+        build_ids = list(build_ids)
+
+    # multicall to fetch the artifacts for all build IDs
+    archives = bulk_load_build_archives(session, build_ids)
+
+    # gather all the buildroot IDs
+    root_ids = set()
+    for archive_list in itervalues(archives):
+        for archive in archive_list:
+            broot_id = archive["buildroot_id"]
+            if broot_id:
+                # do NOT allow None or 0
+                root_ids.add(broot_id)
+
+    # multicall to fetch all the buildroots
+    buildroots = bulk_load_buildroots(session, list(root_ids))
+
+    results = {}
+
+    for build_id, archive_list in iteritems(archives):
+        broots = (a["buildroot_id"] for a in archive_list)
+        broots = unique(b for b in broots if b)
+        results[build_id] = [buildroots[b] for b in broots]
+
+    return results
+
+
+def gather_component_build_ids(session, build_ids, btypes=None):
+    """
+    Given a sequence of build IDs, identify the IDs of the component
+    builds used to produce them (installed in the buildroots of the
+    archives of the original build IDs)
+
+    Returns a dict mapping the original build IDs to a list of the
+    discovered component build IDs.
+
+    If btypes is None, then all component archive types will be
+    considered. Otherwise, btypes may be a sequence of btype names and
+    only component archives of those types will be considered.
+
+    :param build_ids: Build IDs to collect components for
+
+    :type build_ids: list[int]
+
+    :param btypes: Component archive btype filter. Default, all types
+
+    :type btypes: list[str], optional
+
+    :rtype: dict[int, list[int]]
+    """
+
+    if not isinstance(build_ids, (tuple, list)):
+        build_ids = list(build_ids)
+
+    # multicall to fetch the artifacts for all build IDs
+    archives = bulk_load_build_archives(session, build_ids)
+
+    # gather all the buildroot IDs
+    root_ids = set()
+    for archive_list in itervalues(archives):
+        for archive in archive_list:
+            broot_id = archive["buildroot_id"]
+            if broot_id:
+                # do NOT allow None or 0
+                root_ids.add(broot_id)
+
+    components = {}
+
+    if btypes is None or None in btypes:
+        # in order to query all types, we need to explicitly query for
+        # RPMs, and then archives of type None
+        btypes = ("rpm", None)
+
+    # dig up the component archives (pretending that RPMs are just
+    # another archive type as usual) and map them to the buildroot ID.
+    for bt in btypes:
+        if bt == "rpm":
+            find = lambda b: session.listRPMs(componentBuildrootID=b)
+        else:
+            find = lambda b: session.listArchives(componentBuildrootID=b,
+                                                  type=bt)
+        update_extend(components, bulk_load(session, find, root_ids))
+
+    results = {}
+
+    # now associate the components back with the original build IDs
+    for build_id, archive_list in iteritems(archives):
+        cids = set()
+        for archive in archive_list:
+            broot_id = archive["buildroot_id"]
+            archives = components.get(broot_id, ())
+            cids.update(c["build_id"] for c in archives)
+
+        results[build_id] = list(cids)
+
+    return results
 
 
 #
