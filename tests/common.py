@@ -15,7 +15,8 @@
 from unittest import TestCase
 
 from kojismokydingo.common import (
-    unique, chunkseq, fnmatches, globfilter,
+    chunkseq, fnmatches, globfilter,
+    unique, update_extend,
     _rpm_str_compare)
 
 
@@ -107,6 +108,20 @@ class TestEVRSort(TestCase):
 
 
 class TestCommon(TestCase):
+
+
+    def test_update_extend(self):
+
+        A = {'a': [1, 2], 'b': [7], 'c': [10]}
+        B = {'a': [3], 'b': [8, 9], 'd': [11]}
+        C = {'a': [3], 'b': [8, 9], 'd': [11]}
+        D = {'a': [1, 2, 3], 'b': [7, 8, 9], 'c': [10], 'd': [11]}
+
+        update_extend(A, B)
+        self.assertEqual(A, D)
+
+        # verify that B wasn't modified
+        self.assertEqual(B, C)
 
 
     def test_unique(self):
