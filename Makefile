@@ -5,6 +5,10 @@ PROJECT = kojismokydingo
 VERSION = $(shell tools/version.sh)
 ARCHIVE = $(PROJECT)-$(VERSION).tar.gz
 
+GITBRANCH = $(shell git branch --show-current)
+GITHEADREF = $(shell git show-ref -d --heads $(GITBRANCH) \
+		| head -n1 | cut -f2 -d' ')
+
 
 default: test
 
@@ -44,8 +48,8 @@ archive: $(ARCHIVE)
 
 # newer versions support the --format tar.gz but we're intending to work all
 # the way back to RHEL 6 which does not have that.
-$(ARCHIVE):
-	git archive HEAD \
+$(ARCHIVE): .git/$(GITHEADREF)
+	git archive $(GITHEADREF) \
 		--format tar --prefix "$(PROJECT)-$(VERSION)/" \
 		| gzip > "$(ARCHIVE)"
 
