@@ -143,6 +143,15 @@ def _bulk_load(session, loadfn, keys, size=100):
                 yield key, None
 
 
+def bulk_load(session, loadfn, keys, size=100, results=None):
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, loadfn, keys, size):
+        results[key] = info
+
+    return results
+
+
 def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     """
     Load many buildinfo dicts from a koji client session and a
