@@ -13,13 +13,17 @@ GITHEADREF = $(shell git show-ref -d --heads $(GITBRANCH) \
 default: test
 
 
-clean: clean-docs
-	rm -rf *.egg-info dist/* build/* logs/*
-	rm -f "$(ARCHIVE)"
+tidy:
+	rm -rf *.egg-info
 	find -H . \
 		\( -iname '.tox' -prune \) -o \
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
 		\( -type f -iname '*.pyc' -exec rm -f {} + \)
+
+
+clean: clean-docs tidy
+	rm -rf dist/* build/* logs/*
+	rm -f "$(ARCHIVE)"
 
 
 packaging-build: archive
