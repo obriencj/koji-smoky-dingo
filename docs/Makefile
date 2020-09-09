@@ -47,7 +47,7 @@ help:
 	@echo "  linkcheck  to check all external links for integrity"
 
 clean:
-	rm -rf $(BUILDDIR)/*
+	@rm -rf $(BUILDDIR)/*
 
 html: generate
 	$(SPHINXCMD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
@@ -91,21 +91,21 @@ _static _templates $(DEPLOYDIR):
 	mkdir -p $@
 
 build-project:
-	pushd ../ >/dev/null ;\
+	@pushd ../ >/dev/null ;\
 	./setup.py clean build ;\
 	popd
 
 overview.rst: ../README.md
-	sed 's/^\[\!.*/ /g' ../README.md > overview.md
-	pandoc --from=markdown --to=rst -o "overview.rst" "overview.md"
-	rm -f overview.md
+	@sed 's/^\[\!.*/ /g' ../README.md > overview.md
+	@pandoc --from=markdown --to=rst -o "overview.rst" "overview.md"
+	@rm -f overview.md
 
 generate: build-project overview.rst
 
 # clones the appropriate git repo and branch in the deploy directory
 # if it isn't already setup
 setup-stage: $(DEPLOYDIR)
-	if ! [ -d "$(DEPLOYDIR)/.git" ] ; then \
+	@if ! [ -d "$(DEPLOYDIR)/.git" ] ; then \
 		git clone $(DEPLOYREPO) $(DEPLOYDIR) \
 			--single-branch \
 			--branch $(DEPLOYBRANCH) ;\
@@ -114,16 +114,16 @@ setup-stage: $(DEPLOYDIR)
 # clears out the old contents of _deploy so that we can replace them
 # with our newly generated version
 clean-stage: setup-stage
-	pushd $(DEPLOYDIR) ;\
+	@pushd $(DEPLOYDIR) ;\
 	git checkout --force $(DEPLOYBRANCH) ;\
 	git pull ;\
 	git rm -rf * ;\
 	rm -rf * ;\
-	touch .nojekyll ; git add .nojekyll ;\
+	touch .nojekyll ; @git add .nojekyll ;\
 	popd
 
 stage: generate clean-stage $(DEPLOYFORMAT)
-	cp -r "$(BUILDDIR)/$(DEPLOYFORMAT)/"* $(DEPLOYDIR)
+	@cp -r "$(BUILDDIR)/$(DEPLOYFORMAT)/"* $(DEPLOYDIR)
 	pushd $(DEPLOYDIR) ;\
 	git add . ;\
 	popd
@@ -131,7 +131,7 @@ stage: generate clean-stage $(DEPLOYFORMAT)
 # builds the selected format of docs, and checks them into the right
 # branch on our repo.
 deploy: stage
-	pushd $(DEPLOYDIR) ;\
+	@pushd $(DEPLOYDIR) ;\
 	git commit -m "deploying sphinx update" ;\
 	git push ;\
 	popd
