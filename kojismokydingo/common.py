@@ -57,7 +57,7 @@ def chunkseq(seq, chunksize):
 
     if not isinstance(seq, (tuple, list)):
         seq = list(seq)
-        seqlen = len(seq)
+    seqlen = len(seq)
 
     return (seq[offset:offset + chunksize] for
             offset in range(0, seqlen, chunksize))
