@@ -9,8 +9,19 @@ GITBRANCH = $(shell git branch --show-current)
 GITHEADREF = $(shell git show-ref -d --heads $(GITBRANCH) \
 		| head -n1 | cut -f2 -d' ')
 
+PYTHON ?= $(shell which python3 python2 python 2>/dev/null \
+	        | head -n1)
 
-default: test
+
+default: build
+
+
+build: clean
+	@$(PYTHON) setup.py clean flake8 bdist_wheel
+
+
+install: build
+	@$(PYTHON) -B -m pip install --no-deps --user -I dist/*.whl
 
 
 tidy:
