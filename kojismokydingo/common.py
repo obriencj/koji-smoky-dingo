@@ -52,12 +52,10 @@ def chunkseq(seq, chunksize):
     :param chunksize: max length for chunks
     :type chunksize: int
 
-    :rtype: Iterator[list]
+    :rtype: Generator[list]
     """
 
-    try:
-        seqlen = len(seq)
-    except TypeError:
+    if not isinstance(seq, (tuple, list)):
         seq = list(seq)
         seqlen = len(seq)
 
