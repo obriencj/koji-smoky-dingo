@@ -32,11 +32,17 @@ from six import itervalues
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
-    read_clean_lines, printerr, resplit)
-from .. import NoSuchTag, NoSuchUser, bulk_load_builds
+    printerr, read_clean_lines, resplit)
+from .. import (
+    NoSuchTag, NoSuchUser,
+    bulk_load, bulk_load_builds, bulk_load_tags)
 from ..builds import (
+    BuildFilter,
+    as_buildinfo,
     build_dedup, build_id_sort, build_nvr_sort,
-    decorate_build_archive_data, iter_bulk_tag_builds, filter_imported)
+    decorate_build_archive_data, filter_imported,
+    gather_component_build_ids, iter_bulk_tag_builds)
+from ..tags import gather_tag_ids
 from ..common import chunkseq, unique
 
 
@@ -181,7 +187,7 @@ class BulkTagBuilds(TagSmokyDingo):
                dest="inherit", help="Do not use parent tags to"
                " determine existing package listing.")
 
-        addarg("--file", action="store", default="-",
+        addarg("-f", "--file", action="store", default="-",
                dest="nvr_file", metavar="NVR_FILE",
                help="Read list of builds from file, one NVR per line."
                " Omit for default behavior: read build NVRs from stdin")
@@ -327,70 +333,234 @@ class ListImported(AnonSmokyDingo):
                                  cg_list=options.cg_list)
 
 
-def args_filter_builds_by_tag(parser):
+class BuildFiltering(AnonSmokyDingo):
 
-    grp = parser.add_group("Filtering by tag")
-    addarg = grp.add_argument
+    def parser(self):
+        parser = super(BuildFiltering, self).parser()
 
-    addarg("--lookaside", action="append", default=list(),
-           help="Omit builds found in this tag or its parent tags")
+        grp = parser.add_argument_group("Filtering by tag")
+        addarg = grp.add_argument
 
-    addarg("--shallow-lookaside", action="append", default=list(),
-           help="Omit builds found directly in this tag")
+        addarg("--lookaside", action="append", default=list(),
+               help="Omit builds found in this tag or its parent tags")
 
-    addarg("--limit", action="append", default=list(),
-           help="Limit results to builds found in this tag or its"
-           " parent tags")
+        addarg("--shallow-lookaside", action="append", default=list(),
+               help="Omit builds found directly in this tag")
 
-    addarg("--shallow-limit", action="append", default=list(),
-           help="Limit results to builds found directly in this tag")
+        addarg("--limit", action="append", default=list(),
+               help="Limit results to builds found in this tag or its"
+               " parent tags")
 
-    return parser
+        addarg("--shallow-limit", action="append", default=list(),
+               help="Limit results to builds found directly in this tag")
+
+        grp = parser.add_argument_group("Filtering by type")
+        addarg = grp.add_argument
+
+        addarg("--type", action="append", dest="btypes",
+               default=[],
+               help="Limit to builds of this BType")
+
+        addarg("-c", "--content-generator", dest="cg_list",
+               action="append", default=list(),
+               metavar="CG_NAME",
+               help="show content generator imports by build"
+               " system name. Default: display no CG builds."
+               " Specify 'any' to see CG imports from any system."
+               " May be specified more than once.")
+
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+        addarg("--imports", action="store_true",
+               dest="imports", default=None,
+               help="Limit to imports")
+
+        addarg("--no-imports", action="store_false",
+               dest="imports", default=None,
+               help="Invert the imports checking")
+
+        return parser
 
 
-def args_filter_builds_by_type(parser):
+def cli_list_components(session, nvr_list, task=False,
+                        limit=(), shallow_limit=(),
+                        lookaside=(), shallow_lookaside=(),
+                        imported=None, cg_list=(),
+                        btypes=(),
+                        sorting=None):
 
-    grp = parser.add_group("Filtering by type")
-    addarg = grp.add_argument
+    if not nvr_list:
+        return
 
-    addarg("--imports", action="store_true", default=None,
-           help="Limit to imports")
+    # setup the limit as a set of IDs for each tag named in the
+    # options.
+    limit_ids = gather_tag_ids(session, deep=limit,
+                               shallow=shallow_limit)
 
-    addarg("--no-imports", action="store_true", default=None,
-           help="Limit to non-imports")
+    # setup the lookaside as a set of IDs for the tags in the
+    # flattened inheritance of each tag named in the options.
+    lookaside_ids = gather_tag_ids(session, deep=lookaside,
+                                   shallow=shallow_lookaside)
 
-    addarg("--type", action="append", default=None,
-           help="Limit to builds of this BType")
+    loaded = bulk_load_builds(session, nvr_list)
 
-    return parser
+    bf = BuildFilter(session,
+                     limit_tags=limit_ids,
+                     lookaside_tags=lookaside_ids,
+                     imported=imported,
+                     cg_list=cg_list,
+                     btypes=btypes)
+
+    builds = gather_component_build_ids(session, itervalues(loaded))
+
+    builds = bf.filter(itervalues(builds))
+
+    if sorting is SORT_BY_NVR:
+        builds = build_nvr_sort(builds, dedup=False)
+
+    elif sorting is SORT_BY_ID:
+        builds = build_id_sort(builds, dedup=False)
+
+    # print("Identified %i components of %s:" % (len(builds), nvr))
+    for binfo in builds:
+        print(binfo["nvr"])
 
 
-def args_filter_builds(parser):
-    parser = args_filter_builds_by_tag(parser)
-    parser = args_filter_builds_by_type(parser)
-
-    return parser
-
-
-def cli_list_build_components(session, nvr):
-    pass
-
-
-class ListBuildComponents(AnonSmokyDingo):
+class ListComponents(BuildFiltering):
 
     description = "List a build's component dependencies"
 
 
     def parser(self):
-        parser = super(ListBuildComponents, self).parser()
+        parser = super(ListComponents, self).parser()
+        addarg = parser.add_argument
+
+        addarg("nvr", action="append", nargs="*",
+               help="Build NVR to list components of")
+
+        addarg("-f", "--file", action="store", default=None,
+               dest="nvr_file", metavar="NVR_FILE",
+               help="Read list of builds from file, one NVR per line."
+               " Specify - to read from stdin.")
+
+        addarg("--task", action="store_true", default=False,
+               help="Specify task IDs instead of build NVRs")
+
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--nvr-sort", action="store_const",
+               dest="sorting", const=SORT_BY_NVR, default=None,
+               help="Sort output by NVR in ascending order")
+
+        addarg("--id-sort", action="store_const",
+               dest="sorting", const=SORT_BY_ID, default=None,
+               help="Sort output by Build ID in ascending order")
 
         return parser
 
 
     def handle(self, options):
+        nvrs = list(options.nvr)
 
-        return cli_list_build_components(self.session,
-                                         self.nvr)
+        if options.nvr_file:
+            nvrs.extend(read_clean_lines(options.nvr_file))
+
+        return cli_list_components(self.session,
+                                   nvrs,
+                                   task=options.task,
+                                   limit=options.limit,
+                                   shallow_limit=options.shallow_limit,
+                                   lookaside=options.lookaside,
+                                   shallow_lookaside=options.shallow_lookaside,
+                                   imported=options.imported,
+                                   cg_list=options.cg_list,
+                                   btypes=options.btypes,
+                                   sorting=options.sorting)
+
+
+def cli_filter_builds(session, nvr_list,
+                      limit=(), shallow_limit=(),
+                      lookaside=(), shallow_lookaside=(),
+                      imported=None, cg_list=(),
+                      btypes=(),
+                      sorting=None):
+
+    # setup the limit as a set of IDs for each tag named in the
+    # options.
+    limit_ids = gather_tag_ids(session, deep=limit,
+                               shallow=shallow_limit)
+
+    # setup the lookaside as a set of IDs for the tags in the
+    # flattened inheritance of each tag named in the options.
+    lookaside_ids = gather_tag_ids(session, deep=lookaside,
+                                   shallow=shallow_lookaside)
+
+    loaded = bulk_load_builds(session, nvr_list)
+
+    bf = BuildFilter(session,
+                     limit_tags=limit_ids,
+                     lookaside_tags=lookaside_ids,
+                     imported=imported,
+                     cg_list=cg_list,
+                     btypes=btypes)
+
+    builds = bf(itervalues(loaded))
+
+    if sorting is SORT_BY_NVR:
+        builds = build_nvr_sort(builds, dedup=False)
+
+    elif sorting is SORT_BY_ID:
+        builds = build_id_sort(builds, dedup=False)
+
+    for binfo in builds:
+        print(binfo["nvr"])
+
+
+class FilterBuilds(BuildFiltering):
+
+    description = "Filter a list of NVRs by various criteria"
+
+    def parser(self):
+        parser = super(FilterBuilds, self).parser()
+        addarg = parser.add_argument
+
+        addarg("nvr", action="append", nargs="*", default=[])
+
+        addarg("-f", "--file", action="store", default=None,
+               dest="nvr_file", metavar="NVR_FILE",
+               help="Read list of builds from file, one NVR per line."
+               " Specify - to read from stdin.")
+
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--nvr-sort", action="store_const",
+               dest="sorting", const=SORT_BY_NVR, default=None,
+               help="Sort output by NVR in ascending order")
+
+        addarg("--id-sort", action="store_const",
+               dest="sorting", const=SORT_BY_ID, default=None,
+               help="Sort output by Build ID in ascending order")
+
+        return parser
+
+
+    def handle(self, options):
+        nvrs = list(options.nvr)
+
+        if options.nvr_file:
+            nvrs.extend(read_clean_lines(options.nvr_file))
+
+        return cli_filter_builds(self.session, nvrs,
+                                 limit=options.limit,
+                                 shallow_limit=options.shallow_limit,
+                                 lookaside=options.lookaside,
+                                 shallow_lookaside=options.shallow_lookaside,
+                                 imported=options.imported,
+                                 cg_list=options.cg_list,
+                                 btypes=options.btypes,
+                                 sorting=options.sorting)
 
 
 #
