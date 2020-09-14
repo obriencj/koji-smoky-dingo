@@ -253,6 +253,29 @@ def bulk_load_build_archives(session, build_ids, btype=None,
     return results
 
 
+def bulk_load_build_rpms(session, build_ids,
+                         size=100, results=None):
+    """
+    Set up a chunking multicall to fetch the the archives of builds
+    via session.listArchives for each build ID in build_ids.
+
+    Returns an OrderedDict associating the individual build IDs with
+    their resulting archive lists.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, session.listRPMs,
+                                build_ids, size):
+        results[key] = info
+
+    return results
+
+
 def bulk_load_buildroots(session, broot_ids, size=100, results=None):
     """
     Set up a chunking multicall to fetch the buildroot data via
