@@ -28,6 +28,7 @@ from __future__ import print_function
 import sys
 
 from functools import partial
+from itertools import chain
 from six import itervalues
 
 from . import (
@@ -372,11 +373,11 @@ class BuildFiltering(AnonSmokyDingo):
         grp = grp.add_mutually_exclusive_group()
         addarg = grp.add_argument
         addarg("--imports", action="store_true",
-               dest="imports", default=None,
-               help="Limit to imports")
+               dest="imported", default=None,
+               help="Limit to imported builds")
 
         addarg("--no-imports", action="store_false",
-               dest="imports", default=None,
+               dest="imported", default=None,
                help="Invert the imports checking")
 
         return parser
@@ -402,24 +403,37 @@ def cli_list_components(session, nvr_list, task=False,
     lookaside_ids = gather_tag_ids(session, deep=lookaside,
                                    shallow=shallow_lookaside)
 
-    loaded = bulk_load_builds(session, nvr_list)
-
     bf = BuildFilter(session,
-                     limit_tags=limit_ids,
-                     lookaside_tags=lookaside_ids,
+                     limit_tag_ids=limit_ids,
+                     lookaside_tag_ids=lookaside_ids,
                      imported=imported,
                      cg_list=cg_list,
                      btypes=btypes)
 
-    builds = gather_component_build_ids(session, itervalues(loaded))
+    if task:
+        print("Not yet implemented")
+        return 1
 
-    builds = bf.filter(itervalues(builds))
+    else:
+        # load the initial set of builds, this also verifies our input
+        loaded = bulk_load_builds(session, nvr_list)
 
-    if sorting is SORT_BY_NVR:
-        builds = build_nvr_sort(builds, dedup=False)
+        # load the components for each of those builds
+        bids = [b["id"] for b in itervalues(loaded)]
+        components = gather_component_build_ids(session, bids)
 
-    elif sorting is SORT_BY_ID:
-        builds = build_id_sort(builds, dedup=False)
+        # now we need to turn those components build IDs into build_infos
+        bids = chain(*itervalues(components))
+        builds = bulk_load_builds(session, bids)
+
+    # do the filtering
+    builds = bf(itervalues(builds))
+
+    if sorting == SORT_BY_NVR:
+        builds = build_nvr_sort(builds)
+
+    elif sorting == SORT_BY_ID:
+        builds = build_id_sort(builds)
 
     # print("Identified %i components of %s:" % (len(builds), nvr))
     for binfo in builds:
@@ -435,7 +449,7 @@ class ListComponents(BuildFiltering):
         parser = super(ListComponents, self).parser()
         addarg = parser.add_argument
 
-        addarg("nvr", action="append", nargs="*",
+        addarg("nvr", nargs="*",
                help="Build NVR to list components of")
 
         addarg("-f", "--file", action="store", default=None,
@@ -466,8 +480,7 @@ class ListComponents(BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
-        return cli_list_components(self.session,
-                                   nvrs,
+        return cli_list_components(self.session, nvrs,
                                    task=options.task,
                                    limit=options.limit,
                                    shallow_limit=options.shallow_limit,
@@ -499,18 +512,18 @@ def cli_filter_builds(session, nvr_list,
     loaded = bulk_load_builds(session, nvr_list)
 
     bf = BuildFilter(session,
-                     limit_tags=limit_ids,
-                     lookaside_tags=lookaside_ids,
+                     limit_tag_ids=limit_ids,
+                     lookaside_tag_ids=lookaside_ids,
                      imported=imported,
                      cg_list=cg_list,
                      btypes=btypes)
 
     builds = bf(itervalues(loaded))
 
-    if sorting is SORT_BY_NVR:
+    if sorting == SORT_BY_NVR:
         builds = build_nvr_sort(builds, dedup=False)
 
-    elif sorting is SORT_BY_ID:
+    elif sorting == SORT_BY_ID:
         builds = build_id_sort(builds, dedup=False)
 
     for binfo in builds:
@@ -525,7 +538,7 @@ class FilterBuilds(BuildFiltering):
         parser = super(FilterBuilds, self).parser()
         addarg = parser.add_argument
 
-        addarg("nvr", action="append", nargs="*", default=[])
+        addarg("nvr", nargs="*", default=[])
 
         addarg("-f", "--file", action="store", default=None,
                dest="nvr_file", metavar="NVR_FILE",

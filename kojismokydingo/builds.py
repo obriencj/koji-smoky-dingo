@@ -28,8 +28,8 @@ from six.moves import filter
 
 from . import (
     NoSuchBuild,
-    bulk_load, bulk_load_build_archives, bulk_load_builds,
-    bulk_load_buildroots)
+    bulk_load, bulk_load_build_archives, bulk_load_build_rpms,
+    bulk_load_builds, bulk_load_buildroots)
 from .common import chunkseq, rpm_evr_compare, unique, update_extend
 from .tags import as_taginfo
 
@@ -349,7 +349,7 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
 
     :param build_infos: list of build infos to decorate and return
 
-    :type build_infos: list[dict]
+    :type build_infos: list[dict] or Iterator[dict]
 
     :param with_cg: load buildroot data for each archive of each build
       to determine the CG names and IDs. Default, does not load
@@ -357,23 +357,28 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
 
     :type with_cg: bool, optional
 
-    :rtype: list[dict]
+    :rtype: Iterator[dict]
     """
 
-    if not isinstance(build_infos, (tuple, list)):
-        build_infos = list(build_infos)
-
     # convert build_infos into an id:info dict
-    builds = dict((b["id"], b) for b in build_infos)
+    builds = OrderedDict((b["id"], b) for b in build_infos)
 
     # multicall to fetch the artifacts for all build IDs
     archives = bulk_load_build_archives(session, list(builds))
+    rpms = bulk_load_build_rpms(session, list(builds))
 
     # gather all the buildroot IDs
     root_ids = set()
     for archive_list in itervalues(archives):
         for archive in archive_list:
-            broot_id = archive["buildroot_id"]
+            broot_id = archive.get("buildroot_id")
+            if broot_id:
+                # do NOT allow None or 0
+                root_ids.add(broot_id)
+
+    for rpm_list in itervalues(rpms):
+        for rpm in rpm_list:
+            broot_id = rpm.get("buildroot_id")
             if broot_id:
                 # do NOT allow None or 0
                 root_ids.add(broot_id)
@@ -421,7 +426,43 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
             if cg_name:
                 cg_names.add(cg_name)
 
-    return build_infos
+    for build_id, rpm_list in iteritems(rpms):
+        if not rpm_list:
+            continue
+
+        bld = builds[build_id]
+        cg_ids = bld["archive_cg_ids"]
+        cg_names = bld["archive_cg_names"]
+
+        btype_ids = bld["archive_btype_ids"]
+        btype_ids.add(1)
+
+        btype_names = bld["archive_btype_names"]
+        btype_names.add("rpm")
+
+        if not with_cg:
+            continue
+
+        for rpm in rpm_list:
+            broot_id = rpm["buildroot_id"]
+            if not broot_id:
+                # no buildroot, thus no CG info, skip
+                continue
+
+            # The CG info is stored on the archive's buildroot, so
+            # let's correlate back to a buildroot info from the
+            # archive's buildroot_id
+            broot = buildroots[broot_id]
+
+            cg_id = broot.get("cg_id")
+            if cg_id:
+                cg_ids.add(cg_id)
+
+            cg_name = broot.get("cg_name")
+            if cg_name:
+                cg_names.add(cg_name)
+
+    return itervalues(builds)
 
 
 def filter_by_tags(session, build_infos,
@@ -439,38 +480,36 @@ def filter_by_tags(session, build_infos,
       pass. Default, do not filter against any tag membership.
     :type lookaside_tag_ids: list[int]
 
-    :rtype: Generator[dict]
+    :rtype: list[dict] or Iterator[dict]
     """
+
+    if not (limit_tag_ids or lookaside_tag_ids):
+        return build_infos
 
     limit = set(limit_tag_ids) if limit_tag_ids else None
     lookaside = set(lookaside_tag_ids) if lookaside_tag_ids else None
 
-    if not (limit or lookaside):
-        return build_infos
-
     # a build ID: build_info mapping that we'll use to trim out
     # mismatches
-    builds = dict((b["id"], b) for b in build_infos)
+    builds = OrderedDict((b["id"], b) for b in build_infos)
 
     # for each build ID, load the list of tags for that build
-    btags = bulk_load(session, session.listTags, list(builds))
+    build_tags = bulk_load(session, session.listTags, list(builds))
 
-    for bid, btags in btags:
+    for bid, tags in iteritems(build_tags):
         # convert the list of tags into a set of tag IDs
-        btags = set(t["id"] for t in btags)
+        tags = set(t["id"] for t in tags)
 
-        if limit and btags.isdisjoint(limit):
+        if limit and tags.isdisjoint(limit):
             # don't want it, limit was given and this is not tagged in
             # the limit
-            continue
+            builds.pop(bid)
 
-        elif lookaside and not btags.isdisjoint(lookaside):
+        elif lookaside and not tags.isdisjoint(lookaside):
             # don't want it, it's in the lookaside
-            continue
+            builds.pop(bid)
 
-        else:
-            # looks good!
-            yield builds[bid]
+    return itervalues(builds)
 
 
 def filter_imported(build_infos, by_cg=(), negate=False):
@@ -478,13 +517,13 @@ def filter_imported(build_infos, by_cg=(), negate=False):
     Given a sequence of build info dicts, yield those which are
     imports.
 
-    build_infos may have been decorated by the decorate_build_cg_list
-    function. This provides an accurate listing of the content
-    generators which have been used to import the build (if any). In
-    the event that they have not been thus decorated, the cg filtering
-    will rely on the cg_name setting on the build itself, which will
-    only have been provided if the content generator reserved the
-    build ahead of time.
+    build_infos may have been decorated by the
+    decorate_build_archive_data function. This provides an accurate
+    listing of the content generators which have been used to import
+    the build (if any). In the event that they have not been thus
+    decorated, the cg filtering will rely on the cg_name setting on
+    the build itself, which will only have been provided if the
+    content generator reserved the build ahead of time.
 
     If by_cg is empty and negate is False, then only builds which are
     non-CG imports will be emitted.
@@ -605,9 +644,6 @@ def gather_component_build_ids(session, build_ids, btypes=None):
     :rtype: dict[int, list[int]]
     """
 
-    if not isinstance(build_ids, (tuple, list)):
-        build_ids = list(build_ids) if build_ids else []
-
     # multicall to fetch the artifacts for all build IDs
     archives = bulk_load_build_archives(session, build_ids)
 
@@ -684,10 +720,10 @@ class BuildFilter(object):
 
         self._session = session
 
-        self._limit_tags = \
+        self._limit_tag_ids = \
             set(limit_tag_ids) if limit_tag_ids else None
 
-        self._lookaside_tags = \
+        self._lookaside_tag_ids = \
             set(lookaside_tag_ids) if lookaside_tag_ids else None
 
         self._imported = imported
@@ -697,13 +733,12 @@ class BuildFilter(object):
 
 
     def filter_by_tags(self, build_infos):
-        return filter_by_tags(self.session, build_infos,
-                              self._limit_ids,
-                              self._lookaside_ids)
+        return filter_by_tags(self._session, build_infos,
+                              limit_tag_ids=self._limit_tag_ids,
+                              lookaside_tag_ids=self._lookaside_tag_ids)
 
 
     def filter_by_btype(self, build_infos):
-
         bt = self._btypes
         if bt:
             def test(b):
@@ -716,11 +751,9 @@ class BuildFilter(object):
 
 
     def filter_imported(self, build_infos):
-
         if self._cg_list or self._imported is not None:
-            build_infos = filter_imported(build_infos,
-                                          self._cg_list,
-                                          not self._imported)
+            negate = not (self._imported or self._imported is None)
+            build_infos = filter_imported(build_infos, self._cg_list, negate)
 
         return build_infos
 
@@ -739,13 +772,11 @@ class BuildFilter(object):
         # first stage filtering, based on tag membership
         work = self.filter_by_tags(work)
 
+        # check if we're going to need the decorated additional data
+        # for filtering, and if so decorate
         with_cg = bool(self._cg_list)
-        check_imports = self._imported is not None
-
-        if self._btypes or with_cg or check_imports:
-            # we're going to need the decorated additional data for
-            # filtering
-            decorate_build_archive_data(self._session, work, with_cg)
+        if self._btypes or with_cg or self._imported is not None:
+            work = decorate_build_archive_data(self._session, work, with_cg)
 
         # filtering by btype (provided by decorated addtl data)
         work = self.filter_by_btype(work)
