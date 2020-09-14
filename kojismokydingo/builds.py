@@ -24,12 +24,28 @@ Functions for working with Koji builds
 
 from collections import OrderedDict
 from six import iteritems, itervalues
+from six.moves import filter
 
 from . import (
+    NoSuchBuild,
     bulk_load, bulk_load_build_archives, bulk_load_builds,
     bulk_load_buildroots)
 from .common import chunkseq, rpm_evr_compare, unique, update_extend
 from .tags import as_taginfo
+
+
+def as_buildinfo(session, build):
+    if isinstance(build, (str, int)):
+        info = session.getBuild(build)
+    elif isinstance(build, dict):
+        info = build
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchBuild(build)
+
+    return info
 
 
 class BuildNEVRCompare(object):
@@ -73,23 +89,31 @@ class BuildNEVRCompare(object):
         return self.__cmp__(other) > 0
 
 
-def build_nvr_sort(build_infos):
+def build_nvr_sort(build_infos, dedup=True):
     """
-    Given a sequence of build info dictionaries, deduplicate and then
-    sort them by Name, Epoch, Version, and Release using RPM's
-    variation of comparison
+    Given a sequence of build info dictionaries, sort them by Name,
+    Epoch, Version, and Release using RPM's variation of comparison
+
+    If dedup is True (the default), then duplicate NVRs will be
+    omitted.
 
     :param build_infos: build infos to be sorted and de-duplicated
     :type build_infos: list[dict]
 
+    :param dedup: remove duplicate entries. Default, True
+    :type dedup: bool, optional
+
     :rtype: list[dict]
     """
 
-    dedup = dict((b["id"], b) for b in build_infos if b)
-    return sorted(itervalues(dedup), key=BuildNEVRCompare)
+    if dedup:
+        dd = dict((b["id"], b) for b in build_infos if b)
+        build_infos = itervalues(dd)
+
+    return sorted(build_infos, key=BuildNEVRCompare)
 
 
-def build_id_sort(build_infos):
+def build_id_sort(build_infos, dedup=True):
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, sorted by the build ID
@@ -97,11 +121,17 @@ def build_id_sort(build_infos):
     :param build_infos: build infos to be sorted and de-duplicated
     :type build_infos: list[dict]
 
+    :param dedup: remove duplicate entries. Default, True
+    :type dedup: bool, optional
+
     :rtype: list[dict]
     """
 
-    dedup = dict((b["id"], b) for b in build_infos if b)
-    return [b for _bid, b in sorted(iteritems(dedup))]
+    if dedup:
+        builds = dict((b["id"], b) for b in build_infos if b)
+        return [b for _bid, b in sorted(iteritems(builds))]
+    else:
+        return sorted(builds, key=lambda b: (b["id"], b))
 
 
 def build_dedup(build_infos):
@@ -394,6 +424,55 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
     return build_infos
 
 
+def filter_by_tags(session, build_infos,
+                   limit_tag_ids=(), lookaside_tag_ids=()):
+
+    """
+    :param build_infos: build infos to filter through
+    :type build_infos: list[dict] or Iterator[dict]
+
+    :param limit_tag_ids: tag IDs that builds must be tagged with to
+      pass. Default, do not limit to any tag membership.
+    :type limit_tag_ids: list[int]
+
+    :param lookaside_tag_ids: tag IDs that builds must not be tagged with to
+      pass. Default, do not filter against any tag membership.
+    :type lookaside_tag_ids: list[int]
+
+    :rtype: Generator[dict]
+    """
+
+    limit = set(limit_tag_ids) if limit_tag_ids else None
+    lookaside = set(lookaside_tag_ids) if lookaside_tag_ids else None
+
+    if not (limit or lookaside):
+        return build_infos
+
+    # a build ID: build_info mapping that we'll use to trim out
+    # mismatches
+    builds = dict((b["id"], b) for b in build_infos)
+
+    # for each build ID, load the list of tags for that build
+    btags = bulk_load(session, session.listTags, list(builds))
+
+    for bid, btags in btags:
+        # convert the list of tags into a set of tag IDs
+        btags = set(t["id"] for t in btags)
+
+        if limit and btags.isdisjoint(limit):
+            # don't want it, limit was given and this is not tagged in
+            # the limit
+            continue
+
+        elif lookaside and not btags.isdisjoint(lookaside):
+            # don't want it, it's in the lookaside
+            continue
+
+        else:
+            # looks good!
+            yield builds[bid]
+
+
 def filter_imported(build_infos, by_cg=(), negate=False):
     """
     Given a sequence of build info dicts, yield those which are
@@ -476,8 +555,6 @@ def filter_imported(build_infos, by_cg=(), negate=False):
 
 
 def gather_buildroots(session, build_ids):
-    if not isinstance(build_ids, (tuple, list)):
-        build_ids = list(build_ids)
 
     # multicall to fetch the artifacts for all build IDs
     archives = bulk_load_build_archives(session, build_ids)
@@ -492,7 +569,7 @@ def gather_buildroots(session, build_ids):
                 root_ids.add(broot_id)
 
     # multicall to fetch all the buildroots
-    buildroots = bulk_load_buildroots(session, list(root_ids))
+    buildroots = bulk_load_buildroots(session, root_ids)
 
     results = {}
 
@@ -529,7 +606,7 @@ def gather_component_build_ids(session, build_ids, btypes=None):
     """
 
     if not isinstance(build_ids, (tuple, list)):
-        build_ids = list(build_ids)
+        build_ids = list(build_ids) if build_ids else []
 
     # multicall to fetch the artifacts for all build IDs
     archives = bulk_load_build_archives(session, build_ids)
@@ -573,6 +650,110 @@ def gather_component_build_ids(session, build_ids, btypes=None):
         results[build_id] = list(cids)
 
     return results
+
+
+class BuildFilter(object):
+
+    def __init__(self, session,
+                 limit_tag_ids=None, lookaside_tag_ids=None,
+                 imported=None, cg_list=None,
+                 btypes=None):
+
+        """
+        :param limit_tag_ids: if specified, builds must be tagged with one
+          of these tags
+        :type limit_tag_ids: list[int], optional
+
+        :param lookaside_tag_ids: if specified, builds must not be tagged
+          with any of these tags
+        :type lookaside_tag_ids: list[int], optional
+
+        :param imported: if True, only imported builds are returned. If
+          False, only unimported builds are returned. Default, does not
+          test whether a build is imported or not.
+        :type imported: bool, optional
+
+        :param cg_list: If specified, only builds which are produced by
+          the named content generators will be returned.
+        :type cg_list: list[str], optional
+
+        :param btypes: Filter for the given build types, by name
+        :type btypes: list[str], optional
+
+        """
+
+        self._session = session
+
+        self._limit_tags = \
+            set(limit_tag_ids) if limit_tag_ids else None
+
+        self._lookaside_tags = \
+            set(lookaside_tag_ids) if lookaside_tag_ids else None
+
+        self._imported = imported
+        self._cg_list = set(cg_list)
+
+        self._btypes = set(btypes or ())
+
+
+    def filter_by_tags(self, build_infos):
+        return filter_by_tags(self.session, build_infos,
+                              self._limit_ids,
+                              self._lookaside_ids)
+
+
+    def filter_by_btype(self, build_infos):
+
+        bt = self._btypes
+        if bt:
+            def test(b):
+                btn = b.get("archive_btype_names")
+                return btn and not bt.isdisjoint(btn)
+
+            build_infos = filter(test, build_infos)
+
+        return build_infos
+
+
+    def filter_imported(self, build_infos):
+
+        if self._cg_list or self._imported is not None:
+            build_infos = filter_imported(build_infos,
+                                          self._cg_list,
+                                          not self._imported)
+
+        return build_infos
+
+
+    def __call__(self, build_infos):
+        # TODO: could we add some caching to this, such that we
+        # associate the build ID with a bool indicating whether it's
+        # been filtered before and whether it was included (True) or
+        # omitted (False).  That might allow us to cut down on the
+        # overhead if filtering is used multiple times... However,
+        # will filtering ever actually be used multiple times?
+
+        # ensure this is a real list and not a generator of some sort
+        work = list(build_infos)
+
+        # first stage filtering, based on tag membership
+        work = self.filter_by_tags(work)
+
+        with_cg = bool(self._cg_list)
+        check_imports = self._imported is not None
+
+        if self._btypes or with_cg or check_imports:
+            # we're going to need the decorated additional data for
+            # filtering
+            decorate_build_archive_data(self._session, work, with_cg)
+
+        # filtering by btype (provided by decorated addtl data)
+        work = self.filter_by_btype(work)
+
+        # filtering by import or cg (provided by decorated addtl data)
+        work = self.filter_imported(work)
+
+        return work
 
 
 #
