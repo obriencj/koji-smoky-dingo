@@ -163,7 +163,8 @@ def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
 
         # fake some archive members, since RPMs are missing these
         f["type_id"] = 0
-        f["type_name"] = "rpm"
+        f["btype_id"] = 1
+        f["type_name"] = f["btype"] = "rpm"
 
     return found
 
