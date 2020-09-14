@@ -343,6 +343,10 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
       archive of the build if with_cg is True, or None if with_cg is
       False
 
+    Returns a de-duplicated sequence of the build_infos. Any
+    build_infos which had not been previously decorated will be
+    mutated with their new keys.
+
     :param session: an active koji session
 
     :type session: koji.ClientSession
@@ -363,11 +367,19 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
     # convert build_infos into an id:info dict
     builds = OrderedDict((b["id"], b) for b in build_infos)
 
-    # multicall to fetch the artifacts for all build IDs
-    archives = bulk_load_build_archives(session, list(builds))
-    rpms = bulk_load_build_rpms(session, list(builds))
+    # we'll only decorate the build infos which aren't already
+    # decorated, using the archive_cg_ids as the sentinel key.
+    needed = []
+    for bid, bld in iteritems(builds):
+        if "archive_cg_ids" not in bld:
+            needed.append(bid)
 
-    # gather all the buildroot IDs
+    # multicall to fetch the artifacts for all build IDs
+    archives = bulk_load_build_archives(session, needed)
+    rpms = bulk_load_build_rpms(session, needed)
+
+    # gather all the buildroot IDs, based on both the archives and
+    # RPMs of the build.
     root_ids = set()
     for archive_list in itervalues(archives):
         for archive in archive_list:
@@ -431,17 +443,16 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
             continue
 
         bld = builds[build_id]
-        cg_ids = bld["archive_cg_ids"]
-        cg_names = bld["archive_cg_names"]
 
-        btype_ids = bld["archive_btype_ids"]
-        btype_ids.add(1)
-
-        btype_names = bld["archive_btype_names"]
-        btype_names.add("rpm")
+        # we have some RPMs, therefore inject the hard-coded btype ID and name
+        bld["archive_btype_ids"].add(1)
+        bld["archive_btype_names"].add("rpm")
 
         if not with_cg:
             continue
+
+        cg_ids = bld["archive_cg_ids"]
+        cg_names = bld["archive_cg_names"]
 
         for rpm in rpm_list:
             broot_id = rpm["buildroot_id"]
