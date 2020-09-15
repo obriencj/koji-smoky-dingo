@@ -180,10 +180,14 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     return results
 
 
-def bulk_load_tasks(session, tasks, err=True, size=100, results=None):
+def bulk_load_tasks(session, task_ids, request=False,
+                    err=True, size=100, results=None):
+
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.getTask, tasks, size):
+    fn = partial(session.getTaskInfo, request=request)
+
+    for key, info in _bulk_load(session, fn, task_ids, size):
         if err and not info:
             raise NoSuchTask(key)
         else:
@@ -226,6 +230,32 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     return results
 
 
+def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
+                                 size=100, results=None):
+
+    results = OrderedDict() if results is None else results
+
+    fn = lambda i: session.listArchives(componentBuildrootID=i, type=btype)
+
+    for key, info in _bulk_load(session, fn, buildroot_ids, size):
+        results[key] = info
+
+    return results
+
+
+def bulk_load_buildroot_rpms(session, buildroot_ids,
+                             size=100, results=None):
+
+    results = OrderedDict() if results is None else results
+
+    fn = lambda i: session.listRPMs(componentBuildrootID=i)
+
+    for key, info in _bulk_load(session, fn, buildroot_ids, size):
+        results[key] = info
+
+    return results
+
+
 def bulk_load_build_archives(session, build_ids, btype=None,
                              size=100, results=None):
     """
@@ -242,10 +272,7 @@ def bulk_load_build_archives(session, build_ids, btype=None,
 
     results = OrderedDict() if results is None else results
 
-    if btype:
-        fn = partial(session.listArchives, type=btype)
-    else:
-        fn = session.listArchives
+    fn = lambda i: session.listArchives(buildID=i, type=btype)
 
     for key, info in _bulk_load(session, fn, build_ids, size):
         results[key] = info
@@ -253,8 +280,7 @@ def bulk_load_build_archives(session, build_ids, btype=None,
     return results
 
 
-def bulk_load_build_rpms(session, build_ids,
-                         size=100, results=None):
+def bulk_load_build_rpms(session, build_ids, size=100, results=None):
     """
     Set up a chunking multicall to fetch the the archives of builds
     via session.listArchives for each build ID in build_ids.
