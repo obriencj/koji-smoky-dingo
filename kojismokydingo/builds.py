@@ -29,8 +29,12 @@ from six.moves import filter
 from . import (
     NoSuchBuild,
     bulk_load, bulk_load_build_archives, bulk_load_build_rpms,
-    bulk_load_builds, bulk_load_buildroots)
-from .common import chunkseq, rpm_evr_compare, unique, update_extend
+    bulk_load_builds, bulk_load_buildroots,
+    bulk_load_buildroot_archives, bulk_load_buildroot_rpms,
+    bulk_load_tasks)
+from .common import (
+    chunkseq, merge_extend, rpm_evr_compare,
+    unique, update_extend)
 from .tags import as_taginfo
 
 
@@ -396,6 +400,24 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
         # everything seems to be decorated already, let's call it done!
         return itervalues(builds)
 
+    btypes = dict((bt["name"], bt["id"]) for bt in session.listBTypes())
+
+    if not with_cg:
+        # no need to go fetching all those buildroots, let's offload
+        # some of the lifting to the hub. In cases where we do want
+        # the CG info, these fields will get filled in from the
+        # archives -- we'll correlate it ourselves rather than having
+        # koji look it up for us twice.
+
+        needful = bulk_load(session, session.getBuildType, needed)
+        for bid, btns in iteritems(needful):
+            bld = builds[bid]
+            bld["archive_btype_names"] = set(btns)
+            bld["archive_btype_ids"] = set(btypes[b] for b in btns)
+
+        # Done!
+        return itervalues(builds)
+
     # multicall to fetch the artifacts and rpms for all build IDs that
     # need decorating
     archives = bulk_load_build_archives(session, needed)
@@ -418,33 +440,20 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
                 # do NOT allow None or 0
                 root_ids.add(broot_id)
 
-    if with_cg:
-        # multicall to fetch all the buildroots
-        buildroots = bulk_load_buildroots(session, list(root_ids))
-    else:
-        # we aren't collecting CG information, so we don't actually
-        # need any buildroots
-        buildroots = None
+    # multicall to fetch all the buildroots
+    buildroots = bulk_load_buildroots(session, list(root_ids))
 
     for build_id, archive_list in iteritems(archives):
-
-        # step one, decorate with the initial values
+        # always decorate with the initial values
         bld = builds[build_id]
         bld["archive_btype_ids"] = btype_ids = set()
         bld["archive_btype_names"] = btype_names = set()
-
-        if with_cg:
-            bld["archive_cg_ids"] = cg_ids = set()
-            bld["archive_cg_names"] = cg_names = set()
+        bld["archive_cg_ids"] = cg_ids = set()
+        bld["archive_cg_names"] = cg_names = set()
 
         for archive in archive_list:
-            # determine the build's BTypes from the archives
             btype_ids.add(archive["btype_id"])
             btype_names.add(archive["btype"])
-
-            if not with_cg:
-                # we don't want the CG info, so skip the rest
-                continue
 
             broot_id = archive["buildroot_id"]
             if not broot_id:
@@ -469,17 +478,11 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
             continue
 
         bld = builds[build_id]
-
-        # we have some RPMs, therefore inject the hard-coded btype ID
-        # and name
-        bld["archive_btype_ids"].add(1)
-        bld["archive_btype_names"].add("rpm")
-
-        if not with_cg:
-            continue
-
         cg_ids = bld["archive_cg_ids"]
         cg_names = bld["archive_cg_names"]
+
+        bld["archive_btype_ids"].add(btypes.get("rpm", 0))
+        bld["archive_btype_names"].add("rpm")
 
         for rpm in rpm_list:
             broot_id = rpm["buildroot_id"]
@@ -661,6 +664,29 @@ def gather_buildroots(session, build_ids):
     return results
 
 
+def gather_wrapped_builds(session, task_ids, results=None):
+    """
+    Given a list of task IDs, identify any which are wrapperRPM
+    tasks. For each which is a wrapperRPM task, associate the task ID
+    with the underlying wrapped build info from the request.
+
+    :param task_ids: task IDs to check
+    :type task_ids: list[int] or Iterator[int]
+
+    :rtype: dict[int, dict]
+    """
+
+    results = OrderedDict() if results is None else results
+
+    tasks = bulk_load_tasks(session, task_ids, request=True)
+
+    for tid, task in iteritems(tasks):
+        if task["method"] == "wrapperRPM":
+            results[tid] = task["request"][2]
+
+    return results
+
+
 def gather_component_build_ids(session, build_ids, btypes=None):
     """
     Given a sequence of build IDs, identify the IDs of the component
@@ -685,8 +711,9 @@ def gather_component_build_ids(session, build_ids, btypes=None):
     :rtype: dict[int, list[int]]
     """
 
-    # multicall to fetch the artifacts for all build IDs
-    archives = bulk_load_build_archives(session, build_ids)
+    # multicall to fetch the artifacts and RPMs for all build IDs
+    archives = merge_extend(bulk_load_build_archives(session, build_ids),
+                            bulk_load_build_rpms(session, build_ids))
 
     # gather all the buildroot IDs
     root_ids = set()
@@ -697,26 +724,25 @@ def gather_component_build_ids(session, build_ids, btypes=None):
                 # do NOT allow None or 0
                 root_ids.add(broot_id)
 
-    components = {}
-
-    if btypes is None or None in btypes:
+    if not btypes or None in btypes:
         # in order to query all types, we need to explicitly query for
         # RPMs, and then archives of type None
         btypes = ("rpm", None)
 
     # dig up the component archives (pretending that RPMs are just
     # another archive type as usual) and map them to the buildroot ID.
+    components = {}
+
     for bt in btypes:
         if bt == "rpm":
-            find = lambda b: session.listRPMs(componentBuildrootID=b)
+            more = bulk_load_buildroot_rpms(session, root_ids)
         else:
-            find = lambda b: session.listArchives(componentBuildrootID=b,
-                                                  type=bt)
-        update_extend(components, bulk_load(session, find, root_ids))
-
-    results = {}
+            more = bulk_load_buildroot_archives(session, root_ids, btype=bt)
+        update_extend(components, more)
 
     # now associate the components back with the original build IDs
+    results = {}
+
     for build_id, archive_list in iteritems(archives):
         cids = set()
         for archive in archive_list:
