@@ -374,6 +374,10 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
         if "archive_cg_ids" not in bld:
             needed.append(bid)
 
+    if not needed:
+        # everything seems to be decorated already, let's call it done!
+        return itervalues(builds)
+
     # multicall to fetch the artifacts for all build IDs
     archives = bulk_load_build_archives(session, needed)
     rpms = bulk_load_build_rpms(session, needed)
@@ -444,7 +448,8 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
 
         bld = builds[build_id]
 
-        # we have some RPMs, therefore inject the hard-coded btype ID and name
+        # we have some RPMs, therefore inject the hard-coded btype ID
+        # and name
         bld["archive_btype_ids"].add(1)
         bld["archive_btype_names"].add("rpm")
 
@@ -481,14 +486,17 @@ def filter_by_tags(session, build_infos,
 
     """
     :param build_infos: build infos to filter through
+
     :type build_infos: list[dict] or Iterator[dict]
 
     :param limit_tag_ids: tag IDs that builds must be tagged with to
       pass. Default, do not limit to any tag membership.
+
     :type limit_tag_ids: list[int]
 
-    :param lookaside_tag_ids: tag IDs that builds must not be tagged with to
-      pass. Default, do not filter against any tag membership.
+    :param lookaside_tag_ids: tag IDs that builds must not be tagged
+      with to pass. Default, do not filter against any tag membership.
+
     :type lookaside_tag_ids: list[int]
 
     :rtype: list[dict] or Iterator[dict]
