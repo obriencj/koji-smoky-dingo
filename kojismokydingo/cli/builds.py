@@ -41,7 +41,8 @@ from ..builds import (
     BuildFilter,
     as_buildinfo, build_dedup, build_id_sort, build_nvr_sort,
     decorate_build_archive_data, filter_imported,
-    gather_component_build_ids, iter_bulk_tag_builds)
+    gather_component_build_ids, gather_wrapped_builds,
+    iter_bulk_tag_builds)
 from ..tags import as_taginfo, gather_tag_ids
 from ..common import chunkseq, unique
 
@@ -420,10 +421,16 @@ def cli_list_components(session, nvr_list, task=False,
         components = gather_component_build_ids(session, bids)
 
         # now we need to turn those components build IDs into build_infos
-        bids = chain(*itervalues(components))
+        found = bulk_load_builds(session, chain(*itervalues(components)))
 
-    loaded = bulk_load_builds(session, bids)
-    builds = itervalues(loaded)
+        # we'll also want the underlying builds used to produce any
+        # standalone wrapperRPM builds, as those are not recorded as
+        # normal buildroot components
+        tids = [b["task_id"] for b in itervalues(loaded) if b["task_id"]]
+        wrapped = gather_wrapped_builds(session, tids)
+
+        builds = list(itervalues(found))
+        builds.extend(itervalues(wrapped))
 
     # do the filtering
     if build_filter:
@@ -457,8 +464,8 @@ class ListComponents(BuildFiltering):
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
 
-        addarg("--task", action="store_true", default=False,
-               help="Specify task IDs instead of build NVRs")
+        # addarg("--task", action="store_true", default=False,
+        #        help="Specify task IDs instead of build NVRs")
 
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
@@ -483,7 +490,7 @@ class ListComponents(BuildFiltering):
         bf = self.build_filter(options)
 
         return cli_list_components(self.session, nvrs,
-                                   task=options.task,
+                                   task=False,  # options.task,
                                    build_filter=bf,
                                    sorting=options.sorting)
 
