@@ -39,11 +39,10 @@ from .. import (
     bulk_load, bulk_load_builds, bulk_load_tags)
 from ..builds import (
     BuildFilter,
-    as_buildinfo,
-    build_dedup, build_id_sort, build_nvr_sort,
+    as_buildinfo, build_dedup, build_id_sort, build_nvr_sort,
     decorate_build_archive_data, filter_imported,
     gather_component_build_ids, iter_bulk_tag_builds)
-from ..tags import gather_tag_ids
+from ..tags import as_taginfo, gather_tag_ids
 from ..common import chunkseq, unique
 
 
@@ -67,9 +66,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
 
     # fetch the destination tag info (and make sure it actually
     # exists)
-    taginfo = session.getTag(tagname)
-    if not taginfo:
-        raise NoSuchTag(tagname)
+    taginfo = as_taginfo(session, tagname)
     tagid = taginfo["id"]
 
     # figure out how we're going to be dealing with builds that don't
@@ -245,10 +242,7 @@ def cli_list_imported(session, tagname=None, nvr_list=None,
         builds = list(itervalues(builds))
 
     elif tagname:
-        taginfo = session.getTag(tagname)
-        if not taginfo:
-            raise NoSuchTag(tagname)
-
+        taginfo = as_taginfo(session, tagname)
         builds = session.listTagged(taginfo["id"], inherit=inherit)
 
     else:
@@ -552,6 +546,79 @@ class FilterBuilds(BuildFiltering):
         bf = self.build_filter(options)
 
         return cli_filter_builds(self.session, nvrs,
+                                 build_filter=bf,
+                                 sorting=options.sorting)
+
+
+def cli_filter_tagged(session, tagname,
+                      latest=False, inherit=False,
+                      build_filter=None, sorting=None):
+
+    taginfo = as_taginfo(session, tagname)
+
+    listTagged = partial(session.listTagged, taginfo["id"],
+                         inherit=inherit, latest=latest)
+
+    # server-side optimization if we're doing filtering by btype
+    if build_filter and build_filter._btypes:
+        builds = []
+        for btype in build_filter._btypes:
+            builds.extend(listTagged(type=btype))
+    else:
+        builds = listTagged()
+
+    if build_filter:
+        builds = build_filter(builds)
+
+    if sorting == SORT_BY_NVR:
+        builds = build_nvr_sort(builds, dedup=False)
+
+    elif sorting == SORT_BY_ID:
+        builds = build_id_sort(builds, dedup=False)
+
+    for bld in builds:
+        print(bld["nvr"])
+
+
+class FilterTagged(BuildFiltering):
+
+    description = "Filter a list of NVRs from a tag"
+
+
+    def parser(self):
+        parser = super(FilterTagged, self).parser()
+        addarg = parser.add_argument
+
+        addarg("tag", metavar="TAGNAME",
+               help="Tag to find builds within for filtering")
+
+        addarg("--latest", action="store_true", default=False,
+               help="Only show the latest builds")
+
+        addarg("--inherit", action="store_true", default=False,
+               help="Follow inheritance")
+
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--nvr-sort", action="store_const",
+               dest="sorting", const=SORT_BY_NVR, default=None,
+               help="Sort output by NVR in ascending order")
+
+        addarg("--id-sort", action="store_const",
+               dest="sorting", const=SORT_BY_ID, default=None,
+               help="Sort output by Build ID in ascending order")
+
+        return parser
+
+
+    def handle(self, options):
+        bf = self.build_filter(options)
+
+        return cli_filter_tagged(self.session,
+                                 options.tag,
+                                 latest=options.latest,
+                                 inherit=options.inherit,
                                  build_filter=bf,
                                  sorting=options.sorting)
 
