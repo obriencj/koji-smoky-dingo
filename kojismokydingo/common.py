@@ -36,8 +36,8 @@ from six.moves import filter, filterfalse, range, zip_longest
 
 
 __all__ = (
-    "chunkseq", "fnmatches", "globfilter",
-    "rpm_evr_compare", "unique",
+    "chunkseq", "fnmatches", "globfilter", "merge_extend",
+    "rpm_evr_compare", "unique", "update_extend",
 )
 
 
@@ -91,7 +91,7 @@ def fnmatches(value, patterns, ignore_case=False):
         return False
 
 
-def update_extend(dict_orig, dict_additions):
+def update_extend(dict_orig, *dict_additions):
     """
     Extend the list values of the original dict with the list values of
     the additions dict.
@@ -112,7 +112,7 @@ def update_extend(dict_orig, dict_additions):
     The values of dict_orig must support an extend method.
 
     :param dict_orig: The original dict, which may be mutated and whose
-      values will be extended
+      values may be extended
 
     :type dict_orig: dict[object, list]
 
@@ -123,9 +123,16 @@ def update_extend(dict_orig, dict_additions):
     :rtype: None
     """
 
-    for key, val in iteritems(dict_additions):
-        orig = dict_orig.setdefault(key, [])
-        orig.extend(val)
+    for additions in dict_additions:
+        for key, val in iteritems(additions):
+            orig = dict_orig.setdefault(key, [])
+            orig.extend(val)
+
+    return dict_orig
+
+
+def merge_extend(*d):
+    return update_extend({}, *d)
 
 
 def globfilter(seq, patterns,
