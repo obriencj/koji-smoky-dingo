@@ -37,11 +37,13 @@ function verify_koji_cli() {
               -e bulk-tag-builds \
               -e check-hosts \
               -e client-config \
+              -e filter-builds \
+              -e filter-tagged \
               -e latest-archives \
               -e list-build-archives \
               -e list-cgs \
+              -e list-component-builds \
               -e list-env-vars \
-              -e list-imported \
               -e list-rpm-macros \
               -e list-tag-extras \
               -e perminfo \
