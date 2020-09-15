@@ -336,6 +336,7 @@ class ListImported(AnonSmokyDingo):
 
 class BuildFiltering(AnonSmokyDingo):
 
+
     def parser(self):
         parser = super(BuildFiltering, self).parser()
 
@@ -383,35 +384,37 @@ class BuildFiltering(AnonSmokyDingo):
         return parser
 
 
+    def build_filter(self, options):
+        session = self.session
+
+        # setup the limit as a set of IDs for each tag named in the
+        # options.
+        limit_ids = gather_tag_ids(session, deep=options.limit,
+                                   shallow=options.shallow_limit)
+
+        # setup the lookaside as a set of IDs for the tags in the
+        # flattened inheritance of each tag named in the options.
+        lookaside_ids = gather_tag_ids(session, deep=options.lookaside,
+                                       shallow=options.shallow_lookaside)
+
+        return BuildFilter(self.session,
+                           limit_tag_ids=limit_ids,
+                           lookaside_tag_ids=lookaside_ids,
+                           imported=options.imported,
+                           cg_list=options.cg_list,
+                           btypes=options.btypes)
+
+
 def cli_list_components(session, nvr_list, task=False,
-                        limit=(), shallow_limit=(),
-                        lookaside=(), shallow_lookaside=(),
-                        imported=None, cg_list=(),
-                        btypes=(),
-                        sorting=None):
+                        build_filter=None, sorting=None):
 
     if not nvr_list:
         return
 
-    # setup the limit as a set of IDs for each tag named in the
-    # options.
-    limit_ids = gather_tag_ids(session, deep=limit,
-                               shallow=shallow_limit)
-
-    # setup the lookaside as a set of IDs for the tags in the
-    # flattened inheritance of each tag named in the options.
-    lookaside_ids = gather_tag_ids(session, deep=lookaside,
-                                   shallow=shallow_lookaside)
-
-    bf = BuildFilter(session,
-                     limit_tag_ids=limit_ids,
-                     lookaside_tag_ids=lookaside_ids,
-                     imported=imported,
-                     cg_list=cg_list,
-                     btypes=btypes)
-
     if task:
-        print("Not yet implemented")
+        bids = []
+
+        printerr("Not yet implemented")
         return 1
 
     else:
@@ -424,10 +427,13 @@ def cli_list_components(session, nvr_list, task=False,
 
         # now we need to turn those components build IDs into build_infos
         bids = chain(*itervalues(components))
-        builds = bulk_load_builds(session, bids)
+
+    loaded = bulk_load_builds(session, bids)
+    builds = itervalues(loaded)
 
     # do the filtering
-    builds = bf(itervalues(builds))
+    if build_filter:
+        builds = build_filter(builds)
 
     if sorting == SORT_BY_NVR:
         builds = build_nvr_sort(builds)
@@ -480,45 +486,22 @@ class ListComponents(BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
+        bf = self.build_filter(options)
+
         return cli_list_components(self.session, nvrs,
                                    task=options.task,
-                                   limit=options.limit,
-                                   shallow_limit=options.shallow_limit,
-                                   lookaside=options.lookaside,
-                                   shallow_lookaside=options.shallow_lookaside,
-                                   imported=options.imported,
-                                   cg_list=options.cg_list,
-                                   btypes=options.btypes,
+                                   build_filter=bf,
                                    sorting=options.sorting)
 
 
 def cli_filter_builds(session, nvr_list,
-                      limit=(), shallow_limit=(),
-                      lookaside=(), shallow_lookaside=(),
-                      imported=None, cg_list=(),
-                      btypes=(),
-                      sorting=None):
-
-    # setup the limit as a set of IDs for each tag named in the
-    # options.
-    limit_ids = gather_tag_ids(session, deep=limit,
-                               shallow=shallow_limit)
-
-    # setup the lookaside as a set of IDs for the tags in the
-    # flattened inheritance of each tag named in the options.
-    lookaside_ids = gather_tag_ids(session, deep=lookaside,
-                                   shallow=shallow_lookaside)
+                      build_filter=None, sorting=None):
 
     loaded = bulk_load_builds(session, nvr_list)
+    builds = itervalues(loaded)
 
-    bf = BuildFilter(session,
-                     limit_tag_ids=limit_ids,
-                     lookaside_tag_ids=lookaside_ids,
-                     imported=imported,
-                     cg_list=cg_list,
-                     btypes=btypes)
-
-    builds = bf(itervalues(loaded))
+    if build_filter:
+        builds = build_filter(builds)
 
     if sorting == SORT_BY_NVR:
         builds = build_nvr_sort(builds, dedup=False)
@@ -533,6 +516,7 @@ def cli_filter_builds(session, nvr_list,
 class FilterBuilds(BuildFiltering):
 
     description = "Filter a list of NVRs by various criteria"
+
 
     def parser(self):
         parser = super(FilterBuilds, self).parser()
@@ -565,14 +549,10 @@ class FilterBuilds(BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
+        bf = self.build_filter(options)
+
         return cli_filter_builds(self.session, nvrs,
-                                 limit=options.limit,
-                                 shallow_limit=options.shallow_limit,
-                                 lookaside=options.lookaside,
-                                 shallow_lookaside=options.shallow_lookaside,
-                                 imported=options.imported,
-                                 cg_list=options.cg_list,
-                                 btypes=options.btypes,
+                                 build_filter=bf,
                                  sorting=options.sorting)
 
 

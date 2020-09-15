@@ -327,7 +327,7 @@ def bulk_tag_nvrs(session, tag, nvrs,
 
 def decorate_build_archive_data(session, build_infos, with_cg=False):
     """
-    Augments a list of build_info dicts with four new keys:
+    Augments a list of build_info dicts with two or four new keys:
 
     * archive_btype_ids is a set of btype IDs for each archive of the
       build
@@ -336,11 +336,11 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
       the build
 
     * archive_cg_ids is a set of content generator IDs for each
-      archive of the build if with_cg is True, or None if with_cg is
+      archive of the build if with_cg is True, absent if with_cg is
       False
 
     * archive_cg_names is a set of content generator names for each
-      archive of the build if with_cg is True, or None if with_cg is
+      archive of the build if with_cg is True, absent if with_cg is
       False
 
     Returns a de-duplicated sequence of the build_infos. Any
@@ -364,21 +364,40 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
     :rtype: Iterator[dict]
     """
 
-    # convert build_infos into an id:info dict
+    # some of the facets we might consider as a property of the build
+    # are in fact stored as properties of the artifacts or of the
+    # artifacts' buildroot entries. This means that we have to dig
+    # fairly deep to be able to answer simple questions like "what CGs
+    # produced this build," or "what are the BTypes of this build?" So
+    # we have this decorating utility to find the underlying values
+    # and store them back on the build directly. We try to optimize
+    # the decoration process such that it as polite to koji as
+    # possible while farming all the data, and we also make it so that
+    # we do not re-decorate builds which have already been decorated.
+
+    # convert build_infos into an id:info dict -- this also helps us
+    # ensure that the sequence of build_infos is preserved, for cases
+    # where it might have been a generator
     builds = OrderedDict((b["id"], b) for b in build_infos)
 
     # we'll only decorate the build infos which aren't already
-    # decorated, using the archive_cg_ids as the sentinel key.
+    # decorated
     needed = []
+
     for bid, bld in iteritems(builds):
-        if "archive_cg_ids" not in bld:
-            needed.append(bid)
+        if with_cg:
+            if "archive_cg_ids" not in bld:
+                needed.append(bid)
+        else:
+            if "archive_btype_ids" not in bld:
+                needed.append(bid)
 
     if not needed:
         # everything seems to be decorated already, let's call it done!
         return itervalues(builds)
 
-    # multicall to fetch the artifacts for all build IDs
+    # multicall to fetch the artifacts and rpms for all build IDs that
+    # need decorating
     archives = bulk_load_build_archives(session, needed)
     rpms = bulk_load_build_rpms(session, needed)
 
@@ -409,11 +428,14 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
 
     for build_id, archive_list in iteritems(archives):
 
+        # step one, decorate with the initial values
         bld = builds[build_id]
-        bld["archive_cg_ids"] = cg_ids = set() if with_cg else None
-        bld["archive_cg_names"] = cg_names = set() if with_cg else None
         bld["archive_btype_ids"] = btype_ids = set()
         bld["archive_btype_names"] = btype_names = set()
+
+        if with_cg:
+            bld["archive_cg_ids"] = cg_ids = set()
+            bld["archive_cg_names"] = cg_names = set()
 
         for archive in archive_list:
             # determine the build's BTypes from the archives
