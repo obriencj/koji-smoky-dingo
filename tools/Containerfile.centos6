@@ -7,7 +7,7 @@ RUN \
     yum install -q -y epel-release && \
     yum install -q -y \
         make rpm-build which yum-utils \
-        python-pip python2-mock && \
+        python-pip python2-mock koji && \
     python -W "ignore:a true SSLContext" -m pip.__main__ install -q nose
 
 ARG VERSION

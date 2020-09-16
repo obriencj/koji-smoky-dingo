@@ -24,7 +24,7 @@ from collections import OrderedDict
 from itertools import chain
 from six import iteritems, itervalues
 
-from . import NoSuchTag, NoSuchTarget
+from . import as_taginfo, as_targetinfo, bulk_load, bulk_load_tags
 
 
 def resolve_tag(session, name, target=False):
@@ -58,36 +58,6 @@ def resolve_tag(session, name, target=False):
         name = tinfo.get("build_tag_name", name)
 
     return as_taginfo(session, name)
-
-
-def as_taginfo(session, tag):
-
-    if isinstance(tag, (str, int)):
-        info = session.getTag(tag)
-    elif isinstance(tag, dict):
-        info = tag
-    else:
-        info = None
-
-    if not info:
-        raise NoSuchTag(tag)
-
-    return info
-
-
-def as_targetinfo(session, target):
-
-    if isinstance(target, (str, int)):
-        info = session.getBuildTarget(target)
-    elif isinstance(target, dict):
-        info = target
-    else:
-        info = None
-
-    if not info:
-        raise NoSuchTarget(target)
-
-    return info
 
 
 def get_affected_targets(session, tagnames):
@@ -225,6 +195,51 @@ def collect_tag_extras(session, taginfo, prefix=None):
         convert_tag_extras(tag, into=found, prefix=prefix)
 
     return found
+
+
+def gather_tag_ids(session, shallow=(), deep=(), results=None):
+    """
+    Load IDs from shallow tags, and load IDs from deep tags and all
+    their parents. Returns a set of all IDs found.
+
+    If results is specified, it must be a set instance into which the
+    disovered tag IDs will be added. Otherwise a new set will be
+    allocated and returned.
+
+    :param shallow: list of tag names to resolve IDs for
+    :type shallow: list[str], optional
+
+    :param deep: list of tag names to resolve IDs and parent IDs for
+    :type deep: list[str], optional
+
+    :param results: storage for resolved IDs. Default, create a new set
+    :type results: set[int], optional
+
+    :rtype: set[int]
+    """
+
+    results = set() if results is None else results
+
+    if not (shallow or deep):
+        return results
+
+    seek = list(shallow) if shallow else []
+
+    if deep and not isinstance(deep, (list, tuple)):
+        deep = list(deep)
+        seek.extend(deep)
+
+    # first dig up the IDs for all the tags. If any are invalid, this will
+    # raise a NoSuchTag exception
+    found = bulk_load_tags(session, seek)
+    results.update(t['id'] for t in itervalues(found))
+
+    if deep:
+        inh = bulk_load(session, session.getFullInheritance, deep)
+        for parents in itervalues(inh):
+            results.update(t['parent_id'] for t in parents)
+
+    return results
 
 
 #

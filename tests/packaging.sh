@@ -30,34 +30,43 @@ function run_nose() {
 
 
 function verify_koji_cli() {
-    echo 'Checking output of `koji help`:'
-    koji help \
-        | grep \
-              -e affected-targets \
-              -e bulk-tag-builds \
-              -e check-hosts \
-              -e client-config \
-              -e latest-archives \
-              -e list-build-archives \
-              -e list-cgs \
-              -e list-env-vars \
-              -e list-imported \
-              -e list-rpm-macros \
-              -e list-tag-extras \
-              -e perminfo \
-              -e renum-tag-inheritance \
-              -e set-env-var \
-              -e set-rpm-macro \
-              -e swap-tag-inheritance \
-              -e unset-env-var \
-              -e unset-rpm-macro \
-              -e userinfo
+    echo 'Checking output of koji help:'
 
-    if [ "$?" != 0 ] ; then
-        echo "Subcommands not found in `koji help` output"
-        return 1
-    fi
+    local HELP=$(koji help)
+    local EXPECTED=(
+        affected-targets
+        bulk-tag-builds
+        check-hosts
+        client-config
+        filter-builds
+        latest-archives
+        list-build-archives
+        list-cgs
+        list-component-builds
+        list-env-vars
+        list-rpm-macros
+        list-tag-extras
+        perminfo
+        renum-tag-inheritance
+        set-env-var
+        set-rpm-macro
+        swap-tag-inheritance
+        unset-env-var
+        unset-rpm-macro
+        userinfo
+    )
+
+    local RESULT=0
+
+    for E in "${EXPECTED[@]}" ; do
+        if ! grep -F "$E" 2>/dev/null <<< "$HELP" ; then
+            echo "Subcommand "$E" not present"
+            RESULT=1
+        fi
+    done
+
     echo
+    return $RESULT
 }
 
 

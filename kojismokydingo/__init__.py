@@ -131,12 +131,9 @@ def _bulk_load(session, loadfn, keys, size=100):
         session.multicall = True
 
         for key in key_chunk:
-            # print(key, file=sys.stderr)
             loadfn(key)
 
         for key, info in zip(key_chunk, session.multiCall()):
-            # print(key, info, file=sys.stderr)
-
             if info:
                 if "faultCode" in info:
                     raise convertFault(Fault(**info))
@@ -144,6 +141,28 @@ def _bulk_load(session, loadfn, keys, size=100):
                     yield key, info[0]
             else:
                 yield key, None
+
+
+def bulk_load(session, loadfn, keys, size=100, results=None):
+    """
+    Generic bulk loading function, invokes the given loadfn on each
+    key in keys using chunking multicalls limited to the specified
+    size.
+
+    Returns an OrderedDict associating the individual keys with the
+    returned value of loadfn.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, loadfn, keys, size):
+        results[key] = info
+
+    return results
 
 
 def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
@@ -174,10 +193,14 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     return results
 
 
-def bulk_load_tasks(session, tasks, err=True, size=100, results=None):
+def bulk_load_tasks(session, task_ids, request=False,
+                    err=True, size=100, results=None):
+
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.getTask, tasks, size):
+    fn = partial(session.getTaskInfo, request=request)
+
+    for key, info in _bulk_load(session, fn, task_ids, size):
         if err and not info:
             raise NoSuchTask(key)
         else:
@@ -220,6 +243,32 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     return results
 
 
+def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
+                                 size=100, results=None):
+
+    results = OrderedDict() if results is None else results
+
+    fn = lambda i: session.listArchives(componentBuildrootID=i, type=btype)
+
+    for key, info in _bulk_load(session, fn, buildroot_ids, size):
+        results[key] = info
+
+    return results
+
+
+def bulk_load_buildroot_rpms(session, buildroot_ids,
+                             size=100, results=None):
+
+    results = OrderedDict() if results is None else results
+
+    fn = lambda i: session.listRPMs(componentBuildrootID=i)
+
+    for key, info in _bulk_load(session, fn, buildroot_ids, size):
+        results[key] = info
+
+    return results
+
+
 def bulk_load_build_archives(session, build_ids, btype=None,
                              size=100, results=None):
     """
@@ -236,12 +285,31 @@ def bulk_load_build_archives(session, build_ids, btype=None,
 
     results = OrderedDict() if results is None else results
 
-    if btype:
-        fn = partial(session.listArchives, type=btype)
-    else:
-        fn = session.listArchives
+    fn = lambda i: session.listArchives(buildID=i, type=btype)
 
     for key, info in _bulk_load(session, fn, build_ids, size):
+        results[key] = info
+
+    return results
+
+
+def bulk_load_build_rpms(session, build_ids, size=100, results=None):
+    """
+    Set up a chunking multicall to fetch the the archives of builds
+    via session.listArchives for each build ID in build_ids.
+
+    Returns an OrderedDict associating the individual build IDs with
+    their resulting archive lists.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
+    results = OrderedDict() if results is None else results
+
+    for key, info in _bulk_load(session, session.listRPMs,
+                                build_ids, size):
         results[key] = info
 
     return results
@@ -267,6 +335,48 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
         results[key] = info
 
     return results
+
+
+def as_buildinfo(session, build):
+    if isinstance(build, (str, int)):
+        info = session.getBuild(build)
+    elif isinstance(build, dict):
+        info = build
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchBuild(build)
+
+    return info
+
+
+def as_taginfo(session, tag):
+    if isinstance(tag, (str, int)):
+        info = session.getTag(tag)
+    elif isinstance(tag, dict):
+        info = tag
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchTag(tag)
+
+    return info
+
+
+def as_targetinfo(session, target):
+    if isinstance(target, (str, int)):
+        info = session.getBuildTarget(target)
+    elif isinstance(target, dict):
+        info = target
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchTarget(target)
+
+    return info
 
 
 #

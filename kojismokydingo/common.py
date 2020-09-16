@@ -31,12 +31,13 @@ import re
 
 from collections import OrderedDict
 from fnmatch import fnmatchcase
+from six import iteritems
 from six.moves import filter, filterfalse, range, zip_longest
 
 
 __all__ = (
-    "chunkseq", "fnmatches", "globfilter",
-    "rpm_evr_compare", "unique",
+    "chunkseq", "fnmatches", "globfilter", "merge_extend",
+    "rpm_evr_compare", "unique", "update_extend",
 )
 
 
@@ -51,14 +52,12 @@ def chunkseq(seq, chunksize):
     :param chunksize: max length for chunks
     :type chunksize: int
 
-    :rtype: Iterator[list]
+    :rtype: Generator[list]
     """
 
-    try:
-        seqlen = len(seq)
-    except TypeError:
+    if not isinstance(seq, (tuple, list)):
         seq = list(seq)
-        seqlen = len(seq)
+    seqlen = len(seq)
 
     return (seq[offset:offset + chunksize] for
             offset in range(0, seqlen, chunksize))
@@ -90,6 +89,50 @@ def fnmatches(value, patterns, ignore_case=False):
             return True
     else:
         return False
+
+
+def update_extend(dict_orig, *dict_additions):
+    """
+    Extend the list values of the original dict with the list values of
+    the additions dict.
+
+    eg.
+    ```
+    A = {'a': [1, 2], 'b': [7], 'c': [10]}
+    B = {'a': [3], 'b': [8, 9], 'd': [11]}
+    update_extend(A, B)
+
+    A
+    >> {'a': [1, 2, 3],
+        'b': [7, 8, 9],
+        'c': [10],
+        'd': [11]}
+    ```
+
+    The values of dict_orig must support an extend method.
+
+    :param dict_orig: The original dict, which may be mutated and whose
+      values may be extended
+
+    :type dict_orig: dict[object, list]
+
+    :param dict_additions: The additions dict. Will not be altered.
+
+    :type dict_additions: dict[object, list]
+
+    :rtype: None
+    """
+
+    for additions in dict_additions:
+        for key, val in iteritems(additions):
+            orig = dict_orig.setdefault(key, [])
+            orig.extend(val)
+
+    return dict_orig
+
+
+def merge_extend(*d):
+    return update_extend({}, *d)
 
 
 def globfilter(seq, patterns,
