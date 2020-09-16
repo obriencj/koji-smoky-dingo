@@ -58,6 +58,10 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
                         force=False, notify=False,
                         verbose=False, strict=False):
 
+    """
+    CLI handler for `koji bulk-tag-builds`
+    """
+
     # set up the verbose debugging output function
     if verbose:
         def debug(message, *args):
@@ -231,106 +235,6 @@ class BulkTagBuilds(TagSmokyDingo):
                                    strict=options.strict)
 
 
-def cli_list_imported(session, tagname=None, nvr_list=None,
-                      inherit=False, negate=False,
-                      cg_list=()):
-
-    """
-    CLI handler for `koji list-imported`
-    """
-
-    if nvr_list:
-        nvr_list = unique(nvr_list)
-        builds = bulk_load_builds(session, nvr_list, err=True)
-        builds = list(itervalues(builds))
-
-    elif tagname:
-        taginfo = as_taginfo(session, tagname)
-        builds = session.listTagged(taginfo["id"], inherit=inherit)
-
-    else:
-        # from the CLI, one of these should be specified.
-        builds = ()
-
-    if cg_list or not negate:
-        # we'll be trying to match content generators, which will
-        # require us doing some extra work to actually determine what
-        # content generators were used to produce a build. This will
-        # mean digging through every archive in every build, then
-        # finding the buildroots for each... so we only want to do
-        # this if we'll actually be using the additional info!
-        decorate_build_archive_data(session, builds,
-                                    with_cg=bool(cg_list))
-
-    for build in filter_imported(builds, by_cg=cg_list, negate=negate):
-        print(build["nvr"])
-
-
-class ListImported(AnonSmokyDingo):
-
-    description = "Detect imported builds"
-
-
-    def parser(self):
-        argp = super(ListImported, self).parser()
-
-        group = argp.add_mutually_exclusive_group()
-        addarg = group.add_argument
-
-        addarg("tag", nargs="?", action="store", default=None,
-               metavar="TAGNAME",
-               help="Tag containing builds to check.")
-
-        addarg("-f", "--file", action="store", default=None,
-               dest="nvr_file", metavar="NVR_FILE",
-               help="Read list of builds from file, one NVR per line."
-               " Set to - to read from stdin.")
-
-        addarg = argp.add_argument
-
-        addarg("-i", "--inherit", action="store_true", default=False,
-               help="also scan any parent tags when checking"
-               " for imported builds")
-
-        addarg("-n", "--negate", action="store_true", default=False,
-               help="inverted behavior, list non-imports instead"
-               " of imports")
-
-        addarg("-c", "--content-generator", dest="cg_list",
-               action="append", default=list(),
-               metavar="CG_NAME",
-               help="show content generator imports by build"
-               " system name. Default: display no CG builds."
-               " Specify 'any' to see CG imports from any system."
-               " May be specified more than once.")
-
-        return argp
-
-
-    def validate(self, parser, options):
-        if not (options.tag or options.nvr_file):
-            parser.error("Please specify either a tag to scan, or"
-                         " --file=NVR_FILE")
-
-        options.cg_list = resplit(options.cg_list)
-
-        try:
-            options.nvr_list = read_clean_lines(options.nvr_file)
-        except IOError as ioe:
-            parser.error("Unable to read NVR list %s" % ioe)
-
-
-    def handle(self, options):
-        nvr_list = read_clean_lines(options.nvr_file)
-
-        return cli_list_imported(self.session,
-                                 tagname=options.tag,
-                                 nvr_list=nvr_list,
-                                 inherit=options.inherit,
-                                 negate=options.negate,
-                                 cg_list=options.cg_list)
-
-
 class BuildFiltering(AnonSmokyDingo):
 
 
@@ -405,6 +309,10 @@ class BuildFiltering(AnonSmokyDingo):
 def cli_list_components(session, nvr_list,
                         tag=None, inherit=False, latest=False,
                         build_filter=None, sorting=None):
+
+    """
+    CLI handler for `koji list-component-builds`
+    """
 
     nvr_list = unique(nvr_list)
 
@@ -523,6 +431,10 @@ class ListComponents(BuildFiltering):
 def cli_filter_builds(session, nvr_list,
                       tag=None, inherit=False, latest=False,
                       build_filter=None, sorting=None):
+
+    """
+    CLI handler for `koji filter-builds`
+    """
 
     nvr_list = unique(nvr_list)
 
