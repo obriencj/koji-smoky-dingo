@@ -612,6 +612,9 @@ class FilterBuilds(BuildFiltering):
 
         return cli_filter_builds(self.session, nvrs,
                                  build_filter=bf,
+                                 tag=options.tag,
+                                 inherit=options.inherit,
+                                 latest=options.latest,
                                  sorting=options.sorting)
 
 
