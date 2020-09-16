@@ -144,6 +144,19 @@ def _bulk_load(session, loadfn, keys, size=100):
 
 
 def bulk_load(session, loadfn, keys, size=100, results=None):
+    """
+    Generic bulk loading function, invokes the given loadfn on each
+    key in keys using chunking multicalls limited to the specified
+    size.
+
+    Returns an OrderedDict associating the individual keys with the
+    returned value of loadfn.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, loadfn, keys, size):
