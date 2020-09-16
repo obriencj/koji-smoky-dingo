@@ -16,6 +16,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
 
+# we don't generate binaries, let's turn that part off
+%global debug_package %{nil}
+
+
 # There's two distinct eras of RPM packaging for python, with
 # different macros and different expectations. Generally speaking the
 # new features are available in RHEL 8+ and Fedora 22+
