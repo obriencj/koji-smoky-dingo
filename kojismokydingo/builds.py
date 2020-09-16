@@ -28,6 +28,7 @@ from six.moves import filter
 
 from . import (
     NoSuchBuild,
+    as_buildinfo, as_taginfo,
     bulk_load, bulk_load_build_archives, bulk_load_build_rpms,
     bulk_load_builds, bulk_load_buildroots,
     bulk_load_buildroot_archives, bulk_load_buildroot_rpms,
@@ -35,21 +36,6 @@ from . import (
 from .common import (
     chunkseq, merge_extend, rpm_evr_compare,
     unique, update_extend)
-from .tags import as_taginfo
-
-
-def as_buildinfo(session, build):
-    if isinstance(build, (str, int)):
-        info = session.getBuild(build)
-    elif isinstance(build, dict):
-        info = build
-    else:
-        info = None
-
-    if not info:
-        raise NoSuchBuild(build)
-
-    return info
 
 
 class BuildNEVRCompare(object):

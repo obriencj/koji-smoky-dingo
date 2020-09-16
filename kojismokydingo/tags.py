@@ -24,7 +24,7 @@ from collections import OrderedDict
 from itertools import chain
 from six import iteritems, itervalues
 
-from . import NoSuchTag, NoSuchTarget, bulk_load, bulk_load_tags
+from . import as_taginfo, as_targetinfo, bulk_load, bulk_load_tags
 
 
 def resolve_tag(session, name, target=False):
@@ -58,36 +58,6 @@ def resolve_tag(session, name, target=False):
         name = tinfo.get("build_tag_name", name)
 
     return as_taginfo(session, name)
-
-
-def as_taginfo(session, tag):
-
-    if isinstance(tag, (str, int)):
-        info = session.getTag(tag)
-    elif isinstance(tag, dict):
-        info = tag
-    else:
-        info = None
-
-    if not info:
-        raise NoSuchTag(tag)
-
-    return info
-
-
-def as_targetinfo(session, target):
-
-    if isinstance(target, (str, int)):
-        info = session.getBuildTarget(target)
-    elif isinstance(target, dict):
-        info = target
-    else:
-        info = None
-
-    if not info:
-        raise NoSuchTarget(target)
-
-    return info
 
 
 def get_affected_targets(session, tagnames):

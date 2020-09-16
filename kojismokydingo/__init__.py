@@ -324,5 +324,47 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
     return results
 
 
+def as_buildinfo(session, build):
+    if isinstance(build, (str, int)):
+        info = session.getBuild(build)
+    elif isinstance(build, dict):
+        info = build
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchBuild(build)
+
+    return info
+
+
+def as_taginfo(session, tag):
+    if isinstance(tag, (str, int)):
+        info = session.getTag(tag)
+    elif isinstance(tag, dict):
+        info = tag
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchTag(tag)
+
+    return info
+
+
+def as_targetinfo(session, target):
+    if isinstance(target, (str, int)):
+        info = session.getBuildTarget(target)
+    elif isinstance(target, dict):
+        info = target
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchTarget(target)
+
+    return info
+
+
 #
 # The end.

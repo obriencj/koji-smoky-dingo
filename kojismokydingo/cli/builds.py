@@ -36,14 +36,15 @@ from . import (
     printerr, read_clean_lines, resplit)
 from .. import (
     NoSuchTag, NoSuchUser,
+    as_buildinfo, as_taginfo,
     bulk_load, bulk_load_builds, bulk_load_tags)
 from ..builds import (
     BuildFilter,
-    as_buildinfo, build_dedup, build_id_sort, build_nvr_sort,
+    build_dedup, build_id_sort, build_nvr_sort,
     decorate_build_archive_data, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_tag_builds)
-from ..tags import as_taginfo, gather_tag_ids
+from ..tags import gather_tag_ids
 from ..common import chunkseq, unique
 
 
