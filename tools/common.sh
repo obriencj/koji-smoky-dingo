@@ -35,31 +35,31 @@ function ksd_rpmbuild() {
     local RPMS="$TOPDIR"/RPMS
 
     if [ `which dnf 2>/dev/null` ] ; then
-        function ksd_install() {
+        function _install() {
             dnf install -qy "$@"
         }
-        function ksd_builddep() {
+        function _builddep() {
             dnf builddep -qy "$@"
         }
     else
-        function ksd_install() {
+        function _install() {
             yum install -q -y "$@"
         }
-        function ksd_builddep() {
+        function _builddep() {
             yum-builddep -q -y "$@"
         }
     fi
 
-    function ksd_rpmbuild() {
-        rpmbuild --define "_topdir $TOPDIR" "$@"
+    function _rpmbuild() {
+	rpmbuild --define "_topdir $TOPDIR" "$@"
     }
 
     rm -rf "$SRPMS" "$RPMS"
 
-    ksd_rpmbuild -ts "$TARBALL"
-    ksd_builddep "$SRPMS"/kojismokydingo-*.src.rpm
-    ksd_rpmbuild --rebuild "$SRPMS"/kojismokydingo-*.src.rpm
-    ksd_install "$RPMS"/noarch/*kojismokydingo-*.rpm
+    _rpmbuild -ts "$TARBALL" || return 1
+    _builddep "$SRPMS"/kojismokydingo-*.src.rpm || return 1
+    _rpmbuild --rebuild "$SRPMS"/kojismokydingo-*.src.rpm || return 1
+    _install "$RPMS"/noarch/*kojismokydingo-*.rpm || return 1
 }
 
 
@@ -75,8 +75,8 @@ function ksd_build_platform() {
     local CFILE=tools/Containerfile."$PLATFORM"
 
     local PODMAN=$(whichever podman docker)
-    if [ $? != 0 ] ; then
-        echo "Neither podman not docker available, exiting"
+    if [ ! "$PODMAN" ] ; then
+        echo "Neither podman nor docker available, exiting"
         return 1
     else
 	echo "Using $PODMAN"
@@ -130,8 +130,8 @@ function ksd_test_platform() {
     local NAME=ksd-test:"$PLATFORM"
 
     local PODMAN=$(whichever podman docker)
-    if [ $? != 0 ] ; then
-        echo "Neither podman not docker available, exiting"
+    if [ ! "$PODMAN" ] ; then
+        echo "Neither podman nor docker available, exiting"
         return 1
     else
 	echo "Using $PODMAN"
@@ -142,7 +142,7 @@ function ksd_test_platform() {
             --volume "$PWD"/logs:/ksd-logs \
             --volume "$PWD"/tests:/ksd-tests \
             "$NAME" \
-            "/ksd-tests/packaging.sh" "$PLATFORM" || return 1
+            "/ksd-tests/packaging.sh" "$PLATFORM"
 }
 
 
