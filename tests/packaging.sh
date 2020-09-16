@@ -39,7 +39,6 @@ function verify_koji_cli() {
         check-hosts
         client-config
         filter-builds
-        filter-tagged
         latest-archives
         list-build-archives
         list-cgs

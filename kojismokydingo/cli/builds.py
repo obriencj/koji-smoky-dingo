@@ -402,37 +402,45 @@ class BuildFiltering(AnonSmokyDingo):
                            btypes=options.btypes)
 
 
-def cli_list_components(session, nvr_list, task=False,
+def cli_list_components(session, nvr_list,
+                        tag=None, inherit=False, latest=False,
                         build_filter=None, sorting=None):
-
-    if not nvr_list:
-        return
 
     nvr_list = unique(nvr_list)
 
-    if task:
-        printerr("Not yet implemented")
-        return 1
+    if nvr_list:
+        # load the initial set of builds, this also verifies our input
+        found = bulk_load_builds(session, nvr_list)
+        loaded = dict((b["id"], b) for b in itervalues(found))
 
     else:
-        # load the initial set of builds, this also verifies our input
-        loaded = bulk_load_builds(session, nvr_list)
+        loaded = {}
 
-        # load the components for each of those builds
-        bids = [b["id"] for b in itervalues(loaded)]
-        components = gather_component_build_ids(session, bids)
+    if tag:
+        # mix in any tagged builds
+        tag = as_taginfo(session, tag)
+        found = session.listTagged(tag["id"], inherit=inherit, latest=latest)
+        loaded.update((b["id"], b) for b in found)
 
-        # now we need to turn those components build IDs into build_infos
-        found = bulk_load_builds(session, chain(*itervalues(components)))
+    # the build IDs of all the builds we've loaded, combined from the
+    # initial nvr_list, plus the builds from tag
+    bids = list(loaded)
 
-        # we'll also want the underlying builds used to produce any
-        # standalone wrapperRPM builds, as those are not recorded as
-        # normal buildroot components
-        tids = [b["task_id"] for b in itervalues(loaded) if b["task_id"]]
-        wrapped = gather_wrapped_builds(session, tids)
+    # now that we have bids (the build IDs to gather components from)
+    # we can begin the real work.
+    components = gather_component_build_ids(session, bids)
 
-        builds = list(itervalues(found))
-        builds.extend(itervalues(wrapped))
+    # now we need to turn those components build IDs into build_infos
+    found = bulk_load_builds(session, chain(*itervalues(components)))
+
+    # we'll also want the underlying builds used to produce any
+    # standalone wrapperRPM builds, as those are not recorded as
+    # normal buildroot components
+    tids = [b["task_id"] for b in itervalues(loaded) if b["task_id"]]
+    wrapped = gather_wrapped_builds(session, tids)
+
+    builds = list(itervalues(found))
+    builds.extend(itervalues(wrapped))
 
     # do the filtering
     if build_filter:
@@ -469,6 +477,18 @@ class ListComponents(BuildFiltering):
         # addarg("--task", action="store_true", default=False,
         #        help="Specify task IDs instead of build NVRs")
 
+        group = parser.add_argument_group("Components of tagged builds")
+        addarg = group.add_argument
+
+        addarg("--tag", action="store", default=None,
+               help="Look for components of builds in this tag")
+
+        addarg("--inherit", action="store_true", default=False,
+               help="Follow inheritance")
+
+        addarg("--latest", action="store_true", default=False,
+               help="Limit to latest builds")
+
         group = parser.add_argument_group("Sorting of builds")
         group = group.add_mutually_exclusive_group()
         addarg = group.add_argument
@@ -493,16 +513,38 @@ class ListComponents(BuildFiltering):
         bf = self.build_filter(options)
 
         return cli_list_components(self.session, nvrs,
-                                   task=False,  # options.task,
+                                   tag=options.tag,
+                                   inherit=options.inherit,
+                                   latest=options.latest,
                                    build_filter=bf,
                                    sorting=options.sorting)
 
 
 def cli_filter_builds(session, nvr_list,
+                      tag=None, inherit=False, latest=False,
                       build_filter=None, sorting=None):
 
-    loaded = bulk_load_builds(session, nvr_list)
-    builds = itervalues(loaded)
+    nvr_list = unique(nvr_list)
+
+    if nvr_list:
+        loaded = bulk_load_builds(session, nvr_list)
+        builds = itervalues(loaded)
+    else:
+        builds = ()
+
+    if tag:
+        taginfo = as_taginfo(session, tag)
+        listTagged = partial(session.listTagged, taginfo["id"],
+                             inherit=inherit, latest=latest)
+
+        builds = list(builds)
+
+        # server-side optimization if we're doing filtering by btype
+        if build_filter and build_filter._btypes:
+            for btype in build_filter._btypes:
+                builds.extend(listTagged(type=btype))
+        else:
+            builds.extend(listTagged())
 
     if build_filter:
         builds = build_filter(builds)
@@ -533,7 +575,19 @@ class FilterBuilds(BuildFiltering):
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
 
-        group = parser.add_argument_group("Sorting of builds")
+        group = parser.add_argument_group("Working from tagged builds")
+        addarg = group.add_argument
+
+        addarg("--tag", action="store", default=None,
+               help="Filter using the builds in this tag")
+
+        addarg("--inherit", action="store_true", default=False,
+               help="Follow inheritance")
+
+        addarg("--latest", action="store_true", default=False,
+               help="Limit to latest builds")
+
+        group = parser.add_argument_group("Sorting of output builds")
         group = group.add_mutually_exclusive_group()
         addarg = group.add_argument
 
@@ -557,80 +611,6 @@ class FilterBuilds(BuildFiltering):
         bf = self.build_filter(options)
 
         return cli_filter_builds(self.session, nvrs,
-                                 build_filter=bf,
-                                 sorting=options.sorting)
-
-
-def cli_filter_tagged(session, tagname,
-                      latest=False, inherit=False,
-                      build_filter=None, sorting=None):
-
-    taginfo = as_taginfo(session, tagname)
-
-    listTagged = partial(session.listTagged, taginfo["id"],
-                         inherit=inherit, latest=latest)
-
-    # server-side optimization if we're doing filtering by btype
-    if build_filter and build_filter._btypes:
-        builds = []
-        for btype in build_filter._btypes:
-            builds.extend(listTagged(type=btype))
-    else:
-        builds = listTagged()
-
-    if build_filter:
-        builds = build_filter(builds)
-
-    if sorting == SORT_BY_NVR:
-        builds = build_nvr_sort(builds, dedup=False)
-
-    elif sorting == SORT_BY_ID:
-        builds = build_id_sort(builds, dedup=False)
-
-    for bld in builds:
-        print(bld["nvr"])
-
-
-class FilterTagged(BuildFiltering):
-
-    description = "Filter a list of NVRs from a tag"
-
-
-    def parser(self):
-        parser = super(FilterTagged, self).parser()
-        addarg = parser.add_argument
-
-        addarg("tag", metavar="TAGNAME",
-               help="Tag to find builds within for filtering")
-
-        addarg("--latest", action="store_true", default=False,
-               help="Only show the latest builds")
-
-        addarg("--inherit", action="store_true", default=False,
-               help="Follow inheritance")
-
-        group = parser.add_argument_group("Sorting of builds")
-        group = group.add_mutually_exclusive_group()
-        addarg = group.add_argument
-
-        addarg("--nvr-sort", action="store_const",
-               dest="sorting", const=SORT_BY_NVR, default=None,
-               help="Sort output by NVR in ascending order")
-
-        addarg("--id-sort", action="store_const",
-               dest="sorting", const=SORT_BY_ID, default=None,
-               help="Sort output by Build ID in ascending order")
-
-        return parser
-
-
-    def handle(self, options):
-        bf = self.build_filter(options)
-
-        return cli_filter_tagged(self.session,
-                                 options.tag,
-                                 latest=options.latest,
-                                 inherit=options.inherit,
                                  build_filter=bf,
                                  sorting=options.sorting)
 
