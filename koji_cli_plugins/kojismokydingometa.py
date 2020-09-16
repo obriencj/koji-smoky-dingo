@@ -40,18 +40,8 @@ def __plugin__(glbls):
     # want to avoid leaving references around that it can see. So all
     # the action happens inside of this function.
 
-    import koji
     import sys
     from pkg_resources import iter_entry_points
-
-    # print("=== enter kojismokydingometa plugin ===", file=sys.stderr)
-
-    # in situations where koji.config is present and koji_smoky_dingo
-    # is explicitly set to False, we'll effective disable this
-    # meta-plugin and not load any of the entry point cli commands.
-    kconfig = getattr(koji, "config", None)
-    if kconfig and not kconfig.getboolean("koji_smoky_dingo", True):
-        return
 
     # we sort the entry points by module name so that duplicate
     # commands have a predictable resolution order
@@ -59,8 +49,6 @@ def __plugin__(glbls):
                     key=lambda e: e.module_name)
 
     for entry_point in points:
-        # print(entry_point, file=sys.stderr)
-
         try:
             # each entry point when loaded should resolve to a unary
             # function. This function is then invoked with the name of
