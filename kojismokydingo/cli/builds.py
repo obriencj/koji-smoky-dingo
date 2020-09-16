@@ -84,8 +84,8 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
     debug("Fed with %i builds", len(nvrs))
 
     # validate our list of NVRs first by attempting to load them
-    builds = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = itervalues(builds)
+    loaded = bulk_load_builds(session, unique(nvrs), err=strict)
+    builds = itervalues(loaded)
 
     # sort/dedup as requested
     if sorting == SORT_BY_NVR:
@@ -201,7 +201,8 @@ class BulkTagBuilds(TagSmokyDingo):
         addarg("--notify", action="store_true", default=False,
                help="Send tagging notifications.")
 
-        group = argp.add_mutually_exclusive_group()
+        group = argp.add_argument_group("Tagging order of builds")
+        group = group.add_mutually_exclusive_group()
         addarg = group.add_argument
 
         addarg("--nvr-sort", action="store_const",
@@ -468,7 +469,8 @@ class ListComponents(BuildFiltering):
         # addarg("--task", action="store_true", default=False,
         #        help="Specify task IDs instead of build NVRs")
 
-        group = parser.add_mutually_exclusive_group()
+        group = parser.add_argument_group("Sorting of builds")
+        group = group.add_mutually_exclusive_group()
         addarg = group.add_argument
 
         addarg("--nvr-sort", action="store_const",
@@ -531,7 +533,8 @@ class FilterBuilds(BuildFiltering):
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
 
-        group = parser.add_mutually_exclusive_group()
+        group = parser.add_argument_group("Sorting of builds")
+        group = group.add_mutually_exclusive_group()
         addarg = group.add_argument
 
         addarg("--nvr-sort", action="store_const",
@@ -606,7 +609,8 @@ class FilterTagged(BuildFiltering):
         addarg("--inherit", action="store_true", default=False,
                help="Follow inheritance")
 
-        group = parser.add_mutually_exclusive_group()
+        group = parser.add_argument_group("Sorting of builds")
+        group = group.add_mutually_exclusive_group()
         addarg = group.add_argument
 
         addarg("--nvr-sort", action="store_const",
