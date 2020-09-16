@@ -406,9 +406,9 @@ def cli_list_components(session, nvr_list, task=False,
     if not nvr_list:
         return
 
-    if task:
-        bids = []
+    nvr_list = unique(nvr_list)
 
+    if task:
         printerr("Not yet implemented")
         return 1
 
