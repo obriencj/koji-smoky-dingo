@@ -548,7 +548,7 @@ def filter_imported(build_infos, by_cg=(), negate=False):
     imports.
 
     build_infos may have been decorated by the
-    decorate_build_archive_data function. This provides an accurate
+    `decorate_build_archive_data` function. This provides an accurate
     listing of the content generators which have been used to import
     the build (if any). In the event that they have not been thus
     decorated, the cg filtering will rely on the cg_name setting on
@@ -568,8 +568,8 @@ def filter_imported(build_infos, by_cg=(), negate=False):
     are CG imports but not from the listed CGs will be emitted.
 
     by_cg may contain the string "any" to indicate that it matches all
-    content generators. "any" should not be used with negate of True,
-    as it will always result in no matches.
+    content generators. "any" should not be used with negate=True,
+    as this will always result in no matches.
 
     :param build_infos: build infos to filter through
     :type build_infos: list[dict] or Iterator[dict]
@@ -827,8 +827,8 @@ class BuildFilter(object):
 
         # check if we're going to need the decorated additional data
         # for filtering, and if so decorate
-        with_cg = bool(self._cg_list)
-        if self._btypes or with_cg or self._imported is not None:
+        with_cg = bool(self._cg_list) or self._imported is not None
+        if self._btypes or with_cg:
             work = decorate_build_archive_data(self._session, work, with_cg)
 
         # filtering by btype (provided by decorated addtl data)
