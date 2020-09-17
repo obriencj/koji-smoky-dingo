@@ -513,18 +513,19 @@ def filter_by_tags(session, build_infos,
     :rtype: list[dict] or Iterator[dict]
     """
 
-    if not (limit_tag_ids or lookaside_tag_ids):
-        return build_infos
-
     limit = set(limit_tag_ids) if limit_tag_ids else None
     lookaside = set(lookaside_tag_ids) if lookaside_tag_ids else None
+
+    if not (limit or lookaside):
+        return build_infos
 
     # a build ID: build_info mapping that we'll use to trim out
     # mismatches
     builds = OrderedDict((b["id"], b) for b in build_infos)
 
     # for each build ID, load the list of tags for that build
-    build_tags = bulk_load(session, session.listTags, list(builds))
+    fn = lambda i: session.listTags(build=i)
+    build_tags = bulk_load(session, fn, builds)
 
     for bid, tags in iteritems(build_tags):
         # convert the list of tags into a set of tag IDs
@@ -786,9 +787,14 @@ class BuildFilter(object):
 
 
     def filter_by_tags(self, build_infos):
-        return filter_by_tags(self._session, build_infos,
-                              limit_tag_ids=self._limit_tag_ids,
-                              lookaside_tag_ids=self._lookaside_tag_ids)
+        limit = self._limit_tag_ids
+        lookaside = self._lookaside_tag_ids
+
+        if limit or lookaside:
+            build_infos = filter_by_tags(self._session, build_infos,
+                                         limit_tag_ids=limit,
+                                         lookaside_tag_ids=lookaside)
+        return build_infos
 
 
     def filter_by_btype(self, build_infos):
