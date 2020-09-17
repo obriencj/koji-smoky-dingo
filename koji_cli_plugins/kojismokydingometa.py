@@ -15,7 +15,7 @@
 """
 Koji Smoky Dingo Meta Plugin
 
-Uses python entry_points to load the actual koji command-line plugins
+Uses python entry_points to load the actual koji command-line plugin
 handler functions.
 
 Koji Smoky Dingo provides some of its own handlers this way, but more
@@ -46,7 +46,7 @@ def __plugin__(glbls):
     # we sort the entry points by module name so that duplicate
     # commands have a predictable resolution order
     points = sorted(iter_entry_points('koji_smoky_dingo'),
-                    key=lambda e: e.module_name)
+                    key=lambda e: (e.module_name, e.name))
 
     for entry_point in points:
         try:
