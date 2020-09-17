@@ -225,9 +225,8 @@ def gather_tag_ids(session, shallow=(), deep=(), results=None):
 
     seek = list(shallow) if shallow else []
 
-    if deep and not isinstance(deep, (list, tuple)):
-        deep = list(deep)
-        seek.extend(deep)
+    deep = list(deep) if deep else []
+    seek.extend(deep)
 
     # first dig up the IDs for all the tags. If any are invalid, this will
     # raise a NoSuchTag exception
