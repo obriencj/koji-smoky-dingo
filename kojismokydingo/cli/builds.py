@@ -382,9 +382,6 @@ class ListComponents(BuildFiltering):
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
 
-        # addarg("--task", action="store_true", default=False,
-        #        help="Specify task IDs instead of build NVRs")
-
         group = parser.add_argument_group("Components of tagged builds")
         addarg = group.add_argument
 
