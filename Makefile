@@ -51,7 +51,10 @@ test: clean
 
 
 srpm: $(ARCHIVE)
-	@rpmbuild --define "_srcrpmdir dist" -ts "$(ARCHIVE)"
+	@rpmbuild \
+		--define "_srcrpmdir dist" \
+		--define "dist %{nil}" \
+		-ts "$(ARCHIVE)"
 
 
 rpm: $(ARCHIVE)
