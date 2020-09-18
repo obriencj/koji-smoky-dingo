@@ -162,13 +162,19 @@ Koji Smoky Dingo
 
 %changelog
 
-* Fri Sep 04 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-1
+* Fri Sep 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-1
 - Begin bumping micro for PRs as we work towards version 1.0.0
-- All 0.9.z versions are still considered API untable, this just helps
-  to differentiate
-- Add list-components koji command
-- Merged into a single egg/wheel/rpm containing both the lib and the
-  meta plugin
+- All 0.9.z versions are still considered API unstable, this just helps
+  to differentiate snapshots
+- Moved to a single distribution containing including the package and
+  the metaplugin
+- added new filter-builds and list-component-builds commands
+- removed list-imported (behavior now available in filter-builds)
+- slightly beefed up docs
+- moved as_buildinfo, as_taginfo, as_targetinfo into the main
+  kojismokydingo package
+- decorate_build_archive_data is now idempotent and slightly less
+  expensive
 
 * Wed Jan 09 2019 Christopher O'Brien <obriencj@gmail.com> - 0.9.0-1
 - Initial build.
