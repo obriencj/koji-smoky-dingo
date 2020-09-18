@@ -97,17 +97,14 @@ def update_extend(dict_orig, *dict_additions):
     the additions dict.
 
     eg.
-    ```
-    A = {'a': [1, 2], 'b': [7], 'c': [10]}
-    B = {'a': [3], 'b': [8, 9], 'd': [11]}
-    update_extend(A, B)
+    ::
 
-    A
-    >> {'a': [1, 2, 3],
-        'b': [7, 8, 9],
-        'c': [10],
-        'd': [11]}
-    ```
+        A = {'a': [1, 2], 'b': [7], 'c': [10]}
+        B = {'a': [3], 'b': [8, 9], 'd': [11]}
+        update_extend(A, B)
+
+        A
+        >> {'a': [1, 2, 3], 'b': [7, 8, 9], 'c': [10], 'd': [11]}
 
     The values of dict_orig must support an extend method.
 
@@ -120,7 +117,9 @@ def update_extend(dict_orig, *dict_additions):
 
     :type dict_additions: dict[object, list]
 
-    :rtype: None
+    :returns: The original dict instance
+
+    :rtype: dict[object, list]
     """
 
     for additions in dict_additions:
@@ -131,8 +130,22 @@ def update_extend(dict_orig, *dict_additions):
     return dict_orig
 
 
-def merge_extend(*d):
-    return update_extend({}, *d)
+def merge_extend(*dict_additions):
+    """
+    Similar to `update_extend` but creates a new dict to hold results,
+    and new initial lists to be extended, leaving all the arguments
+    unaltered.
+
+    :param dict_additions: The additions dict. Will not be altered.
+
+    :type dict_additions: dict[object, list]
+
+    :returns: A new dict, whose values are new lists
+
+    :rtype: dict[object, list]
+    """
+
+    return update_extend({}, *dict_additions)
 
 
 def globfilter(seq, patterns,

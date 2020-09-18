@@ -16,7 +16,7 @@ from unittest import TestCase
 
 from kojismokydingo.common import (
     chunkseq, fnmatches, globfilter,
-    unique, update_extend,
+    merge_extend, unique, update_extend,
     _rpm_str_compare)
 
 
@@ -111,17 +111,39 @@ class TestCommon(TestCase):
 
 
     def test_update_extend(self):
-
         A = {'a': [1, 2], 'b': [7], 'c': [10]}
         B = {'a': [3], 'b': [8, 9], 'd': [11]}
-        C = {'a': [3], 'b': [8, 9], 'd': [11]}
-        D = {'a': [1, 2, 3], 'b': [7, 8, 9], 'c': [10], 'd': [11]}
 
-        update_extend(A, B)
-        self.assertEqual(A, D)
+        C = {'a': [1, 2, 3], 'b': [7, 8, 9], 'c': [10], 'd': [11]}
+
+        Z = {'a': [3], 'b': [8, 9], 'd': [11]}
+
+        r = update_extend(A, B)
+
+        self.assertEqual(A, C)
+        self.assertTrue(A is r)
 
         # verify that B wasn't modified
-        self.assertEqual(B, C)
+        self.assertEqual(B, Z)
+
+
+    def test_merge_extend(self):
+        A = {'a': [1, 2], 'b': [7], 'c': [10]}
+        B = {'a': [3], 'b': [8, 9], 'd': [11]}
+
+        C = {'a': [1, 2, 3], 'b': [7, 8, 9], 'c': [10], 'd': [11]}
+
+        Y = {'a': [1, 2], 'b': [7], 'c': [10]}
+        Z = {'a': [3], 'b': [8, 9], 'd': [11]}
+
+        r = merge_extend(A, B)
+
+        self.assertEqual(r, C)
+        self.assertTrue(A is not r)
+
+        # verify that neither A nor B were modified
+        self.assertEqual(A, Y)
+        self.assertEqual(B, Z)
 
 
     def test_unique(self):
