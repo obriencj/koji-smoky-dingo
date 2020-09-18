@@ -59,7 +59,7 @@ permissions in koji.
 |`list-build-archives` |Show selected archives attached to a build |
 |`list-cgs` |Show content generators and their permitted users |
 |`list-component-builds` |Show builds which were used to produce others |
-|`list-env-vars` |Shows all inherited mock environment variables for a tag |
+|`list-env-vars` |Show all inherited mock environment variables for a tag |
 |`list-rpm-macros` |Show all inherited mock RPM macros for a tag |
 |`list-tag-extras` |Show all inherited extra fields for a tag |
 |`perminfo` |Show information about a permission |

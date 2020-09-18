@@ -92,7 +92,7 @@ permissions in koji.
 | ``list-component-builds``  | Show builds which were used to produce  |
 |                            | others                                  |
 +----------------------------+-----------------------------------------+
-| ``list-env-vars``          | Shows all inherited mock environment    |
+| ``list-env-vars``          | Show all inherited mock environment     |
 |                            | variables for a tag                     |
 +----------------------------+-----------------------------------------+
 | ``list-rpm-macros``        | Show all inherited mock RPM macros for  |
