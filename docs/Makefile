@@ -119,7 +119,7 @@ clean-stage: setup-stage
 	git pull ;\
 	git rm -rf * ;\
 	rm -rf * ;\
-	touch .nojekyll ; @git add .nojekyll ;\
+	touch .nojekyll ; git add .nojekyll ;\
 	popd
 
 stage: generate clean-stage $(DEPLOYFORMAT)
