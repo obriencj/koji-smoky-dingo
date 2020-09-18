@@ -21,11 +21,11 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 
-from setup import config
 
 # -- General configuration ------------------------------------------------
 
-release = config()["version"]
+# we borrow the release string directly from the setup.py
+from setup import VERSION as release
 version = release.rsplit(".", 1)[0]
 
 # If your documentation needs a minimal Sphinx version, state it here.
