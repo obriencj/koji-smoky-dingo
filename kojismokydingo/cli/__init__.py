@@ -379,10 +379,29 @@ class SmokyDingo(object):
 
     def activate(self):
         """
-        Activate the session
+        Activate our session. This is triggered after validate, before
+        pre_handle and handle
+
+        The session and goptions attributes will have been set just
+        prior.
         """
 
         return activate_session(self.session, self.goptions)
+
+
+    def deactivate(self):
+        """
+        Deactivate our session. This is triggered after handle has
+        completed, either normally or by raising an exception.
+
+        The session and goptions attributes will be cleared just
+        after.
+        """
+
+        try:
+            session.logout()
+        except:
+            pass
 
 
     def __call__(self, goptions, session, args):
@@ -422,6 +441,11 @@ class SmokyDingo(object):
             import traceback
             traceback.print_exc()
             raise
+
+        finally:
+            self.deactivate()
+            self.goptions = None
+            self.session = None
 
 
 class AnonSmokyDingo(SmokyDingo):

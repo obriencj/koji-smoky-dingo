@@ -97,7 +97,7 @@ pull-docs:
 
 stage-docs: docs pull-docs
 	@pushd gh-pages ; \
-	git reset --hard gh-pages ; \
+	git reset --hard origin/gh-pages ; \
 	git pull ; \
 	rm -rf * ; \
 	touch .nojekyll ; \
@@ -109,7 +109,11 @@ deploy-docs: stage-docs
 	@pushd gh-pages ; \
 	git remote set-url --push origin $(ORIGIN_PUSH) ; \
 	git commit -a -m "deploying sphinx update" && git push ; \
-	popd
+	popd ; \
+	if [ `git diff --name-only gh-pages` ] ; then \
+		git add gh-pages ; \
+		git commit -m "docs deploy" -o gh-pages ; \
+	fi
 
 
 clean-docs:
