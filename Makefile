@@ -33,11 +33,11 @@ tidy:
 
 
 clean: tidy
-	@rm -rf dist/* build/* logs/*
+	@rm -rf .coverage* build/* dist/* htmlcov/* logs/*
 	@rm -f "$(ARCHIVE)"
 
 
-packaging-build: archive
+packaging-build: $(ARCHIVE)
 	@./tools/launch-build.sh
 
 
@@ -72,19 +72,38 @@ $(ARCHIVE): .git/$(GITHEADREF)
 		| gzip > "$(ARCHIVE)"
 
 
-docs:
-	@make -C docs html
+docs/overview.rst: README.md
+	@sed 's/^\[\!.*/ /g' $< > overview.md
+	@pandoc --from=markdown --to=rst -o $@ "overview.md"
+	@rm -f overview.md
 
 
-deploy-docs:
-	@make -C docs deploy
+docs: docs/overview.rst
+	@$(PYTHON) -B setup.py docs
+
+
+stage-docs: docs
+	@pushd gh-pages ; \
+	git reset --hard gh-pages ; \
+	git pull ; \
+	rm -rf * ; \
+	touch .nojekyll ; \
+	popd ; \
+	cp -r build/sphinx/dirhtml/* gh-pages
+
+
+deploy-docs: stage-docs
+	@pushd gh-pages ; \
+	git commit -a -m "deploying sphinx update" && git push ; \
+	popd
 
 
 clean-docs:
+	@rm -rf build/sphinx/*
 	@make -C docs clean
 
 
-.PHONY: all archive clean default docs deploy-docs packaging-build packaging-test rpm srpm test
+.PHONY: all archive clean default docs deploy-docs overview packaging-build packaging-test rpm srpm stage-docs test
 
 
 # The end.
