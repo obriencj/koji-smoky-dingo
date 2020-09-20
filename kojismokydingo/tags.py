@@ -123,7 +123,7 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
 
     :type into: dict, optional
 
-    :param prefix: Only gather and convert extras with key's having
+    :param prefix: Only gather and convert extras with keys having
         this prefix. Default, gather all keys not already found.
 
     :type prefix: str, optional
