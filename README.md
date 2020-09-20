@@ -1,5 +1,8 @@
 # Overview
 
+[![Build Status](https://travis-ci.org/obriencj/koji-smoky-dingo.svg?branch=master)](https://travis-ci.org/obriencj/koji-smoky-dingo)
+[![Coverage Status](https://coveralls.io/repos/obriencj/koji-smoky-dingo/badge.svg?branch=master)](https://coveralls.io/r/obriencj/koji-smoky-dingo)
+
 Koji Smoky Dingo is a collection of client command-line plugins for
 [koji], and a set of utility modules for writing your own commands or
 scripts.
