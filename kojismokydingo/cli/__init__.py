@@ -399,8 +399,8 @@ class SmokyDingo(object):
         """
 
         try:
-            session.logout()
-        except:
+            self.session.logout()
+        finally:
             pass
 
 
