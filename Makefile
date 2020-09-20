@@ -13,6 +13,11 @@ PYTHON ?= $(shell which python3 python2 python 2>/dev/null \
 	        | head -n1)
 
 
+# We use this later in setting up the gh-pages submodule for pushing,
+# so forks will push their docs to their own gh-pages branch.
+ORIGIN_PUSH = $(shell git remote get-url --push origin)
+
+
 default: build
 
 
@@ -82,7 +87,15 @@ docs: docs/overview.rst
 	@$(PYTHON) -B setup.py docs
 
 
-stage-docs: docs
+pull-docs:
+	@git submodule init ; \
+	pushd gh-pages ; \
+	git reset --hard gh-pages ; \
+	git pull ; \
+	popd
+
+
+stage-docs: docs pull-docs
 	@pushd gh-pages ; \
 	git reset --hard gh-pages ; \
 	git pull ; \
@@ -94,6 +107,7 @@ stage-docs: docs
 
 deploy-docs: stage-docs
 	@pushd gh-pages ; \
+	git remote set-url --push origin $(ORIGIN_PUSH) ; \
 	git commit -a -m "deploying sphinx update" && git push ; \
 	popd
 

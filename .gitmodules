@@ -1,5 +1,6 @@
 [submodule "gh-pages"]
-	path = gh-pages
-	url = https://github.com/obriench/koji-smoky-dingo.git
-	pushurl = git@github.com:obriencj/koji-smoky-dingo.git
-	branch = gh-pages
+path = gh-pages
+url = https://github.com/obriencj/koji-smoky-dingo.git
+# pushurl = git@github.com:obriencj/koji-smoky-dingo.git
+branch = gh-pages
+
