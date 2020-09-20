@@ -1,9 +1,11 @@
 
-sudo: false
+
+os: linux
+
+dist: xenial
 
 
 language: python
-
 
 python:
   - "2.7"
@@ -12,21 +14,25 @@ python:
   - "3.8"
 
 
-cache: pip
-
-
-install:
-  - pip install -I coveralls flake8 koji nose six
-
+# Tell pip and others to shut up about Python 2.7 deprecation
 
 env:
   - PYTHONWARNINGS=ignore
 
 
-script:
-  - python setup.py flake8
-  - coverage run -m nose
+# How we'll be setting up the environment for use
 
+cache: pip
+
+install:
+  - pip install -I coveralls flake8 koji nose six
+
+
+# What we'll run to actually do the testing
+
+script:
+  - flake8 kojismokydingo/ koji_cli_plugins/
+  - coverage run -m nose
 
 after_success:
   - coveralls
