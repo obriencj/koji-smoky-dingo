@@ -1,0 +1,26 @@
+
+language: python
+
+
+python:
+  - "2.6"
+  - "2.7"
+  - "3.6"
+  - "3.7"
+  - "3.8"
+
+
+install:
+  - pip install coveralls nose flake8
+
+
+script:
+  - python setup.py flake8
+  - coverage run -m nose
+
+
+after_success:
+  - coveralls
+
+
+# The end.
