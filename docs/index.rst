@@ -7,5 +7,6 @@ Contents:
    :maxdepth: 4
 
    overview
+   commands
    kojismokydingo
    kojismokydingo/cli
