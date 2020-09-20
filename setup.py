@@ -26,6 +26,7 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
+PROJECT = "kojismokydingo"
 VERSION = "0.9.1"
 
 
@@ -70,11 +71,11 @@ COMMANDS = {
 
 def config():
     return {
-        "name": "kojismokydingo",
+        "name": PROJECT,
         "version": VERSION,
-        "description": "A collection of Koji client plugins and utils",
         "author": "Christopher O'Brien",
         "author_email": "obriencj@gmail.com",
+        "description": "A collection of Koji client plugins and utils",
         "url": "https://github.com/obriencj/koji-smoky-dingo",
 
         "license": "GNU General Public License v3 (GPLv3)",
