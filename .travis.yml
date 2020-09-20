@@ -1,4 +1,7 @@
 
+sudo: false
+
+
 language: python
 
 
@@ -9,8 +12,15 @@ python:
   - "3.8"
 
 
+cache: pip
+
+
 install:
   - pip install -I coveralls flake8 koji nose six
+
+
+env:
+  - PYTHONWARNINGS=ignore
 
 
 script:
