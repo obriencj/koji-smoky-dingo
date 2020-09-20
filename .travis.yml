@@ -10,7 +10,7 @@ python:
 
 
 install:
-  - pip install coveralls nose flake8
+  - pip install -I coveralls flake8 koji nose six
 
 
 script:

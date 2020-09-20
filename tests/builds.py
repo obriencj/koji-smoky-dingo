@@ -55,8 +55,8 @@ BUILD_SAMPLE_4 = {
     "id": 4,
     "nvr": "sample-4-1",
     "task_id": None,
-    "archive_cg_ids": None,
-    "archive_cg_names": None,
+    "archive_cg_ids": set(),
+    "archive_cg_names": set(),
     "archive_btype_ids": set([0]),
     "archive_btype_names": set(["rpm"]),
 }
@@ -66,8 +66,8 @@ BUILD_SAMPLE_5 = {
     "id": 5,
     "nvr": "sample-5-1",
     "task_id": 500,
-    "archive_cg_ids": None,
-    "archive_cg_names": None,
+    "archive_cg_ids": set(),
+    "archive_cg_names": set(),
     "archive_btype_ids": set([0]),
     "archive_btype_names": set(["rpm"]),
 }
