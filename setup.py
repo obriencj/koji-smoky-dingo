@@ -26,7 +26,6 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
-PROJECT = "kojismokydingo"
 VERSION = "0.9.1"
 
 
@@ -71,7 +70,7 @@ COMMANDS = {
 
 def config():
     return {
-        "name": PROJECT,
+        "name": "kojismokydingo",
         "version": VERSION,
         "author": "Christopher O'Brien",
         "author_email": "obriencj@gmail.com",
