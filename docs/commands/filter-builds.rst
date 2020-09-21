@@ -1,7 +1,9 @@
 koji filter-builds
 ==================
 
-.. parsed-literal::
+
+.. highlight:: none
+::
 
  usage: koji filter-builds [-h] [--lookaside LOOKASIDE]
                            [--shallow-lookaside SHALLOW_LOOKASIDE]

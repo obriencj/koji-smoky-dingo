@@ -1,7 +1,8 @@
 koji affected-targets
 =====================
 
-.. parsed-literal::
+.. highlight:: none
+::
 
  usage: koji affected-targets [-h] [-q] [-i | -b] TAGNAME [TAGNAME ...]
 
@@ -12,7 +13,7 @@ koji affected-targets
 
  optional arguments:
    -h, --help        show this help message and exit
-   -q, --quiet       Don\'t print summary information
+   -q, --quiet       Don't print summary information
    -i, --info        Print target name, build tag name, dest tag name
    -b, --build-tags  Print build tag names rather than target names
 
