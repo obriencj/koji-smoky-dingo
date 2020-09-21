@@ -35,6 +35,11 @@ from fnmatch import fnmatchcase
 from six import iteritems
 from six.moves import filter, filterfalse, range, zip_longest
 
+try:
+    from datetime import timezone
+except ImportError:
+    timezone = None
+
 
 __all__ = (
     "chunkseq", "fnmatches", "globfilter", "merge_extend",
@@ -343,21 +348,21 @@ DATETIME_FORMATS = (
     (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} .{3}$"),
      lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S %Z")),
 
-    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{4}"),
+    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{4}$"),
      lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S.%f%z")),
 
-    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{2}:\d{2}"),
+    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{2}:\d{2}$"),
      lambda d: datetime.strptime("".join(d.rsplit(":", 1)),
                                  "%Y-%m-%d %H:%M:%S.%f%z")),
 
-    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[+-]\d{4}"),
+    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[+-]\d{4}$"),
      lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S%z")),
 
-    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}"),
+    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$"),
      lambda d: datetime.strptime("".join(d.rsplit(":", 1)),
                                  "%Y-%m-%d %H:%M:%S%z")),
 
-    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}\:d{2}$"),
+    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"),
      lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S")),
 
     (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}$"),
@@ -366,8 +371,8 @@ DATETIME_FORMATS = (
     (re.compile(r"\d{4}-\d{2}-\d{2}$"),
      lambda d: datetime.strptime(d, "%Y-%m-%d")),
 
-    (re.compile(r"\d{4}-\d{2}"),
-     lambda d: datetime.strptime(d, "%Y-%m$")),
+    (re.compile(r"\d{4}-\d{2}$"),
+     lambda d: datetime.strptime(d, "%Y-%m")),
 
     (re.compile(r"\d+$"),
      lambda d: datetime.fromtimestamp(int(d))),
@@ -397,6 +402,12 @@ def parse_datetime(src):
     Timezone offset formats (%z) may also be specified as either +HHMM
     or +HH:MM (the : will be removed)
     """
+
+    if timezone is None:
+        # This is gross, but if we are on an older Python with no
+        # timezone support baked in, we need to remove the %z portion
+        # and replace it with a hardcoded UTC for %Z instead.
+        src = re.compile(r"([+-]\d{2}:?\d{2}$)").sub(" UTC", src)
 
     for pattern, parser in DATETIME_FORMATS:
         mtch = pattern.match(src)
