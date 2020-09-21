@@ -22,13 +22,12 @@ Functions for working with Koji hosts
 """
 
 
-from datetime import datetime
 from operator import itemgetter
 from six import iterkeys
 from six.moves import zip
 
 from . import NoSuchChannel
-from .common import globfilter
+from .common import globfilter, parse_datetime
 
 
 def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
@@ -87,12 +86,7 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
 
     # correlate the update timestamps with the builder info
     for bid, data in zip(bldr_ids, mc):
-        data = data[0] if data else None
-
-        if data:
-            data = data + " UTC"
-            data = datetime.strptime(data, "%Y-%m-%d %H:%M:%S.%f %Z")
-
+        data = parse_datetime(data[0]) if (data and data[0]) else None
         bldrs[bid]["last_update"] = data
 
     return bldrs
