@@ -2,6 +2,7 @@
 
 extensions = [
     'sphinx.ext.autodoc',
+    # 'sphinx.ext.autosectionlabels',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
     # 'numpydoc',
