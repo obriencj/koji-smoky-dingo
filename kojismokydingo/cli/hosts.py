@@ -46,6 +46,8 @@ def cli_check_hosts(session, timeout=60, arches=(), channel=None,
 
     for bldr in itervalues(bldr_data):
         lup = bldr["last_update"]
+        if lup and lup.tzinfo is not None:
+            lup = lup.replace(tzinfo=None)
 
         if lup:
             if lup < timeout:
