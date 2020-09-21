@@ -15,8 +15,8 @@
 from unittest import TestCase
 
 from kojismokydingo.common import (
-    chunkseq, fnmatches, globfilter,
-    merge_extend, unique, update_extend,
+    chunkseq, fnmatches, globfilter, merge_extend,
+    parse_datetime, unique, update_extend,
     _rpm_str_compare)
 
 
@@ -247,6 +247,21 @@ class TestCommon(TestCase):
         self.assertEqual(gf(["T*"], True, True),
                          ["one", "pizza", "beer"])
         self.assertEqual(gf(["T*"], True, False), data)
+
+
+    def test_parse_datetime(self):
+
+        parse_datetime("2020-09-21 16:30:52.313228+00:00")
+        parse_datetime("2020-09-21 16:30:52.313228+0000")
+        parse_datetime("2020-09-21 16:30:52+00:00")
+        parse_datetime("2020-09-21 16:30:52+0000")
+        parse_datetime("2020-09-21 16:30:52 UTC")
+        parse_datetime("2020-09-21 16:30:52")
+        parse_datetime("2020-09-21 16:30")
+        parse_datetime("2020-09-21")
+        parse_datetime("2020-09")
+        parse_datetime("1600707103")
+        parse_datetime("now")
 
 
 #
