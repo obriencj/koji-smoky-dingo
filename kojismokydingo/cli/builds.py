@@ -33,7 +33,7 @@ from six import itervalues
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
-    printerr, read_clean_lines, resplit)
+    pretty_json, printerr, read_clean_lines, resplit)
 from .. import (
     NoSuchTag, NoSuchUser,
     as_buildinfo, as_taginfo,
@@ -456,7 +456,8 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
 
 def cli_filter_builds(session, nvr_list,
                       tag=None, inherit=False, latest=False,
-                      build_filter=None, sorting=None, strict=False):
+                      build_filter=None, sorting=None, strict=False,
+                      json=False):
 
     """
     CLI handler for `koji filter-builds`
@@ -493,6 +494,13 @@ def cli_filter_builds(session, nvr_list,
     elif sorting == SORT_BY_ID:
         builds = build_id_sort(builds, dedup=False)
 
+    else:
+        builds = list(builds)
+
+    if json:
+        pretty_json(builds)
+        return
+
     for binfo in builds:
         print(binfo["nvr"])
 
@@ -505,7 +513,7 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
     def arguments(self, parser):
         addarg = parser.add_argument
 
-        addarg("nvr", nargs="*", default=[])
+        addarg("nvr", nargs="*", metavar="NVR")
 
         addarg("-f", "--file", action="store", default=None,
                dest="nvr_file", metavar="NVR_FILE",
@@ -548,6 +556,10 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
 
     def handle(self, options):
         nvrs = list(options.nvr)
+
+        if not (nvrs or options.tag or sys.stdin.isatty()):
+            if not options.nvr_file:
+                options.nvr_file = "-"
 
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))

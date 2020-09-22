@@ -13,12 +13,12 @@ koji filter-builds
                            [--limit LIMIT] [--shallow-limit SHALLOW_LIMIT]
                            [--type BTYPES] [-c CG_NAME]
                            [--imports | --no-imports] [--completed | --deleted]
-                           [nvr [nvr ...]]
+                           [NVR [NVR ...]]
 
  Filter a list of NVRs by various criteria
 
  positional arguments:
-   nvr
+   NVR
 
  optional arguments:
    -h, --help            show this help message and exit
@@ -65,12 +65,25 @@ koji filter-builds
 Given a list of NVRs, output only those which match a set of filtering
 parameters.
 
-The NVR list can also come from the contents of a tag.
+The set of NVRs to tag can be fed to this command in multiple
+ways. They can be specified as arguments, or they can be specified
+using the ``--file`` option to reference either a file containing a
+list of NVRs (one per line) or ``-`` to indicate stdin. The NVR list
+can also come from the contents of a tag via the ``--tag`` option.
+
+If NVRs are specified multiple ways, then they will be concatenated
+into a single list. The order will be arguments, then ``--file``, and
+then ``--tag``.
+
+If no NVRs are given as arguments, and the ``--file`` option isn't
+specified, and the ``--tag`` option isn't specified, and stdin is
+detected to not be a TTY, then the list of NVRs will be read from
+stdin.
 
 
 References
 ----------
 
-* :py:obj:`kojismokydingo.builds.BuildFilter`
 * :py:obj:`kojismokydingo.cli.builds.FilterBuilds`
 * :py:func:`kojismokydingo.cli.builds.cli_filter_builds`
+* :py:obj:`kojismokydingo.builds.BuildFilter`

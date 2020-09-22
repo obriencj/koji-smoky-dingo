@@ -577,7 +577,7 @@ def filter_by_state(build_infos, state=1):
     if state is None:
         return build_infos
     else:
-        return (b for b in build_infos if b.get("state") == state)
+        return (b for b in build_infos if (b and b.get("state") == state))
 
 
 def filter_imported(build_infos, by_cg=(), negate=False):
