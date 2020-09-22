@@ -40,6 +40,7 @@ See `Koji's Permission System - Administration <https://docs.pagure.org/koji/per
 .. toctree::
    :maxdepth: 1
 
+   commands/bulk-tag-builds
    commands/renum-tag-inheritance
    commands/set-env-var
    commands/set-rpm-macro
