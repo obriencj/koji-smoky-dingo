@@ -14,13 +14,19 @@
 
 from unittest import TestCase
 
-from kojismokydingo.builds import filter_imported
+from kojismokydingo.builds import (
+    build_dedup, build_id_sort, build_nvr_sort,
+    filter_imported)
 
 
 # A CG-imported build
 BUILD_SAMPLE_1 = {
     "id": 1,
     "nvr": "sample-1-1",
+    "name": "sample",
+    "version": "1",
+    "release": "1",
+    "epoch": None,
     "task_id": None,
     "archive_cg_ids": set([901]),
     "archive_cg_names": set(["example-cg"]),
@@ -32,6 +38,10 @@ BUILD_SAMPLE_1 = {
 BUILD_SAMPLE_2 = {
     "id": 2,
     "nvr": "sample-2-1",
+    "name": "sample",
+    "version": "2",
+    "release": "1",
+    "epoch": None,
     "task_id": None,
     "archive_cg_ids": set([902]),
     "archive_cg_names": set(["other-cg"]),
@@ -41,8 +51,12 @@ BUILD_SAMPLE_2 = {
 
 # A CG-imported build from multiple CGs
 BUILD_SAMPLE_3 = {
-    "id": 4,
-    "nvr": "sample-4-1",
+    "id": 3,
+    "nvr": "sample-3-1",
+    "name": "sample",
+    "version": "3",
+    "release": "1",
+    "epoch": None,
     "task_id": None,
     "archive_cg_ids": set([901, 902]),
     "archive_cg_names": set(["example-cg", "other-cg"]),
@@ -54,6 +68,10 @@ BUILD_SAMPLE_3 = {
 BUILD_SAMPLE_4 = {
     "id": 4,
     "nvr": "sample-4-1",
+    "name": "sample",
+    "version": "4",
+    "release": "1",
+    "epoch": None,
     "task_id": None,
     "archive_cg_ids": set(),
     "archive_cg_names": set(),
@@ -65,6 +83,10 @@ BUILD_SAMPLE_4 = {
 BUILD_SAMPLE_5 = {
     "id": 5,
     "nvr": "sample-5-1",
+    "name": "sample",
+    "version": "5",
+    "release": "1",
+    "epoch": None,
     "task_id": 500,
     "archive_cg_ids": set(),
     "archive_cg_names": set(),
@@ -160,6 +182,86 @@ class TestFilterImported(TestCase):
         expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3)
         self.assertEqual(match, expected)
 
+
+UNSORTED_BUILDS = (
+    BUILD_SAMPLE_5,
+    BUILD_SAMPLE_3,
+    BUILD_SAMPLE_5,
+    BUILD_SAMPLE_1,
+    BUILD_SAMPLE_4,
+    BUILD_SAMPLE_2,
+    BUILD_SAMPLE_1,
+)
+
+SORTED_BUILDS = (
+    BUILD_SAMPLE_1,
+    BUILD_SAMPLE_1,
+    BUILD_SAMPLE_2,
+    BUILD_SAMPLE_3,
+    BUILD_SAMPLE_4,
+    BUILD_SAMPLE_5,
+    BUILD_SAMPLE_5,
+)
+
+DEDUP_BUILDS = (
+    BUILD_SAMPLE_5,
+    BUILD_SAMPLE_3,
+    BUILD_SAMPLE_1,
+    BUILD_SAMPLE_4,
+    BUILD_SAMPLE_2,
+)
+
+
+class TestSorting(TestCase):
+
+
+    def test_id_sort(self):
+
+        res = build_id_sort(BUILD_SAMPLES)
+        self.assertEqual([b["id"] for b in res],
+                         [b["id"] for b in BUILD_SAMPLES])
+        self.assertTrue(res is not BUILD_SAMPLES)
+
+        res = build_id_sort(UNSORTED_BUILDS, dedup=True)
+        self.assertEqual([b["id"] for b in res],
+                         [b["id"] for b in BUILD_SAMPLES])
+        self.assertTrue(res is not UNSORTED_BUILDS)
+
+        res = build_id_sort(UNSORTED_BUILDS, dedup=False)
+        self.assertEqual([b["id"] for b in res],
+                         [b["id"] for b in SORTED_BUILDS])
+        self.assertTrue(res is not SORTED_BUILDS)
+
+
+    def test_nvr_sort(self):
+
+        res = build_id_sort(BUILD_SAMPLES)
+        self.assertEqual([b["nvr"] for b in res],
+                         [b["nvr"] for b in BUILD_SAMPLES])
+        self.assertTrue(res is not BUILD_SAMPLES)
+
+        res = build_id_sort(UNSORTED_BUILDS, dedup=True)
+        self.assertEqual([b["nvr"] for b in res],
+                         [b["nvr"] for b in BUILD_SAMPLES])
+        self.assertTrue(res is not UNSORTED_BUILDS)
+
+        res = build_id_sort(UNSORTED_BUILDS, dedup=False)
+        self.assertEqual([b["nvr"] for b in res],
+                         [b["nvr"] for b in SORTED_BUILDS])
+        self.assertTrue(res is not SORTED_BUILDS)
+
+
+    def test_dedup(self):
+
+        res = build_dedup(BUILD_SAMPLES)
+        self.assertEqual([b["id"] for b in res],
+                         [b["id"] for b in BUILD_SAMPLES])
+        self.assertTrue(res is not BUILD_SAMPLES)
+
+        res = build_dedup(UNSORTED_BUILDS)
+        self.assertEqual([b["id"] for b in res],
+                         [b["id"] for b in DEDUP_BUILDS])
+        self.assertTrue(res is not UNSORTED_BUILDS)
 
 
 # The end.

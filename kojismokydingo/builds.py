@@ -23,6 +23,7 @@ Functions for working with Koji builds
 
 
 from collections import OrderedDict
+from operator import itemgetter
 from six import iteritems, itervalues
 from six.moves import filter
 
@@ -121,7 +122,7 @@ def build_id_sort(build_infos, dedup=True):
         builds = dict((b["id"], b) for b in build_infos if b)
         return [b for _bid, b in sorted(iteritems(builds))]
     else:
-        return sorted(builds, key=lambda b: (b["id"], b))
+        return sorted(build_infos, key=itemgetter("id"))
 
 
 def build_dedup(build_infos):
