@@ -25,7 +25,7 @@ env:
 cache: pip
 
 install:
-  - pip install -I coveralls flake8 koji nose six
+  - pip install -I coveralls docutils flake8 koji nose six
 
 
 # What we'll run to actually do the testing
