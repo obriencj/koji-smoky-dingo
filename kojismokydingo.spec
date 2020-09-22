@@ -161,7 +161,7 @@ Koji Smoky Dingo
 
 
 %changelog
-* Mon Sep 22 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-0
+* Tue Sep 22 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-0
 - fix issue with 'set-rpm-macro --help'
 - fix datetime issues in 'check-hosts'
 - add new parse_datetime function in common
