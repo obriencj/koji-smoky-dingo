@@ -12,7 +12,7 @@ koji filter-builds
                            [--shallow-lookaside SHALLOW_LOOKASIDE]
                            [--limit LIMIT] [--shallow-limit SHALLOW_LIMIT]
                            [--type BTYPES] [-c CG_NAME]
-                           [--imports | --no-imports]
+                           [--imports | --no-imports] [--completed | --deleted]
                            [nvr [nvr ...]]
 
  Filter a list of NVRs by various criteria
@@ -56,6 +56,10 @@ koji filter-builds
                          once.
    --imports             Limit to imported builds
    --no-imports          Invert the imports checking
+
+ Filtering by state:
+   --completed           Limit to completed builds
+   --deleted             Limit to deleted builds
 
 
 Given a list of NVRs, output only those which match a set of filtering

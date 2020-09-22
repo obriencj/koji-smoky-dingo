@@ -13,6 +13,7 @@ koji list-component-builds
                                    [--shallow-limit SHALLOW_LIMIT]
                                    [--type BTYPES] [-c CG_NAME]
                                    [--imports | --no-imports]
+                                   [--completed | --deleted]
                                    [nvr [nvr ...]]
 
  List a build's component dependencies
@@ -54,6 +55,10 @@ koji list-component-builds
                          once.
    --imports             Limit to imported builds
    --no-imports          Invert the imports checking
+
+ Filtering by state:
+   --completed           Limit to completed builds
+   --deleted             Limit to deleted builds
 
 
 This command identifies the builds used to produce another build.

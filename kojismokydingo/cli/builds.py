@@ -280,6 +280,17 @@ class BuildFiltering():
                dest="imported", default=None,
                help="Invert the imports checking")
 
+        grp = parser.add_argument_group("Filtering by state")
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+        addarg("--completed", action="store_const", const=1,
+               dest="state", default=None,
+               help="Limit to completed builds")
+
+        addarg("--deleted", action="store_const", const=2,
+               dest="state", default=None,
+               help="Limit to deleted builds")
+
         return parser
 
 
