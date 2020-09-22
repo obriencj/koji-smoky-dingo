@@ -30,6 +30,9 @@ If the new parent is not already in the direct inheritance of the tag,
 then the old parent will be removed and new parent will be set in its
 place at the same priority.
 
+This command requires either the ``admin`` or ``tag`` permission,
+as it modifies tag configuration data.
+
 
 References
 ----------
