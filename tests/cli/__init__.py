@@ -13,42 +13,87 @@
 
 
 from pkg_resources import EntryPoint
+from six import iteritems
+from six.moves import StringIO
 from unittest import TestCase
 
 from kojismokydingo.cli import (
     SmokyDingo, clean_lines, resplit)
 
 
-ENTRY_POINTS = [
-    "affected-targets = kojismokydingo.cli.tags:AffectedTargets",
-    "bulk-tag-builds = kojismokydingo.cli.builds:BulkTagBuilds",
-    "check-hosts = kojismokydingo.cli.hosts:CheckHosts",
-    "client-config = kojismokydingo.cli.clients:ClientConfig",
-    "filter-builds = kojismokydingo.cli.builds:FilterBuilds",
-    "latest-archives = kojismokydingo.cli.archives:LatestArchives",
-    "list-build-archives = kojismokydingo.cli.archives:ListBuildArchives",
-    "list-cgs = kojismokydingo.cli.users:ListCGs",
-    "list-component-builds = kojismokydingo.cli.builds:ListComponents",
-    "list-env-vars = kojismokydingo.cli.tags:ListEnvVars",
-    "list-rpm-macros = kojismokydingo.cli.tags:ListRPMMacros",
-    "list-tag-extras = kojismokydingo.cli.tags:ListTagExtras",
-    "perminfo = kojismokydingo.cli.users:PermissionInfo",
-    "renum-tag-inheritance = kojismokydingo.cli.tags:RenumTagInheritance",
-    "set-env-var = kojismokydingo.cli.tags:SetEnvVar",
-    "set-rpm-macro = kojismokydingo.cli.tags:SetRPMMacro",
-    "swap-tag-inhertance = kojismokydingo.cli.tags:SwapTagInheritance",
-    "unset-env-var = kojismokydingo.cli.tags:UnsetEnvVar",
-    "unset-rpm-macro = kojismokydingo.cli.tags:UnsetRPMMacro",
-    "userinfo = kojismokydingo.cli.users:UserInfo",
-]
+ENTRY_POINTS = {
+    "affected-targets": "kojismokydingo.cli.tags:AffectedTargets",
+    "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
+    "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
+    "client-config": "kojismokydingo.cli.clients:ClientConfig",
+    "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",
+    "latest-archives": "kojismokydingo.cli.archives:LatestArchives",
+    "list-build-archives": "kojismokydingo.cli.archives:ListBuildArchives",
+    "list-cgs": "kojismokydingo.cli.users:ListCGs",
+    "list-component-builds": "kojismokydingo.cli.builds:ListComponents",
+    "list-env-vars": "kojismokydingo.cli.tags:ListEnvVars",
+    "list-rpm-macros": "kojismokydingo.cli.tags:ListRPMMacros",
+    "list-tag-extras": "kojismokydingo.cli.tags:ListTagExtras",
+    "perminfo": "kojismokydingo.cli.users:PermissionInfo",
+    "renum-tag-inheritance": "kojismokydingo.cli.tags:RenumTagInheritance",
+    "set-env-var": "kojismokydingo.cli.tags:SetEnvVar",
+    "set-rpm-macro": "kojismokydingo.cli.tags:SetRPMMacro",
+    "swap-tag-inheritance": "kojismokydingo.cli.tags:SwapTagInheritance",
+    "unset-env-var": "kojismokydingo.cli.tags:UnsetEnvVar",
+    "unset-rpm-macro": "kojismokydingo.cli.tags:UnsetRPMMacro",
+    "userinfo": "kojismokydingo.cli.users:UserInfo",
+}
+
+
+def default_koji_config(profile="koji"):
+    return {
+        'profile': profile,
+        'server': 'http://localhost/kojihub',
+        'weburl': 'http://localhost/koji',
+        'topurl': None,
+        'pkgurl': None,
+        'topdir': '/mnt/koji',
+        'max_retries': None,
+        'retry_interval': None,
+        'anon_retry': None,
+        'offline_retry': None,
+        'offline_retry_interval': None,
+        'timeout': 60 * 60 * 12,
+        'auth_timeout': 60,
+        'use_fast_upload': False,
+        'upload_blocksize': 1048576,
+        'poll_interval': 6,
+        'principal': None,
+        'keytab': None,
+        'cert': None,
+        'serverca': None,
+        'no_ssl_verify': False,
+        'authtype': None,
+        'debug': False,
+        'debug_xmlrpc': False,
+        'pyver': None,
+        'plugin_paths': None,
+    }
+
+
+class Object(object):
+    pass
+
+
+def default_koji_goptions(profile="koji"):
+    result = Object()
+    result.__dict__ = default_koji_config(profile)
+    return result
 
 
 class TestExpectedEntryPoints(TestCase):
 
+
     def test_entry_points(self):
         # verify the expected entry points resolve and can be
         # initialized
-        for cmd in ENTRY_POINTS:
+        for nameref in iteritems(ENTRY_POINTS):
+            cmd = "=".join(nameref)
             ep = EntryPoint.parse(cmd)
 
             if hasattr(ep, "resolve"):

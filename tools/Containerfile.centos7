@@ -7,7 +7,7 @@ RUN \
     yum install -q -y epel-release && \
     yum install -q -y \
         make rpm-build which yum-utils \
-        python2-mock python2-nose koji
+        python2-docutils python2-mock python2-nose koji
 
 ARG VERSION
 

@@ -24,7 +24,14 @@ function run_nose() {
         echo "No nosetests available on path"
         return 1
     fi
-    "$NOSE" -w /ksd-tests -v --all-modules
+
+    if [ $(rpm --eval '%dist') == ".el6" ] ; then
+        # the argparse in Centos6/RHEL6 has slightly weird help output
+        "$NOSE" -v --all-modules -e 'test_command_help'
+    else
+        "$NOSE" -v --all-modules
+    fi
+
     echo
 }
 
@@ -80,13 +87,14 @@ function verify_installed() {
 function ksd_rpm_tests() {
     local PLATFORM="$1"
 
-    local TESTDIR=/ksd-tests
-    local LOGDIR=/ksd-logs
+    local BASEDIR=/ksd
+    local TESTDIR=$BASEDIR/tests
+    local LOGDIR=$BASEDIR/logs
 
     local LOGFILE="$LOGDIR"/test-"$PLATFORM".log
 
+    pushd "$BASEDIR" >/dev/null
     mkdir -p "$LOGDIR"
-    cd "$BASEDIR"
 
     {
         echo "==== BEGIN RESULTS FOR $PLATFORM ===="
@@ -95,6 +103,8 @@ function ksd_rpm_tests() {
         run_nose 2>&1
         echo "==== END RESULTS FOR $PLATFORM ===="
     } | tee -a "$LOGFILE"
+
+    popd >/dev/null
 }
 
 

@@ -364,7 +364,7 @@ class SmokyDingo(object):
         further calls.
         """
 
-        if self.permission:
+        if self.permission and self.session:
             session = self.session
             userinfo = session.getLoggedInUser()
             userperms = session.getUserPerms(userinfo["id"]) or ()
@@ -392,7 +392,8 @@ class SmokyDingo(object):
         prior.
         """
 
-        return activate_session(self.session, self.goptions)
+        if self.session:
+            return activate_session(self.session, self.goptions)
 
 
     def deactivate(self):
@@ -404,10 +405,11 @@ class SmokyDingo(object):
         after.
         """
 
-        try:
-            self.session.logout()
-        finally:
-            pass
+        if self.session:
+            try:
+                self.session.logout()
+            except BaseException:
+                pass
 
 
     def __call__(self, goptions, session, args):
@@ -478,7 +480,8 @@ class AnonSmokyDingo(SmokyDingo):
 
     def activate(self):
         # rather than logging on, we only open a connection
-        ensure_connection(self.session)
+        if self.session:
+            ensure_connection(self.session)
 
 
     def pre_handle(self, options):

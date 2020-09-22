@@ -139,10 +139,11 @@ function ksd_test_platform() {
 
     echo "Running tests for $NAME"
     $PODMAN run --rm \
-            --volume "$PWD"/logs:/ksd-logs \
-            --volume "$PWD"/tests:/ksd-tests \
+            --volume "$PWD"/docs:/ksd/docs \
+            --volume "$PWD"/logs:/ksd/logs \
+            --volume "$PWD"/tests:/ksd/tests \
             "$NAME" \
-            "/ksd-tests/packaging.sh" "$PLATFORM"
+            "/ksd/tests/packaging.sh" "$PLATFORM"
 }
 
 

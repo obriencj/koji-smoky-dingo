@@ -93,6 +93,7 @@ def config():
         ],
 
         "tests_require": [
+            "docutils",
             "koji",
             "mock",
             "six",
