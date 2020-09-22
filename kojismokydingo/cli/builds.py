@@ -427,7 +427,7 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
 
 def cli_filter_builds(session, nvr_list,
                       tag=None, inherit=False, latest=False,
-                      build_filter=None, sorting=None):
+                      build_filter=None, sorting=None, strict=False):
 
     """
     CLI handler for `koji filter-builds`
@@ -436,7 +436,7 @@ def cli_filter_builds(session, nvr_list,
     nvr_list = unique(nvr_list)
 
     if nvr_list:
-        loaded = bulk_load_builds(session, nvr_list)
+        loaded = bulk_load_builds(session, nvr_list, err=strict)
         builds = itervalues(loaded)
     else:
         builds = ()
@@ -482,6 +482,10 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
                dest="nvr_file", metavar="NVR_FILE",
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
+
+        addarg("--strict", action="store_true", default=False,
+               help="Error if any of the NVRs do not resolve into a"
+               " real build. Otherwise, bad NVRs are ignored.")
 
         group = parser.add_argument_group("Working from tagged builds")
         addarg = group.add_argument

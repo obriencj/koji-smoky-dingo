@@ -6,8 +6,8 @@ koji filter-builds
 
 ::
 
- usage: koji filter-builds [-h] [-f NVR_FILE] [--tag TAG] [--inherit]
-                           [--latest] [--nvr-sort | --id-sort]
+ usage: koji filter-builds [-h] [-f NVR_FILE] [--strict] [--tag TAG]
+                           [--inherit] [--latest] [--nvr-sort | --id-sort]
                            [--lookaside LOOKASIDE]
                            [--shallow-lookaside SHALLOW_LOOKASIDE]
                            [--limit LIMIT] [--shallow-limit SHALLOW_LIMIT]
@@ -25,6 +25,8 @@ koji filter-builds
    -f NVR_FILE, --file NVR_FILE
                          Read list of builds from file, one NVR per line.
                          Specify - to read from stdin.
+   --strict              Error if any of the NVRs do not resolve into a real
+                         build. Otherwise, bad NVRs are ignored.
 
  Working from tagged builds:
    --tag TAG             Filter using the builds in this tag
