@@ -544,6 +544,42 @@ def filter_by_tags(session, build_infos,
     return itervalues(builds)
 
 
+def filter_by_state(build_infos, state=1):
+    """
+    Given a sequence of build info dicts, return a generator of those
+    matching the given state.
+
+    * BUILDING = 0
+    * COMPLETE = 1
+    * DELETED = 2
+    * FAILED = 3
+    * CANCELED = 4
+
+    See `koji.BUILD_STATES`
+
+    Typically only COMPLETE and DELETED will be encountered here, the
+    rest will rarely result in a build info dict existing.
+
+    If state is None then no filtering takes place
+
+    :param build_infos: build infos to filter through
+
+    :type build_infos: list[dict] or Iterator[dict]
+
+    :param state: state value to filter for. Default: only builds in
+      the COMPLETE state are returned
+
+    :type state: int, optional
+
+    :rtype: Iterator[dict]
+    """
+
+    if state is None:
+        return build_infos
+    else:
+        return (b for b in build_infos if b.get("state") == state)
+
+
 def filter_imported(build_infos, by_cg=(), negate=False):
     """
     Given a sequence of build info dicts, yield those which are
@@ -748,7 +784,7 @@ class BuildFilter(object):
     def __init__(self, session,
                  limit_tag_ids=None, lookaside_tag_ids=None,
                  imported=None, cg_list=None,
-                 btypes=None):
+                 btypes=None, state=None):
 
         """
         :param limit_tag_ids: if specified, builds must be tagged with one
@@ -768,9 +804,15 @@ class BuildFilter(object):
           the named content generators will be returned.
         :type cg_list: list[str], optional
 
-        :param btypes: Filter for the given build types, by name
+        :param btypes: Filter for the given build types, by name. Default,
+          any build type is allowed.
+
         :type btypes: list[str], optional
 
+        :param state: Filter by the given build state. Default, no
+          filtering by state.
+
+        :type state: int, optional
         """
 
         self._session = session
@@ -785,6 +827,7 @@ class BuildFilter(object):
         self._cg_list = set(cg_list)
 
         self._btypes = set(btypes or ())
+        self._state = state
 
 
     def filter_by_tags(self, build_infos):
@@ -818,6 +861,13 @@ class BuildFilter(object):
         return build_infos
 
 
+    def filter_by_state(self, build_infos):
+        if self._state:
+            build_infos = filter_by_state(build_infos, self._state)
+
+        return build_infos
+
+
     def __call__(self, build_infos):
         # TODO: could we add some caching to this, such that we
         # associate the build ID with a bool indicating whether it's
@@ -828,6 +878,8 @@ class BuildFilter(object):
 
         # ensure this is a real list and not a generator of some sort
         work = list(build_infos)
+
+        work = self.filter_by_state(work)
 
         # first stage filtering, based on tag membership
         work = self.filter_by_tags(work)

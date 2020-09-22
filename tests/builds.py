@@ -16,12 +16,13 @@ from unittest import TestCase
 
 from kojismokydingo.builds import (
     build_dedup, build_id_sort, build_nvr_sort,
-    filter_imported)
+    filter_by_state, filter_imported)
 
 
 # A CG-imported build
 BUILD_SAMPLE_1 = {
     "id": 1,
+    "state": 2,
     "nvr": "sample-1-1",
     "name": "sample",
     "version": "1",
@@ -37,6 +38,7 @@ BUILD_SAMPLE_1 = {
 # A CG-imported build
 BUILD_SAMPLE_2 = {
     "id": 2,
+    "state": 2,
     "nvr": "sample-2-1",
     "name": "sample",
     "version": "2",
@@ -52,6 +54,7 @@ BUILD_SAMPLE_2 = {
 # A CG-imported build from multiple CGs
 BUILD_SAMPLE_3 = {
     "id": 3,
+    "state": 1,
     "nvr": "sample-3-1",
     "name": "sample",
     "version": "3",
@@ -67,6 +70,7 @@ BUILD_SAMPLE_3 = {
 # An imported, non-CG build
 BUILD_SAMPLE_4 = {
     "id": 4,
+    "state": 1,
     "nvr": "sample-4-1",
     "name": "sample",
     "version": "4",
@@ -82,6 +86,7 @@ BUILD_SAMPLE_4 = {
 # A non-imported build
 BUILD_SAMPLE_5 = {
     "id": 5,
+    "state": 1,
     "nvr": "sample-5-1",
     "name": "sample",
     "version": "5",
@@ -181,6 +186,36 @@ class TestFilterImported(TestCase):
         match = self._filter_imported(("absent-cg",), negate=True)
         expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3)
         self.assertEqual(match, expected)
+
+
+class TestFilterState(TestCase):
+
+
+    def _filter_by_state(self, *args, **kwds):
+        return tuple(filter_by_state(BUILD_SAMPLES, *args, **kwds))
+
+
+    def test_filter_none(self):
+        res = self._filter_by_state(None)
+        self.assertEqual(res, BUILD_SAMPLES)
+
+
+    def test_filter_completed(self):
+        res = self._filter_by_state(1)
+        expected = (BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5)
+        self.assertEqual(res, expected)
+
+
+    def test_filter_deleted(self):
+        res = self._filter_by_state(2)
+        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2)
+        self.assertEqual(res, expected)
+
+
+    def test_filter_failed(self):
+        res = self._filter_by_state(3)
+        expected = ()
+        self.assertEqual(res, expected)
 
 
 UNSORTED_BUILDS = (
