@@ -2,7 +2,7 @@
 
 extensions = [
     'sphinx.ext.autodoc',
-    # 'sphinx.ext.autosectionlabels',
+    'sphinx.ext.autosectionlabel',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
     # 'numpydoc',
@@ -11,6 +11,10 @@ extensions = [
 intersphinx_mapping = {
     "python": ('https://docs.python.org/3', None),
 }
+
+
+autosectionlabel_maxdepth = 1
+autosectionlabel_prefix_document = False
 
 # The suffix of source filenames.
 source_suffix = '.rst'
