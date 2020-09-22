@@ -14,12 +14,12 @@ koji list-component-builds
                                    [--type BTYPES] [-c CG_NAME]
                                    [--imports | --no-imports]
                                    [--completed | --deleted]
-                                   [nvr [nvr ...]]
+                                   [NVR [NVR ...]]
 
  List a build's component dependencies
 
  positional arguments:
-   nvr                   Build NVR to list components of
+   NVR                   Build NVRs to list components of
 
  optional arguments:
    -h, --help            show this help message and exit
@@ -62,6 +62,17 @@ koji list-component-builds
 
 
 This command identifies the builds used to produce another build.
+
+The set of NVRs to tag can be fed to this command in multiple
+ways. They can be specified as arguments, or they can be specified
+using the ``--file`` option to reference either a file containing a
+list of NVRs (one per line) or ``-`` to indicate stdin. If NVRs are
+specified on the command line and also via ``--file`` then the two
+lists will be concatenated in that order.
+
+If no NVRs are given as arguments, and the ``--file`` option isn't
+specified, and stdin is detected to not be a TTY, then the list of
+NVRs will be read from stdin.
 
 
 References

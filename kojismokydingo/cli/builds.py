@@ -179,8 +179,16 @@ class BulkTagBuilds(TagSmokyDingo):
         addarg("tag", action="store", metavar="TAGNAME",
                help="Tag to associate builds with")
 
-        addarg("-v", "--verbose", action="store_true", default=False,
-               help="Print debugging information")
+        addarg("nvr", nargs="*", metavar="NVR",
+               help="Build NVRs to tag")
+
+        addarg("-f", "--file", action="store", default=None,
+               dest="nvr_file", metavar="NVR_FILE",
+               help="Read list of builds from file, one NVR per line."
+               " Specify - to read from stdin.")
+
+        addarg("--strict", action="store_true", default=False,
+               help="Stop processing at the first failure")
 
         addarg("--owner", action="store", default=None,
                help="Force missing package listings to be created"
@@ -190,19 +198,17 @@ class BulkTagBuilds(TagSmokyDingo):
                dest="inherit", help="Do not use parent tags to"
                " determine existing package listing.")
 
-        addarg("-f", "--file", action="store", default="-",
-               dest="nvr_file", metavar="NVR_FILE",
-               help="Read list of builds from file, one NVR per line."
-               " Omit for default behavior: read build NVRs from stdin")
-
-        addarg("--strict", action="store_true", default=False,
-               help="Stop processing at the first failure")
-
         addarg("--force", action="store_true", default=False,
-               help="Force tagging.")
+               help="Force tagging operations. Requires admin"
+               " permission")
 
         addarg("--notify", action="store_true", default=False,
-               help="Send tagging notifications.")
+               help="Send tagging notifications. This can be"
+               " expensive for koji hub, avoid unless absolutely"
+               " necessary.")
+
+        addarg("-v", "--verbose", action="store_true", default=False,
+               help="Print tagging status")
 
         group = parser.add_argument_group("Tagging order of builds")
         group = group.add_mutually_exclusive_group()
@@ -222,7 +228,14 @@ class BulkTagBuilds(TagSmokyDingo):
 
 
     def handle(self, options):
-        nvrs = read_clean_lines(options.nvr_file)
+        nvrs = list(options.nvr)
+
+        if not nvrs and not sys.stdin.isatty():
+            if not options.nvr_file:
+                options.nvr_file = "-"
+
+        if options.nvr_file:
+            nvrs.extend(read_clean_lines(options.nvr_file))
 
         return cli_bulk_tag_builds(self.session, options.tag, nvrs,
                                    sorting=options.sorting,
@@ -382,8 +395,8 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
     def arguments(self, parser):
         addarg = parser.add_argument
 
-        addarg("nvr", nargs="*",
-               help="Build NVR to list components of")
+        addarg("nvr", nargs="*", metavar="NVR",
+               help="Build NVRs to list components of")
 
         addarg("-f", "--file", action="store", default=None,
                dest="nvr_file", metavar="NVR_FILE",
@@ -422,6 +435,10 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
 
     def handle(self, options):
         nvrs = list(options.nvr)
+
+        if not nvrs and not sys.stdin.isatty():
+            if not options.nvr_file:
+                options.nvr_file = "-"
 
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
