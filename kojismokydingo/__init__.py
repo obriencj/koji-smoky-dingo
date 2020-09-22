@@ -114,7 +114,7 @@ class NotPermitted(BadDingo):
     complaint = "Insufficient permissions"
 
 
-def _bulk_load(session, loadfn, keys, size=100):
+def _bulk_load(session, loadfn, keys, err, size):
     """
     Generator utility for multicall loading data from a koji client
     session.
@@ -124,7 +124,9 @@ def _bulk_load(session, loadfn, keys, size=100):
 
     Yields key, result pairs.
 
-    Will convert any koji faults to exceptions and raise them.
+    If err is True (default) then this will convert any koji faults to
+    exceptions and raise them. Otherwise faults will be omitted from
+    the output results.
     """
 
     for key_chunk in chunkseq(keys, size):
@@ -133,17 +135,20 @@ def _bulk_load(session, loadfn, keys, size=100):
         for key in key_chunk:
             loadfn(key)
 
-        for key, info in zip(key_chunk, session.multiCall()):
+        for key, info in zip(key_chunk, session.multiCall(strict=err)):
             if info:
                 if "faultCode" in info:
-                    raise convertFault(Fault(**info))
+                    if err:
+                        raise convertFault(Fault(**info))
+                    else:
+                        yield key, None
                 else:
                     yield key, info[0]
             else:
                 yield key, None
 
 
-def bulk_load(session, loadfn, keys, size=100, results=None):
+def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
     """
     Generic bulk loading function, invokes the given loadfn on each
     key in keys using chunking multicalls limited to the specified
@@ -159,7 +164,7 @@ def bulk_load(session, loadfn, keys, size=100, results=None):
 
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, loadfn, keys, size):
+    for key, info in _bulk_load(session, loadfn, keys, err, size):
         results[key] = info
 
     return results
@@ -184,9 +189,10 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
 
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.getBuild, nvrs, size):
-        if err and not info:
-            raise NoSuchBuild(key)
+    for key, info in _bulk_load(session, session.getBuild, nvrs, False, size):
+        if not info:
+            if err:
+                raise NoSuchBuild(key)
         else:
             results[key] = info
 
@@ -200,9 +206,10 @@ def bulk_load_tasks(session, task_ids, request=False,
 
     fn = partial(session.getTaskInfo, request=request)
 
-    for key, info in _bulk_load(session, fn, task_ids, size):
-        if err and not info:
-            raise NoSuchTask(key)
+    for key, info in _bulk_load(session, fn, task_ids, False, size):
+        if not info:
+            if err:
+                raise NoSuchTask(key)
         else:
             results[key] = info
 
@@ -210,11 +217,13 @@ def bulk_load_tasks(session, task_ids, request=False,
 
 
 def bulk_load_tags(session, tags, err=True, size=100, results=None):
+
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.getTag, tags, size):
-        if err and not info:
-            raise NoSuchTag(key)
+    for key, info in _bulk_load(session, session.getTag, tags, False, size):
+        if not info:
+            if err:
+                raise NoSuchTag(key)
         else:
             results[key] = info
 
@@ -237,7 +246,7 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, session.queryRPMSigs,
-                                rpm_ids, size):
+                                rpm_ids, True, size):
         results[key] = info
 
     return results
@@ -250,7 +259,7 @@ def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
 
     fn = lambda i: session.listArchives(componentBuildrootID=i, type=btype)
 
-    for key, info in _bulk_load(session, fn, buildroot_ids, size):
+    for key, info in _bulk_load(session, fn, buildroot_ids, True, size):
         results[key] = info
 
     return results
@@ -263,7 +272,7 @@ def bulk_load_buildroot_rpms(session, buildroot_ids,
 
     fn = lambda i: session.listRPMs(componentBuildrootID=i)
 
-    for key, info in _bulk_load(session, fn, buildroot_ids, size):
+    for key, info in _bulk_load(session, fn, buildroot_ids, True, size):
         results[key] = info
 
     return results
@@ -287,7 +296,7 @@ def bulk_load_build_archives(session, build_ids, btype=None,
 
     fn = lambda i: session.listArchives(buildID=i, type=btype)
 
-    for key, info in _bulk_load(session, fn, build_ids, size):
+    for key, info in _bulk_load(session, fn, build_ids, True, size):
         results[key] = info
 
     return results
@@ -309,7 +318,7 @@ def bulk_load_build_rpms(session, build_ids, size=100, results=None):
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, session.listRPMs,
-                                build_ids, size):
+                                build_ids, True, size):
         results[key] = info
 
     return results
@@ -331,7 +340,7 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
     results = OrderedDict() if results is None else results
 
     for key, info in _bulk_load(session, session.getBuildroot,
-                                broot_ids, size):
+                                broot_ids, True, size):
         results[key] = info
 
     return results

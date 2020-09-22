@@ -48,7 +48,7 @@ class TestBulkLoad(TestCase):
         ]
 
         x = _bulk_load(self.session, self.session.ImpossibleDream,
-                       range(0, 25), size=5)
+                       range(0, 25), True, size=5)
         x = list(x)
 
         self.assertEqual(x, list(zip(range(0, 25), range(100, 125))))
