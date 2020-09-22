@@ -485,7 +485,7 @@ class SetRPMMacro(TagSmokyDingo):
                help="Name of the macro")
 
         addarg("value", action="store", nargs="?", default="%nil",
-               help="Value of the macro. Default: %nil")
+               help="Value of the macro. Default: %%nil")
 
         addarg("--target", action="store_true", default=False,
                help="Specify by target rather than a tag")
