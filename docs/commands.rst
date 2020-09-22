@@ -1,12 +1,12 @@
-Koji Smoky Dingo Commands
-=========================
+Plugin Commands
+===============
 
 Koji Smoky Dingo provides a number of additional commands to the
 koji CLI.
 
 
-Informational Commands
-----------------------
+Informational
+-------------
 
 These read-only commands gather and display information from Koji, and
 do not require any special permissions to run.
@@ -29,8 +29,8 @@ do not require any special permissions to run.
    commands/userinfo
 
 
-Administrative Commands
------------------------
+Administrative
+--------------
 
 These commands modify aspects of Koji and are subsequently gated
 behind some level of administrative permission.

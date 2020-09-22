@@ -1,7 +1,9 @@
 koji latest-archives
 ====================
 
-.. parsed-literal::
+.. highlight:: none
+
+::
 
  usage: koji latest-archives [-h] [--json] [--urls]
                              [--build-type TYPE | --rpm | --maven | --image | --win]

@@ -1,11 +1,12 @@
 Koji Smoky Dingo
 ================
 
-Contents:
+Documentation Index Table of Contents
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    overview
+   commands
    kojismokydingo
    kojismokydingo/cli

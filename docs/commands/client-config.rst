@@ -1,7 +1,9 @@
 koji client-config
 ==================
 
-.. parsed-literal::
+.. highlight:: none
+
+::
 
  usage: koji client-config [-h] [--quiet | --json | --cfg]
                            [SETTING [SETTING ...]]

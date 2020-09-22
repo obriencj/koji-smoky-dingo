@@ -1,13 +1,15 @@
 koji check-hosts
 ================
 
-.. parsed-literal::
+.. highlight:: none
+
+::
 
  usage: koji check-hosts [-h] [--timeout TIMEOUT] [--channel CHANNEL]
                          [--arch ARCHES] [--ignore IGNORE]
                          [--ignore-file IGNORE_FILE] [-q] [-s]
 
- Show enabled builders which aren\'t checking in
+ Show enabled builders which aren't checking in
 
  optional arguments:
    -h, --help            show this help message and exit
