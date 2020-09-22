@@ -166,6 +166,13 @@ Koji Smoky Dingo
 - fix datetime issues in 'check-hosts'
 - add new parse_datetime function in common
 - explicitly deactivate plugin command sessions 'SmokyDingo.deactivate'
+- refactored how plugin commands populate parser arguments
+- augmented the input logic for filter-builds, bulk-tag-builds, and
+  list-component-builds to read from args or stdin as appropriate
+- added state filtering to BuildFilter and to the filter-builds and
+  list-component-builds commands
+- fixed logic bug with bulk_load and related functions over error
+  handling
 
 * Fri Sep 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-1
 - Begin bumping micro for PRs as we work towards version 1.0.0
