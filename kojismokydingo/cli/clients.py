@@ -74,8 +74,7 @@ class ClientConfig(AnonSmokyDingo):
     description = "Show client profile settings"
 
 
-    def parser(self):
-        parser = super(ClientConfig, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("only", nargs="*", default=(),

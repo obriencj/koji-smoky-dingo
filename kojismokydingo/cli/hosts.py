@@ -79,9 +79,8 @@ class CheckHosts(AnonSmokyDingo):
     description = "Show enabled builders which aren't checking in"
 
 
-    def parser(self):
-        argp = super(CheckHosts, self).parser()
-        addarg = argp.add_argument
+    def arguments(self, parser):
+        addarg = parser.add_argument
 
         addarg("--timeout", action="store", default=60, type=int,
                help="Timeout in minutes before builder is considered"
@@ -110,7 +109,7 @@ class CheckHosts(AnonSmokyDingo):
                help="Only print summary when 1 or more builders are failing"
                " to check in (cron-job friendly)")
 
-        return argp
+        return parser
 
 
     def handle(self, options):

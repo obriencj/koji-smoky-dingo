@@ -102,9 +102,8 @@ class AffectedTargets(AnonSmokyDingo):
     description = "Show targets impacted by changes to the given tag(s)"
 
 
-    def parser(self):
-        argp = super(AffectedTargets, self).parser()
-        addarg = argp.add_argument
+    def arguments(self, parser):
+        addarg = parser.add_argument
 
         addarg("tags", nargs="+", metavar="TAGNAME",
                help="Tag to check")
@@ -112,7 +111,7 @@ class AffectedTargets(AnonSmokyDingo):
         addarg("-q", "--quiet", action="store_true", default=None,
                help="Don't print summary information")
 
-        group = argp.add_mutually_exclusive_group()
+        group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument
 
         addarg("-i", "--info", action="store_true", default=False,
@@ -121,7 +120,7 @@ class AffectedTargets(AnonSmokyDingo):
         addarg("-b", "--build-tags", action="store_true", default=False,
                help="Print build tag names rather than target names")
 
-        return argp
+        return parser
 
 
     def handle(self, options):
@@ -162,9 +161,8 @@ class RenumTagInheritance(TagSmokyDingo):
                   " preserving order"
 
 
-    def parser(self):
-        argp = super(RenumTagInheritance, self).parser()
-        addarg = argp.add_argument
+    def arguments(self, parser):
+        addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
                help="Tag to renumber")
@@ -184,7 +182,7 @@ class RenumTagInheritance(TagSmokyDingo):
                help="Priority increment for each subsequent"
                " inheritance link after the first (default: 10)")
 
-        return argp
+        return parser
 
 
     def validate(self, parser, options):
@@ -293,15 +291,7 @@ class SwapTagInheritance(TagSmokyDingo):
     description = "Swap a tag's inheritance"
 
 
-    def parser(self):
-        """
-        Swaps TAG's inheritance from OLD_PARENT to NEW_PARENT, preserving
-        priority. If NEW_PARENT was already in the inheritance of TAG,
-        OLD_PARENT will be put in its place, effectively exchanging
-        the two parent priorities.
-        """
-
-        parser = super(SwapTagInheritance, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -362,8 +352,7 @@ class ListRPMMacros(AnonSmokyDingo):
     description = "Show RPM Macros for a tag"
 
 
-    def parser(self):
-        parser = super(ListRPMMacros, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -422,8 +411,7 @@ class UnsetRPMMacro(TagSmokyDingo):
     description = "Unset an RPM Macro on a tag"
 
 
-    def parser(self):
-        parser = super(UnsetRPMMacro, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -474,8 +462,7 @@ class SetRPMMacro(TagSmokyDingo):
     description = "Set an RPM Macro on a tag"
 
 
-    def parser(self):
-        parser = super(SetRPMMacro, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -522,8 +509,7 @@ class UnsetEnvVar(TagSmokyDingo):
     description = "Unset a mock environment variable on a tag"
 
 
-    def parser(self):
-        parser = super(UnsetEnvVar, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -562,8 +548,7 @@ class SetEnvVar(TagSmokyDingo):
     description = "Set a mock environment variable on a tag"
 
 
-    def parser(self):
-        parser = super(SetEnvVar, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -626,8 +611,7 @@ class ListEnvVars(AnonSmokyDingo):
     description = "Show mock environment variables for a tag"
 
 
-    def parser(self):
-        parser = super(ListEnvVars, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
@@ -682,8 +666,7 @@ class ListTagExtras(AnonSmokyDingo):
     description = "Show extra settings for a tag"
 
 
-    def parser(self):
-        parser = super(ListTagExtras, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
