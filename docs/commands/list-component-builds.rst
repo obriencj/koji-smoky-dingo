@@ -1,23 +1,24 @@
-koji filter-builds
-==================
-
+koji list-component-builds
+==========================
 
 .. highlight:: none
 
 ::
 
- usage: koji filter-builds [-h] [--lookaside LOOKASIDE]
-                           [--shallow-lookaside SHALLOW_LOOKASIDE]
-                           [--limit LIMIT] [--shallow-limit SHALLOW_LIMIT]
-                           [--type BTYPES] [-c CG_NAME]
-                           [--imports | --no-imports] [-f NVR_FILE] [--tag TAG]
-                           [--inherit] [--latest] [--nvr-sort | --id-sort]
-                           [nvr [nvr ...]]
+ usage: koji list-component-builds [-h] [--lookaside LOOKASIDE]
+                                   [--shallow-lookaside SHALLOW_LOOKASIDE]
+                                   [--limit LIMIT]
+                                   [--shallow-limit SHALLOW_LIMIT]
+                                   [--type BTYPES] [-c CG_NAME]
+                                   [--imports | --no-imports] [-f NVR_FILE]
+                                   [--tag TAG] [--inherit] [--latest]
+                                   [--nvr-sort | --id-sort]
+                                   [nvr [nvr ...]]
 
- Filter a list of NVRs by various criteria
+ List a build's component dependencies
 
  positional arguments:
-   nvr
+   nvr                   Build NVR to list components of
 
  optional arguments:
    -h, --help            show this help message and exit
@@ -45,25 +46,21 @@ koji filter-builds
    --imports             Limit to imported builds
    --no-imports          Invert the imports checking
 
- Working from tagged builds:
-   --tag TAG             Filter using the builds in this tag
+ Components of tagged builds:
+   --tag TAG             Look for components of builds in this tag
    --inherit             Follow inheritance
    --latest              Limit to latest builds
 
- Sorting of output builds:
+ Sorting of builds:
    --nvr-sort            Sort output by NVR in ascending order
    --id-sort             Sort output by Build ID in ascending order
 
 
-Given a list of NVRs, output only those which match a set of filtering
-parameters.
-
-The NVR list can also come from the contents of a tag.
+This command identifies the builds used to produce another build.
 
 
 References
 ----------
 
-* :py:obj:`kojismokydingo.builds.BuildFilter`
-* :py:obj:`kojismokydingo.cli.builds.FilterBuilds`
-* :py:func:`kojismokydingo.cli.builds.cli_filter_builds`
+* :py:obj:`kojismokydingo.cli.builds.ListComponents`
+* :py:func:`kojismokydingo.cli.builds.cli_list_components`

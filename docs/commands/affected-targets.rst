@@ -2,6 +2,7 @@ koji affected-targets
 =====================
 
 .. highlight:: none
+
 ::
 
  usage: koji affected-targets [-h] [-q] [-i | -b] TAGNAME [TAGNAME ...]

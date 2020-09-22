@@ -118,7 +118,6 @@ deploy-docs: stage-docs
 
 clean-docs:
 	@rm -rf build/sphinx/*
-	@make -C docs clean
 
 
 .PHONY: all archive clean default docs deploy-docs overview packaging-build packaging-test rpm srpm stage-docs test

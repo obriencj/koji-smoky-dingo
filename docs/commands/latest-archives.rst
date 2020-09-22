@@ -2,6 +2,7 @@ koji latest-archives
 ====================
 
 .. highlight:: none
+
 ::
 
  usage: koji latest-archives [-h] [--json] [--urls]

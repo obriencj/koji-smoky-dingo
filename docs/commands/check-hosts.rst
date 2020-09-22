@@ -2,6 +2,7 @@ koji check-hosts
 ================
 
 .. highlight:: none
+
 ::
 
  usage: koji check-hosts [-h] [--timeout TIMEOUT] [--channel CHANNEL]

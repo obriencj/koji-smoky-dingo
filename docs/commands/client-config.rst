@@ -2,6 +2,7 @@ koji client-config
 ==================
 
 .. highlight:: none
+
 ::
 
  usage: koji client-config [-h] [--quiet | --json | --cfg]
