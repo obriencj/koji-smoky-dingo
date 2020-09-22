@@ -1,12 +1,12 @@
 
 %global srcname kojismokydingo
-%global srcver 0.9.1
+%global srcver 0.9.2
 
 
 Summary: Koji Smoky Dingo
 Name: %{srcname}
 Version: %{srcver}
-Release: 1%{?dist}
+Release: 0%{?dist}
 License: GPLv3
 Group: Devel
 URL: https://github.com/obriencj/koji-smoky-dingo
@@ -161,6 +161,11 @@ Koji Smoky Dingo
 
 
 %changelog
+* Mon Sep 22 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-0
+- fix issue with 'set-rpm-macro --help'
+- fix datetime issues in 'check-hosts'
+- add new parse_datetime function in common
+- explicitly deactivate plugin command sessions 'SmokyDingo.deactivate'
 
 * Fri Sep 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-1
 - Begin bumping micro for PRs as we work towards version 1.0.0

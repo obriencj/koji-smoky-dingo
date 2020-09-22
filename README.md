@@ -84,7 +84,7 @@ included spec to produce an RPM and install that.
 
 ```bash
 make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-0.9.1-1.fc32.noarch.rpm
+dnf install dist/noarch/python3-kojismokydingo-0.9.2-1.fc32.noarch.rpm
 ```
 
 Using traditional setuptools or pip installation methods can also
@@ -96,11 +96,11 @@ sudo python setup.py clean build install --root=/
 
 # Python 2.7 global install
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-0.9.1-py2-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-0.9.2-py2-none-any.whl
 
 # Python 3 global install
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-0.9.1-py3-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-0.9.2-py3-none-any.whl
 ```
 
 However, if you only want the plugin available for yourself, you can
@@ -110,7 +110,7 @@ install it anywhere and tell koji to look in that particular
 ```bash
 # Python 3 user install
 python3 setup.py bdist_wheel
-pip3 install --user -I dist/kojismokydingo-0.9.1-py3-none-any.whl
+pip3 install --user -I dist/kojismokydingo-0.9.2-py3-none-any.whl
 ```
 
 And the following setting in ~/.koji/config assuming Python version
