@@ -19,6 +19,10 @@ koji list-tag-extras
    --json       Output as JSON
 
 
+Provides a list of tag extra settings, displaying the name and value
+and the tag which provided the setting.
+
+
 References
 ----------
 
