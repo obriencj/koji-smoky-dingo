@@ -325,7 +325,8 @@ class BuildFiltering():
                            lookaside_tag_ids=lookaside_ids,
                            imported=options.imported,
                            cg_list=options.cg_list,
-                           btypes=options.btypes)
+                           btypes=options.btypes,
+                           state=options.state)
 
 
 def cli_list_components(session, nvr_list,

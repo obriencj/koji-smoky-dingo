@@ -862,7 +862,7 @@ class BuildFilter(object):
 
 
     def filter_by_state(self, build_infos):
-        if self._state:
+        if self._state is not None:
             build_infos = filter_by_state(build_infos, self._state)
 
         return build_infos
