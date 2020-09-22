@@ -5,10 +5,9 @@ koji latest-archives
 
 ::
 
- usage: koji latest-archives [-h] [--json] [--urls]
+ usage: koji latest-archives [-h] [--noinherit] [--json] [--urls]
                              [--build-type TYPE | --rpm | --maven | --image | --win]
                              [--archive-type EXT] [--key KEY] [--unsigned]
-                             [--noinherit]
                              TAGNAME
 
  List latest archives from a tag
@@ -18,10 +17,10 @@ koji latest-archives
 
  optional arguments:
    -h, --help            show this help message and exit
+   --noinherit           Do not follow inheritance
    --json                Output archive information as JSON
    --urls, -U            Present archives as URLs using the configured topurl.
                          Default: use the configured topdir
-   --noinherit           Do not follow inheritance
 
  Build Filtering Options:
    --build-type TYPE     Only show archives for the given build type. Example

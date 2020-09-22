@@ -76,7 +76,7 @@ class ArchiveDingo(AnonSmokyDingo):
     group = "info"
 
 
-    def arguments(self, parser):
+    def archive_arguments(self, parser):
         goptions = self.goptions
 
         addarg = parser.add_argument
@@ -161,6 +161,7 @@ class ListBuildArchives(ArchiveDingo):
         addarg("nvr", metavar="NVR",
                help="The NVR containing the archives")
 
+        parser = self.archive_arguments(parser)
         return parser
 
 
@@ -188,6 +189,7 @@ class LatestArchives(ArchiveDingo):
                dest="inherit", default=True,
                help="Do not follow inheritance")
 
+        parser = self.archive_arguments(parser)
         return parser
 
 
