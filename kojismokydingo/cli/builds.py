@@ -173,9 +173,8 @@ class BulkTagBuilds(TagSmokyDingo):
     description = "Quickly tag a large number of builds"
 
 
-    def parser(self):
-        argp = super(BulkTagBuilds, self).parser()
-        addarg = argp.add_argument
+    def arguments(self, parser):
+        addarg = parser.add_argument
 
         addarg("tag", action="store", metavar="TAGNAME",
                help="Tag to associate builds with")
@@ -205,7 +204,7 @@ class BulkTagBuilds(TagSmokyDingo):
         addarg("--notify", action="store_true", default=False,
                help="Send tagging notifications.")
 
-        group = argp.add_argument_group("Tagging order of builds")
+        group = parser.add_argument_group("Tagging order of builds")
         group = group.add_mutually_exclusive_group()
         addarg = group.add_argument
 
@@ -219,7 +218,7 @@ class BulkTagBuilds(TagSmokyDingo):
                help="pre-sort build list by build ID, so most recently"
                " completed build is tagged last")
 
-        return argp
+        return parser
 
 
     def handle(self, options):
@@ -235,11 +234,10 @@ class BulkTagBuilds(TagSmokyDingo):
                                    strict=options.strict)
 
 
-class BuildFiltering(AnonSmokyDingo):
+class BuildFiltering():
 
 
-    def parser(self):
-        parser = super(BuildFiltering, self).parser()
+    def filtering_arguments(self, parser):
 
         grp = parser.add_argument_group("Filtering by tag")
         addarg = grp.add_argument
@@ -365,13 +363,12 @@ def cli_list_components(session, nvr_list,
         print(binfo["nvr"])
 
 
-class ListComponents(BuildFiltering):
+class ListComponents(AnonSmokyDingo, BuildFiltering):
 
     description = "List a build's component dependencies"
 
 
-    def parser(self):
-        parser = super(ListComponents, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("nvr", nargs="*",
@@ -405,6 +402,9 @@ class ListComponents(BuildFiltering):
         addarg("--id-sort", action="store_const",
                dest="sorting", const=SORT_BY_ID, default=None,
                help="Sort output by Build ID in ascending order")
+
+        # additional build filtering arguments
+        parser = self.filtering_arguments(parser)
 
         return parser
 
@@ -468,13 +468,12 @@ def cli_filter_builds(session, nvr_list,
         print(binfo["nvr"])
 
 
-class FilterBuilds(BuildFiltering):
+class FilterBuilds(AnonSmokyDingo, BuildFiltering):
 
     description = "Filter a list of NVRs by various criteria"
 
 
-    def parser(self):
-        parser = super(FilterBuilds, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("nvr", nargs="*", default=[])
@@ -507,6 +506,9 @@ class FilterBuilds(BuildFiltering):
         addarg("--id-sort", action="store_const",
                dest="sorting", const=SORT_BY_ID, default=None,
                help="Sort output by Build ID in ascending order")
+
+        # additional build filtering arguments
+        parser = self.filtering_arguments(parser)
 
         return parser
 

@@ -5,14 +5,14 @@ koji list-component-builds
 
 ::
 
- usage: koji list-component-builds [-h] [--lookaside LOOKASIDE]
+ usage: koji list-component-builds [-h] [-f NVR_FILE] [--tag TAG] [--inherit]
+                                   [--latest] [--nvr-sort | --id-sort]
+                                   [--lookaside LOOKASIDE]
                                    [--shallow-lookaside SHALLOW_LOOKASIDE]
                                    [--limit LIMIT]
                                    [--shallow-limit SHALLOW_LIMIT]
                                    [--type BTYPES] [-c CG_NAME]
-                                   [--imports | --no-imports] [-f NVR_FILE]
-                                   [--tag TAG] [--inherit] [--latest]
-                                   [--nvr-sort | --id-sort]
+                                   [--imports | --no-imports]
                                    [nvr [nvr ...]]
 
  List a build's component dependencies
@@ -25,6 +25,15 @@ koji list-component-builds
    -f NVR_FILE, --file NVR_FILE
                          Read list of builds from file, one NVR per line.
                          Specify - to read from stdin.
+
+ Components of tagged builds:
+   --tag TAG             Look for components of builds in this tag
+   --inherit             Follow inheritance
+   --latest              Limit to latest builds
+
+ Sorting of builds:
+   --nvr-sort            Sort output by NVR in ascending order
+   --id-sort             Sort output by Build ID in ascending order
 
  Filtering by tag:
    --lookaside LOOKASIDE
@@ -45,15 +54,6 @@ koji list-component-builds
                          once.
    --imports             Limit to imported builds
    --no-imports          Invert the imports checking
-
- Components of tagged builds:
-   --tag TAG             Look for components of builds in this tag
-   --inherit             Follow inheritance
-   --latest              Limit to latest builds
-
- Sorting of builds:
-   --nvr-sort            Sort output by NVR in ascending order
-   --id-sort             Sort output by Build ID in ascending order
 
 
 This command identifies the builds used to produce another build.

@@ -6,12 +6,13 @@ koji filter-builds
 
 ::
 
- usage: koji filter-builds [-h] [--lookaside LOOKASIDE]
+ usage: koji filter-builds [-h] [-f NVR_FILE] [--tag TAG] [--inherit]
+                           [--latest] [--nvr-sort | --id-sort]
+                           [--lookaside LOOKASIDE]
                            [--shallow-lookaside SHALLOW_LOOKASIDE]
                            [--limit LIMIT] [--shallow-limit SHALLOW_LIMIT]
                            [--type BTYPES] [-c CG_NAME]
-                           [--imports | --no-imports] [-f NVR_FILE] [--tag TAG]
-                           [--inherit] [--latest] [--nvr-sort | --id-sort]
+                           [--imports | --no-imports]
                            [nvr [nvr ...]]
 
  Filter a list of NVRs by various criteria
@@ -24,6 +25,15 @@ koji filter-builds
    -f NVR_FILE, --file NVR_FILE
                          Read list of builds from file, one NVR per line.
                          Specify - to read from stdin.
+
+ Working from tagged builds:
+   --tag TAG             Filter using the builds in this tag
+   --inherit             Follow inheritance
+   --latest              Limit to latest builds
+
+ Sorting of output builds:
+   --nvr-sort            Sort output by NVR in ascending order
+   --id-sort             Sort output by Build ID in ascending order
 
  Filtering by tag:
    --lookaside LOOKASIDE
@@ -44,15 +54,6 @@ koji filter-builds
                          once.
    --imports             Limit to imported builds
    --no-imports          Invert the imports checking
-
- Working from tagged builds:
-   --tag TAG             Filter using the builds in this tag
-   --inherit             Follow inheritance
-   --latest              Limit to latest builds
-
- Sorting of output builds:
-   --nvr-sort            Sort output by NVR in ascending order
-   --id-sort             Sort output by Build ID in ascending order
 
 
 Given a list of NVRs, output only those which match a set of filtering

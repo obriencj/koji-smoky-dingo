@@ -76,10 +76,8 @@ class ArchiveDingo(AnonSmokyDingo):
     group = "info"
 
 
-    def parser(self):
+    def arguments(self, parser):
         goptions = self.goptions
-
-        parser = super(ArchiveDingo, self).parser()
 
         addarg = parser.add_argument
         addarg("--json", action="store_true", default=False,
@@ -157,8 +155,7 @@ class ListBuildArchives(ArchiveDingo):
     description = "List archives from a build"
 
 
-    def parser(self):
-        parser = super(ListBuildArchives, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("nvr", metavar="NVR",
@@ -181,8 +178,7 @@ class LatestArchives(ArchiveDingo):
     description = "List latest archives from a tag"
 
 
-    def parser(self):
-        parser = super(LatestArchives, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("tag", metavar="TAGNAME",

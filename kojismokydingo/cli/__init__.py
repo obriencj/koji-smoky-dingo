@@ -283,8 +283,9 @@ class SmokyDingo(object):
     * if the sub-command is invoked, then the `SmokyDingo` instance is
       called, this triggers the following:
 
-      * the `SmokyDingo.parser` method provides additional argument
-        parsing
+      * the `SmokyDingo.parser` method provides an ArgumentParser
+        instance which it then decorates with arguments by passing it
+        to `SmokyDingo.arguments`
 
       * the `SmokyDingo.validate` method provides a chance to validate
         and/or manipulate the parsed arguments
@@ -334,13 +335,18 @@ class SmokyDingo(object):
 
 
     def parser(self):
+        invoke = " ".join((basename(sys.argv[0]), self.name))
+        argp = ArgumentParser(prog=invoke, description=self.description)
+        return self.arguments(argp) or argp
+
+
+    def arguments(self, parser):
         """
-        Override to provide an ArgumentParser instance with all the
-        relevant positional arguments and options added.
+        Override to add relevant arguments to the given parser instance.
+        May return an alternative parser instance or None.
         """
 
-        invoke = " ".join((basename(sys.argv[0]), self.name))
-        return ArgumentParser(prog=invoke, description=self.description)
+        pass
 
 
     def validate(self, parser, options):

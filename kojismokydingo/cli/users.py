@@ -97,8 +97,7 @@ class UserInfo(AnonSmokyDingo):
     description = "Show information about a user"
 
 
-    def parser(self):
-        parser = super(UserInfo, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("user", action="store", metavar="USER",
@@ -145,8 +144,7 @@ class PermissionInfo(AnonSmokyDingo):
     description = "Show information about a permission"
 
 
-    def parser(self):
-        parser = super(PermissionInfo, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("permission", action="store", metavar="PERMISSION",
@@ -196,8 +194,7 @@ class ListCGs(AnonSmokyDingo):
     description = "List content generators and their users"
 
 
-    def parser(self):
-        parser = super(ListCGs, self).parser()
+    def arguments(self, parser):
         addarg = parser.add_argument
 
         addarg("--name", action="store", default=None,
