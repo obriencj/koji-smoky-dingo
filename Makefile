@@ -18,11 +18,11 @@ PYTHON ?= $(shell which python3 python2 python 2>/dev/null \
 ORIGIN_PUSH = $(shell git remote get-url --push origin)
 
 
-default: build
+default: quick-test
 
 
 build: clean
-	@$(PYTHON) setup.py clean flake8 bdist_wheel
+	@$(PYTHON) setup.py flake8 bdist_wheel
 
 
 install: build
@@ -53,6 +53,10 @@ packaging-test: packaging-build
 
 test: clean
 	@tox
+
+
+quick-test: clean
+	@$(PYTHON) -B setup.py flake8 build test
 
 
 srpm: $(ARCHIVE)
