@@ -19,7 +19,7 @@ koji set-env-var
    --target    Specify by target rather than a tag
 
 
-This permission requires either the ``admin`` or ``tag`` permission,
+This command requires either the ``admin`` or ``tag`` permission,
 as it modifies tag configuration data.
 
 See also :ref:`koji list-env-vars`, :ref:`koji unset-env-var`
