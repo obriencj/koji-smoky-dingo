@@ -1,5 +1,5 @@
-Package kojismokydingo Contents
-===============================
+Core API Reference
+==================
 
 .. automodule:: kojismokydingo
     :members:
@@ -7,11 +7,11 @@ Package kojismokydingo Contents
     :show-inheritance:
 
 
-Submodules
-----------
+Core Modules
+------------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    kojismokydingo/archives
    kojismokydingo/builds

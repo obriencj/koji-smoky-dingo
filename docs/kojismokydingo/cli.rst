@@ -1,5 +1,5 @@
-Package kojismokydingo.cli Contents
-===================================
+CLI API Reference
+=================
 
 .. automodule:: kojismokydingo.cli
     :members:
@@ -7,11 +7,11 @@ Package kojismokydingo.cli Contents
     :show-inheritance:
 
 
-Submodules
-----------
+CLI Modules
+-----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    cli/archives
    cli/builds
