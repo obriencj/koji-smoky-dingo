@@ -29,6 +29,7 @@ import sys
 
 from functools import partial
 from itertools import chain
+from operator import itemgetter
 from six import itervalues
 
 from . import (
@@ -572,6 +573,66 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
                                  inherit=options.inherit,
                                  latest=options.latest,
                                  sorting=options.sorting)
+
+
+def cli_list_btypes(session, nvr=None, json=False, quiet=False):
+
+    btypes = dict((bt["id"], bt) for bt in session.listBTypes())
+
+    if nvr:
+        build = as_buildinfo(session, nvr)
+        decorate_build_archive_data(session, [build], False)
+        build_bts = build["archive_btype_ids"]
+
+        for btid in list(btypes):
+            if btid not in build_bts:
+                btypes.pop(btid)
+
+    btypes = sorted(itervalues(btypes), key=itemgetter("id"))
+
+    if json:
+        pretty_json(btypes)
+        return
+
+    if quiet:
+        fmt = "{name}".format
+
+    else:
+        fmt = "  {name} [{id}]".format
+        if nvr:
+            print("Build Types for {nvr} [{id}]".format(**build))
+        else:
+            print("Build Types")
+
+    for bt in btypes:
+        print(fmt(**bt))
+
+
+class ListBTypes(AnonSmokyDingo):
+
+    description = "List BTypes"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("--build", action="store", default=None,
+               metavar="NVR", help="List the BTypes in a given build")
+
+        addarg("--json", action="store_true", default=False,
+               help="Output as JSON")
+
+        addarg("--quiet", "-q", action="store_true", default=False,
+               help="Output just the BType names")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_list_btypes(self.session,
+                               nvr=options.build,
+                               json=options.json,
+                               quiet=options.quiet)
 
 
 #

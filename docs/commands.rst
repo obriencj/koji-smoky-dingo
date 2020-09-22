@@ -19,6 +19,7 @@ do not require any special permissions to run.
    commands/client-config
    commands/filter-builds
    commands/latest-archives
+   commands/list-btypes
    commands/list-build-archives
    commands/list-cgs
    commands/list-component-builds

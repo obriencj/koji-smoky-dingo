@@ -51,6 +51,7 @@ COMMANDS = {
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
     "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",
     "latest-archives": "kojismokydingo.cli.archives:LatestArchives",
+    "list-btypes": "kojismokydingo.cli.builds:ListBTypes",
     "list-build-archives": "kojismokydingo.cli.archives:ListBuildArchives",
     "list-cgs": "kojismokydingo.cli.users:ListCGs",
     "list-component-builds": "kojismokydingo.cli.builds:ListComponents",

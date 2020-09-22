@@ -59,6 +59,7 @@ permissions in koji.
 |`client-config` |Show settings for client profiles |
 |`filter-builds` |Filter a list of NVRs by various criteria |
 |`latest-archives` |Show selected latest archives from a tag |
+|`list-btypes` |Show available BTypes |
 |`list-build-archives` |Show selected archives attached to a build |
 |`list-cgs` |Show content generators and their permitted users |
 |`list-component-builds` |Show builds which were used to produce others |

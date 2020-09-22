@@ -83,6 +83,8 @@ permissions in koji.
 | ``latest-archives``        | Show selected latest archives from a    |
 |                            | tag                                     |
 +----------------------------+-----------------------------------------+
+| ``list-btypes``            | Show available BTypes                   |
++----------------------------+-----------------------------------------+
 | ``list-build-archives``    | Show selected archives attached to a    |
 |                            | build                                   |
 +----------------------------+-----------------------------------------+
