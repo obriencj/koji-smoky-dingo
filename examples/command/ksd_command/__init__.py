@@ -1,4 +1,21 @@
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
 
+
+"""
+An example project that uses Koji Smoky Dingo to add new commands
+to Koji
+"""
 
 
 from __future__ import print_function
@@ -45,12 +62,9 @@ class WhoAmI(SmokyDingo):
     permission = None
 
 
-    def parser(self):
-        # if you're certain your commands will only be used on Python
-        # 3, feel free to use the more modern form of super(). But if
-        # you're going to support older hosts that run Python 2, gotta
-        # do it this way.
-        parser = super(WhoAmI, self).parser()
+    def arguments(self, parser):
+        # use this method to decorate the default ArgumentParser instance
+        # with more arguments
 
         parser.add_argument("--json", action="store_true", default=False,
                             help="Output as JSON")
