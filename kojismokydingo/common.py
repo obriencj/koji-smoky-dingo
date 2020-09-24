@@ -43,7 +43,7 @@ except ImportError:
 
 __all__ = (
     "chunkseq", "fnmatches", "globfilter", "merge_extend",
-    "rpm_evr_compare", "unique", "update_extend",
+    "parse_datetime", "rpm_evr_compare", "unique", "update_extend",
 )
 
 
@@ -345,15 +345,15 @@ DATETIME_FORMATS = (
     (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} .{3}$"),
      lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S.%f %Z")),
 
-    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} .{3}$"),
-     lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S %Z")),
-
     (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{4}$"),
      lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S.%f%z")),
 
     (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{2}:\d{2}$"),
      lambda d: datetime.strptime("".join(d.rsplit(":", 1)),
                                  "%Y-%m-%d %H:%M:%S.%f%z")),
+
+    (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} .{3}$"),
+     lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S %Z")),
 
     (re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[+-]\d{4}$"),
      lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S%z")),
@@ -389,8 +389,8 @@ def parse_datetime(src):
 
     Supported formats:
      - %Y-%m-%d %H:%M:%S.%f %Z
-     - %Y-%m-%d %H:%M:%S %Z
      - %Y-%m-%d %H:%M:%S.%f%z
+     - %Y-%m-%d %H:%M:%S %Z
      - %Y-%m-%d %H:%M:%S%z
      - %Y-%m-%d %H:%M:%S
      - %Y-%m-%d %H:%M
