@@ -1,7 +1,7 @@
 
 %global srcname kojismokydingo
-%global srcver 0.9.2
-%global srcrel 1
+%global srcver 0.9.3
+%global srcrel 0
 
 
 Summary: Koji Smoky Dingo
@@ -162,6 +162,8 @@ Koji Smoky Dingo
 
 
 %changelog
+* Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-0
+
 * Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-1
 - fix issue with 'set-rpm-macro --help'
 - fix datetime issues in check-hosts
