@@ -161,7 +161,7 @@ Koji Smoky Dingo
 
 
 %changelog
-* Tue Sep 22 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-0
+* Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-0
 - fix issue with 'set-rpm-macro --help'
 - fix datetime issues in 'check-hosts'
 - add new parse_datetime function in common
@@ -173,6 +173,8 @@ Koji Smoky Dingo
   list-component-builds commands
 - fixed logic bug with bulk_load and related functions over error
   handling
+- ManagedClientSession no longer loads configuration from a profile
+- added ProfileClientSession
 
 * Fri Sep 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-1
 - Begin bumping micro for PRs as we work towards version 1.0.0
