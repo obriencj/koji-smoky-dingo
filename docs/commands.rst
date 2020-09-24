@@ -15,6 +15,7 @@ do not require any special permissions to run.
    :maxdepth: 1
 
    commands/affected-targets
+   commands/cginfo
    commands/check-hosts
    commands/client-config
    commands/filter-builds

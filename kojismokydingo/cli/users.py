@@ -169,7 +169,7 @@ class PermissionInfo(AnonSmokyDingo):
                             json=options.json)
 
 
-def cli_list_cgs(session, name=None, json=False):
+def cli_cginfo(session, name=None, json=False):
 
     cgs = collect_cgs(session, name=name)
 
@@ -189,7 +189,7 @@ def cli_list_cgs(session, name=None, json=False):
         print()
 
 
-class ListCGs(AnonSmokyDingo):
+class CGInfo(AnonSmokyDingo):
 
     description = "List content generators and their users"
 
@@ -207,9 +207,9 @@ class ListCGs(AnonSmokyDingo):
 
 
     def handle(self, options):
-        return cli_list_cgs(self.session,
-                            name=options.name,
-                            json=options.json)
+        return cli_cginfo(self.session,
+                          name=options.name,
+                          json=options.json)
 
 
 #

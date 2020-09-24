@@ -30,7 +30,7 @@ import sys
 from functools import partial
 from itertools import chain
 from operator import itemgetter
-from six import itervalues
+from six import iteritems, itervalues
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
@@ -633,6 +633,71 @@ class ListBTypes(AnonSmokyDingo):
                                nvr=options.build,
                                json=options.json,
                                quiet=options.quiet)
+
+
+def cli_list_cgs(session, nvr=None, json=False, quiet=False):
+
+    cgs = {}
+    for name, cg in iteritems(session.listCGs()):
+        cg["name"] = name
+        cg.pop("users")
+        cgs[cg["id"]] = cg
+
+    if nvr:
+        build = as_buildinfo(session, nvr)
+        decorate_build_archive_data(session, [build], True)
+        build_cgs = build["archive_cg_ids"]
+
+        for cgid in list(cgs):
+            if cgid not in build_cgs:
+                cgs.pop(cgid)
+
+    cgs = sorted(itervalues(cgs), key=itemgetter("id"))
+
+    if json:
+        pretty_json(cgs)
+        return
+
+    if quiet:
+        fmt = "{name}".format
+
+    else:
+        fmt = "  {name} [{id}]".format
+        if nvr:
+            print("Content Generators for {nvr} [{id}]".format(**build))
+        else:
+            print("Content Generators")
+
+    for cg in cgs:
+        print(fmt(**cg))
+
+
+class ListCGs(AnonSmokyDingo):
+
+    description = "List Content Generators"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("--build", action="store", default=None,
+               metavar="NVR", help="List the Content Generators"
+               " used to produce a given build")
+
+        addarg("--json", action="store_true", default=False,
+               help="Output as JSON")
+
+        addarg("--quiet", "-q", action="store_true", default=False,
+               help="Output just the CG names")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_list_cgs(self.session,
+                            nvr=options.build,
+                            json=options.json,
+                            quiet=options.quiet)
 
 
 #

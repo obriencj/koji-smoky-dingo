@@ -1,11 +1,11 @@
-koji list-cgs
-=============
+koji cginfo
+===========
 
 .. highlight:: none
 
 ::
 
- usage: koji list-cgs [-h] [--name NAME] [--json]
+ usage: koji cginfo [-h] [--name NAME] [--json]
 
  List content generators and their users
 
@@ -24,5 +24,5 @@ on behalf of that content generator.
 References
 ----------
 
-* :py:obj:`kojismokydingo.cli.users.ListCGs`
-* :py:func:`kojismokydingo.cli.users.cli_list_cgs`
+* :py:obj:`kojismokydingo.cli.users.CGInfo`
+* :py:func:`kojismokydingo.cli.users.cli_cginfo`
