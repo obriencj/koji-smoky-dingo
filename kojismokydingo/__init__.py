@@ -32,15 +32,10 @@ from .common import chunkseq
 
 class ManagedClientSession(ClientSession):
     """
-    A koji.ClientSession that can be used as via the 'with' keyword to
-    provide a managed session that will handle login and logout. Also
-    takes care of loading the relevant profile configuration.
+    A `koji.ClientSession` that can be used as via the ``with``
+    keyword to provide a managed session that will handle
+    authenticated login and logout.
     """
-
-    def __init__(self, profile="koji"):
-        conf = read_config(profile)
-        server = conf["server"]
-        super(ManagedClientSession, self).__init__(server, opts=conf)
 
     def __enter__(self):
         activate_session(self, self.opts)
@@ -54,11 +49,26 @@ class ManagedClientSession(ClientSession):
         return (exc_type is None)
 
 
-class AnonClientSession(ManagedClientSession):
+class ProfileClientSession(ManagedClientSession):
     """
-    A koji.ClientSession that can be used as via the 'with' keyword to
-    provide a managed session. Suitable for working with anonymous
-    commands which do not require authentication.
+    A `koji.ClientSession` which loads profile config information and
+    which can be used via tha ``with`` keyword.
+    """
+
+    def __init__(self, profile="koji", anon=False):
+        conf = read_config(profile)
+        server = conf["server"]
+        super(ProfileClientSession, self).__init__(server, opts=conf)
+
+
+class AnonClientSession(ProfileClientSession):
+    """
+    A `koji.ClientSession` which loads profile config information and
+    which can be used via the ``with`` keyword.
+
+    Suitable for working with anonymous commands which do not require
+    authentication. Does not authenticate, and will only connect
+    lazily.
     """
 
     def __enter__(self):
@@ -71,6 +81,16 @@ class AnonClientSession(ManagedClientSession):
 
 
 class BadDingo(Exception):
+    """
+    Generalized base class for exceptions raised from kojismokydingo.
+    This class and its subclasses are used to combine a fixed
+    complaint string with some specific information. This is a
+    convenience primarily for the CLI, but can also be used to track
+    more detailed situations where a requested data type wasn't
+    present on the koji hub, rather than just working with
+    `koji.GenericError`
+    """
+
     complaint = "Something bad happened"
 
     def __str__(self):
@@ -79,38 +99,75 @@ class BadDingo(Exception):
 
 
 class NoSuchBuild(BadDingo):
+    """
+    A build was not found
+    """
+
     complaint = "No such build"
 
 
 class NoSuchChannel(BadDingo):
+    """
+    A channel was not found
+    """
+
     complaint = "No such builder channel"
 
 
 class NoSuchContentGenerator(BadDingo):
+    """
+    A content generator was not found
+    """
+
     complaint = "No such content generator"
 
 
 class NoSuchTag(BadDingo):
+    """
+    A tag was not found
+    """
+
     complaint = "No such tag"
 
 
 class NoSuchTarget(BadDingo):
+    """
+    A target was not found
+    """
+
     complaint = "No such target"
 
 
 class NoSuchTask(BadDingo):
+    """
+    A task was not found
+    """
+
     complaint = "No such task"
 
 
 class NoSuchUser(BadDingo):
+    """
+    A user was not found
+    """
+
     complaint = "No such user"
 
 
 class NoSuchPermission(BadDingo):
+    """
+    A permission was not found
+    """
+
     complaint = "No such permission"
 
 
 class NotPermitted(BadDingo):
+    """
+    A required permission was not associated with the currently logged
+    in user account.
+    """
+
     complaint = "Insufficient permissions"
 
 
@@ -150,16 +207,49 @@ def _bulk_load(session, loadfn, keys, err, size):
 
 def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
     """
-    Generic bulk loading function, invokes the given loadfn on each
-    key in keys using chunking multicalls limited to the specified
+    Generic bulk loading function. Invokes the given `loadfn` on each
+    key in `keys` using chunking multicalls limited to the specified
     size.
 
-    Returns an OrderedDict associating the individual keys with the
-    returned value of loadfn.
+    Returns an `OrderedDict` associating the individual keys with the
+    returned value of loadfn. If `results` is specified, it must
+    support dict assignment, and will be used in place of a newly
+    allocated `OrderedDict` to store and return the results.
 
-    If results is non-None, it must support dict assignment, and will
-    be used in place of a newly allocated OrderedDict to store and
-    return the results.
+    :param session: The koji session
+
+    :type session: `koji.ClientSession`
+
+    :param loadfn: The loading function, to be invoked in a multicall
+      arrangement. Will be called once with each given key from `keys`
+
+    :type loadfn: Callable[[object], object]
+
+    :param keys: The sequence of keys to be used to invoke `loadfn`
+
+    :type keys: list[object]
+
+    :param err: Whether to raise any underlying fault returns as
+      exceptions. Default, True
+
+    :type err: bool, optional
+
+    :param size: How many calls to `loadfn` to chunk up for each
+      multicall. Default, 100
+
+    :type size: int, optional
+
+    :param results: storage for `loadfn` results. If specified, must
+      support item assignment (like a dict), and it will be populated
+      and then used as the return value for this function. Default, a
+      new `OrderedDict` will be allocated.
+
+    :type results: dict, optional
+
+    :raises koji.GenericError: if `err` is `True` and an issue
+      occurrs while invoking the `loadfn`
+
+    :rtype: dict[object, object]
     """
 
     results = OrderedDict() if results is None else results
@@ -347,6 +437,24 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
 
 
 def as_buildinfo(session, build):
+    """
+    Coerces a build value into a koji build info dict.
+
+    If build is an
+     * int, will attempt to load as a build ID
+     * str, will attempt to load as an NVR
+     * dict, will presume already a build info
+
+    :param build: value to lookup
+
+    :type build: int or str or dict
+
+    :raises NoSuchBuild: if the build value could not be resolved
+      into a build info dict
+
+    :rtype: dict
+    """
+
     if isinstance(build, (str, int)):
         info = session.getBuild(build)
     elif isinstance(build, dict):
@@ -361,6 +469,24 @@ def as_buildinfo(session, build):
 
 
 def as_taginfo(session, tag):
+    """
+    Coerces a tag value into a koji tag info dict.
+
+    If tag is an
+     * int, will attempt to load as a tag ID
+     * str, will attempt to load as a tag name
+     * dict, will presume already a tag info
+
+    :param tag: value to lookup
+
+    :type tag: int or str or dict
+
+    :raises NoSuchTag: if the tag value could not be resolved into a
+      tag info dict
+
+    :rtype: dict
+    """
+
     if isinstance(tag, (str, int)):
         info = session.getTag(tag)
     elif isinstance(tag, dict):
@@ -375,6 +501,24 @@ def as_taginfo(session, tag):
 
 
 def as_targetinfo(session, target):
+    """
+    Coerces a target value into a koji target info dict.
+
+    If target is an
+     * int, will attempt to load as a target ID
+     * str, will attempt to load as a target name
+     * dict, will presume already a target info
+
+    :param target: value to lookup
+
+    :type target: int or str or dict
+
+    :raises NoSuchTarget: if the target value could not be resolved
+      into a target info dict
+
+    :rtype: dict
+    """
+
     if isinstance(target, (str, int)):
         info = session.getBuildTarget(target)
     elif isinstance(target, dict):

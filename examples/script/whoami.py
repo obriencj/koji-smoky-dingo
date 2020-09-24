@@ -5,7 +5,7 @@ from __future__ import print_function
 
 from argparse import ArgumentParser
 from koji import GenericError
-from kojismokydingo import BadDingo, ManagedClientSession
+from kojismokydingo import BadDingo, ProfileClientSession
 from kojismokydingo.cli import pretty_json, printerr
 from kojismokydingo.cli.users import get_usertype_str, get_userstatus_str
 from kojismokydingo.users import collect_userinfo
@@ -33,7 +33,7 @@ def cli_argparser(progname):
 
 
 def cli_whoami(options):
-    with ManagedClientSession(options.profile) as session:
+    with ProfileClientSession(options.profile) as session:
         myinfo = session.getLoggedInUser()
         myinfo = collect_userinfo(session, myinfo)
 
