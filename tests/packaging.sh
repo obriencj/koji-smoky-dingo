@@ -43,10 +43,12 @@ function verify_koji_cli() {
     local EXPECTED=(
         affected-targets
         bulk-tag-builds
+        cginfo
         check-hosts
         client-config
         filter-builds
         latest-archives
+        list-btypes
         list-build-archives
         list-cgs
         list-component-builds
