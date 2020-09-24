@@ -117,11 +117,11 @@ stage-docs: docs pull-docs	## Builds docs and stages them in gh-pages
 deploy-docs: stage-docs	## Build, stage, and deploy docs to gh-pages
 	@pushd gh-pages ; \
 	git remote set-url --push origin $(ORIGIN_PUSH) ; \
-	git commit -a -m "deploying sphinx update" && git push ; \
+	git add -A && git commit -m "deploying sphinx update" && git push ; \
 	popd ; \
 	if [ `git diff --name-only gh-pages` ] ; then \
 		git add gh-pages ; \
-		git commit -m "docs deploy" -o gh-pages ; \
+		git commit -m "docs deploy [ci skip]" -o gh-pages ; \
 	fi
 
 
