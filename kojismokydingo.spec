@@ -1,12 +1,13 @@
 
 %global srcname kojismokydingo
 %global srcver 0.9.2
+%global srcrel 1
 
 
 Summary: Koji Smoky Dingo
 Name: %{srcname}
 Version: %{srcver}
-Release: 0%{?dist}
+Release: %{srcrel}%{?dist}
 License: GPLv3
 Group: Devel
 URL: https://github.com/obriencj/koji-smoky-dingo
@@ -161,9 +162,9 @@ Koji Smoky Dingo
 
 
 %changelog
-* Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-0
+* Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-1
 - fix issue with 'set-rpm-macro --help'
-- fix datetime issues in 'check-hosts'
+- fix datetime issues in check-hosts
 - add new parse_datetime function in common
 - explicitly deactivate plugin command sessions 'SmokyDingo.deactivate'
 - refactored how plugin commands populate parser arguments
@@ -175,6 +176,7 @@ Koji Smoky Dingo
   handling
 - ManagedClientSession no longer loads configuration from a profile
 - added ProfileClientSession
+- refactored list-cgs and added cginfo
 
 * Fri Sep 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-1
 - Begin bumping micro for PRs as we work towards version 1.0.0
