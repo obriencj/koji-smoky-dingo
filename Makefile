@@ -17,19 +17,23 @@ PYTHON ?= $(shell which python3 python2 python 2>/dev/null \
 # so forks will push their docs to their own gh-pages branch.
 ORIGIN_PUSH = $(shell git remote get-url --push origin)
 
+##@ Valid Targets
+help:  ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-default: quick-test
+
+default: quick-test	## Runs the quick-test target
 
 
-build: clean
+build: clean	## Produces a wheel using the default system python
 	@$(PYTHON) setup.py flake8 bdist_wheel
 
 
-install: build
+install: build	## Installs using the default python for the current user
 	@$(PYTHON) -B -m pip install --no-deps --user -I dist/*.whl
 
 
-tidy:
+tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
 	@find -H . \
 		\( -iname '.tox' -o -iname '.eggs' -prune \) -o \
@@ -37,40 +41,40 @@ tidy:
 		\( -type f -iname '*.pyc' -exec rm -f {} + \)
 
 
-clean: tidy
+clean: tidy	## Removes built content, test logs, coverage reports
 	@rm -rf .coverage* build/* dist/* htmlcov/* logs/*
 	@rm -f "$(ARCHIVE)"
 
 
-packaging-build: $(ARCHIVE)
+packaging-build: $(ARCHIVE)	## Launches all containerized builds
 	@./tools/launch-build.sh
 
 
-packaging-test: packaging-build
+packaging-test: packaging-build	## Launches all containerized tests
 	@rm -rf logs/*
 	@./tools/launch-test.sh
 
 
-test: clean
+test: clean	## Launches tox
 	@tox
 
 
-quick-test: clean
+quick-test: clean	## Launches nosetest using the default python
 	@$(PYTHON) -B setup.py flake8 build test
 
 
-srpm: $(ARCHIVE)
+srpm: $(ARCHIVE)	## Produce an SRPM from the current git commit
 	@rpmbuild \
 		--define "_srcrpmdir dist" \
 		--define "dist %{nil}" \
 		-ts "$(ARCHIVE)"
 
 
-rpm: $(ARCHIVE)
+rpm: $(ARCHIVE)		## Produce an RPM from the current git commit
 	@rpmbuild --define "_rpmdir dist" -tb "$(ARCHIVE)"
 
 
-archive: $(ARCHIVE)
+archive: $(ARCHIVE)	## Extracts an archive from the current git commit
 
 
 # newer versions support the --format tar.gz but we're intending to work all
@@ -87,11 +91,11 @@ docs/overview.rst: README.md
 	@rm -f overview.md
 
 
-docs: docs/overview.rst
+docs: docs/overview.rst	## Build sphinx docs
 	@$(PYTHON) -B setup.py docs
 
 
-pull-docs:
+pull-docs:	## Refreshes the gh-pages submodule
 	@git submodule init ; \
 	pushd gh-pages ; \
 	git reset --hard gh-pages ; \
@@ -99,7 +103,7 @@ pull-docs:
 	popd
 
 
-stage-docs: docs pull-docs
+stage-docs: docs pull-docs	## Builds docs and stages them in gh-pages
 	@pushd gh-pages ; \
 	git reset --hard origin/gh-pages ; \
 	git pull ; \
@@ -109,7 +113,7 @@ stage-docs: docs pull-docs
 	cp -r build/sphinx/dirhtml/* gh-pages
 
 
-deploy-docs: stage-docs
+deploy-docs: stage-docs	## Build, stage, and deploy docs to gh-pages
 	@pushd gh-pages ; \
 	git remote set-url --push origin $(ORIGIN_PUSH) ; \
 	git commit -a -m "deploying sphinx update" && git push ; \
@@ -120,11 +124,11 @@ deploy-docs: stage-docs
 	fi
 
 
-clean-docs:
+clean-docs:	## Remove built docs
 	@rm -rf build/sphinx/*
 
 
-.PHONY: all archive clean default docs deploy-docs overview packaging-build packaging-test rpm srpm stage-docs test
+.PHONY: all archive clean default docs deploy-docs help overview packaging-build packaging-test rpm srpm stage-docs test
 
 
 # The end.
