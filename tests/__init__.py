@@ -18,7 +18,7 @@ from mock import MagicMock, PropertyMock, patch
 from six.moves import zip
 from unittest import TestCase
 
-from kojismokydingo import _bulk_load
+from kojismokydingo import iter_bulk_load
 
 
 class TestBulkLoad(TestCase):
@@ -35,8 +35,8 @@ class TestBulkLoad(TestCase):
         patch.stopall()
 
 
-    def test_bulk_load_simple(self):
-        # validates that the _bulk_load utility is indeed breaking up
+    def test_iter_bulk_load(self):
+        # validates that the iter_bulk_load utility is indeed breaking up
         # the list of keys into the appropriate sized chunks and
         # invoking the function in a multicall loop, then yielding the
         # key:result pairs.
@@ -47,8 +47,8 @@ class TestBulkLoad(TestCase):
             [[100 + v] for v in range(i, i+5)] for i in range(0, 25, 5)
         ]
 
-        x = _bulk_load(self.session, self.session.ImpossibleDream,
-                       range(0, 25), True, size=5)
+        x = iter_bulk_load(self.session, self.session.ImpossibleDream,
+                           range(0, 25), True, size=5)
         x = list(x)
 
         self.assertEqual(x, list(zip(range(0, 25), range(100, 125))))
