@@ -21,6 +21,8 @@ koji set-rpm-macro
 
 Defines an RPM macro on a tag.
 
+This command is a user-friendly alternative to using `koji edit-tag` as defined in `Setting RPM Macros for Builds - Setting rpm.macro values <https://docs.pagure.org/koji/setting_rpm_macros/#setting-rpm-macro-values>`_
+
 The underlying tag extra setting will be constructed with the prefix
 ``rpm.macro.`` and the macro name (minus any leading ``%``)
 

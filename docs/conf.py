@@ -10,6 +10,10 @@ extensions = [
 
 intersphinx_mapping = {
     "python": ('https://docs.python.org/3', None),
+
+    # koji currently doesn't offer autodoc output as objects.inv, but
+    # maybe one day...
+    # "koji": ('https://docs.pagure.io/koji', None),
 }
 
 
