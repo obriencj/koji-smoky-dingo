@@ -13,8 +13,8 @@
 
 
 """
-Koji Smoky Dingo - Utility functions and command line plugins for
-Koji users
+Koji Smoky Dingo - Client utilities for working with the Koji
+build system
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
@@ -171,19 +171,45 @@ class NotPermitted(BadDingo):
     complaint = "Insufficient permissions"
 
 
-def _bulk_load(session, loadfn, keys, err, size):
+def iter_bulk_load(session, loadfn, keys, err=True, size=100):
     """
-    Generator utility for multicall loading data from a koji client
-    session.
+    Generic bulk loading generator. Invokes the given loadfn on each
+    key in keys using chunking multicalls limited to the specified
+    size.
 
-    loadfn is a bound method which will be called with each key in the
-    keys sequence. Up to size calls will be made at a time.
+    Yields (key, result) pairs in order.
 
-    Yields key, result pairs.
+    If err is True (default) then any faults will raise an exception.
+    If err is False, then a None will be substituted as the result for
+    the failing key.
 
-    If err is True (default) then this will convert any koji faults to
-    exceptions and raise them. Otherwise faults will be omitted from
-    the output results.
+    :param session: The koji session
+
+    :type session: `koji.ClientSession`
+
+    :param loadfn: The loading function, to be invoked in a multicall
+      arrangement. Will be called once with each given key from keys
+
+    :type loadfn: Callable[[object], object]
+
+    :param keys: The sequence of keys to be used to invoke loadfn.
+
+    :type keys: list[object]
+
+    :param err: Whether to raise any underlying fault returns as
+      exceptions. Default, True
+
+    :type err: bool, optional
+
+    :param size: How many calls to loadfn to chunk up for each
+      multicall. Default, 100
+
+    :type size: int, optional
+
+    :raises koji.GenericError: if err is True and an issue
+      occurrs while invoking the loadfn
+
+    :rtype: Generator[tuple[object, object]]
     """
 
     for key_chunk in chunkseq(keys, size):
@@ -225,7 +251,10 @@ def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
 
     :type loadfn: Callable[[object], object]
 
-    :param keys: The sequence of keys to be used to invoke `loadfn`
+    :param keys: The sequence of keys to be used to invoke `loadfn`.
+      These keys need to be individually hashable, or the `results`
+      value needs to be specified with an instance that accepts
+      assignmnet using these values as the key.
 
     :type keys: list[object]
 
@@ -254,7 +283,7 @@ def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
 
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, loadfn, keys, err, size):
+    for key, info in iter_bulk_load(session, loadfn, keys, err, size):
         results[key] = info
 
     return results
@@ -275,11 +304,26 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     If results is non-None, it must support dict assignment, and will
     be used in place of a newly allocated OrderedDict to store and
     return the results.
+
+    :param nvrs: Sequence of build NVRs or build IDs to load
+
+    :type nvrs: Iterator[str] or Iterator[int]
+
+    :param err: Raise an exception if an NVR fails to load. Default,
+      bad or missing NVRs will be absent from the results mapping.
+
+    :type err: bool, optional
+
+    :param size: Count of NVRs to load in a single multicall. Default,
+      100
+
+    :type size: int, optional
     """
 
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.getBuild, nvrs, False, size):
+    for key, info in iter_bulk_load(session, session.getBuild, nvrs,
+                                    False, size):
         if not info:
             if err:
                 raise NoSuchBuild(key)
@@ -296,7 +340,7 @@ def bulk_load_tasks(session, task_ids, request=False,
 
     fn = partial(session.getTaskInfo, request=request)
 
-    for key, info in _bulk_load(session, fn, task_ids, False, size):
+    for key, info in iter_bulk_load(session, fn, task_ids, False, size):
         if not info:
             if err:
                 raise NoSuchTask(key)
@@ -310,7 +354,8 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
 
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.getTag, tags, False, size):
+    for key, info in iter_bulk_load(session, session.getTag, tags,
+                                    False, size):
         if not info:
             if err:
                 raise NoSuchTag(key)
@@ -335,8 +380,8 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
 
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.queryRPMSigs,
-                                rpm_ids, True, size):
+    for key, info in iter_bulk_load(session, session.queryRPMSigs,
+                                    rpm_ids, True, size):
         results[key] = info
 
     return results
@@ -349,7 +394,7 @@ def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
 
     fn = lambda i: session.listArchives(componentBuildrootID=i, type=btype)
 
-    for key, info in _bulk_load(session, fn, buildroot_ids, True, size):
+    for key, info in iter_bulk_load(session, fn, buildroot_ids, True, size):
         results[key] = info
 
     return results
@@ -362,7 +407,7 @@ def bulk_load_buildroot_rpms(session, buildroot_ids,
 
     fn = lambda i: session.listRPMs(componentBuildrootID=i)
 
-    for key, info in _bulk_load(session, fn, buildroot_ids, True, size):
+    for key, info in iter_bulk_load(session, fn, buildroot_ids, True, size):
         results[key] = info
 
     return results
@@ -386,7 +431,7 @@ def bulk_load_build_archives(session, build_ids, btype=None,
 
     fn = lambda i: session.listArchives(buildID=i, type=btype)
 
-    for key, info in _bulk_load(session, fn, build_ids, True, size):
+    for key, info in iter_bulk_load(session, fn, build_ids, True, size):
         results[key] = info
 
     return results
@@ -407,8 +452,8 @@ def bulk_load_build_rpms(session, build_ids, size=100, results=None):
 
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.listRPMs,
-                                build_ids, True, size):
+    for key, info in iter_bulk_load(session, session.listRPMs,
+                                    build_ids, True, size):
         results[key] = info
 
     return results
@@ -429,8 +474,8 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
 
     results = OrderedDict() if results is None else results
 
-    for key, info in _bulk_load(session, session.getBuildroot,
-                                broot_ids, True, size):
+    for key, info in iter_bulk_load(session, session.getBuildroot,
+                                    broot_ids, True, size):
         results[key] = info
 
     return results
