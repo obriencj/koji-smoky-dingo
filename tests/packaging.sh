@@ -42,6 +42,8 @@ function verify_koji_cli() {
     local HELP=$(koji help)
     local EXPECTED=(
         affected-targets
+        block-env-var
+        block-rpm-macro
         bulk-tag-builds
         cginfo
         check-hosts
@@ -56,6 +58,8 @@ function verify_koji_cli() {
         list-rpm-macros
         list-tag-extras
         perminfo
+        remove-env-var
+        remove-rpm-macro
         renum-tag-inheritance
         set-env-var
         set-rpm-macro
