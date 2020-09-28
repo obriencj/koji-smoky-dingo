@@ -36,7 +36,7 @@ from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os.path import basename
 from six import add_metaclass
-from six.moves import zip_longest
+from six.moves import map, zip_longest
 
 from kojismokydingo import BadDingo, NotPermitted
 
@@ -253,7 +253,7 @@ def tabulate(headings, data, key=None, sorting=0,
         print("  ".join(("-" * h) for h in widths), file=out)
 
     for row in data:
-        print(fmt.format(*row), file=out)
+        print(fmt.format(*map(str, row)), file=out)
 
 
 def space_normalize(txt):
