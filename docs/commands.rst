@@ -47,5 +47,10 @@ See `Koji's Permission System - Administration <https://docs.pagure.org/koji/per
    commands/set-env-var
    commands/set-rpm-macro
    commands/swap-tag-inheritance
+
+
+.. toctree::
+   :hidden:
+
    commands/unset-env-var
    commands/unset-rpm-macro
