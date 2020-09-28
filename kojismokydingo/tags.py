@@ -21,13 +21,15 @@ Koji Smoky Dingo - tags and targets
 
 
 from collections import OrderedDict
+from functools import partial
 from itertools import chain
+from koji import ParameterError
 from six import iteritems, itervalues
 
 from . import as_taginfo, as_targetinfo, bulk_load, bulk_load_tags
 
 
-def resolve_tag(session, name, target=False):
+def resolve_tag(session, name, target=False, blocked=False):
     """
     Given a name, resolve it to a taginfo.
 
@@ -57,7 +59,7 @@ def resolve_tag(session, name, target=False):
         tinfo = as_targetinfo(session, name)
         name = tinfo.get("build_tag_name", name)
 
-    return as_taginfo(session, name)
+    return as_taginfo(session, name, blocked=blocked)
 
 
 def get_affected_targets(session, tagnames):
@@ -134,6 +136,15 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
     found = OrderedDict() if into is None else into
 
     for key, val in iteritems(taginfo["extra"]):
+
+        # check whether the taginfo was gathered with blocks included.
+        # See https://pagure.io/koji/pull-request/2495#_4__40
+        if isinstance(val, (tuple, list)):
+            blocked = val[0]
+            val = val[1]
+        else:
+            blocked = False
+
         if prefix and not key.startswith(prefix):
             continue
 
@@ -141,6 +152,7 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
             found[key] = {
                 "name": key,
                 "value": val,
+                "blocked": blocked,
                 "tag_name": taginfo["name"],
                 "tag_id": taginfo["id"],
             }
@@ -159,6 +171,7 @@ def collect_tag_extras(session, taginfo, prefix=None):
 
     * name - the extra setting key
     * value - the extra setting value
+    * blocked - whether the setting represents a block
     * tag_name - the name of the tag this setting came from
     * tag_id - the ID of the tag this setting came from
 
@@ -175,11 +188,22 @@ def collect_tag_extras(session, taginfo, prefix=None):
     :rtype: collections.OrderedDict[str, dict]
     """
 
-    taginfo = as_taginfo(session, taginfo)
-
     # this borrows heavily from the hub implementation of
     # getBuildConfig, but gives us a chance to record what tag in the
     # inheritance that the setting is coming from
+
+    try:
+        # try using the new API first
+        taginfo = as_taginfo(session, taginfo, blocked=True)
+
+    except ParameterError:
+        # this is an older koji that doesn't support extra blocking
+        taginfo = as_taginfo(session, taginfo)
+        get_tag = session.getTag
+
+    else:
+        # looks like we support extra blocking
+        get_tag = partial(session.getTag, blocked=True)
 
     found = convert_tag_extras(taginfo, prefix=prefix)
 
@@ -188,11 +212,14 @@ def collect_tag_extras(session, taginfo, prefix=None):
     session.multicall = True
     for link in inher:
         if not link["noconfig"]:
-            session.getTag(link["parent_id"])
-    tags = (t[0] for t in session.multiCall())
+            get_tag(link["parent_id"])
 
-    for tag in tags:
-        convert_tag_extras(tag, into=found, prefix=prefix)
+    for tag in session.multiCall():
+        # mix the extras into existing found results. note: we're not
+        # checking for faults, because we got this list of tag IDs
+        # straight from koji itself, but there could be some kind of
+        # race condition from this.
+        convert_tag_extras(tag[0], into=found, prefix=prefix)
 
     return found
 

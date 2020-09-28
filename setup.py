@@ -64,8 +64,6 @@ COMMANDS = {
     "set-env-var": "kojismokydingo.cli.tags:SetEnvVar",
     "set-rpm-macro": "kojismokydingo.cli.tags:SetRPMMacro",
     "swap-tag-inheritance": "kojismokydingo.cli.tags:SwapTagInheritance",
-    "unset-env-var": "kojismokydingo.cli.tags:UnsetEnvVar",
-    "unset-rpm-macro": "kojismokydingo.cli.tags:UnsetRPMMacro",
     "userinfo": "kojismokydingo.cli.users:UserInfo",
 }
 

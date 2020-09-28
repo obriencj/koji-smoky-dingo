@@ -5,7 +5,8 @@ koji set-env-var
 
 ::
 
- usage: koji set-env-var [-h] [--target] TAGNAME var [value]
+ usage: koji set-env-var [-h] [--remove] [--block] [--target]
+                         TAGNAME var [value]
 
  Set a mock environment variable on a tag
 
@@ -16,13 +17,15 @@ koji set-env-var
 
  optional arguments:
    -h, --help  show this help message and exit
+   --remove    Remove the environment var from the tag
+   --block     Block the environment var from the tag
    --target    Specify by target rather than a tag
 
 
 This command requires either the ``admin`` or ``tag`` permission,
 as it modifies tag configuration data.
 
-See also :ref:`koji list-env-vars`, :ref:`koji unset-env-var`
+See also :ref:`koji list-env-vars`
 
 
 References

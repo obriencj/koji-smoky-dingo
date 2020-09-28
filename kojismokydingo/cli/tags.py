@@ -25,6 +25,7 @@ from __future__ import print_function
 import sys
 
 from json import dumps
+from koji import ParameterError
 from koji_cli.lib import arg_filter
 from operator import itemgetter
 from six import iteritems, itervalues
@@ -33,7 +34,7 @@ from six.moves import zip
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
     printerr, pretty_json, tabulate)
-from .. import BadDingo, NoSuchTag
+from .. import BadDingo, FeatureUnavailable, NoSuchTag
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, get_affected_targets,
     renum_inheritance, resolve_tag)
@@ -385,11 +386,34 @@ class ListRPMMacros(AnonSmokyDingo):
                                    json=options.json)
 
 
-def cli_unset_rpm_macro(session, tagname, macro, target=False):
+def cli_set_rpm_macro(session, tagname, macro,
+                      value=None, remove=False, block=False,
+                      target=False):
 
-    taginfo = resolve_tag(session, tagname, target)
+    """
+    If remove is True, value and block are ignored. The setting will
+    be removed from the tag's extra settings.
 
-    extras = taginfo["extra"]
+    If block is True, value is ignored. A block entry will be added to
+    the tag's extra settings.
+
+    If remove and block are both False, then the value will be
+    assigned to the tag's extra settings.
+
+    If target is True, then tagname is actually the name of a target.
+    That target's build tag will be the tag that is therefore
+    modified.
+    """
+
+    try:
+        taginfo = resolve_tag(session, tagname, target, blocked=block)
+
+    except ParameterError:
+        taginfo = resolve_tag(session, tagname, target)
+        with_blocking = False
+
+    else:
+        with_blocking = True
 
     if macro.startswith("rpm.macro."):
         key = macro
@@ -400,61 +424,29 @@ def cli_unset_rpm_macro(session, tagname, macro, target=False):
     else:
         key = "rpm.macro." + macro
 
-    if key not in extras:
-        raise NoSuchMacro(macro)
+    if remove:
+        if key not in taginfo["extra"]:
+            raise NoSuchMacro(macro)
 
-    session.editTag2(taginfo["id"], remove_extra=[key])
+        session.editTag2(taginfo["id"], remove_extra=[key])
 
+    elif block:
+        if not with_blocking:
+            raise FeatureUnavailable("block tag extra values")
 
-class UnsetRPMMacro(TagSmokyDingo):
+        session.editTag2(taginfo["id"], block_extra=[key])
 
-    description = "Unset an RPM Macro on a tag"
-
-
-    def arguments(self, parser):
-        addarg = parser.add_argument
-
-        addarg("tag", action="store", metavar="TAGNAME",
-               help="Name of tag")
-
-        addarg("macro", action="store",
-               help="Name of the macro")
-
-        addarg("--target", action="store_true", default=False,
-               help="Specify by target rather than a tag")
-
-        return parser
-
-
-    def handle(self, options):
-        return cli_unset_rpm_macro(self.session,
-                                   options.tag, options.macro,
-                                   target=options.target)
-
-
-def cli_set_rpm_macro(session, tagname, macro, value, target=False):
-
-    taginfo = resolve_tag(session, tagname, target)
-
-    if macro.startswith("rpm.macro."):
-        key = macro
-        macro = macro[10:]
-    elif macro.startswith("%"):
-        macro = macro.lstrip("%")
-        key = "rpm.macro." + macro
     else:
-        key = "rpm.macro." + macro
+        # converts to numbers, True, False, and None as applicable
+        value = arg_filter(value)
 
-    # converts to numbers, True, False, and None as applicable
-    value = arg_filter(value)
+        # an empty string breaks mock and RPM, make it %nil instead.  RPM
+        # macros are not allowed to have an empty body. None is treated as
+        # the string "None" so we leave that alone.
+        if value == '':
+            value = "%nil"
 
-    # an empty string breaks mock and RPM, make it %nil instead.  RPM
-    # macros are not allowed to have an empty body. None is treated as
-    # the string "None" so we leave that alone.
-    if value == '':
-        value = "%nil"
-
-    session.editTag2(taginfo["id"], extra={key: value})
+        session.editTag2(taginfo["id"], extra={key: value})
 
 
 class SetRPMMacro(TagSmokyDingo):
@@ -471,8 +463,19 @@ class SetRPMMacro(TagSmokyDingo):
         addarg("macro", action="store",
                help="Name of the macro")
 
+        grp = parser.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
         addarg("value", action="store", nargs="?", default="%nil",
                help="Value of the macro. Default: %%nil")
+
+        addarg("--remove", action="store_true", default=False,
+               help="Remove the macro definition from the tag")
+
+        addarg("--block", action="store_true", default=False,
+               help="Block the macro definition from the tag")
+
+        addarg = parser.add_argument
 
         addarg("--target", action="store_true", default=False,
                help="Specify by target rather than a tag")
@@ -482,15 +485,40 @@ class SetRPMMacro(TagSmokyDingo):
 
     def handle(self, options):
         return cli_set_rpm_macro(self.session, options.tag,
-                                 options.macro, options.value,
+                                 options.macro,
+                                 value=options.value,
+                                 remove=options.remove,
+                                 block=options.block,
                                  target=options.target)
 
 
-def cli_unset_env_var(session, tagname, var, target=False):
+def cli_set_env_var(session, tagname, var,
+                    value=None, remove=False, block=False,
+                    target=False):
+    """
+    If remove is True, value and block are ignored. The setting will
+    be removed from the tag's extra settings.
 
-    taginfo = resolve_tag(session, tagname, target)
+    If block is True, value is ignored. A block entry will be added to
+    the tag's extra settings.
 
-    extras = taginfo["extra"]
+    If remove and block are both False, then the value will be
+    assigned to the tag's extra settings.
+
+    If target is True, then tagname is actually the name of a target.
+    That target's build tag will be the tag that is therefore
+    modified.
+    """
+
+    try:
+        taginfo = resolve_tag(session, tagname, target, blocked=block)
+
+    except ParameterError:
+        taginfo = resolve_tag(session, tagname, target)
+        with_blocking = False
+
+    else:
+        with_blocking = True
 
     if var.startswith("rpm.env."):
         key = var
@@ -498,49 +526,20 @@ def cli_unset_env_var(session, tagname, var, target=False):
     else:
         key = "rpm.env." + var
 
-    if key not in extras:
-        raise NoSuchEnvVar(var)
+    if remove:
+        if key not in taginfo["extra"]:
+            raise NoSuchEnvVar(var)
 
-    session.editTag2(taginfo["id"], remove_extra=[key])
+        session.editTag2(taginfo["id"], remove_extra=[key])
 
+    elif block:
+        if not with_blocking:
+            raise FeatureUnavailable("block tag extra values")
 
-class UnsetEnvVar(TagSmokyDingo):
+        session.editTag2(taginfo["id"], block_extra=[key])
 
-    description = "Unset a mock environment variable on a tag"
-
-
-    def arguments(self, parser):
-        addarg = parser.add_argument
-
-        addarg("tag", action="store", metavar="TAGNAME",
-               help="Name of tag")
-
-        addarg("var", action="store",
-               help="Name of the environment variable")
-
-        addarg("--target", action="store_true", default=False,
-               help="Specify by target rather than a tag")
-
-        return parser
-
-
-    def handle(self, options):
-        return cli_unset_env_var(self.session,
-                                 options.tag, options.var,
-                                 target=options.target)
-
-
-def cli_set_env_var(session, tagname, var, value, target=False):
-
-    taginfo = resolve_tag(session, tagname, target)
-
-    if var.startswith("rpm.env."):
-        key = var
-        var = var[8:]
     else:
-        key = "rpm.env." + var
-
-    session.editTag2(taginfo["id"], extra={key: value})
+        session.editTag2(taginfo["id"], extra={key: value})
 
 
 class SetEnvVar(TagSmokyDingo):
@@ -557,8 +556,19 @@ class SetEnvVar(TagSmokyDingo):
         addarg("var", action="store",
                help="Name of the environment variable")
 
+        grp = parser.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
         addarg("value", action="store", nargs="?", default="",
                help="Value of the environment var. Default: ''")
+
+        addarg("--remove", action="store_true", default=False,
+               help="Remove the environment var from the tag")
+
+        addarg("--block", action="store_true", default=False,
+               help="Block the environment var from the tag")
+
+        addarg = parser.add_argument
 
         addarg("--target", action="store_true", default=False,
                help="Specify by target rather than a tag")
@@ -568,7 +578,10 @@ class SetEnvVar(TagSmokyDingo):
 
     def handle(self, options):
         return cli_set_env_var(self.session, options.tag,
-                               options.var, options.value,
+                               options.var,
+                               value=options.value,
+                               remove=options.remove,
+                               block=options.block,
                                target=options.target)
 
 

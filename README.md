@@ -40,11 +40,9 @@ permission (koji >= [1.18]) or the admin permission.
 |---------|-------------|
 |`bulk—tag-builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
 |`renum—tag-inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
-|`set-env-var` |Sets the value of a mock environment variable on a tag. |
-|`set-rpm-macro` |Sets the value of a mock RPM macro on a tag. |
+|`set-env-var` |Sets, unsets, or blocks the value of a mock environment variable on a tag. |
+|`set-rpm-macro` |Sets, unsets, or blocks the value of a mock RPM macro on a tag. |
 |`swap—tag-inheritance` |Adjust the inheritance of a tag by replacing one entry for another. If both entries are already parents of a tag, then swap the priority of the two. |
-|`unset-env-var` |Removes a mock environment variable from a tag. |
-|`unset-rpm-macro` |Removes a mock RPM macro from a tag. |
 
 
 ## Information Commands
