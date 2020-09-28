@@ -102,8 +102,8 @@ def collect_userinfo(session, user):
 
     uid = userinfo["id"]
 
-    perms = session.getUserPerms(uid)
-    userinfo["permissions"] = perms
+    userinfo["permissions"] = session.getUserPerms(uid)
+    userinfo["content_generators"] = collect_cg_access(session, userinfo)
 
     if userinfo.get("usertype", USER_NORMAL) == USER_GROUP:
         try:
@@ -111,9 +111,6 @@ def collect_userinfo(session, user):
         except Exception:
             # non-admin accounts cannot query group membership, so omit
             userinfo["members"] = None
-
-    cgs = collect_cg_access(session, userinfo)
-    userinfo["content_generators"] = cgs
 
     return userinfo
 
@@ -139,7 +136,8 @@ def collect_cg_access(session, user):
     found = []
     for cgname, val in iteritems(session.listCGs()):
         if username in val.get("users", ()):
-            found.append(cgname)
+            val["name"] = cgname
+            found.append(val)
     return found
 
 
