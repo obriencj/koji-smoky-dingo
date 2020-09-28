@@ -36,7 +36,7 @@ from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os.path import basename
 from six import add_metaclass
-from six.moves import map, zip_longest
+from six.moves import zip_longest
 
 from kojismokydingo import BadDingo, NotPermitted
 
@@ -246,14 +246,14 @@ def tabulate(headings, data, key=None, sorting=0,
     # now we create the format string based on the max width of each
     # column plus some spacing. Note that python 2.6 mandates the
     # field index be specified, so we MUST use enumerate here.
-    fmt = "  ".join("{%i:<%i}" % iw for iw in enumerate(widths))
+    fmt = "  ".join("{%i!s:<%i}" % iw for iw in enumerate(widths))
 
     if headings and not quiet:
         print(fmt.format(*headings), file=out)
         print("  ".join(("-" * h) for h in widths), file=out)
 
     for row in data:
-        print(fmt.format(*map(str, row)), file=out)
+        print(fmt.format(*row), file=out)
 
 
 def space_normalize(txt):
