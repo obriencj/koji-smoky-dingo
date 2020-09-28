@@ -5,7 +5,8 @@ koji set-rpm-macro
 
 ::
 
- usage: koji set-rpm-macro [-h] [--target] TAGNAME macro [value]
+ usage: koji set-rpm-macro [-h] [--remove] [--block] [--target]
+                           TAGNAME macro [value]
 
  Set an RPM Macro on a tag
 
@@ -16,6 +17,8 @@ koji set-rpm-macro
 
  optional arguments:
    -h, --help  show this help message and exit
+   --remove    Remove the macro definition from the tag
+   --block     Block the macro definition from the tag
    --target    Specify by target rather than a tag
 
 
@@ -42,7 +45,7 @@ build configurations may be impacted by any macro definitions.
 This command requires either the ``admin`` or ``tag`` permission,
 as it modifies tag configuration data.
 
-See also :ref:`koji list-rpm-macros`, :ref:`koji unset-rpm-macro`
+See also :ref:`koji list-rpm-macros`
 
 
 References

@@ -23,7 +23,9 @@ build system
 
 from collections import OrderedDict
 from functools import partial
-from koji import convertFault, read_config, Fault, ClientSession
+from koji import (
+    ClientSession, Fault,
+    convertFault, read_config)
 from koji_cli.lib import activate_session, ensure_connection
 from six.moves import zip
 
@@ -169,6 +171,14 @@ class NotPermitted(BadDingo):
     """
 
     complaint = "Insufficient permissions"
+
+
+class FeatureUnavailable(BadDingo):
+    """
+    A given feature isn't available due to the version on the koji hub
+    """
+
+    complaint = "The koji hub version doesn't support this feature"
 
 
 def iter_bulk_load(session, loadfn, keys, err=True, size=100):
@@ -513,7 +523,7 @@ def as_buildinfo(session, build):
     return info
 
 
-def as_taginfo(session, tag):
+def as_taginfo(session, tag, blocked=False):
     """
     Coerces a tag value into a koji tag info dict.
 
@@ -526,16 +536,30 @@ def as_taginfo(session, tag):
 
     :type tag: int or str or dict
 
+    :param blocked: attempts to load blocked tag extra values. Default,
+      only loads
+
+    :type blocked: bool, optional
+
     :raises NoSuchTag: if the tag value could not be resolved into a
       tag info dict
+
+    :raises koji.ParameterError: if blocked was True but the koji instance
+      does not support tag extra blocking
 
     :rtype: dict
     """
 
     if isinstance(tag, (str, int)):
-        info = session.getTag(tag)
+        if blocked:
+            # this may raise a ParameterError on an older koji
+            info = session.getTag(tag, blocked=blocked)
+        else:
+            info = session.getTag(tag)
+
     elif isinstance(tag, dict):
         info = tag
+
     else:
         info = None
 

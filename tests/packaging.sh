@@ -60,8 +60,6 @@ function verify_koji_cli() {
         set-env-var
         set-rpm-macro
         swap-tag-inheritance
-        unset-env-var
-        unset-rpm-macro
         userinfo
     )
 
