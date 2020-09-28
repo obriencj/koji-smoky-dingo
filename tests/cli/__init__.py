@@ -174,7 +174,7 @@ class TestTabulate(TestCase):
             ("Foo", "Bar", "Baz"),
             (1, 2, 3),
             ("Hello", None, None),
-            ("", "''", ...),
+            ("", "''", Ellipsis),
         )
 
         out = StringIO()
