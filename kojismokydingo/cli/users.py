@@ -76,7 +76,7 @@ def cli_userinfo(session, user, json=False):
     if cgs:
         print("Content generators:")
         for cg in sorted(cgs):
-            print(" ", cg)
+            print(" {name} [{id}]".format(**cg))
 
     perms = userinfo.get("permissions", None)
     if perms:
