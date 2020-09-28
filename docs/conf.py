@@ -140,4 +140,12 @@ numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
 
+# --- Manpage Settings
+
+man_pages = [
+    ('commands', 'kojismokydingo', "Koji Smoky Dingo Plugin Commands",
+     ["Christopher O'Brien"], 7),
+]
+
+
 # The end.
