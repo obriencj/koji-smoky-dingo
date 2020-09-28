@@ -23,6 +23,8 @@ from kojismokydingo.cli import (
 
 ENTRY_POINTS = {
     "affected-targets": "kojismokydingo.cli.tags:AffectedTargets",
+    "block-env-var": "kojismokydingo.cli.tags:BlockEnvVar",
+    "block-rpm-macro": "kojismokydingo.cli.tags:BlockRPMMacro",
     "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
     "cginfo": "kojismokydingo.cli.users:CGInfo",
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
@@ -37,6 +39,8 @@ ENTRY_POINTS = {
     "list-rpm-macros": "kojismokydingo.cli.tags:ListRPMMacros",
     "list-tag-extras": "kojismokydingo.cli.tags:ListTagExtras",
     "perminfo": "kojismokydingo.cli.users:PermissionInfo",
+    "remove-env-var": "kojismokydingo.cli.tags:RemoveEnvVar",
+    "remove-rpm-macro": "kojismokydingo.cli.tags:RemoveRPMMacro",
     "renum-tag-inheritance": "kojismokydingo.cli.tags:RenumTagInheritance",
     "set-env-var": "kojismokydingo.cli.tags:SetEnvVar",
     "set-rpm-macro": "kojismokydingo.cli.tags:SetRPMMacro",

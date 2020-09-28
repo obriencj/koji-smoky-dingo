@@ -492,6 +492,64 @@ class SetRPMMacro(TagSmokyDingo):
                                  target=options.target)
 
 
+class RemoveRPMMacro(TagSmokyDingo):
+
+    description = "Remove an RPM Macro from a tag"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("macro", action="store",
+               help="Name of the macro to remove")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_set_rpm_macro(self.session, options.tag,
+                                 options.macro,
+                                 value=None,
+                                 remove=True,
+                                 block=False,
+                                 target=options.target)
+
+
+class BlockRPMMacro(TagSmokyDingo):
+
+    description = "Block an RPM Macro from a tag"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("macro", action="store",
+               help="Name of the macro to block")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_set_rpm_macro(self.session, options.tag,
+                                 options.macro,
+                                 value=None,
+                                 remove=False,
+                                 block=True,
+                                 target=options.target)
+
+
 def cli_set_env_var(session, tagname, var,
                     value=None, remove=False, block=False,
                     target=False):
@@ -576,12 +634,85 @@ class SetEnvVar(TagSmokyDingo):
         return parser
 
 
+    def validate(self, parser, options):
+        val = options.value
+
+        if val and val.startswith(r"\-"):
+            # fight against option parsing
+            options.value = val[1:]
+
+        elif not (val or options.remove or options.block):
+            # support KEY=VAL definitions
+            if "=" in options.var:
+                var, val = options.var.split("=", 1)
+                options.var = var
+                options.value = val
+
+
     def handle(self, options):
         return cli_set_env_var(self.session, options.tag,
                                options.var,
                                value=options.value,
                                remove=options.remove,
                                block=options.block,
+                               target=options.target)
+
+
+class RemoveEnvVar(TagSmokyDingo):
+
+    description = "Remove a mock environment variable from a tag"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("var", action="store",
+               help="Name of the environment variable")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_set_env_var(self.session, options.tag,
+                               options.var,
+                               value=None,
+                               remove=True,
+                               block=False,
+                               target=options.target)
+
+
+class BlockEnvVar(TagSmokyDingo):
+
+    description = "Block a mock environment variable from a tag"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("var", action="store",
+               help="Name of the environment variable")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_set_env_var(self.session, options.tag,
+                               options.var,
+                               value=None,
+                               remove=False,
+                               block=True,
                                target=options.target)
 
 
@@ -658,6 +789,7 @@ class ListEnvVars(AnonSmokyDingo):
 
 
 def cli_list_tag_extras(session, tagname, target=False,
+                        blocked=False,
                         quiet=None, json=False):
 
     taginfo = resolve_tag(session, tagname, target)
@@ -667,9 +799,22 @@ def cli_list_tag_extras(session, tagname, target=False,
         pretty_json(extras)
         return
 
-    tabulate(("Setting", "Value", "Tag"),
+    if blocked:
+        headings = ("Setting", "Value", "Tag", "Block")
+        _fields = itemgetter("name", "value", "tag_name", "blocked")
+
+        def fields(v):
+            vals = list(_fields(v))
+            vals[3] = "[BLOCK]" if vals[3] else ""
+            return vals
+
+    else:
+        headings = ("Setting", "Value", "Tag")
+        fields = itemgetter("name", "value", "tag_name")
+
+    tabulate(headings,
              itervalues(extras),
-             key=itemgetter("name", "value", "tag_name"),
+             key=fields,
              sorting=1,
              quiet=quiet)
 
@@ -687,6 +832,9 @@ class ListTagExtras(AnonSmokyDingo):
 
         addarg("--target", action="store_true", default=False,
                help="Specify by target rather than a tag")
+
+        addarg("--blocked", action="store_true", default=False,
+               help="Show blocked extras")
 
         group = parser.add_mutually_exclusive_group()
         addarg = group.add_argument

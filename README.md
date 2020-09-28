@@ -38,7 +38,11 @@ permission (koji >= [1.18]) or the admin permission.
 
 | Command | Description |
 |---------|-------------|
+|`block-env-var` |Blocks a mock environment variable from a tag. |
+|`block-rpm-macro` |Blocks a mock RPM macro from a tag. |
 |`bulk—tag-builds` |Quickly tag a large amount of builds, bypassing the creation of individual tasks. |
+|`remove-env-var` |Removes a mock environment variable from a tag. |
+|`remove-rpm-macro` |Removes a mock RPM macro from a tag. |
 |`renum—tag-inheritance` |Adjust the priority values of a tag to maintain the same inheritance order, but to create an even amount of space between each entry. |
 |`set-env-var` |Sets, unsets, or blocks the value of a mock environment variable on a tag. |
 |`set-rpm-macro` |Sets, unsets, or blocks the value of a mock RPM macro on a tag. |
