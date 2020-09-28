@@ -18,7 +18,7 @@ from six.moves import StringIO
 from unittest import TestCase
 
 from kojismokydingo.cli import (
-    SmokyDingo, clean_lines, resplit)
+    SmokyDingo, clean_lines, resplit, tabulate)
 
 
 ENTRY_POINTS = {
@@ -163,6 +163,51 @@ class TestUtils(TestCase):
         self.assertEqual(clean_lines(expect_1, True), expect_1)
         self.assertEqual(clean_lines(expect_2, True), expect_1)
         self.assertEqual(clean_lines(expect_2, False), expect_2)
+
+
+class TestTabulate(TestCase):
+
+
+    def do_tabulate(self, **kwds):
+
+        headings = ("Heading 1", "Heading 2", "Heading 3")
+
+        data = (
+            ("Foo", "Bar", "Baz"),
+            (1, 2, 3),
+            ("Hello", None, None),
+            ("", "''", ...),
+        )
+
+        out = StringIO()
+        tabulate(headings, data, out=out, **kwds)
+        return out.getvalue()
+
+
+    def test_quiet(self):
+
+        result = self.do_tabulate(quiet=True)
+
+        expected = ("Foo    Bar   Baz     \n"
+                    "1      2     3       \n"
+                    "Hello  None  None    \n"
+                    "       ''    Ellipsis\n")
+
+        self.assertEqual(expected, result)
+
+
+    def test_non_quiet(self):
+
+        result = self.do_tabulate(quiet=False)
+
+        expected = ("Heading 1  Heading 2  Heading 3\n"
+                    "---------  ---------  ---------\n"
+                    "Foo        Bar        Baz      \n"
+                    "1          2          3        \n"
+                    "Hello      None       None     \n"
+                    "           ''         Ellipsis \n")
+
+        self.assertEqual(expected, result)
 
 
 #
