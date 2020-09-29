@@ -25,7 +25,6 @@ from __future__ import print_function
 import sys
 
 from json import dumps
-from koji import ParameterError
 from koji_cli.lib import arg_filter
 from operator import itemgetter
 from six import iteritems, itervalues
@@ -34,7 +33,7 @@ from six.moves import zip
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
     printerr, pretty_json, tabulate)
-from .. import BadDingo, FeatureUnavailable, NoSuchTag
+from .. import BadDingo, FeatureUnavailable, NoSuchTag, version_check
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, get_affected_targets,
     renum_inheritance, resolve_tag)
@@ -405,15 +404,9 @@ def cli_set_rpm_macro(session, tagname, macro,
     modified.
     """
 
-    try:
-        taginfo = resolve_tag(session, tagname, target, blocked=block)
+    with_blocking = version_check(session, (1, 23))
 
-    except ParameterError:
-        taginfo = resolve_tag(session, tagname, target)
-        with_blocking = False
-
-    else:
-        with_blocking = True
+    taginfo = resolve_tag(session, tagname, target)
 
     if macro.startswith("rpm.macro."):
         key = macro
@@ -568,15 +561,9 @@ def cli_set_env_var(session, tagname, var,
     modified.
     """
 
-    try:
-        taginfo = resolve_tag(session, tagname, target, blocked=block)
+    with_blocking = version_check(session, (1, 23))
 
-    except ParameterError:
-        taginfo = resolve_tag(session, tagname, target)
-        with_blocking = False
-
-    else:
-        with_blocking = True
+    taginfo = resolve_tag(session, tagname, target)
 
     if var.startswith("rpm.env."):
         key = var

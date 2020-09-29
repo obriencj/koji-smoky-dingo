@@ -24,7 +24,7 @@ build system
 from collections import OrderedDict
 from functools import partial
 from koji import (
-    ClientSession, Fault,
+    ClientSession, Fault, GenericError,
     convertFault, read_config)
 from koji_cli.lib import activate_session, ensure_connection
 from six.moves import zip
@@ -523,7 +523,7 @@ def as_buildinfo(session, build):
     return info
 
 
-def as_taginfo(session, tag, blocked=False):
+def as_taginfo(session, tag):
     """
     Coerces a tag value into a koji tag info dict.
 
@@ -544,16 +544,12 @@ def as_taginfo(session, tag, blocked=False):
     :raises NoSuchTag: if the tag value could not be resolved into a
       tag info dict
 
-    :raises koji.ParameterError: if blocked was True but the koji instance
-      does not support tag extra blocking
-
     :rtype: dict
     """
 
     if isinstance(tag, (str, int)):
-        if blocked:
-            # this may raise a ParameterError on an older koji
-            info = session.getTag(tag, blocked=blocked)
+        if version_check(session, (1, 23)):
+            info = session.getTag(tag, blocked=True)
         else:
             info = session.getTag(tag)
 
@@ -599,6 +595,25 @@ def as_targetinfo(session, target):
         raise NoSuchTarget(target)
 
     return info
+
+
+def version_check(session, minimum=(1, 23, 0)):
+
+    # we need to use this instead of getattr as koji sessions will
+    # automatically create all missing properties as proxies to a
+    # remote hub method.
+    session_vars = vars(session)
+
+    hub_ver = session_vars.get("__hub_version", None)
+
+    if hub_ver is None:
+        try:
+            hub_ver = session.getVersion()
+        except GenericError:
+            hub_ver = ()
+        session_vars["__hub_version"] = hub_ver
+
+    return bool(hub_ver and hub_ver >= minimum)
 
 
 #

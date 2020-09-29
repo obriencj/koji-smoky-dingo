@@ -23,10 +23,11 @@ Koji Smoky Dingo - tags and targets
 from collections import OrderedDict
 from functools import partial
 from itertools import chain
-from koji import ParameterError
 from six import iteritems, itervalues
 
-from . import as_taginfo, as_targetinfo, bulk_load, bulk_load_tags
+from . import (
+    as_taginfo, as_targetinfo, bulk_load,
+    bulk_load_tags, version_check)
 
 
 def ensure_tag(session, name):
@@ -50,7 +51,7 @@ def ensure_tag(session, name):
     return info
 
 
-def resolve_tag(session, name, target=False, blocked=False):
+def resolve_tag(session, name, target=False):
     """
     Given a name, resolve it to a taginfo.
 
@@ -80,7 +81,7 @@ def resolve_tag(session, name, target=False, blocked=False):
         tinfo = as_targetinfo(session, name)
         name = tinfo.get("build_tag_name", name)
 
-    return as_taginfo(session, name, blocked=blocked)
+    return as_taginfo(session, name)
 
 
 def get_affected_targets(session, tagnames):
@@ -213,25 +214,13 @@ def collect_tag_extras(session, taginfo, prefix=None):
     # getBuildConfig, but gives us a chance to record what tag in the
     # inheritance that the setting is coming from
 
-    # we need to trigger a leading getTag call in order to determine
-    # if our hub supports tag extra blocking. So if we're already a
-    # tag info dict, let's down-convert to just the ID or name
-    if isinstance(taginfo, dict):
-        taginfo = taginfo["id"] or taginfo["name"]
+    taginfo = as_taginfo(session, taginfo)
 
-    try:
-        # try using the new API first
-        taginfo = as_taginfo(session, taginfo, blocked=True)
-
-    except ParameterError:
-        # this is an older koji that doesn't support extra blocking
-        taginfo = as_taginfo(session, taginfo)
-        get_tag = session.getTag
-
-    else:
-        # looks like we support extra blocking
-
+    if version_check(session, (1, 23)):
         get_tag = partial(session.getTag, blocked=True)
+    else:
+        # this is an older koji that doesn't support extra blocking
+        get_tag = session.getTag
 
     found = convert_tag_extras(taginfo, prefix=prefix)
 
