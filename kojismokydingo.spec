@@ -21,6 +21,16 @@ BuildArch: noarch
 %global debug_package %{nil}
 
 
+# sure, we could build some docs
+%bcond_with docs
+
+%if %{with docs}
+  %define ksd_docs %{_docdir}/%{srcname}
+  %define __brp_mangle_shebangs_exclude_from \
+          %{ksd_docs}/examples/script/whoami.py
+%endif
+
+
 # There's two distinct eras of RPM packaging for python, with
 # different macros and different expectations. Generally speaking the
 # new features are available in RHEL 8+ and Fedora 22+
@@ -39,7 +49,6 @@ BuildArch: noarch
   %bcond_with python2
   %bcond_without python3
 %endif
-
 
 # Some older koji fedora packages don't declare their python_provide
 # even though the feature was available in the packaging macros. This
@@ -73,6 +82,15 @@ Koji Smoky Dingo
   %py3_build_wheel
 %endif
 
+%if %{with docs}
+   %if %{with python3}
+     %{python3} setup.py docs --builder html,man
+   %else
+     %{__python} setup.py docs --builder html,man
+   %endif
+   %__rm -f build/sphinx/html/.buildinfo
+%endif
+
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -89,9 +107,44 @@ rm -rf $RPM_BUILD_ROOT
   %py3_install_wheel %{srcname}-%{version}-py3-none-any.whl
 %endif
 
+%if %{with docs}
+
+# we're going to manually copy these into place so that they land
+# under /usr/share/doc/kojismokydingo rather than
+# under /usr/share/doc/kojismokydingo-doc
+%__mkdir_p %{buildroot}/%{ksd_docs}
+%__cp -r examples %{buildroot}/%{ksd_docs}/examples
+%__cp -r build/sphinx/html %{buildroot}/%{ksd_docs}/html
+
+# our man pages
+%__mkdir_p %{buildroot}/%{_mandir}/man7
+%__cp build/sphinx/man/*.7 %{buildroot}/%{_mandir}/man7/
+%endif
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+
+%if %{with docs}
+
+%package -n %{srcname}-docs
+Summary:        Documentation for %{srcname}
+%if %{with python3}
+BuildRequires:  make python3-sphinx
+%else
+BuildRequires:  make python2-sphinx
+%endif
+
+%description -n %{srcname}-docs
+Docs for Koji Smoky Dingo
+
+%files -n %{srcname}-docs
+%defattr(-,root,root,-)
+%{_mandir}
+%doc %{ksd_docs}
+
+%endif
 
 
 %if %{with old_python}
@@ -113,6 +166,8 @@ Koji Smoky Dingo
 %{python_sitelib}/koji_cli_plugins/
 %{python_sitelib}/kojismokydingo/
 %{python_sitelib}/kojismokydingo-%{version}-py2.?.egg-info/
+%doc README.md
+%license LICENSE
 
 %endif
 
@@ -135,6 +190,8 @@ Koji Smoky Dingo
 %{python2_sitelib}/koji_cli_plugins/
 %{python2_sitelib}/kojismokydingo/
 %{python2_sitelib}/kojismokydingo-%{version}.dist-info/
+%doc README.md
+%license LICENSE
 
 %endif
 
@@ -157,6 +214,8 @@ Koji Smoky Dingo
 %{python3_sitelib}/koji_cli_plugins/
 %{python3_sitelib}/kojismokydingo/
 %{python3_sitelib}/kojismokydingo-%{version}.dist-info/
+%doc README.md
+%license LICENSE
 
 %endif
 
