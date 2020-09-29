@@ -838,6 +838,7 @@ class ListTagExtras(AnonSmokyDingo):
     def handle(self, options):
         return cli_list_tag_extras(self.session, options.tag,
                                    target=options.target,
+                                   blocked=options.blocked,
                                    quiet=options.quiet,
                                    json=options.json)
 
