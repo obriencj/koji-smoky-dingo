@@ -45,7 +45,7 @@ from ..builds import (
     decorate_build_archive_data, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_tag_builds)
-from ..tags import gather_tag_ids
+from ..tags import ensure_tag, gather_tag_ids
 from ..common import chunkseq, unique
 
 
@@ -57,6 +57,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
                         sorting=None,
                         owner=None, inherit=False,
                         force=False, notify=False,
+                        create=False,
                         verbose=False, strict=False):
 
     """
@@ -73,7 +74,9 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
 
     # fetch the destination tag info (and make sure it actually
     # exists)
-    taginfo = as_taginfo(session, tagname)
+    taginfo = ensure_tag(session, tagname) if create \
+        else as_taginfo(session, tagname)
+
     tagid = taginfo["id"]
 
     # figure out how we're going to be dealing with builds that don't
@@ -188,6 +191,9 @@ class BulkTagBuilds(TagSmokyDingo):
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
 
+        addarg("--create", action="store_true", default=False,
+               help="Create the tag if it doesn't exist already")
+
         addarg("--strict", action="store_true", default=False,
                help="Stop processing at the first failure")
 
@@ -244,6 +250,7 @@ class BulkTagBuilds(TagSmokyDingo):
                                    inherit=options.inherit,
                                    force=options.force,
                                    notify=options.notify,
+                                   create=options.create,
                                    verbose=options.verbose,
                                    strict=options.strict)
 
