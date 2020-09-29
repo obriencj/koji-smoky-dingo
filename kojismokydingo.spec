@@ -231,6 +231,7 @@ Koji Smoky Dingo
 - updated list-tag-extras to add a '--blocked' option
 - add ensure_tag function
 - updated bulk-tag-builds to add a '--create' option
+- add version_check function (requires koji 1.23)
 
 * Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-1
 - fix issue with 'set-rpm-macro --help'

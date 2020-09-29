@@ -27,7 +27,7 @@ from koji import (
     ClientSession, Fault, GenericError,
     convertFault, read_config)
 from koji_cli.lib import activate_session, ensure_connection
-from six.moves import zip
+from six.moves import map, zip
 
 from .common import chunkseq
 
@@ -597,7 +597,36 @@ def as_targetinfo(session, target):
     return info
 
 
-def version_check(session, minimum=(1, 23, 0)):
+def _int(val):
+    try:
+        val = int(val)
+    except ValueError:
+        pass
+    return val
+
+
+def version_check(session, minimum=(1, 23)):
+    """
+    Verifies that the requested minimum version is met compared
+    against session.getKojiVersion.
+
+    If the getKojiVersion method isn't implemented on the hub, we
+    presume that we're version 1.22 (the last version before
+    getKojiVersion was added). Because of this, checking for minimum
+    versions lower than 1.23 will always return True.
+
+    Version is specified as a tuple of integers, eg. 1.23 is ``(1,
+    23)``
+
+    :param minimum: Minimum version required. Default, ``(1, 23)``
+
+    :type minimum: tuple[int]
+
+    :rtype: bool
+    """
+
+    if isinstance(minimum, str):
+        minimum = tuple(map(_int, minimum.split(".")))
 
     # we need to use this instead of getattr as koji sessions will
     # automatically create all missing properties as proxies to a
@@ -605,12 +634,18 @@ def version_check(session, minimum=(1, 23, 0)):
     session_vars = vars(session)
 
     hub_ver = session_vars.get("__hub_version", None)
-
     if hub_ver is None:
         try:
-            hub_ver = session.getVersion()
+            hub_ver = session.getKojiVersion()
         except GenericError:
-            hub_ver = ()
+            pass
+
+        if hub_ver is None:
+            hub_ver = (1, 22)
+
+        elif isinstance(hub_ver, str):
+            hub_ver = tuple(map(_int, hub_ver.split(".")))
+
         session_vars["__hub_version"] = hub_ver
 
     return bool(hub_ver and hub_ver >= minimum)
