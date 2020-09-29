@@ -213,6 +213,12 @@ def collect_tag_extras(session, taginfo, prefix=None):
     # getBuildConfig, but gives us a chance to record what tag in the
     # inheritance that the setting is coming from
 
+    # we need to trigger a leading getTag call in order to determine
+    # if our hub supports tag extra blocking. So if we're already a
+    # tag info dict, let's down-convert to just the ID or name
+    if isinstance(taginfo, dict):
+        taginfo = taginfo["id"] or taginfo["name"]
+
     try:
         # try using the new API first
         taginfo = as_taginfo(session, taginfo, blocked=True)
@@ -224,6 +230,7 @@ def collect_tag_extras(session, taginfo, prefix=None):
 
     else:
         # looks like we support extra blocking
+
         get_tag = partial(session.getTag, blocked=True)
 
     found = convert_tag_extras(taginfo, prefix=prefix)
