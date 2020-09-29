@@ -46,6 +46,8 @@ CLASSIFIERS = [
 
 COMMANDS = {
     "affected-targets": "kojismokydingo.cli.tags:AffectedTargets",
+    "block-env-var": "kojismokydingo.cli.tags:BlockEnvVar",
+    "block-rpm-macro": "kojismokydingo.cli.tags:BlockRPMMacro",
     "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
@@ -60,6 +62,8 @@ COMMANDS = {
     "list-rpm-macros": "kojismokydingo.cli.tags:ListRPMMacros",
     "list-tag-extras": "kojismokydingo.cli.tags:ListTagExtras",
     "perminfo": "kojismokydingo.cli.users:PermissionInfo",
+    "remove-env-var": "kojismokydingo.cli.tags:RemoveEnvVar",
+    "remove-rpm-macro": "kojismokydingo.cli.tags:RemoveRPMMacro",
     "renum-tag-inheritance": "kojismokydingo.cli.tags:RenumTagInheritance",
     "set-env-var": "kojismokydingo.cli.tags:SetEnvVar",
     "set-rpm-macro": "kojismokydingo.cli.tags:SetRPMMacro",

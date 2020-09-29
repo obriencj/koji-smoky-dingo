@@ -165,6 +165,11 @@ Koji Smoky Dingo
 * Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-0
 - add iter_bulk_load generator function
 - fix exception in kojismokyding.cli.tabulate for None values
+- rename unset-env-var to remove-env-var
+- rename unset-rpm-macro to remove-rpm-macro
+- added block-env-var and block-rpm-macro (requires koji 1.23)
+- added FeatureUnavailable exception type
+- updated list-tag-extras to add a '--blocked' option
 
 * Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-1
 - fix issue with 'set-rpm-macro --help'
