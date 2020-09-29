@@ -5,9 +5,9 @@ koji bulk-tag-builds
 
 ::
 
- usage: koji bulk-tag-builds [-h] [-f NVR_FILE] [--strict] [--owner OWNER]
-                             [--no-inherit] [--force] [--notify] [-v]
-                             [--nvr-sort | --id-sort]
+ usage: koji bulk-tag-builds [-h] [-f NVR_FILE] [--create] [--strict]
+                             [--owner OWNER] [--no-inherit] [--force]
+                             [--notify] [-v] [--nvr-sort | --id-sort]
                              TAGNAME [NVR [NVR ...]]
 
  Quickly tag a large number of builds
@@ -21,6 +21,7 @@ koji bulk-tag-builds
    -f NVR_FILE, --file NVR_FILE
                          Read list of builds from file, one NVR per line.
                          Specify - to read from stdin.
+   --create              Create the tag if it doesn't exist already
    --strict              Stop processing at the first failure
    --owner OWNER         Force missing package listings to be created with the
                          specified owner

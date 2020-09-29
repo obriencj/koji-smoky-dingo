@@ -29,6 +29,27 @@ from six import iteritems, itervalues
 from . import as_taginfo, as_targetinfo, bulk_load, bulk_load_tags
 
 
+def ensure_tag(session, name):
+    """
+    Given a name, resolve it to a tag info dict. If there is no such
+    tag, then create it first.
+
+    :param name: tag name
+
+    :type name: str
+
+    :rtype: dict
+    """
+
+    info = session.getTag(name)
+
+    if not info:
+        tag_id = session.createTag(name)
+        info = session.getTag(tag_id)
+
+    return info
+
+
 def resolve_tag(session, name, target=False, blocked=False):
     """
     Given a name, resolve it to a taginfo.
