@@ -1,39 +1,63 @@
 # Sorry that this Makefile is a bit of a disaster.
 
 
-PROJECT = kojismokydingo
-VERSION = $(shell tools/version.sh)
-ARCHIVE = $(PROJECT)-$(VERSION).tar.gz
+PROJECT := kojismokydingo
+VERSION := $(shell tools/version.sh)
+ARCHIVE := $(PROJECT)-$(VERSION).tar.gz
 
-GITBRANCH = $(shell git branch --show-current)
-GITHEADREF = $(shell git show-ref -d --heads $(GITBRANCH) \
-		| head -n1 | cut -f2 -d' ')
 
 PYTHON ?= $(shell which python3 python2 python 2>/dev/null \
 	        | head -n1)
+PYTHON := $(PYTHON)
 
+_WHEELCHECK := $(shell $(PYTHON) -c 'import wheel' 2>/dev/null)
+ifeq ($(.SHELLSTATUS),0)
+	BDIST := bdist_wheel
+	BDIST_FILE := dist/$(PROJECT)-$(VERSION)*.whl
+else
+	BDIST := build
+	BDIST_FILE := dist/$(PROJECT)-$(VERSION)*.egg
+endif
+
+_FLAKE8CHECK := $(shell $(PYTHON) -c 'import flake8' 2>/dev/null)
+ifeq ($(.SHELLSTATUS),0)
+	FLAKE8 := flake8
+else
+	FLAKE8 :=
+endif
+
+
+# what I really want is for the $(ARCHIVE) target to be able to
+# compare the timestamp of that file vs. the timestamp of the last
+# commit in the repo.
+GITBRANCH := $(shell git branch --show-current)
+GITHEADREF := $(shell git show-ref -d --heads $(GITBRANCH) \
+		| head -n1 | cut -f2 -d' ')
 
 # We use this later in setting up the gh-pages submodule for pushing,
 # so forks will push their docs to their own gh-pages branch.
-ORIGIN_PUSH = $(shell git remote get-url --push origin)
+ORIGIN_PUSH := $(shell git remote get-url --push origin)
 
 
+##@ Basic Targets
 default: quick-test	## Runs the quick-test target
 
 
-##@ Valid Targets
 help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 
+##@ Local Build and Install
 build: clean	## Produces a wheel using the default system python
-	@$(PYTHON) setup.py flake8 bdist_wheel
+	$(PYTHON) setup.py $(FLAKE8) $(BDIST)
 
 
 install: build	## Installs using the default python for the current user
-	@$(PYTHON) -B -m pip install --no-deps --user -I dist/*.whl
+	$(PYTHON) -B -m pip.__main__ \
+		install --no-deps --user -I $(BDIST_FILE)
 
 
+##@ Cleanup
 tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
 	@find -H . \
@@ -44,9 +68,10 @@ tidy:	## Removes stray eggs and .pyc files
 
 clean: tidy	## Removes built content, test logs, coverage reports
 	@rm -rf .coverage* build/* dist/* htmlcov/* logs/*
-	@rm -f "$(ARCHIVE)"
+	@if [ -f "$(ARCHIVE)" ] ; then rm -f "$(ARCHIVE)" ; fi
 
 
+##@ Containerized RPMs
 packaging-build: $(ARCHIVE)	## Launches all containerized builds
 	@./tools/launch-build.sh
 
@@ -56,22 +81,24 @@ packaging-test: packaging-build	## Launches all containerized tests
 	@./tools/launch-test.sh
 
 
+##@ Testing
 test: clean	## Launches tox
 	@tox
 
 
 quick-test: clean	## Launches nosetest using the default python
-	@$(PYTHON) -B setup.py flake8 build test
+	@$(PYTHON) -B setup.py $(FLAKE8) build test
 
 
-srpm: $(ARCHIVE)	## Produce an SRPM from the current git commit
+##@ RPMs
+srpm: $(ARCHIVE)	## Produce an SRPM from the archive
 	@rpmbuild \
 		--define "_srcrpmdir dist" \
 		--define "dist %{nil}" \
 		-ts "$(ARCHIVE)"
 
 
-rpm: $(ARCHIVE)		## Produce an RPM from the current git commit
+rpm: $(ARCHIVE)		## Produce an RPM from the archive
 	@rpmbuild --define "_rpmdir dist" -tb "$(ARCHIVE)"
 
 
@@ -86,39 +113,42 @@ $(ARCHIVE): .git/$(GITHEADREF)
 		| gzip > "$(ARCHIVE)"
 
 
+##@ Documentation
+docs: docs/overview.rst	## Build sphinx docs
+	@$(PYTHON) -B setup.py docs
+
+
+overview: docs/overview.rst  ## rebuilds the overview from README.md
+
+
 docs/overview.rst: README.md
 	@sed 's/^\[\!.*/ /g' $< > overview.md
 	@pandoc --from=markdown --to=rst -o $@ "overview.md"
 	@rm -f overview.md
 
 
-docs: docs/overview.rst	## Build sphinx docs
-	@$(PYTHON) -B setup.py docs
-
-
 pull-docs:	## Refreshes the gh-pages submodule
 	@git submodule init ; \
-	pushd gh-pages ; \
-	git reset --hard gh-pages ; \
+	pushd gh-pages >/dev/null ; \
+	git reset --hard origin/gh-pages ; \
 	git pull ; \
-	popd
+	git clean -fd >/dev/null ; \
+	popd >/dev/null
 
 
 stage-docs: docs pull-docs	## Builds docs and stages them in gh-pages
-	@pushd gh-pages ; \
-	git reset --hard origin/gh-pages ; \
-	git pull ; \
+	@pushd gh-pages >/dev/null ; \
 	rm -rf * ; \
 	touch .nojekyll ; \
-	popd ; \
-	cp -r build/sphinx/dirhtml/* gh-pages
+	popd >/dev/null ; \
+	cp -vr build/sphinx/dirhtml/* gh-pages/
 
 
-deploy-docs: stage-docs	## Build, stage, and deploy docs to gh-pages
-	@pushd gh-pages ; \
+deploy-docs: stage-docs	## Builds, stages, and deploys docs to gh-pages
+	@pushd gh-pages >/dev/null ; \
 	git remote set-url --push origin $(ORIGIN_PUSH) ; \
 	git add -A && git commit -m "deploying sphinx update" && git push ; \
-	popd ; \
+	popd >/dev/null ; \
 	if [ `git diff --name-only gh-pages` ] ; then \
 		git add gh-pages ; \
 		git commit -m "docs deploy [ci skip]" -o gh-pages ; \
