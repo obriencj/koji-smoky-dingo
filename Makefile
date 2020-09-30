@@ -16,7 +16,7 @@ ifeq ($(.SHELLSTATUS),0)
 	BDIST_FILE := dist/$(PROJECT)-$(VERSION)*.whl
 else
 	BDIST := build
-	BDIST_FILE := dist/$(PROJECT)-$(VERSION)*.egg
+	BDIST_FILE := .
 endif
 
 _FLAKE8CHECK := $(shell $(PYTHON) -c 'import flake8' 2>/dev/null)
@@ -30,13 +30,12 @@ endif
 # what I really want is for the $(ARCHIVE) target to be able to
 # compare the timestamp of that file vs. the timestamp of the last
 # commit in the repo.
-GITBRANCH := $(shell git branch --show-current)
-GITHEADREF := $(shell git show-ref -d --heads $(GITBRANCH) \
-		| head -n1 | cut -f2 -d' ')
+GITHEAD := $(shell cut -f2 -d' ' .git/HEAD)
+GITHEADREF := .git/$(GITHEAD)
 
 # We use this later in setting up the gh-pages submodule for pushing,
 # so forks will push their docs to their own gh-pages branch.
-ORIGIN_PUSH := $(shell git remote get-url --push origin)
+ORIGIN_PUSH = $(shell git remote get-url --push origin)
 
 
 ##@ Basic Targets
@@ -107,8 +106,8 @@ archive: $(ARCHIVE)	## Extracts an archive from the current git commit
 
 # newer versions support the --format tar.gz but we're intending to work all
 # the way back to RHEL 6 which does not have that.
-$(ARCHIVE): .git/$(GITHEADREF)
-	@git archive $(GITHEADREF) \
+$(ARCHIVE): $(GITHEADREF)
+	@git archive $(GITHEAD) \
 		--format tar --prefix "$(PROJECT)-$(VERSION)/" \
 		| gzip > "$(ARCHIVE)"
 
