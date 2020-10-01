@@ -26,8 +26,10 @@ else
 	FLAKE8 :=
 endif
 
-_OLDCHECK := $(shell $(PYTHON) -c 'import sys; sys.exit(sys.version_info < (2, \
-7,));')
+# python 2.6 needed an externally installed argparse, which has weird
+# output for some things (like mutually exclusive groups), so we skip
+# that test for 2.6
+_OLDCHECK := $(shell $(PYTHON) -c 'import sys; sys.exit(sys.version_info < (2, 7,))')
 ifeq ($(.SHELLSTATUS),0)
 	NOSEARGS :=
 else
@@ -56,11 +58,11 @@ help:  ## Display this help
 
 ##@ Local Build and Install
 build: clean	## Produces a wheel using the default system python
-	$(PYTHON) setup.py $(FLAKE8) $(BDIST)
+	@$(PYTHON) setup.py $(FLAKE8) $(BDIST)
 
 
 install: build	## Installs using the default python for the current user
-	$(PYTHON) -B -m pip.__main__ \
+	@$(PYTHON) -B -m pip.__main__ \
 		install --no-deps --user -I $(BDIST_FILE)
 
 
@@ -93,8 +95,8 @@ test: clean	## Launches tox
 	@tox
 
 
-quick-test: clean	## Launches nosetest using the default python
-	@$(PYTHON) -B setup.py $(FLAKE8) build test $(NOSEARGS)
+quick-test: build	## Launches nosetest using the default python
+	@$(PYTHON) -B setup.py test $(NOSEARGS)
 
 
 ##@ RPMs
@@ -166,7 +168,7 @@ clean-docs:	## Remove built docs
 	@rm -rf build/sphinx/*
 
 
-.PHONY: all archive clean default docs deploy-docs help overview packaging-build packaging-test rpm srpm stage-docs test
+.PHONY: archive build clean clean-docs default deploy-docs docs help overview packaging-build packaging-test quick-test rpm srpm stage-docs test tidy
 
 
 # The end.
