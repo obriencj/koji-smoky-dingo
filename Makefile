@@ -26,6 +26,13 @@ else
 	FLAKE8 :=
 endif
 
+_OLDCHECK := $(shell $(PYTHON) -c 'from __future__ import print_function; import sys; print(sys.version);' | grep -q '^2\.6\.')
+ifeq ($(.SHELLSTATUS),0)
+	NOSEARGS := -e 'test_command_help'
+else
+	NOSEARGS :=
+endif
+
 
 # what I really want is for the $(ARCHIVE) target to be able to
 # compare the timestamp of that file vs. the timestamp of the last
@@ -86,7 +93,7 @@ test: clean	## Launches tox
 
 
 quick-test: clean	## Launches nosetest using the default python
-	@$(PYTHON) -B setup.py $(FLAKE8) build test
+	@$(PYTHON) -B setup.py $(FLAKE8) build test $(NOSEARGS)
 
 
 ##@ RPMs
