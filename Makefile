@@ -26,11 +26,12 @@ else
 	FLAKE8 :=
 endif
 
-_OLDCHECK := $(shell $(PYTHON) -c 'from __future__ import print_function; import sys; print(sys.version);' | grep -q '^2\.6\.')
+_OLDCHECK := $(shell $(PYTHON) -c 'import sys; sys.exit(sys.version_info < (2, \
+7,));')
 ifeq ($(.SHELLSTATUS),0)
-	NOSEARGS := -e 'test_command_help'
-else
 	NOSEARGS :=
+else
+	NOSEARGS := -e 'test_command_help'
 endif
 
 
