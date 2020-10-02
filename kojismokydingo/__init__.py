@@ -712,8 +712,8 @@ def version_require(session, minimum=(1, 23), message=None):
     :type minimum: tuple[int]
 
     :param message: Message to use in exception if version check
-    fails. Default, with a minimum of ``(1, 23)``, ``"requires >=
-    1.23"``
+      fails. Default, with a minimum of ``(1, 23)``, ``"requires >=
+      1.23"``
 
     :type message: str, optional
 
