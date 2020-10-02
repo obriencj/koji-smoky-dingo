@@ -1,7 +1,7 @@
 
 %global srcname kojismokydingo
 %global srcver 0.9.3
-%global srcrel 0
+%global srcrel 1
 
 
 Summary: Koji Smoky Dingo
@@ -219,7 +219,7 @@ Koji Smoky Dingo
 
 
 %changelog
-* Thu Oct 01 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-0
+* Fri Oct 02 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-1
 - add iter_bulk_load generator function
 - fix exception in kojismokyding.cli.tabulate for None values
 - rename unset-env-var to remove-env-var
@@ -229,7 +229,7 @@ Koji Smoky Dingo
 - updated list-tag-extras to add a '--blocked' option
 - add ensure_tag function
 - updated bulk-tag-builds to add a '--create' option
-- add version_check function (requires koji 1.23)
+- add version_check and version_require functions
 
 * Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-1
 - fix issue with 'set-rpm-macro --help'
