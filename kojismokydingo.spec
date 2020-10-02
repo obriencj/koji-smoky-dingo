@@ -166,8 +166,6 @@ Koji Smoky Dingo
 %{python_sitelib}/koji_cli_plugins/
 %{python_sitelib}/kojismokydingo/
 %{python_sitelib}/kojismokydingo-%{version}-py2.?.egg-info/
-%doc README.md
-%license LICENSE
 
 %endif
 
