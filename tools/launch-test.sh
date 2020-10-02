@@ -5,7 +5,7 @@
 
 
 for PLATFORM in $(ksd_platforms "$@") ; do
-    ksd_test_platform "$PLATFORM"
+    ksd_test_platform "$PLATFORM" || exit 1
 done
 
 
