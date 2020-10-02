@@ -33,7 +33,7 @@ from six.moves import zip
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
     printerr, pretty_json, tabulate)
-from .. import BadDingo, FeatureUnavailable, NoSuchTag, version_check
+from .. import BadDingo, FeatureUnavailable, NoSuchTag, version_require
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, get_affected_targets,
     renum_inheritance, resolve_tag)
@@ -404,8 +404,6 @@ def cli_set_rpm_macro(session, tagname, macro,
     modified.
     """
 
-    with_blocking = version_check(session, (1, 23))
-
     taginfo = resolve_tag(session, tagname, target)
 
     if macro.startswith("rpm.macro."):
@@ -424,9 +422,7 @@ def cli_set_rpm_macro(session, tagname, macro,
         session.editTag2(taginfo["id"], remove_extra=[key])
 
     elif block:
-        if not with_blocking:
-            raise FeatureUnavailable("block tag extra values")
-
+        version_require(session, (1, 23), "block tag extra values")
         session.editTag2(taginfo["id"], block_extra=[key])
 
     else:
@@ -561,8 +557,6 @@ def cli_set_env_var(session, tagname, var,
     modified.
     """
 
-    with_blocking = version_check(session, (1, 23))
-
     taginfo = resolve_tag(session, tagname, target)
 
     if var.startswith("rpm.env."):
@@ -578,9 +572,7 @@ def cli_set_env_var(session, tagname, var,
         session.editTag2(taginfo["id"], remove_extra=[key])
 
     elif block:
-        if not with_blocking:
-            raise FeatureUnavailable("block tag extra values")
-
+        version_require(session, (1, 23), "block tag extra values")
         session.editTag2(taginfo["id"], block_extra=[key])
 
     else:

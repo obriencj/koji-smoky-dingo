@@ -32,6 +32,41 @@ from six.moves import map, zip
 from .common import chunkseq
 
 
+__all__ = (
+    "AnonClientSession",
+    "BadDingo",
+    "FeatureUnavailable",
+    "ManagedClientSession",
+    "NoSuchBuild",
+    "NoSuchChannel",
+    "NoSuchContentGenerator",
+    "NoSuchPermission",
+    "NoSuchTag",
+    "NoSuchTarget",
+    "NoSuchTask",
+    "NoSuchUser",
+    "NotPermitted",
+    "ProfileClientSession",
+
+    "as_buildinfo",
+    "as_taginfo",
+    "as_targetinfo",
+    "bulk_load",
+    "bulk_load_build_archives",
+    "bulk_load_build_rpms",
+    "bulk_load_builds",
+    "bulk_load_buildroot_archives",
+    "bulk_load_buildroot_rpms",
+    "bulk_load_buildroots",
+    "bulk_load_rpm_sigs",
+    "bulk_load_tags",
+    "bulk_load_tasks",
+    "iter_bulk_load",
+    "version_check",
+    "version_require",
+)
+
+
 class ManagedClientSession(ClientSession):
     """
     A `koji.ClientSession` that can be used as via the ``with``
@@ -364,8 +399,12 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
 
     results = OrderedDict() if results is None else results
 
-    for key, info in iter_bulk_load(session, session.getTag, tags,
-                                    False, size):
+    if version_check(session, (1, 23)):
+        fn = partial(session.getTag, blocked=True)
+    else:
+        fn = session.getTag
+
+    for key, info in iter_bulk_load(session, fn, tags, False, size):
         if not info:
             if err:
                 raise NoSuchTag(key)
@@ -649,6 +688,50 @@ def version_check(session, minimum=(1, 23)):
         session_vars["__hub_version"] = hub_ver
 
     return bool(hub_ver and hub_ver >= minimum)
+
+
+def version_require(session, minimum=(1, 23), message=None):
+    """
+    Verifies that the requested minimum version is met compared
+    against ``session.getKojiVersion()``
+
+    If the getKojiVersion method isn't implemented on the hub, we
+    presume that we're version 1.22 (the last version before
+    getKojiVersion was added). Because of this, checking for minimum
+    versions lower than 1.23 will always return True.
+
+    Version is specified as a tuple of integers, eg. 1.23 is ``(1,
+    23)``
+
+    If the version requirement is not met, a `FeatureUnavailable`
+    exception is raised, with the given message. If message is not
+    provided, a simple one is constructed based on the minimum value.
+
+    :param minimum: Minimum version required. Default, ``(1, 23)``
+
+    :type minimum: tuple[int]
+
+    :param message: Message to use in exception if version check
+    fails. Default, with a minimum of ``(1, 23)``, ``"requires >=
+    1.23"``
+
+    :type message: str, optional
+
+    :raises FeatureUnavailable: If the minimum version is not met
+
+    :rtype: bool
+    """
+
+
+    if version_check(session, minimum=minimum):
+        return True
+
+    if message is None:
+        if isinstance(minimum, (list, tuple)):
+            minimum = ".".join(str(m) for m in minimum)
+        message = "requires >= %s" % minimum
+
+    raise FeatureUnavailable(message)
 
 
 #

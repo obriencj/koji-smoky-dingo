@@ -18,7 +18,9 @@ from mock import MagicMock, PropertyMock, patch
 from six.moves import zip
 from unittest import TestCase
 
-from kojismokydingo import iter_bulk_load
+from kojismokydingo import (
+    FeatureUnavailable,
+    iter_bulk_load, version_check, version_require)
 
 
 class TestBulkLoad(TestCase):
@@ -73,6 +75,101 @@ class TestBulkLoad(TestCase):
             for i, call in enumerate(calls):
                 self.assertEqual(call['methodName'], "ImpossibleDream")
                 self.assertEqual(call['params'], (i + offset,))
+
+
+class TestVersionCheck(TestCase):
+
+
+    def setUp(self):
+        self.send = patch('koji.ClientSession._sendCall').start()
+
+
+    def tearDown(self):
+        patch.stopall()
+
+
+    def session(self):
+        return koji.ClientSession('FAKE_URL')
+
+
+    def ge(self):
+        return koji.GenericError("Invalid method: getKojiVersion")
+
+
+    def test_bad_version_check(self):
+        self.send.side_effect = ["1.25", self.ge()]
+
+        sess = self.session()
+        self.assertFalse(version_check(sess, (1, 26)))
+        self.assertFalse(version_check(sess, (1, 27)))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 25))
+        self.assertEqual(self.send.call_count, 1)
+
+        sess = self.session()
+        self.assertFalse(version_check(sess, (1, 23)))
+        self.assertFalse(version_check(sess, (1, 24)))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 22))
+        self.assertEqual(self.send.call_count, 2)
+
+
+    def test_good_version_check(self):
+        self.send.side_effect = ["1.24", "1.25", self.ge()]
+
+        sess = self.session()
+        self.assertTrue(version_check(sess, (1, 23)))
+        self.assertTrue(version_check(sess, (1, 24)))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 24))
+        self.assertEqual(self.send.call_count, 1)
+
+        sess = self.session()
+        self.assertTrue(version_check(sess, (1, 24)))
+        self.assertTrue(version_check(sess, (1, 25)))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 25))
+        self.assertEqual(self.send.call_count, 2)
+
+        sess = self.session()
+        self.assertTrue(version_check(sess, (1, 22)))
+        self.assertTrue(version_check(sess, (1, 22)))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 22))
+        self.assertEqual(self.send.call_count, 3)
+
+
+    def test_bad_version_require(self):
+        self.send.side_effect = ["1.25", self.ge()]
+
+        sess = self.session()
+        self.assertRaises(FeatureUnavailable, version_require, sess, (1, 26))
+        self.assertRaises(FeatureUnavailable, version_require, sess, (1, 27))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 25))
+        self.assertEqual(self.send.call_count, 1)
+
+        sess = self.session()
+        self.assertRaises(FeatureUnavailable, version_require, sess, (1, 23))
+        self.assertRaises(FeatureUnavailable, version_require, sess, (1, 24))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 22))
+        self.assertEqual(self.send.call_count, 2)
+
+
+    def test_good_version_require(self):
+        self.send.side_effect = ["1.24", "1.25", self.ge()]
+
+        sess = self.session()
+        self.assertTrue(version_require(sess, (1, 23)))
+        self.assertTrue(version_require(sess, (1, 24)))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 24))
+        self.assertEqual(self.send.call_count, 1)
+
+        sess = self.session()
+        self.assertTrue(version_require(sess, (1, 24)))
+        self.assertTrue(version_require(sess, (1, 25)))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 25))
+        self.assertEqual(self.send.call_count, 2)
+
+        sess = self.session()
+        self.assertTrue(version_require(sess, (1, 22)))
+        self.assertTrue(version_require(sess, (1, 22)))
+        self.assertEqual(vars(sess)["__hub_version"], (1, 22))
+        self.assertEqual(self.send.call_count, 3)
 
 
 #

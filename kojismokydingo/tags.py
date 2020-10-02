@@ -26,8 +26,9 @@ from itertools import chain
 from six import iteritems, itervalues
 
 from . import (
-    as_taginfo, as_targetinfo, bulk_load,
-    bulk_load_tags, version_check)
+    NoSuchTag,
+    as_taginfo, as_targetinfo,
+    bulk_load, bulk_load_tags)
 
 
 def ensure_tag(session, name):
@@ -42,11 +43,16 @@ def ensure_tag(session, name):
     :rtype: dict
     """
 
-    info = session.getTag(name)
+    try:
+        info = as_taginfo(session, name)
+    except NoSuchTag:
+        info = None
 
-    if not info:
+    # we do it this way so we don't get a nested exception if
+    # createTag fails
+    if info is None:
         tag_id = session.createTag(name)
-        info = session.getTag(tag_id)
+        info = as_taginfo(session, tag_id)
 
     return info
 
@@ -215,28 +221,18 @@ def collect_tag_extras(session, taginfo, prefix=None):
     # inheritance that the setting is coming from
 
     taginfo = as_taginfo(session, taginfo)
-
-    if version_check(session, (1, 23)):
-        get_tag = partial(session.getTag, blocked=True)
-    else:
-        # this is an older koji that doesn't support extra blocking
-        get_tag = session.getTag
-
     found = convert_tag_extras(taginfo, prefix=prefix)
 
     inher = session.getFullInheritance(taginfo["id"])
+    tids = (tag["parent_id"] for tag in inher if not tag["noconfig"])
+    parents = bulk_load_tags(session, tids)
 
-    session.multicall = True
-    for link in inher:
-        if not link["noconfig"]:
-            get_tag(link["parent_id"])
-
-    for tag in session.multiCall():
+    for tag in itervalues(parents):
         # mix the extras into existing found results. note: we're not
         # checking for faults, because we got this list of tag IDs
         # straight from koji itself, but there could be some kind of
         # race condition from this.
-        convert_tag_extras(tag[0], into=found, prefix=prefix)
+        convert_tag_extras(tag, into=found, prefix=prefix)
 
     return found
 
