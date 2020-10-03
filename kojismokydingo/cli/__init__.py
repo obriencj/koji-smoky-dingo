@@ -36,9 +36,27 @@ from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os.path import basename
 from six import add_metaclass
-from six.moves import zip_longest
+from six.moves import filter, map, zip_longest
 
 from kojismokydingo import BadDingo, NotPermitted
+
+
+__all__ = (
+    "AdminSmokyDingo",
+    "AnonSmokyDingo",
+    "HostSmokyDingo",
+    "SmokyDingo",
+    "TagSmokyDingo",
+    "TargetSmokyDingo",
+
+    "clean_lines",
+    "pretty_json",
+    "printerr",
+    "read_clean_lines",
+    "resplit",
+    "space_normalize",
+    "tabulate",
+)
 
 
 # these mimic the default format for jq output
@@ -94,8 +112,8 @@ def resplit(arglist, sep=","):
     ``x = [1, 2, 3, 4, 5, 6, 7, 8]``
     """
 
-    work = (a.strip() for a in sep.join(arglist).split(sep))
-    return [a for a in work if a]
+    work = map(str.strip, sep.join(arglist).split(sep))
+    return list(filter(None, work))
 
 
 def clean_lines(lines, skip_comments=True):
@@ -123,8 +141,9 @@ def clean_lines(lines, skip_comments=True):
     if skip_comments:
         lines = (l.split('#', 1)[0].strip() for l in lines)
     else:
-        lines = (l.strip() for l in lines)
-    return [l for l in lines if l]
+        lines = map(str.strip, lines)
+
+    return list(filter(None, lines))
 
 
 def read_clean_lines(filename="-", skip_comments=True):
@@ -225,7 +244,7 @@ def tabulate(headings, data, key=None, sorting=0,
     # convert data to a list, and apply the key if necessary to find
     # the real columns
     if key:
-        data = (key(row) for row in data)
+        data = map(key, data)
 
     if sorting:
         data = sorted(data, reverse=(sorting < 0))
@@ -257,8 +276,17 @@ def tabulate(headings, data, key=None, sorting=0,
 
 
 def space_normalize(txt):
-    lines = (t.strip() for t in txt.split())
-    return " ".join(t for t in lines if t)
+    """
+    Normalizes the whitespace in txt to single spaces.
+
+    :param txt: Original text
+    :type txt: str
+
+    :rtype: str
+    """
+
+    lines = map(str.strip, txt.split())
+    return " ".join(filter(None, lines))
 
 
 @add_metaclass(ABCMeta)
