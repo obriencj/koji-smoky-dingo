@@ -18,7 +18,7 @@ from six.moves import StringIO
 from unittest import TestCase
 
 from kojismokydingo.cli import (
-    SmokyDingo, clean_lines, resplit, tabulate)
+    SmokyDingo, clean_lines, resplit, space_normalize, tabulate)
 
 
 ENTRY_POINTS = {
@@ -165,6 +165,21 @@ class TestUtils(TestCase):
         self.assertEqual(clean_lines(expect_1, True), expect_1)
         self.assertEqual(clean_lines(expect_2, True), expect_1)
         self.assertEqual(clean_lines(expect_2, False), expect_2)
+
+
+    def test_space_normalize(self):
+        data = """
+        This is a
+        big mess of a string with    all   sorts\tof whitespace
+        in it.
+
+        """
+
+        expect = ("This is a big mess of a string with all sorts of"
+                  " whitespace in it.")
+
+        self.assertEqual(space_normalize(data), expect)
+        self.assertEqual(space_normalize(expect), expect)
 
 
 class TestTabulate(TestCase):
