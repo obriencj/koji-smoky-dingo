@@ -1,7 +1,7 @@
 
 %global srcname kojismokydingo
-%global srcver 0.9.3
-%global srcrel 1
+%global srcver 0.9.4
+%global srcrel 0
 
 
 Summary: Koji Smoky Dingo
@@ -219,6 +219,8 @@ Koji Smoky Dingo
 
 
 %changelog
+* Fri Oct 09 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.4-0
+
 * Fri Oct 02 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-1
 - add iter_bulk_load generator function
 - fix exception in kojismokyding.cli.tabulate for None values
