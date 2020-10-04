@@ -22,6 +22,7 @@ Functions for working with Koji builds
 """
 
 
+from koji import BUILD_STATES
 from collections import OrderedDict
 from operator import itemgetter
 from six import iteritems, itervalues
@@ -37,6 +38,13 @@ from . import (
 from .common import (
     chunkseq, merge_extend, rpm_evr_compare,
     unique, update_extend)
+
+
+BUILD_BUILDING = BUILD_STATES["BUILDING"]
+BUILD_COMPLETE = BUILD_STATES["COMPLETE"]
+BUILD_DELETED = BUILD_STATES["DELETED"]
+BUILD_FAILED = BUILD_STATES["FAILED"]
+BUILD_CANCELED = BUILD_STATES["CANCELED"]
 
 
 class BuildNEVRCompare(object):
@@ -544,7 +552,7 @@ def filter_by_tags(session, build_infos,
     return itervalues(builds)
 
 
-def filter_by_state(build_infos, state=1):
+def filter_by_state(build_infos, state=BUILD_COMPLETE):
     """
     Given a sequence of build info dicts, return a generator of those
     matching the given state.

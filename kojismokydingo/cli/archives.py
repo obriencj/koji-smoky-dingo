@@ -22,58 +22,63 @@ Koji Smoky Dingo - CLI Archive and RPM Commands
 
 from __future__ import print_function
 
+from collections import OrderedDict
+from six import itervalues
+
 from . import AnonSmokyDingo, pretty_json, resplit
-from .. import NoSuchBuild
+from .. import bulk_load_builds
 from ..archives import \
     filter_archives, gather_build_archives, gather_latest_archives
+from ..builds import BUILD_COMPLETE, build_dedup
 
 
-def cli_list_build_archives(session, nvr, btype,
-                            atypes=(), rpmkeys=(),
+def cli_list_build_archives(session, nvrs, btype,
+                            atypes=(), arches=(), rpmkeys=(),
+                            deleted=False,
                             path=None, json=False):
 
-    # quick sanity check, and we'll work with the build info rather
-    # than the NVR from here on out
-    binfo = session.getBuild(nvr)
-    if not binfo:
-        raise NoSuchBuild(nvr)
+    loaded = bulk_load_builds(session, nvrs)
+    found = []
 
-    found = gather_build_archives(session, binfo, btype,
-                                  rpmkeys, path)
+    for binfo in build_dedup(itervalues(loaded)):
+        # the meaning of the --show-deleted/-d setting is a little
+        # different than explained. Any non-COMPLETE build will
+        # normally show no archives, but with that setting enabled,
+        # any state will show archives if the data is recorded in
+        # koji.
+        if deleted or binfo.get("state") == BUILD_COMPLETE:
+            found.extend(gather_build_archives(session, binfo, btype,
+                                               rpmkeys, path))
 
-    if atypes:
-        found = filter_archives(session, found, atypes)
+    found = filter_archives(session, found, atypes, arches)
 
     if json:
         pretty_json(found)
+        return
 
-    else:
-        for f in found:
-            print(f["filepath"])
+    for f in found:
+        print(f["filepath"])
 
 
 def cli_latest_tag_archives(session, tagname, btype,
-                            atypes=(), rpmkeys=(),
+                            atypes=(), arches=(), rpmkeys=(),
                             inherit=True, path=None,
                             json=False):
 
     found = gather_latest_archives(session, tagname, btype,
                                    rpmkeys, inherit, path)
 
-    if atypes:
-        found = filter_archives(session, found, atypes)
+    found = filter_archives(session, found, atypes, arches)
 
     if json:
         pretty_json(found)
+        return
 
-    else:
-        for f in found:
-            print(f["filepath"])
+    for f in found:
+        print(f["filepath"])
 
 
-class ArchiveDingo(AnonSmokyDingo):
-
-    group = "info"
+class ArchiveFiltering(object):
 
 
     def archive_arguments(self, parser):
@@ -117,9 +122,14 @@ class ArchiveDingo(AnonSmokyDingo):
         grp = parser.add_argument_group("Archive Filtering Options")
         addarg = grp.add_argument
 
-        addarg("--archive-type", "-a", action="append", metavar="EXT",
+        addarg("--archive-type", action="append", metavar="EXT",
                dest="atypes", default=[],
                help="Only show archives with the given archive type."
+               " Can be specified multiple times. Default: show all")
+
+        addarg("--arch", action="append",
+               dest="arches", default=[],
+               help="Only show archives with the given arch."
                " Can be specified multiple times. Default: show all")
 
         grp = parser.add_argument_group("RPM Options")
@@ -141,8 +151,9 @@ class ArchiveDingo(AnonSmokyDingo):
         return parser
 
 
-    def validate(self, parser, options):
+    def validate_archive_options(self, parser, options):
         options.atypes = resplit(options.atypes)
+        options.arches = resplit(options.arches)
 
         keys = resplit(options.keys)
         if keys and options.unsigned:
@@ -150,7 +161,7 @@ class ArchiveDingo(AnonSmokyDingo):
         options.keys = keys
 
 
-class ListBuildArchives(ArchiveDingo):
+class ListBuildArchives(AnonSmokyDingo, ArchiveFiltering):
 
     description = "List archives from a build"
 
@@ -158,23 +169,34 @@ class ListBuildArchives(ArchiveDingo):
     def arguments(self, parser):
         addarg = parser.add_argument
 
-        addarg("nvr", metavar="NVR",
+        addarg("nvrs", nargs="+", metavar="NVR",
                help="The NVR containing the archives")
+
+        addarg("--show-deleted", "-d", dest="deleted",
+               action="store_true", default=False,
+               help="Show archives for a deleted build. Default, deleted"
+               " builds show an empty archive list")
 
         parser = self.archive_arguments(parser)
         return parser
 
 
+    def validate(self, parser, options):
+        return self.validate_archive_options(parser, options)
+
+
     def handle(self, options):
-        return cli_list_build_archives(self.session, options.nvr,
+        return cli_list_build_archives(self.session, options.nvrs,
                                        btype=options.btype,
                                        atypes=options.atypes,
+                                       arches=options.arches,
                                        rpmkeys=options.keys,
+                                       deleted=options.deleted,
                                        path=options.path,
                                        json=options.json)
 
 
-class LatestArchives(ArchiveDingo):
+class LatestArchives(AnonSmokyDingo, ArchiveFiltering):
 
     description = "List latest archives from a tag"
 
@@ -193,10 +215,15 @@ class LatestArchives(ArchiveDingo):
         return parser
 
 
+    def validate(self, parser, options):
+        return self.validate_archive_options(parser, options)
+
+
     def handle(self, options):
         return cli_latest_tag_archives(self.session, options.tag,
                                        btype=options.btype,
                                        atypes=options.atypes,
+                                       arches=options.arches,
                                        rpmkeys=options.keys,
                                        inherit=options.inherit,
                                        path=options.path,

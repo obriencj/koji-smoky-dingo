@@ -61,7 +61,7 @@ def as_pathinfo(path):
         return PathInfo(path or "")
 
 
-def filter_archives(session, archives, archive_types):
+def filter_archives(session, archives, archive_types=(), arches=()):
     """
     Given a list of archives (or RPMs dressed up like archives),
     return a new list of those archives which are of the given archive
@@ -75,8 +75,15 @@ def filter_archives(session, archives, archive_types):
 
     :type archive_types: list[str]
 
+    :param arches: Desired architectures
+
+    :type arches: list[str]
+
     :rtype: list[dict]
     """
+
+    if not (archive_types or arches):
+        return archives
 
     # convert the list of string extensions from atypes into a set of
     # archive type IDs
@@ -95,12 +102,12 @@ def filter_archives(session, archives, archive_types):
 
     # find only those archives whose type_id is in the set of desired
     # archive types
-    result = []
-    for archive in archives:
-        if archive["type_id"] in atypes:
-            result.append(archive)
 
-    return result
+    def filter_fn(a):
+        return ((not atypes or a["type_id"] in atypes) and
+                (not arches or a.get("arch", "noarch") in arches))
+
+    return list(filter(filter_fn, archives))
 
 
 def gather_signed_rpms(session, archives, sigkeys):
