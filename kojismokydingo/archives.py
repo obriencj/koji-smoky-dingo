@@ -25,7 +25,7 @@ from koji import PathInfo
 from os.path import join
 from six import iterkeys, iteritems
 
-from . import NoSuchTag, bulk_load_rpm_sigs
+from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
 
 
 __all__ = (
@@ -294,21 +294,35 @@ def gather_build_archives(session, binfo, btype=None,
     :rtype: list[dict]
     """
 
+    binfo = as_buildinfo(session, binfo)
+
     known_types = ("rpm", "maven", "win", "image", )
     found = []
 
+    # Check for a decorated list of build types. If not present, then
+    # get it from koji directly. Having this allows us to avoid
+    # querying koji for archives of a btype that the build doesn't
+    # have.
+    build_types = binfo.get("archive_btype_names", None)
+    if build_types is None:
+        build_types = set(session.getBuildType(binfo["id"]))
+
+    if btype and btype not in build_types:
+        # we already know we'll find nothing, so don't bother asking
+        return found
+
     path = as_pathinfo(path)
 
-    if btype in (None, "rpm"):
+    if btype in (None, "rpm") and "rpm" in build_types:
         found.extend(gather_build_rpms(session, binfo, rpmkeys, path))
 
-    if btype in (None, "maven"):
+    if btype in (None, "maven") and "maven" in build_types:
         found.extend(gather_build_maven_archives(session, binfo, path))
 
-    if btype in (None, "win"):
+    if btype in (None, "win") and "win" in build_types:
         found.extend(gather_build_win_archives(session, binfo, path))
 
-    if btype in (None, "image"):
+    if btype in (None, "image") and "image" in build_types:
         found.extend(gather_build_image_archives(session, binfo, path))
 
     if btype in known_types:
@@ -559,12 +573,17 @@ def gather_latest_archives(session, tagname, btype=None,
 
     :type path: str
 
+    :raises NoSuchTag: if specified tag doesn't exist
+
     :rtype: list[dict]
     """
 
-    taginfo = session.getTag(tagname)
-    if not taginfo:
-        raise NoSuchTag(tagname)
+    # we'll cheat a bit and use as_taginfo to verify that the tag
+    # exists -- it will raise a NoSuchTag for us if necessary. We
+    # aren't doing any such checking in the lower-level per-type
+    # gather functions.
+    taginfo = as_taginfo(session, tagname)
+    tagname = taginfo["name"]
 
     known_types = ("rpm", "maven", "win", "image")
     found = []
