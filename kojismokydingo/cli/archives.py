@@ -22,6 +22,7 @@ Koji Smoky Dingo - CLI Archive and RPM Commands
 
 from __future__ import print_function
 
+from argparse import SUPPRESS
 from collections import OrderedDict
 from six import itervalues
 
@@ -99,25 +100,29 @@ class ArchiveFiltering(object):
 
         addarg("--build-type", action="store", metavar="TYPE",
                dest="btype", default=None,
+               help=SUPPRESS)
+
+        addarg("--type", action="store", metavar="TYPE",
+               dest="btype", default=None,
                help="Only show archives for the given build type. Example"
                " types are rpm, maven, image, win. Default: show all"
                " archives.")
 
         addarg("--rpm", action="store_const", dest="btype",
                const="rpm",
-               help="--build-type=rpm")
+               help="Synonym for --type=rpm")
 
         addarg("--maven", action="store_const", dest="btype",
                const="maven",
-               help="--build-type=maven")
+               help="Synonym for --type=maven")
 
         addarg("--image", action="store_const", dest="btype",
                const="image",
-               help="--build-type=image")
+               help="Synonym for --type=image")
 
         addarg("--win", action="store_const", dest="btype",
                const="win",
-               help="--build-type=win")
+               help="Synonym for --type=win")
 
         grp = parser.add_argument_group("Archive Filtering Options")
         addarg = grp.add_argument
