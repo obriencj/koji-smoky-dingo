@@ -40,6 +40,7 @@ from .. import (
     as_buildinfo, as_taginfo,
     bulk_load, bulk_load_builds, bulk_load_tags)
 from ..builds import (
+    BUILD_COMPLETE, BUILD_DELETED,
     BuildFilter,
     build_dedup, build_id_sort, build_nvr_sort,
     decorate_build_archive_data, filter_imported,
@@ -280,8 +281,9 @@ class BuildFiltering():
         addarg = grp.add_argument
 
         addarg("--type", action="append", dest="btypes",
-               default=[],
-               help="Limit to builds of this BType")
+               metavar="BUILD_TYPE", default=[],
+               help="Limit to builds with this BType. May be specified"
+               " multiple times to allow for more than one type.")
 
         addarg("-c", "--content-generator", dest="cg_list",
                action="append", default=list(),
@@ -304,11 +306,11 @@ class BuildFiltering():
         grp = parser.add_argument_group("Filtering by state")
         grp = grp.add_mutually_exclusive_group()
         addarg = grp.add_argument
-        addarg("--completed", action="store_const", const=1,
+        addarg("--completed", action="store_const", const=BUILD_COMPLETE,
                dest="state", default=None,
                help="Limit to completed builds")
 
-        addarg("--deleted", action="store_const", const=2,
+        addarg("--deleted", action="store_const", const=BUILD_DELETED,
                dest="state", default=None,
                help="Limit to deleted builds")
 
