@@ -1,0 +1,28 @@
+Koji Smoky Dingo preview 0.9.3 Release Notes
+============================================
+
+*October 02, 2020*
+
+Chugging along and collecting feedback.
+
+Some interesting new features are coming in Koji 1.23. In particular
+we will be gaining the ability to block tag extra settings, and the
+new block-env-var and block-rpm-macro commands expose that
+behavior. This will also be the first version of koji which enables
+the hub to report what version is running, so we've created the
+version_check and version_require functions to gate behavior around
+the koji hub version.
+
+- add iter_bulk_load generator function
+- fix exception in kojismokyding.cli.tabulate for None values
+- rename unset-env-var to remove-env-var
+- rename unset-rpm-macro to remove-rpm-macro
+- added block-env-var and block-rpm-macro (requires koji 1.23)
+- added FeatureUnavailable exception type
+- updated list-tag-extras to add a '--blocked' option
+- add ensure_tag function
+- updated bulk-tag-builds to add a '--create' option
+- add version_check and version_require functions
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/3?closed=1>

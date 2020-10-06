@@ -1,0 +1,40 @@
+Koji Smoky Dingo preview 0.9.0 Release Notes
+============================================
+
+*September 03, 2020*
+
+Welcome to the initial preview release of Koji Smoky Dingo!
+
+This first release contains the following commands:
+
+ - affected-targets
+ - check-hosts
+ - client-config
+ - bulk-tag-builds
+ - latest-archives
+ - list-build-archives
+ - list-cgs
+ - list-env-vars
+ - list-imported
+ - list-rpm-macros
+ - list-tag-extras
+ - perminfo
+ - renum-tag-inheritance
+ - set-env-var
+ - set-rpm-macro
+ - swap-tag-inheritance
+ - unset-env-var
+ - unset-rpm-macro
+ - userinfo
+
+The project is broken up into two main installable pieces
+
+ - kojismokydingo - The core library and plugin command handlers
+ - kojismokydingo_meta - A Koji CLI plugin which acts as an adapter to
+   python entry points
+
+At this time, no API stability is guaranteed. Indeed it's expected
+that many functions and commands may change their signatures or
+names. Once the project reaches the goals for a version 1.0.0, it will
+no longer be in preview mode, and at that point in time semantic
+versioning rules will apply.

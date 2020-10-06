@@ -10,3 +10,4 @@ Documentation Index Table of Contents
    commands
    kojismokydingo
    kojismokydingo/cli
+   release_notes

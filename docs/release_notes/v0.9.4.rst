@@ -1,0 +1,13 @@
+Koji Smoky Dingo preview 0.9.4 Release Notes
+============================================
+
+*Unreleased*
+
+Chugging along and collecting feedback
+
+- list-build-archives now accepts multiple NVRs
+- list-build-archives and latest-archives now accept an '--arch'
+  option which allows filtering by architecture
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/4?closed=1>

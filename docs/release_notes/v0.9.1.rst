@@ -1,0 +1,22 @@
+Koji Smoky Dingo preview 0.9.1 Release Notes
+============================================
+
+*September 18, 2020*
+
+This release merges the core library and the meta plugin together into
+a single package. This means they can no longer be installed
+independently.
+
+ChangeLog:
+
+- All 0.9.z versions are still considered API unstable, this just
+  helps to differentiate snapshots
+- Moved to a single distribution containing including the package and
+  the metaplugin
+- added new filter-builds and list-component-builds commands
+- removed list-imported (behavior now available in filter-builds)
+- slightly beefed up docs
+- moved as_buildinfo, as_taginfo, as_targetinfo into the main
+  kojismokydingo package
+- decorate_build_archive_data is now idempotent and slightly less
+  expensive
