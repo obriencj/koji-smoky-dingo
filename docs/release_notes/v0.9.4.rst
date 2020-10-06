@@ -8,6 +8,10 @@ Chugging along and collecting feedback
 - list-build-archives now accepts multiple NVRs
 - list-build-archives and latest-archives now accept an '--arch'
   option which allows filtering by architecture
+- rename the '--build-type' option for list-build-archives and
+  latest-archives to simply '--type'
+- add the build type option aliases to relevant build filtering
+  commands
 
 Closed Issues:
 <https://github.com/obriencj/koji-smoky-dingo/milestone/4?closed=1>
