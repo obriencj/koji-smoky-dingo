@@ -285,6 +285,25 @@ class BuildFiltering():
                help="Limit to builds with this BType. May be specified"
                " multiple times to allow for more than one type.")
 
+        addarg("--rpm", action="append_const", dest="btypes",
+               const="rpm",
+               help="Synonym for --type=rpm")
+
+        addarg("--maven", action="append_const", dest="btypes",
+               const="maven",
+               help="Synonym for --type=maven")
+
+        addarg("--image", action="append_const", dest="btypes",
+               const="image",
+               help="Synonym for --type=image")
+
+        addarg("--win", action="append_const", dest="btypes",
+               const="win",
+               help="Synonym for --type=win")
+
+        grp = parser.add_argument_group("Filtering by origin")
+        addarg = grp.add_argument
+
         addarg("-c", "--content-generator", dest="cg_list",
                action="append", default=list(),
                metavar="CG_NAME",
@@ -306,6 +325,7 @@ class BuildFiltering():
         grp = parser.add_argument_group("Filtering by state")
         grp = grp.add_mutually_exclusive_group()
         addarg = grp.add_argument
+
         addarg("--completed", action="store_const", const=BUILD_COMPLETE,
                dest="state", default=None,
                help="Limit to completed builds")
