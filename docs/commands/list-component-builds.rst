@@ -11,7 +11,8 @@ koji list-component-builds
                                    [--shallow-lookaside SHALLOW_LOOKASIDE]
                                    [--limit LIMIT]
                                    [--shallow-limit SHALLOW_LIMIT]
-                                   [--type BTYPES] [-c CG_NAME]
+                                   [--type BUILD_TYPE] [--rpm] [--maven]
+                                   [--image] [--win] [-c CG_NAME]
                                    [--imports | --no-imports]
                                    [--completed | --deleted]
                                    [NVR [NVR ...]]
@@ -47,7 +48,14 @@ koji list-component-builds
                          Limit results to builds found directly in this tag
 
  Filtering by type:
-   --type BTYPES         Limit to builds of this BType
+   --type BUILD_TYPE     Limit to builds with this BType. May be specified
+                         multiple times to allow for more than one type.
+   --rpm                 Synonym for --type=rpm
+   --maven               Synonym for --type=maven
+   --image               Synonym for --type=image
+   --win                 Synonym for --type=win
+
+ Filtering by origin:
    -c CG_NAME, --content-generator CG_NAME
                          show content generator imports by build system name.
                          Default: display no CG builds. Specify 'any' to see CG

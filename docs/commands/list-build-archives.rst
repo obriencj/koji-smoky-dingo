@@ -6,7 +6,7 @@ koji list-build-archives
 ::
 
  usage: koji list-build-archives [-h] [--show-deleted] [--json] [--urls]
-                                 [--build-type TYPE | --rpm | --maven | --image | --win]
+                                 [--type TYPE | --rpm | --maven | --image | --win]
                                  [--archive-type EXT] [--arch ARCHES]
                                  [--key KEY] [--unsigned]
                                  NVR [NVR ...]
@@ -25,13 +25,13 @@ koji list-build-archives
                        Default: use the configured topdir
 
  Build Filtering Options:
-   --build-type TYPE   Only show archives for the given build type. Example
+   --type TYPE         Only show archives for the given build type. Example
                        types are rpm, maven, image, win. Default: show all
                        archives.
-   --rpm               --build-type=rpm
-   --maven             --build-type=maven
-   --image             --build-type=image
-   --win               --build-type=win
+   --rpm               Synonym for --type=rpm
+   --maven             Synonym for --type=maven
+   --image             Synonym for --type=image
+   --win               Synonym for --type=win
 
  Archive Filtering Options:
    --archive-type EXT  Only show archives with the given archive type. Can be
@@ -49,7 +49,14 @@ koji list-build-archives
                        then only RPMs signed with one of those keys are shown.
 
 
-Print paths for archives and RPMs attached to a build
+Print paths for archives and RPMs attached to a build.
+
+Allows optional filtering based on the build type, archive type,
+architecture, and available signatures.
+
+The paths are based on the koji client configuration for the profile
+in use, and so will start with the ``topdir`` value. If ``--urls`` is
+specified, then the ``topurl`` value is used instead.
 
 
 References

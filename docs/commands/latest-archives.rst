@@ -6,7 +6,7 @@ koji latest-archives
 ::
 
  usage: koji latest-archives [-h] [--noinherit] [--json] [--urls]
-                             [--build-type TYPE | --rpm | --maven | --image | --win]
+                             [--type TYPE | --rpm | --maven | --image | --win]
                              [--archive-type EXT] [--arch ARCHES] [--key KEY]
                              [--unsigned]
                              TAGNAME
@@ -24,13 +24,13 @@ koji latest-archives
                        Default: use the configured topdir
 
  Build Filtering Options:
-   --build-type TYPE   Only show archives for the given build type. Example
+   --type TYPE         Only show archives for the given build type. Example
                        types are rpm, maven, image, win. Default: show all
                        archives.
-   --rpm               --build-type=rpm
-   --maven             --build-type=maven
-   --image             --build-type=image
-   --win               --build-type=win
+   --rpm               Synonym for --type=rpm
+   --maven             Synonym for --type=maven
+   --image             Synonym for --type=image
+   --win               Synonym for --type=win
 
  Archive Filtering Options:
    --archive-type EXT  Only show archives with the given archive type. Can be
