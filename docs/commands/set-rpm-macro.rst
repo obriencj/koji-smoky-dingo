@@ -22,7 +22,13 @@ koji set-rpm-macro
    --target    Specify by target rather than a tag
 
 
-Defines an RPM macro on a tag.
+Configures RPM macro settings on a tag.
+
+Koji 1.18 and later support defining RPM macros via mock as part of a
+tag's configuration metadata.
+
+Koji 1.23 and later also support blocking such settings from being
+inherited.
 
 This command is a user-friendly alternative to using the ``koji
 edit-tag`` command as defined in `Setting RPM Macros for Builds -
@@ -34,10 +40,11 @@ permission, as it is mutating tag configuration data.
 The underlying tag extra setting will be constructed with the prefix
 ``rpm.macro.`` and the macro name (minus any leading ``%``)
 
-Empty RPM macro values are not permitted. The closest is ``%nil``
-which is the default if no value is specified.
+Empty RPM macro values are not permitted. The closest no an empty
+value is ``%nil`` which is used as the default value if not otherwise
+specified.
 
-Note that RPM macros definitioned in this manner will take precedence
+Note that RPM macros definined in this manner will take precedence
 over any other definitions that may be provided by installed packages
 in the buildroot.
 

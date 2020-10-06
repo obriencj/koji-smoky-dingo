@@ -20,6 +20,10 @@ koji block-rpm-macro
 
 This command is a convenience equivalent to ``koji set-rpm-macro --block``
 
+The ability to block RPM macros from being inherited requires Koji
+1.23 or later. Attempting to block an RPM macro on a downlevel Koji
+deployment will result in an error message.
+
 See also :ref:`koji list-rpm-macros`, :ref:`koji set-rpm-macro`, :ref:`koji remove-rpm-macro`
 
 
