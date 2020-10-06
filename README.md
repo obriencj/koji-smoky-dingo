@@ -4,8 +4,8 @@
 [![Coverage Status](https://coveralls.io/repos/obriencj/koji-smoky-dingo/badge.svg?branch=master)](https://coveralls.io/r/obriencj/koji-smoky-dingo)
 
 Koji Smoky Dingo is a collection of client command-line plugins for
-[koji], and a set of utility modules for writing your own commands or
-scripts.
+the [Koji] build system, and a set of utility modules for writing your
+own commands or scripts.
 
 [koji]: https://pagure.io/koji
 
@@ -131,7 +131,7 @@ plugin_paths = ~/.local/lib/python3.7/site-packages/koji_cli_plugins/
 With koji >= [1.18], the meta plugin can also be symlinked into
 `~/.koji/plugins`
 
-[1.18]: https://docs.pagure.org/koji/release_notes_1.18/
+[1.18]: https://docs.pagure.org/koji/release_notes/release_notes_1.18/
 
 ```bash
 mkdir -p ~/.koji/plugins

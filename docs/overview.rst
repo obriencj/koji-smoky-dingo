@@ -1,9 +1,9 @@
 Overview
 ========
 
-Koji Smoky Dingo is a collection of client command-line plugins for
-`koji <https://pagure.io/koji>`__, and a set of utility modules for
-writing your own commands or scripts.
+Koji Smoky Dingo is a collection of client command-line plugins for the
+`Koji <https://pagure.io/koji>`__ build system, and a set of utility
+modules for writing your own commands or scripts.
 
 The phrase “smoky-dingo” was provided by
 `coolname <https://pypi.org/project/coolname/>`__ and has no particular
@@ -28,8 +28,9 @@ Tag Commands
 ------------
 
 These commands modify tag features, requiring either the tag permission
-(koji >= `1.18 <https://docs.pagure.org/koji/release_notes_1.18/>`__) or
-the admin permission.
+(koji >=
+`1.18 <https://docs.pagure.org/koji/release_notes/release_notes_1.18/>`__)
+or the admin permission.
 
 +----------------------------+-----------------------------------------+
 | Command                    | Description                             |
@@ -171,8 +172,8 @@ use the meta plugin with.
    plugin_paths = ~/.local/lib/python3.7/site-packages/koji_cli_plugins/
 
 With koji >=
-`1.18 <https://docs.pagure.org/koji/release_notes_1.18/>`__, the meta
-plugin can also be symlinked into ``~/.koji/plugins``
+`1.18 <https://docs.pagure.org/koji/release_notes/release_notes_1.18/>`__,
+the meta plugin can also be symlinked into ``~/.koji/plugins``
 
 .. code:: bash
 
