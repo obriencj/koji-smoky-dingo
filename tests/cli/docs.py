@@ -22,7 +22,7 @@ from pkg_resources import EntryPoint
 from six import iteritems
 from six.moves import StringIO
 
-from . import ENTRY_POINTS, default_koji_goptions
+from . import ENTRY_POINTS, GOptions
 
 
 def default_document(name):
@@ -78,7 +78,7 @@ def check_command_help(cmdname):
 
     command = cmd_cls(name)
 
-    goptions = default_koji_goptions()
+    goptions = GOptions()
 
     with patch('sys.stdout', new=StringIO()) as out:
         with patch('sys.argv', new=["koji", name, "--help"]):

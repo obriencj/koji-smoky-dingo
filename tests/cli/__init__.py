@@ -81,14 +81,9 @@ def default_koji_config(profile="koji"):
     }
 
 
-class Object(object):
-    pass
-
-
-def default_koji_goptions(profile="koji"):
-    result = Object()
-    result.__dict__ = default_koji_config(profile)
-    return result
+class GOptions(object):
+    def __init__(self, profile="koji"):
+        self.__dict__ = default_koji_config(profile)
 
 
 class TestExpectedEntryPoints(TestCase):
