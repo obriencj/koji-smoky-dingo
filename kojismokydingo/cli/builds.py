@@ -34,9 +34,9 @@ from six import iteritems, itervalues
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
-    pretty_json, printerr, read_clean_lines, resplit)
+    int_or_str, pretty_json, printerr, read_clean_lines, resplit)
 from .. import (
-    NoSuchTag, NoSuchUser,
+    NoSuchUser,
     as_buildinfo, as_taginfo,
     bulk_load, bulk_load_builds, bulk_load_tags)
 from ..builds import (
@@ -426,7 +426,7 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
     def arguments(self, parser):
         addarg = parser.add_argument
 
-        addarg("nvr", nargs="*", metavar="NVR",
+        addarg("nvr", nargs="*", type=int_or_str, metavar="NVR",
                help="Build NVRs to list components of")
 
         addarg("-f", "--file", action="store", default=None,

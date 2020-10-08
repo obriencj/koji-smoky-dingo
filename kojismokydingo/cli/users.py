@@ -24,7 +24,7 @@ from __future__ import print_function
 
 from operator import itemgetter
 
-from . import AnonSmokyDingo, pretty_json
+from . import AnonSmokyDingo, int_or_str, pretty_json
 from ..users import (
     USER_NORMAL, USER_HOST, USER_GROUP,
     STATUS_NORMAL, STATUS_BLOCKED,
@@ -32,7 +32,7 @@ from ..users import (
 
 
 def get_usertype_str(userinfo):
-    val = userinfo.get("usertype", 0) or 0
+    val = userinfo.get("usertype", USER_NORMAL) or USER_NORMAL
     if val == USER_NORMAL:
         return "NORMAL (user)"
     elif val == USER_HOST:
@@ -100,7 +100,7 @@ class UserInfo(AnonSmokyDingo):
     def arguments(self, parser):
         addarg = parser.add_argument
 
-        addarg("user", action="store", metavar="USER",
+        addarg("user", action="store", type=int_or_str, metavar="USER",
                help="User name or principal")
 
         addarg("--json", action="store_true", default=False,
@@ -148,6 +148,7 @@ class PermissionInfo(AnonSmokyDingo):
         addarg = parser.add_argument
 
         addarg("permission", action="store", metavar="PERMISSION",
+               type=int_or_str,
                help="Name of permission")
 
         addarg("--verbose", "-v", action="store_true", default=False,

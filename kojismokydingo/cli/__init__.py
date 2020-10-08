@@ -50,6 +50,7 @@ __all__ = (
     "TargetSmokyDingo",
 
     "clean_lines",
+    "int_or_str",
     "pretty_json",
     "printerr",
     "read_clean_lines",
@@ -287,6 +288,24 @@ def space_normalize(txt):
 
     lines = map(str.strip, txt.split())
     return " ".join(filter(None, lines))
+
+
+def int_or_str(value):
+    """
+    For use as an argument type where the value may be either an int
+    (if it is entirely numeric) or a str.
+
+    :rtype: str or int
+    """
+
+    if isinstance(value, str):
+        if value.isdigit():
+            value = int(value)
+
+    elif not isinstance(value, int):
+        value = str(value)
+
+    return value
 
 
 @add_metaclass(ABCMeta)
