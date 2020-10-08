@@ -18,7 +18,8 @@ from six.moves import StringIO
 from unittest import TestCase
 
 from kojismokydingo.cli import (
-    SmokyDingo, clean_lines, resplit, space_normalize, tabulate)
+    SmokyDingo, clean_lines, int_or_str,
+    resplit, space_normalize, tabulate)
 
 
 ENTRY_POINTS = {
@@ -180,6 +181,36 @@ class TestUtils(TestCase):
 
         self.assertEqual(space_normalize(data), expect)
         self.assertEqual(space_normalize(expect), expect)
+
+
+    def test_int_or_str(self):
+        data = "hello"
+        res = int_or_str(data)
+        self.assertTrue(isinstance(res, str))
+        self.assertEqual(res, data)
+        self.assertTrue(res is data)
+
+        data = "123 Hello"
+        res = int_or_str(data)
+        self.assertTrue(isinstance(res, str))
+        self.assertEqual(res, data)
+        self.assertTrue(res is data)
+
+        data = "123 456"
+        res = int_or_str(data)
+        self.assertTrue(isinstance(res, str))
+        self.assertEqual(res, data)
+        self.assertTrue(res is data)
+
+        data = "123"
+        res = int_or_str(data)
+        self.assertTrue(isinstance(res, int))
+        self.assertEqual(res, 123)
+
+        data = "0"
+        res = int_or_str(data)
+        self.assertTrue(isinstance(res, int))
+        self.assertEqual(res, 0)
 
 
 class TestTabulate(TestCase):
