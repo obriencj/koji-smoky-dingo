@@ -12,6 +12,11 @@ Chugging along and collecting feedback
   latest-archives to simply '--type'
 - add the build type option aliases to relevant build filtering
   commands
+- move as_userinfo into the base package
+- add int_or_str function to cli package, for use as the type argument
+  to parser arguments. Will safely convert str to int if applicable.
+  This allows a number of commands to accept the ID of their relevant
+  data type in place of its name
 
 Closed Issues:
 <https://github.com/obriencj/koji-smoky-dingo/milestone/4?closed=1>

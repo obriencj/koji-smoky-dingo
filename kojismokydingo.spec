@@ -221,8 +221,9 @@ Koji Smoky Dingo
 %changelog
 * Fri Oct 09 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.4-0
 - list-build-archives now accepts multiple NVRs
-- list-build-archives and latest-archives now accept an '--arch'
-  option which allows filtering by architecture
+- list-build-archives and latest-archives now accept '--arch=ARCH'
+- moved as_userinfo to kojismokydingo package
+- add int_or_str helper function to kojismokydingo.cli
 
 * Fri Oct 02 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-1
 - add iter_bulk_load generator function
