@@ -1,3 +1,4 @@
+# Containerized Build Tooling
 
 Some scripts for building RPMs across a diverse range of platforms.
 
@@ -23,3 +24,29 @@ to speed up the process, so only the final layer which produces and
 installs the RPM should normally be run (and then only if the tarball
 has been regenerated). Old images are discarded when new images are
 introduced.
+
+It should be safe to run `podman system prune` every now and then to
+clean up orphaned layers, as the latest image builds will be safely
+tagged, eg. ksd-test:centos6 or ksd-test:fedora32
+
+
+## Building Individual Containers
+
+Running `./tools/launch-build.sh` will build and tag each
+Containerfile in the ./tools directory. These files are named with a
+suffix that indicates their platform, eg. Containerfile.centos6 is for
+building on CentOS 6.
+
+You can launch builds for individual platforms by name by specifiying
+the platform as an argument to the launch-build.sh script.
+
+`./tools/launch-build.sh centos6` will cause only the
+Containerfile.centos6 to be used, producing an image tagged
+ksd-test:centos6
+
+Any invocation of launch-build.sh is reliant on the archive having
+been created first. This can be done by committing your work and
+running `make archive` in the top project directory.
+
+A final side-effect of running launch-build.sh is the copying of the
+SRPM and RPMs to the dist directory.
