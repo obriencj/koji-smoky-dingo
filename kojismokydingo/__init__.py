@@ -24,7 +24,7 @@ build system
 from collections import OrderedDict
 from functools import partial
 from koji import (
-    ClientSession, Fault, GenericError,
+    ClientSession, Fault, GenericError, ParameterError,
     convertFault, read_config)
 from koji_cli.lib import activate_session, ensure_connection
 from six.moves import map, zip
@@ -51,6 +51,7 @@ __all__ = (
     "as_buildinfo",
     "as_taginfo",
     "as_targetinfo",
+    "as_userinfo",
     "bulk_load",
     "bulk_load_build_archives",
     "bulk_load_build_rpms",
@@ -636,11 +637,49 @@ def as_targetinfo(session, target):
     return info
 
 
+def as_userinfo(session, user):
+    """
+    Resolves user to a userinfo dict.
+
+    If user is a str or int, then getUser will be invoked. If user is
+    already a dict, it's presumed to be a userinfo already and it's
+    returned unaltered.
+
+    :param user: Name, ID, or User Info describing a koji user
+
+    :type user: str or int or dict
+
+    :rtype: dict
+
+    :raises NoSuchUser: when user cannot be found
+    """
+
+    if isinstance(user, (str, int)):
+        # an API incompatibility emerged at some point in Koji's past,
+        # so we need to try the new way first and fall back to the
+        # older signature if that fails. This happened before Koji hub
+        # started reporting its version, so we cannot use the
+        # version_check function to gate this.
+        try:
+            info = session.getUser(user, False, True)
+        except ParameterError:
+            info = session.getUser(user)
+
+    elif isinstance(user, dict):
+        info = user
+
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchUser(user)
+
+    return info
+
+
 def _int(val):
-    try:
+    if isinstance(val, str) and val.isdigit():
         val = int(val)
-    except ValueError:
-        pass
     return val
 
 

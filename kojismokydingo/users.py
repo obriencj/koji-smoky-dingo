@@ -21,10 +21,25 @@ Koji Smoki Dingo - users and permissions
 
 
 from koji import ParameterError, USERTYPES, USER_STATUS
+from operator import itemgetter
 from six import iteritems
 from time import asctime, localtime
 
-from . import NoSuchContentGenerator, NoSuchPermission, NoSuchUser
+from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
+
+
+__all__ = (
+    "STATUS_NORMAL",
+    "STATUS_BLOCKED",
+    "USER_NORMAL",
+    "USER_HOST",
+    "USER_GROUP",
+
+    "collect_cg_access",
+    "collect_cgs",
+    "collect_perminfo",
+    "collect_userinfo",
+)
 
 
 # just borrowing from Koji's definitions
@@ -34,45 +49,6 @@ USER_GROUP = USERTYPES['GROUP']
 
 STATUS_NORMAL = USER_STATUS['NORMAL']
 STATUS_BLOCKED = USER_STATUS['BLOCKED']
-
-
-def as_userinfo(session, user):
-    """
-    Resolves user to a userinfo dict.
-
-    If user is a str or int, then getUser will be invoked. If user is
-    already a dict, it's presumed to be a userinfo already and it's
-    returned unaltered.
-
-    :param user: Name, ID, or User Info describing a koji user
-
-    :type user: str or int or dict
-
-    :rtype: dict
-
-    :raises NoSuchUser: when user cannot be resolved via
-        :py:meth:`session.getUser`
-    """
-
-    if isinstance(user, (str, int)):
-        # an API incompatibility emerged at some point in Koji's past,
-        # so we need to try the new way first and fall back to the
-        # older signature if that fails
-        try:
-            info = session.getUser(user, False, True)
-        except ParameterError:
-            info = session.getUser(user)
-
-    elif isinstance(user, dict):
-        info = user
-
-    else:
-        info = None
-
-    if not info:
-        raise NoSuchUser(user)
-
-    return info
 
 
 def collect_userinfo(session, user):
@@ -179,16 +155,21 @@ def collect_perminfo(session, permission):
     users granted the permission, as well as the date that the
     permission was granted and the user that granted it.
 
-    :param permission: the string name of a permission
-    :type permission: str
+    :param permission: the ID or name of the permission
+    :type permission: int or str
 
     :rtype: dict
 
     :raises NoSuchPermission: if there is no matching permission found
     """
 
+    if isinstance(permission, int):
+        field = itemgetter("id")
+    else:
+        field = itemgetter("name")
+
     for p in session.getAllPerms():
-        if p["name"] == permission:
+        if field(p) == permission:
             pinfo = p
             break
     else:
