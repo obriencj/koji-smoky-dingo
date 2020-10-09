@@ -26,7 +26,6 @@ from kojismokydingo import (
 
 class TestBulkLoad(TestCase):
 
-
     def setUp(self):
         self.prep = patch('koji.ClientSession._prepCall').start()
         self.prep.return_value = (None, None, None)
@@ -82,6 +81,7 @@ class TestVersionCheck(TestCase):
 
     def session(self, results):
         sess = MagicMock()
+
         send = sess.getKojiVersion
         send.side_effect = results
 
