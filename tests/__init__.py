@@ -19,7 +19,8 @@ from six.moves import zip
 from unittest import TestCase
 
 from kojismokydingo import (
-    FeatureUnavailable,
+    FeatureUnavailable, NoSuchBuild, NoSuchTag, NoSuchUser,
+    as_buildinfo, as_taginfo, as_userinfo,
     iter_bulk_load, version_check, version_require)
 
 
@@ -79,17 +80,12 @@ class TestBulkLoad(TestCase):
 
 class TestVersionCheck(TestCase):
 
+    def session(self, results):
+        sess = MagicMock()
+        send = sess.getKojiVersion
+        send.side_effect = results
 
-    def setUp(self):
-        self.send = patch('koji.ClientSession._sendCall').start()
-
-
-    def tearDown(self):
-        patch.stopall()
-
-
-    def session(self):
-        return koji.ClientSession('FAKE_URL')
+        return sess, send
 
 
     def ge(self):
@@ -97,79 +93,303 @@ class TestVersionCheck(TestCase):
 
 
     def test_bad_version_check(self):
-        self.send.side_effect = ["1.25", self.ge()]
 
-        sess = self.session()
+        sess, send = self.session(["1.25"])
+        self.assertFalse(version_check(sess, "1.26"))
         self.assertFalse(version_check(sess, (1, 26)))
         self.assertFalse(version_check(sess, (1, 27)))
         self.assertEqual(vars(sess)["__hub_version"], (1, 25))
-        self.assertEqual(self.send.call_count, 1)
+        self.assertEqual(send.call_count, 1)
 
-        sess = self.session()
+        sess, send = self.session([self.ge()])
         self.assertFalse(version_check(sess, (1, 23)))
         self.assertFalse(version_check(sess, (1, 24)))
         self.assertEqual(vars(sess)["__hub_version"], (1, 22))
-        self.assertEqual(self.send.call_count, 2)
+        self.assertEqual(send.call_count, 1)
 
 
     def test_good_version_check(self):
-        self.send.side_effect = ["1.24", "1.25", self.ge()]
 
-        sess = self.session()
+        sess, send = self.session(["1.24"])
+        self.assertTrue(version_check(sess, "1.23"))
         self.assertTrue(version_check(sess, (1, 23)))
         self.assertTrue(version_check(sess, (1, 24)))
         self.assertEqual(vars(sess)["__hub_version"], (1, 24))
-        self.assertEqual(self.send.call_count, 1)
+        self.assertEqual(send.call_count, 1)
 
-        sess = self.session()
+        sess, send = self.session(["1.25"])
         self.assertTrue(version_check(sess, (1, 24)))
         self.assertTrue(version_check(sess, (1, 25)))
         self.assertEqual(vars(sess)["__hub_version"], (1, 25))
-        self.assertEqual(self.send.call_count, 2)
+        self.assertEqual(send.call_count, 1)
 
-        sess = self.session()
+        sess, send = self.session([self.ge()])
         self.assertTrue(version_check(sess, (1, 22)))
         self.assertTrue(version_check(sess, (1, 22)))
         self.assertEqual(vars(sess)["__hub_version"], (1, 22))
-        self.assertEqual(self.send.call_count, 3)
+        self.assertEqual(send.call_count, 1)
 
 
     def test_bad_version_require(self):
-        self.send.side_effect = ["1.25", self.ge()]
 
-        sess = self.session()
+        sess, send = self.session(["1.25"])
         self.assertRaises(FeatureUnavailable, version_require, sess, (1, 26))
         self.assertRaises(FeatureUnavailable, version_require, sess, (1, 27))
         self.assertEqual(vars(sess)["__hub_version"], (1, 25))
-        self.assertEqual(self.send.call_count, 1)
+        self.assertEqual(send.call_count, 1)
 
-        sess = self.session()
+        sess, send = self.session([self.ge()])
         self.assertRaises(FeatureUnavailable, version_require, sess, (1, 23))
         self.assertRaises(FeatureUnavailable, version_require, sess, (1, 24))
         self.assertEqual(vars(sess)["__hub_version"], (1, 22))
-        self.assertEqual(self.send.call_count, 2)
+        self.assertEqual(send.call_count, 1)
 
 
     def test_good_version_require(self):
-        self.send.side_effect = ["1.24", "1.25", self.ge()]
 
-        sess = self.session()
+        sess, send = self.session(["1.24"])
         self.assertTrue(version_require(sess, (1, 23)))
         self.assertTrue(version_require(sess, (1, 24)))
         self.assertEqual(vars(sess)["__hub_version"], (1, 24))
-        self.assertEqual(self.send.call_count, 1)
+        self.assertEqual(send.call_count, 1)
 
-        sess = self.session()
+        sess, send = self.session(["1.25"])
         self.assertTrue(version_require(sess, (1, 24)))
         self.assertTrue(version_require(sess, (1, 25)))
         self.assertEqual(vars(sess)["__hub_version"], (1, 25))
-        self.assertEqual(self.send.call_count, 2)
+        self.assertEqual(send.call_count, 1)
 
-        sess = self.session()
+        sess, send = self.session([self.ge()])
         self.assertTrue(version_require(sess, (1, 22)))
         self.assertTrue(version_require(sess, (1, 22)))
         self.assertEqual(vars(sess)["__hub_version"], (1, 22))
-        self.assertEqual(self.send.call_count, 3)
+        self.assertEqual(send.call_count, 1)
+
+
+class TestAsBuildInfo(TestCase):
+
+    DATA = {
+        "id": 1,
+        "state": 2,
+        "nvr": "sample-1-1",
+    }
+
+
+    def session(self, results):
+        sess = MagicMock()
+
+        send = sess.getBuild
+        send.side_effect = results
+
+        return sess, send
+
+
+    def test_as_buildinfo_nvr(self):
+
+        key = "sample-1-1"
+        sess, send = self.session([self.DATA])
+        res = as_buildinfo(sess, key)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key,))
+
+
+    def test_as_buildinfo_id(self):
+
+        sess, send = self.session([self.DATA])
+        res = as_buildinfo(sess, 1)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (1,))
+
+
+    def test_as_buildinfo_dict(self):
+
+        sess, send = self.session([])
+        res = as_buildinfo(sess, self.DATA)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 0)
+
+
+    def test_no_such_build(self):
+
+        key = "sample-1-1"
+        sess, send = self.session([None])
+        self.assertRaises(NoSuchBuild, as_buildinfo, sess, key)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key,))
+
+        sess, send = self.session([])
+        self.assertRaises(NoSuchBuild, as_buildinfo, sess, None)
+        self.assertEqual(send.call_count, 0)
+
+
+class TestAsTaginfo(TestCase):
+
+    DATA = {
+        "id": 1,
+        "name": "example-1.0-build",
+    }
+
+
+    def session(self, results, ver="1.23"):
+        sess = MagicMock()
+
+        send = sess.getTag
+        send.side_effect = results
+
+        vercheck = sess.getKojiVersion
+        vercheck.side_effect = [ver]
+
+        return sess, send
+
+
+    def test_as_taginfo_name(self):
+
+        key = "example-1.0-build"
+
+        sess, send = self.session([self.DATA])
+        res = as_taginfo(sess, key)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key,))
+        self.assertEqual(send.call_args_list[0][1], {"blocked": True})
+
+        sess, send = self.session([self.DATA], ver="1.22")
+        res = as_taginfo(sess, key)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key,))
+        self.assertEqual(send.call_args_list[0][1], {})
+
+
+    def test_as_taginfo_id(self):
+
+        sess, send = self.session([self.DATA])
+        res = as_taginfo(sess, 1)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (1,))
+        self.assertEqual(send.call_args_list[0][1], {"blocked": True})
+
+        sess, send = self.session([self.DATA], ver="1.22")
+        res = as_taginfo(sess, 1)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (1,))
+        self.assertEqual(send.call_args_list[0][1], {})
+
+
+    def test_as_taginfo_dict(self):
+
+        sess, send = self.session([])
+        res = as_taginfo(sess, self.DATA)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 0)
+
+
+    def test_no_such_tag(self):
+
+        key = "example-1.0-build"
+
+        sess, send = self.session([None])
+        self.assertRaises(NoSuchTag, as_taginfo, sess, key)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key,))
+        self.assertEqual(send.call_args_list[0][1], {"blocked": True})
+
+        sess, send = self.session([None], ver="1.22")
+        self.assertRaises(NoSuchTag, as_taginfo, sess, key)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key,))
+        self.assertEqual(send.call_args_list[0][1], {})
+
+        sess, send = self.session([])
+        self.assertRaises(NoSuchTag, as_taginfo, sess, None)
+        self.assertEqual(send.call_count, 0)
+
+
+class TestAsUserinfo(TestCase):
+
+    DATA = {
+        "id": 1,
+        "name": "joey_ramone",
+    }
+
+
+    def session(self, results):
+        sess = MagicMock()
+
+        send = sess.getUser
+        send.side_effect = results
+
+        return sess, send
+
+
+    def err(self):
+        return koji.ParameterError()
+
+
+    def test_as_userinfo_name(self):
+
+        key = "joey_ramone"
+
+        sess, send = self.session([self.DATA])
+        res = as_userinfo(sess, key)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key, False, True))
+
+        sess, send = self.session([self.err(), self.DATA])
+        res = as_userinfo(sess, key)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 2)
+        self.assertEqual(send.call_args_list[0][0], (key, False, True))
+        self.assertEqual(send.call_args_list[1][0], (key,))
+
+
+    def test_as_userinfo_id(self):
+
+        sess, send = self.session([self.DATA])
+        res = as_userinfo(sess, 1)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (1, False, True))
+
+        sess, send = self.session([self.err(), self.DATA])
+        res = as_userinfo(sess, 1)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 2)
+        self.assertEqual(send.call_args_list[0][0], (1, False, True))
+        self.assertEqual(send.call_args_list[1][0], (1,))
+
+
+    def test_as_userinfo_dict(self):
+
+        sess, send = self.session([])
+        res = as_userinfo(sess, self.DATA)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 0)
+
+
+    def test_no_such_user(self):
+
+        key = "joey_ramone"
+
+        sess, send = self.session([None])
+        self.assertRaises(NoSuchUser, as_userinfo, sess, key)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key, False, True))
+
+        sess, send = self.session([self.err(), None])
+        self.assertRaises(NoSuchUser, as_userinfo, sess, key)
+        self.assertEqual(send.call_count, 2)
+        self.assertEqual(send.call_args_list[0][0], (key, False, True))
+        self.assertEqual(send.call_args_list[1][0], (key,))
+
+        sess, send = self.session([])
+        self.assertRaises(NoSuchUser, as_userinfo, sess, None)
+        self.assertEqual(send.call_count, 0)
 
 
 #
