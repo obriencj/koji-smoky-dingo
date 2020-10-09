@@ -34,7 +34,7 @@ from . import (
 def ensure_tag(session, name):
     """
     Given a name, resolve it to a tag info dict. If there is no such
-    tag, then create it first.
+    tag, then create it and return its newly created tag info.
 
     :param name: tag name
 
@@ -91,6 +91,23 @@ def resolve_tag(session, name, target=False):
 
 
 def get_affected_targets(session, tagnames):
+    """
+    Returns the list of target info dicts representing the targets
+    which inherit any of the given named tags. That is to say, the
+    targets whose build tags are children of the named tags.
+
+    This list allows us to gauge what build configurations would be
+    impacted by changes to the given tags.
+
+    :param tagnames: List of tag names
+
+    :type tagnames: list[str]
+
+    :raises NoSuchTag: if any of the names do not resolve to a tag
+      info
+
+    :rtype: list[dict]
+    """
 
     tags = [as_taginfo(session, t) for t in set(tagnames)]
 
@@ -109,9 +126,26 @@ def get_affected_targets(session, tagnames):
     return list(chain(*(t[0] for t in session.multiCall() if t)))
 
 
-def renum_inheritance(inheritance, begin, step):
+def renum_inheritance(inheritance, begin=0, step=10):
     """
-    a new copy of the tag inheritance data, renumbered
+    Create a new copy of the tag inheritance data with the priority
+    values renumbered. Ordering is preserved.
+
+    :param inheritance: Inheritance structure data
+
+    :type inheritance: list[dict]
+
+    :param begin: Starting point for renumbering priority
+      values. Default, 0
+
+    :type begin: int, optional
+
+    :param step: Priority value increment for each priority after the
+      first. Default, 10
+
+    :type step: int, optional
+
+    :rtype: list[dict]
     """
 
     renumbered = list()
@@ -126,9 +160,11 @@ def renum_inheritance(inheritance, begin, step):
 
 def find_inheritance_parent(inheritance, parent_id):
     """
+    Find the parent link in the inheritance list with the given tag ID.
+
     :param inheritance: the output of a getFullInheritance call
 
-    :type inheritance: list(dict)
+    :type inheritance: list[dict]
 
     :param parent_id: the ID of a parent tag to look for in the
         inheritance data.
@@ -139,17 +175,34 @@ def find_inheritance_parent(inheritance, parent_id):
     :rtype: dict
     """
 
-    for i in inheritance:
-        if i["parent_id"] == parent_id:
-            return i
+    for parent in inheritance:
+        if parent["parent_id"] == parent_id:
+            return parent
     else:
         return None
 
 
 def convert_tag_extras(taginfo, into=None, prefix=None):
     """
+    Provides a merged view of the tag extra settings for a tag. The
+    extras are decorated with additional keys:
+
+      * name - str, the name of the setting
+      * blocked - bool, whether the setting is blocked
+      * tag_name - str, the name of the tag that provided this setting
+      * tag_id - int, the ID of the tag that provided this setting
+
+    When into is not None, then only settings which are not already
+    present in that dict will be set. This behavior is used by
+    :py:func:`collect_tag_extras` to merge the extra settings across a
+    tag and all its parents into a single dict.
+
+    :param taginfo: A koji tag info dict
+
+    :type taginfo: dict
+
     :param into: Existing dict to collect extras into. Default, create
-        a new OrderedDict
+        a new OrderedDict.
 
     :type into: dict, optional
 
@@ -163,7 +216,11 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
 
     found = OrderedDict() if into is None else into
 
-    for key, val in iteritems(taginfo["extra"]):
+    extra = taginfo.get("extra")
+    if not extra:
+        return found
+
+    for key, val in iteritems(extra):
 
         # check whether the taginfo was gathered with blocks included.
         # See https://pagure.io/koji/pull-request/2495#_4__40

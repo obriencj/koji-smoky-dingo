@@ -17,7 +17,10 @@ koji list-btypes
    --quiet, -q  Output just the BType names
 
 
-List all available BTypes in the koji instance, or for a given build.
+List the available BTypes (build types) in the koji instance.
+
+If the ``--build`` option is specified, then output only those types
+present in the given build.
 
 
 References

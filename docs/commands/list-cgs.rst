@@ -16,8 +16,10 @@ koji list-cgs
    --quiet, -q  Output just the CG names
 
 
-List all available Content Generators in the koji instance, or for a
-given build.
+List available Content Generators in the koji instance.
+
+If the ``--build`` option is specified, then list those content
+generators (if any) which were responsible for producing the build.
 
 
 References
