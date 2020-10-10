@@ -32,7 +32,8 @@ import re
 from collections import OrderedDict
 from datetime import datetime
 from fnmatch import fnmatchcase
-from six import iteritems
+from operator import itemgetter
+from six import iteritems, itervalues
 from six.moves import filter, filterfalse, range, zip_longest
 
 try:
@@ -324,12 +325,25 @@ def rpm_evr_compare(left_evr, right_evr):
         return 0
 
 
-def unique(sequence):
+def unique(sequence, key=None):
     """
-    Given a sequence, de-duplicate it into a new list, preserving order.
+    Given a sequence, de-duplicate it into a new list, preserving
+    order.
+
+    In the event that the sequence contains non-hashable objects,
+    `key` must be specified as a unary callable which produces a
+    hashable unique identifier for the individual items in the
+    sequence. This identifier is then used to perform the
+    de-duplication.
 
     :param sequence: series of hashable objects
     :type sequence: list
+
+    :param key: unary callable that produces a hashable identifying
+      value. Default, use each object in sequence as its own
+      identifier.
+
+    :type key: Callable[[object],object], optional
 
     :rtype: list
     """
@@ -338,7 +352,15 @@ def unique(sequence):
     # supporting 2.6, 2.7 as well. At some point Python will likely do
     # something bad and deprecate OrderedDict, at that point we'll
     # have to begin detecting the version and using just plain dict
-    return list(OrderedDict.fromkeys(sequence))
+
+    if key:
+        if not callable(key):
+            # undocumented behavior! woo!!
+            key = itemgetter(key)
+        work = ((key(v), v) for v in sequence)
+        return list(itervalues(OrderedDict(work)))
+    else:
+        return list(OrderedDict.fromkeys(sequence))
 
 
 DATETIME_FORMATS = (
@@ -375,14 +397,14 @@ DATETIME_FORMATS = (
      lambda d: datetime.strptime(d, "%Y-%m")),
 
     (re.compile(r"\d+$"),
-     lambda d: datetime.fromtimestamp(int(d))),
+     lambda d: datetime.utcfromtimestamp(int(d))),
 
     (re.compile("now$"),
      lambda d: datetime.utcnow()),
 )
 
 
-def parse_datetime(src):
+def parse_datetime(src, strict=True):
     """
     Attempts to parse a datetime string in numerous ways based on
     pre-defined regex mappings
@@ -397,10 +419,25 @@ def parse_datetime(src):
      - %Y-%m-%d
      - %Y-%m
 
-    Plus integer timestamps and the string "now"
+    Plus integer timestamps and the string ``"now"``
 
     Timezone offset formats (%z) may also be specified as either +HHMM
     or +HH:MM (the : will be removed)
+
+    :param src: Date-time text to be parsed
+
+    :type src: str
+
+    :param strict: Raise an exception if no matching format is known
+      and the date-time text cannot be parsed. If False, simply return
+      `None`
+
+    :type strict: bool, optional
+
+    :raises Exception: if strict and no src matches none of the
+      pre-defined formats
+
+    :rtype: `datetime` or `None`
     """
 
     if timezone is None:
@@ -414,7 +451,10 @@ def parse_datetime(src):
         if mtch:
             return parser(mtch.string)
     else:
-        raise Exception("Invalid date-time format, %r" % src)
+        if strict:
+            raise Exception("Invalid date-time format, %r" % src)
+        else:
+            return None
 
 
 #
