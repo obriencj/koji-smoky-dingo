@@ -12,6 +12,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+from operator import itemgetter
+from six import iteritems
 from unittest import TestCase
 
 from kojismokydingo.common import (
@@ -156,6 +158,26 @@ class TestCommon(TestCase):
         self.assertEqual(unique(data), expect)
 
 
+    def test_unique_key(self):
+
+        origin = ["one", "two", "three", "four"]
+
+        def make_data(series):
+            return [{"id": origin.index(val), "val": val} for val in series]
+
+        data = make_data(["one", "two", "one", "two", "three",
+                          "three", "three", "one", "two", "three", "four",
+                          "four", "three", "two", "one"])
+
+        expect = make_data(origin)
+
+        self.assertEqual(unique(data, itemgetter("id")), expect)
+        self.assertEqual(unique(data, itemgetter("val")), expect)
+
+        self.assertEqual(unique(data, "id"), expect)
+        self.assertEqual(unique(data, "val"), expect)
+
+
     def test_chunkseq(self):
         data = list(range(0, 25))
         expect = [list(range(0, 5)),
@@ -250,18 +272,46 @@ class TestCommon(TestCase):
 
 
     def test_parse_datetime(self):
+        expected = {
+            "year": 2020,
+            "month": 9,
+            "day": 21,
+            "hour": 16,
+            "minute": 30,
+            "second": 52,
+            "microsecond": 313228
+        }
 
-        parse_datetime("2020-09-21 16:30:52.313228+00:00")
-        parse_datetime("2020-09-21 16:30:52.313228+0000")
-        parse_datetime("2020-09-21 16:30:52+00:00")
-        parse_datetime("2020-09-21 16:30:52+0000")
-        parse_datetime("2020-09-21 16:30:52 UTC")
-        parse_datetime("2020-09-21 16:30:52")
-        parse_datetime("2020-09-21 16:30")
-        parse_datetime("2020-09-21")
-        parse_datetime("2020-09")
-        parse_datetime("1600707103")
+        def check_datetime(src, **magic):
+            if magic:
+                checks = dict(expected)
+                checks.update(magic)
+            else:
+                checks = expected
+
+            dtv = parse_datetime(src)
+            for key, val in iteritems(checks):
+                found = getattr(dtv, key, None)
+                if found:
+                    self.assertEqual(found, val)
+
+        check_datetime("2020-09-21 16:30:52.313228+00:00")
+        check_datetime("2020-09-21 16:30:52.313228+0000")
+        check_datetime("2020-09-21 16:30:52+00:00")
+        check_datetime("2020-09-21 16:30:52+0000")
+        check_datetime("2020-09-21 16:30:52 UTC")
+        check_datetime("2020-09-21 16:30:52")
+        check_datetime("2020-09-21 16:30")
+        check_datetime("2020-09-21")
+        check_datetime("2020-09", day=1)
+        check_datetime("1600705852")
+
+        # we'll just validate that it doesn't raise an exception
         parse_datetime("now")
+
+        bad = "joey ramone"
+        self.assertRaises(Exception, parse_datetime, bad)
+        self.assertEqual(parse_datetime(bad, strict=False), None)
 
 
 #
