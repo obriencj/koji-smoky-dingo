@@ -17,6 +17,10 @@ Chugging along and collecting feedback
   to parser arguments. Will safely convert str to int if applicable.
   This allows a number of commands to accept the ID of their relevant
   data type in place of its name
+- unique now accepts a 'key=' parameter to allow deduplication of
+  otherwise unhashable values
+- parse_datetime now accepts a 'strict=' parameter to let it return
+  None instead of raising an Exception when parsing fails
 
 Closed Issues:
 <https://github.com/obriencj/koji-smoky-dingo/milestone/4?closed=1>

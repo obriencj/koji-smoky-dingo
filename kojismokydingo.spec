@@ -224,6 +224,10 @@ Koji Smoky Dingo
 - list-build-archives and latest-archives now accept '--arch=ARCH'
 - moved as_userinfo to kojismokydingo package
 - add int_or_str helper function to kojismokydingo.cli
+- unique now accepts a 'key=' parameter to allow deduplication of
+  otherwise unhashable values
+- parse_datetime now accepts a 'strict=' parameter to let it return
+  None instead of raising an Exception when parsing fails
 
 * Fri Oct 02 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-1
 - add iter_bulk_load generator function
