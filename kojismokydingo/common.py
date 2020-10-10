@@ -206,6 +206,9 @@ def globfilter(seq, patterns,
         # needs to happen one time for the patterns
         patterns = [p.lower() for p in patterns]
 
+    if not (key is None or callable(key)):
+        key = itemgetter(key)
+
     def test(val):
         if key:
             val = key(val)

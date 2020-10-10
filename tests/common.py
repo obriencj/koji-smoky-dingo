@@ -18,7 +18,7 @@ from unittest import TestCase
 
 from kojismokydingo.common import (
     chunkseq, fnmatches, globfilter, merge_extend,
-    parse_datetime, unique, update_extend,
+    parse_datetime, rpm_evr_compare, unique, update_extend,
     _rpm_str_compare)
 
 
@@ -107,6 +107,22 @@ class TestEVRSort(TestCase):
         for vl, vr in RPM_STR_CMP_1:
             self.assertEqual(_rpm_str_compare(vl, vr), 1)
             self.assertEqual(_rpm_str_compare(vr, vl), -1)
+
+
+    def test_rpm_evr_compare_cmp_0(self):
+        for vl, vr in RPM_STR_CMP_0:
+            evr_l = ("0", vl, "1")
+            evr_r = ("0", vr, "1")
+            self.assertEqual(rpm_evr_compare(evr_l, evr_r), 0)
+            self.assertEqual(rpm_evr_compare(evr_r, evr_l), 0)
+
+
+    def test_rpm_evr_compare_cmp_1(self):
+        for vl, vr in RPM_STR_CMP_1:
+            evr_l = ("0", vl, "1")
+            evr_r = ("0", vr, "1")
+            self.assertEqual(rpm_evr_compare(evr_l, evr_r), 1)
+            self.assertEqual(rpm_evr_compare(evr_r, evr_l), -1)
 
 
 class TestCommon(TestCase):
@@ -269,6 +285,42 @@ class TestCommon(TestCase):
         self.assertEqual(gf(["T*"], True, True),
                          ["one", "pizza", "beer"])
         self.assertEqual(gf(["T*"], True, False), data)
+
+
+    def test_globfilter_key(self):
+        data = ["one", "two", "three", "tacos", "pizza", "beer"]
+        data = [{"id": i, "val": v} for (i, v) in enumerate(data)]
+
+        def gf(patterns, invert, ignore_case):
+            vals = (globfilter(data, patterns, key="val",
+                               invert=invert, ignore_case=ignore_case))
+            return [v["val"] for v in vals]
+
+        def dv(vals):
+            return [v["val"] for v in vals]
+
+        self.assertEqual(gf(["*"], False, False), dv(data))
+        self.assertEqual(gf(["*"], False, True), dv(data))
+        self.assertEqual(gf(["*"], True, False), [])
+        self.assertEqual(gf(["*"], True, True), [])
+
+        self.assertEqual(gf(["?"], False, False), [])
+        self.assertEqual(gf(["?"], False, True), [])
+        self.assertEqual(gf(["?"], True, False), dv(data))
+        self.assertEqual(gf(["?"], True, True), dv(data))
+
+        self.assertEqual(gf(["t*"], False, True),
+                         ["two", "three", "tacos"])
+        self.assertEqual(gf(["t*"], False, False),
+                         ["two", "three", "tacos"])
+
+        self.assertEqual(gf(["T*"], False, True),
+                         ["two", "three", "tacos"])
+        self.assertEqual(gf(["T*"], False, False), [])
+
+        self.assertEqual(gf(["T*"], True, True),
+                         ["one", "pizza", "beer"])
+        self.assertEqual(gf(["T*"], True, False), dv(data))
 
 
     def test_parse_datetime(self):
