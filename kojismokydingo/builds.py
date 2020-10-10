@@ -670,9 +670,20 @@ def filter_imported(build_infos, by_cg=(), negate=False):
 
 
 def gather_buildroots(session, build_ids):
+    """
+    For each build ID given, produce the list of buildroots used to
+    create it.
+
+    :param build_ids: build IDs to fetch buildroots for
+
+    :type build_ids: list[int]
+
+    :rtype: dict[int, list[dict]]
+    """
 
     # multicall to fetch the artifacts for all build IDs
-    archives = bulk_load_build_archives(session, build_ids)
+    archives = merge_extend(bulk_load_build_archives(session, build_ids),
+                            bulk_load_build_rpms(session, build_ids))
 
     # gather all the buildroot IDs
     root_ids = set()
@@ -690,7 +701,7 @@ def gather_buildroots(session, build_ids):
 
     for build_id, archive_list in iteritems(archives):
         broots = (a["buildroot_id"] for a in archive_list)
-        broots = unique(b for b in broots if b)
+        broots = unique(filter(None, broots))
         results[build_id] = [buildroots[b] for b in broots]
 
     return results
