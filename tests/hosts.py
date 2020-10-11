@@ -32,17 +32,27 @@ HOST_2 = {
 }
 
 
+HOST_3 = {
+    "id": 3,
+    "name": "joey-ramone",
+}
+
+
 BUILDERS = (
     HOST_1,
     HOST_2,
-    # HOST_3,
-    # HOST_4,
 )
 
 
+CHAN = {
+    "id": 101,
+    "name": "example-channel",
+}
+
+
 UPDATES = {
-    1: {"result": "2020-10-10",
-        "expect": datetime(2020, 10, 10, 0, 0)},
+    1: {"result": "2020-10-10 14:22",
+        "expect": datetime(2020, 10, 10, 14, 22)},
     2: {"result": None,
         "expect": None},
 }
@@ -57,6 +67,9 @@ class TestHostCheckins(TestCase):
         listhosts = sess.listHosts
         listhosts.side_effect = [[dict(b) for b in BUILDERS]]
 
+        getchan = sess.getChannel
+        getchan.side_effect = [CHAN]
+
         lu_ask = []
         lastupdate = sess.getLastHostUpdate
         lastupdate.side_effect = lu_ask.append
@@ -64,12 +77,22 @@ class TestHostCheckins(TestCase):
         mc = sess.multiCall
         mc.side_effect = lambda **k: ([UPDATES[i]["result"]] for i in lu_ask)
 
-        hosts = gather_hosts_checkins(sess)
+        hosts = gather_hosts_checkins(sess,
+                                      arches=None,
+                                      channel="example-channel",
+                                      skiplist=['joey*'])
+
         self.assertEqual(len(hosts), 2)
 
-        self.assertEqual(mc.call_count, 1)
+        self.assertEqual(getchan.call_count, 1)
+        self.assertEqual(getchan.call_args[0][0], "example-channel")
+
         self.assertEqual(listhosts.call_count, 1)
+
         self.assertEqual(lastupdate.call_count, 2)
+        self.assertEqual(lastupdate.call_count, 2)
+
+        self.assertEqual(mc.call_count, 1)
 
         for bldr in hosts:
             bldr_id = bldr["id"]
