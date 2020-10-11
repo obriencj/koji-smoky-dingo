@@ -56,6 +56,8 @@ UPDATES = {
         "expect": datetime(2020, 10, 10, 14, 22)},
     2: {"result": None,
         "expect": None},
+    3: {"result": None,
+        "expect": None},
 }
 
 
@@ -63,6 +65,44 @@ class TestHostCheckins(TestCase):
 
 
     def test_gather_hosts_checkins(self):
+        sess = MagicMock()
+
+        getchan = sess.getChannel
+        getchan.side_effect = [CHAN]
+
+        listhosts = sess.listHosts
+        listhosts.side_effect = [[dict(b) for b in BUILDERS]]
+
+        lu_ask = []
+        lastupdate = sess.getLastHostUpdate
+        lastupdate.side_effect = lu_ask.append
+
+        mc = sess.multiCall
+        mc.side_effect = lambda **k: ([UPDATES[i]["result"]] for i in lu_ask)
+
+        hosts = gather_hosts_checkins(sess)
+
+        # verify it loaded the channel as desired
+        self.assertEqual(getchan.call_count, 0)
+
+        self.assertEqual(listhosts.call_count, 1)
+
+        self.assertEqual(lastupdate.call_count, 3)
+
+        # should fit in a single multicall
+        self.assertEqual(mc.call_count, 1)
+
+        # we fed it with three, but only two should be matched
+        self.assertEqual(len(BUILDERS), 3)
+        self.assertEqual(len(hosts), 3)
+
+        for bldr in hosts:
+            bldr_id = bldr["id"]
+            self.assertTrue("last_update" in bldr)
+            self.assertEqual(UPDATES[bldr_id]["expect"], bldr["last_update"])
+
+
+    def test_channel(self):
         sess = MagicMock()
 
         getchan = sess.getChannel
@@ -88,6 +128,8 @@ class TestHostCheckins(TestCase):
         self.assertEqual(getchan.call_args[0][0], "example-channel")
 
         self.assertEqual(listhosts.call_count, 1)
+        self.assertEqual(listhosts.call_args[0][1], 101)
+
         self.assertEqual(lastupdate.call_count, 2)
 
         # should fit in a single multicall
