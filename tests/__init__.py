@@ -19,8 +19,9 @@ from six.moves import zip
 from unittest import TestCase
 
 from kojismokydingo import (
-    FeatureUnavailable, NoSuchBuild, NoSuchTag, NoSuchUser,
-    as_buildinfo, as_taginfo, as_userinfo,
+    BadDingo, FeatureUnavailable,
+    NoSuchBuild, NoSuchTag, NoSuchTarget, NoSuchUser,
+    as_buildinfo, as_taginfo, as_targetinfo, as_userinfo,
     iter_bulk_load, version_check, version_require)
 
 
@@ -309,6 +310,63 @@ class TestAsTaginfo(TestCase):
         self.assertEqual(send.call_count, 0)
 
 
+class TestAsTargetInfo(TestCase):
+
+    DATA = {
+        "id": 1,
+        "name": "example-1.0-candidate",
+    }
+
+
+    def session(self, results):
+        sess = MagicMock()
+
+        send = sess.getBuildTarget
+        send.side_effect = results
+
+        return sess, send
+
+
+    def test_as_targetinfo_nvr(self):
+
+        key = "example-1.0-candidate"
+        sess, send = self.session([self.DATA])
+        res = as_targetinfo(sess, key)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key,))
+
+
+    def test_as_targetinfo_id(self):
+
+        sess, send = self.session([self.DATA])
+        res = as_targetinfo(sess, 1)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (1,))
+
+
+    def test_as_targetinfo_dict(self):
+
+        sess, send = self.session([])
+        res = as_targetinfo(sess, self.DATA)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 0)
+
+
+    def test_no_such_build(self):
+
+        key = "example-1.0-candidate"
+        sess, send = self.session([None])
+        self.assertRaises(NoSuchTarget, as_targetinfo, sess, key)
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(send.call_args_list[0][0], (key,))
+
+        sess, send = self.session([])
+        self.assertRaises(NoSuchTarget, as_targetinfo, sess, None)
+        self.assertEqual(send.call_count, 0)
+
+
 class TestAsUserinfo(TestCase):
 
     DATA = {
@@ -390,6 +448,17 @@ class TestAsUserinfo(TestCase):
         sess, send = self.session([])
         self.assertRaises(NoSuchUser, as_userinfo, sess, None)
         self.assertEqual(send.call_count, 0)
+
+
+class TestBadDingo(TestCase):
+
+    def test_bad_dingo(self):
+        bads = [BadDingo, FeatureUnavailable,
+                NoSuchBuild, NoSuchTag, NoSuchTarget, NoSuchUser,]
+
+        for cls in bads:
+            inst = cls("test")
+            self.assertEqual(str(inst), "%s: test" % cls.complaint)
 
 
 #
