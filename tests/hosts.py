@@ -41,6 +41,7 @@ HOST_3 = {
 BUILDERS = (
     HOST_1,
     HOST_2,
+    HOST_3,
 )
 
 
@@ -64,11 +65,11 @@ class TestHostCheckins(TestCase):
     def test_gather_hosts_checkins(self):
         sess = MagicMock()
 
-        listhosts = sess.listHosts
-        listhosts.side_effect = [[dict(b) for b in BUILDERS]]
-
         getchan = sess.getChannel
         getchan.side_effect = [CHAN]
+
+        listhosts = sess.listHosts
+        listhosts.side_effect = [[dict(b) for b in BUILDERS]]
 
         lu_ask = []
         lastupdate = sess.getLastHostUpdate
@@ -82,21 +83,37 @@ class TestHostCheckins(TestCase):
                                       channel="example-channel",
                                       skiplist=['joey*'])
 
-        self.assertEqual(len(hosts), 2)
-
+        # verify it loaded the channel as desired
         self.assertEqual(getchan.call_count, 1)
         self.assertEqual(getchan.call_args[0][0], "example-channel")
 
         self.assertEqual(listhosts.call_count, 1)
-
-        self.assertEqual(lastupdate.call_count, 2)
         self.assertEqual(lastupdate.call_count, 2)
 
+        # should fit in a single multicall
         self.assertEqual(mc.call_count, 1)
+
+        # we fed it with three, but only two should be matched
+        self.assertEqual(len(BUILDERS), 3)
+        self.assertEqual(len(hosts), 2)
 
         for bldr in hosts:
             bldr_id = bldr["id"]
+            self.assertTrue("last_update" in bldr)
             self.assertEqual(UPDATES[bldr_id]["expect"], bldr["last_update"])
+
+
+    def test_no_such_channel(self):
+        sess = MagicMock()
+
+        getchan = sess.getChannel
+        getchan.side_effect = [None]
+
+        self.assertRaises(NoSuchChannel,
+                          gather_hosts_checkins, sess, channel="not found")
+
+        self.assertEqual(getchan.call_count, 1)
+        self.assertEqual(getchan.call_args[0][0], "not found")
 
 
 #
