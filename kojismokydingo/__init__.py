@@ -285,8 +285,9 @@ def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
 
     Returns an `OrderedDict` associating the individual keys with the
     returned value of loadfn. If `results` is specified, it must
-    support dict assignment, and will be used in place of a newly
-    allocated `OrderedDict` to store and return the results.
+    support dict-like assignment via an update method, and will be
+    used in place of a newly allocated `OrderedDict` to store and
+    return the results.
 
     :param session: The koji session
 
@@ -315,9 +316,9 @@ def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
     :type size: int, optional
 
     :param results: storage for `loadfn` results. If specified, must
-      support item assignment (like a dict), and it will be populated
-      and then used as the return value for this function. Default, a
-      new `OrderedDict` will be allocated.
+      support item assignment (like a dict) via an update method, and
+      it will be populated and then used as the return value for this
+      function. Default, a new `OrderedDict` will be allocated.
 
     :type results: dict, optional
 
@@ -328,10 +329,7 @@ def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
     """
 
     results = OrderedDict() if results is None else results
-
-    for key, info in iter_bulk_load(session, loadfn, keys, err, size):
-        results[key] = info
-
+    results.update(iter_bulk_load(session, loadfn, keys, err, size))
     return results
 
 
@@ -423,17 +421,14 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     Returns an OrderedDict associating the individual RPM IDs with their
     resulting RPM signature lists.
 
-    If results is non-None, it must support dict assignment, and will
-    be used in place of a newly allocated OrderedDict to store and
-    return the results.
+    If results is non-None, it must support a dict-like update method,
+    and will be used in place of a newly allocated OrderedDict to
+    store and return the results.
     """
 
     results = OrderedDict() if results is None else results
-
-    for key, info in iter_bulk_load(session, session.queryRPMSigs,
-                                    rpm_ids, True, size):
-        results[key] = info
-
+    results.update(iter_bulk_load(session, session.queryRPMSigs,
+                                  rpm_ids, True, size))
     return results
 
 
@@ -441,12 +436,8 @@ def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
                                  size=100, results=None):
 
     results = OrderedDict() if results is None else results
-
     fn = lambda i: session.listArchives(componentBuildrootID=i, type=btype)
-
-    for key, info in iter_bulk_load(session, fn, buildroot_ids, True, size):
-        results[key] = info
-
+    results.update(iter_bulk_load(session, fn, buildroot_ids, True, size))
     return results
 
 
@@ -454,12 +445,8 @@ def bulk_load_buildroot_rpms(session, buildroot_ids,
                              size=100, results=None):
 
     results = OrderedDict() if results is None else results
-
     fn = lambda i: session.listRPMs(componentBuildrootID=i)
-
-    for key, info in iter_bulk_load(session, fn, buildroot_ids, True, size):
-        results[key] = info
-
+    results.update(iter_bulk_load(session, fn, buildroot_ids, True, size))
     return results
 
 
@@ -472,18 +459,14 @@ def bulk_load_build_archives(session, build_ids, btype=None,
     Returns an OrderedDict associating the individual build IDs with
     their resulting archive lists.
 
-    If results is non-None, it must support dict assignment, and will
-    be used in place of a newly allocated OrderedDict to store and
-    return the results.
+    If results is non-None, it must support dict-like update method,
+    and will be used in place of a newly allocated OrderedDict to
+    store and return the results.
     """
 
     results = OrderedDict() if results is None else results
-
     fn = lambda i: session.listArchives(buildID=i, type=btype)
-
-    for key, info in iter_bulk_load(session, fn, build_ids, True, size):
-        results[key] = info
-
+    results.update(iter_bulk_load(session, fn, build_ids, True, size))
     return results
 
 
@@ -495,17 +478,14 @@ def bulk_load_build_rpms(session, build_ids, size=100, results=None):
     Returns an OrderedDict associating the individual build IDs with
     their resulting archive lists.
 
-    If results is non-None, it must support dict assignment, and will
-    be used in place of a newly allocated OrderedDict to store and
-    return the results.
+    If results is non-None, it must support a dict-like update method,
+    and will be used in place of a newly allocated OrderedDict to
+    store and return the results.
     """
 
     results = OrderedDict() if results is None else results
-
-    for key, info in iter_bulk_load(session, session.listRPMs,
-                                    build_ids, True, size):
-        results[key] = info
-
+    results.update(iter_bulk_load(session, session.listRPMs,
+                                  build_ids, True, size))
     return results
 
 
@@ -517,17 +497,14 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
     Returns an OrderedDict associating the individual buildroot IDs
     with their resulting buildroot info dicts.
 
-    If results is non-None, it must support dict assignment, and will
-    be used in place of a newly allocated OrderedDict to store and
-    return the results.
+    If results is non-None, it must support a dict-like update method,
+    and will be used in place of a newly allocated OrderedDict to
+    store and return the results.
     """
 
     results = OrderedDict() if results is None else results
-
-    for key, info in iter_bulk_load(session, session.getBuildroot,
-                                    broot_ids, True, size):
-        results[key] = info
-
+    results.update(iter_bulk_load(session, session.getBuildroot,
+                                  broot_ids, True, size))
     return results
 
 
