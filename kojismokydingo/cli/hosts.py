@@ -26,7 +26,6 @@ enabled but which are not checking in.
 from __future__ import print_function
 
 from datetime import datetime, timedelta
-from six import itervalues
 
 from . import AnonSmokyDingo
 from ..hosts import gather_hosts_checkins
@@ -44,7 +43,7 @@ def cli_check_hosts(session, timeout=60, arches=(), channel=None,
 
     collected = []
 
-    for bldr in itervalues(bldr_data):
+    for bldr in bldr_data:
         lup = bldr["last_update"]
         if lup and lup.tzinfo is not None:
             lup = lup.replace(tzinfo=None)

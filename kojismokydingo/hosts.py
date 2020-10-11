@@ -22,11 +22,10 @@ Functions for working with Koji hosts
 """
 
 
-from operator import itemgetter
-from six import iterkeys
-from six.moves import zip
+from six import itervalues
+from six.moves import filter
 
-from . import NoSuchChannel
+from . import NoSuchChannel, iter_bulk_load
 from .common import globfilter, parse_datetime
 
 
@@ -68,28 +67,23 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     else:
         chan_id = None
 
-    bldrs = session.listHosts(arches, chan_id, None, True, None, None)
+    loaded = session.listHosts(arches, chan_id, None, True, None, None)
+    loaded = filter(None, loaded)
 
     if skiplist:
-        bldrs = globfilter(bldrs, skiplist,
-                           key=itemgetter("name"), invert=True)
+        loaded = globfilter(loaded, skiplist, key="name", invert=True)
 
     # collect a mapping of builder ids to builder info
-    bldrs = dict((b["id"], b) for b in bldrs)
+    bldrs = dict((b["id"], b) for b in loaded)
 
-    bldr_ids = list(iterkeys(bldrs))
-
-    session.multicall = True
-    for bid in bldr_ids:
-        session.getLastHostUpdate(bid)
-    mc = session.multiCall()
+    updates = iter_bulk_load(session, session.getLastHostUpdate, bldrs)
 
     # correlate the update timestamps with the builder info
-    for bid, data in zip(bldr_ids, mc):
-        data = parse_datetime(data[0]) if (data and data[0]) else None
-        bldrs[bid]["last_update"] = data
+    for bldr_id, data in updates:
+        data = parse_datetime(data, strict=False) if data else None
+        bldrs[bldr_id]["last_update"] = data
 
-    return bldrs
+    return list(itervalues(bldrs))
 
 
 #
