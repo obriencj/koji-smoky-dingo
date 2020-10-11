@@ -106,8 +106,9 @@ def build_nvr_sort(build_infos, dedup=True):
     """
 
     if dedup:
-        dd = dict((b["id"], b) for b in build_infos if b)
-        build_infos = itervalues(dd)
+        build_infos = build_dedup(build_infos)
+    else:
+        build_infos = filter(None, build_infos)
 
     return sorted(build_infos, key=BuildNEVRCompare)
 
@@ -126,8 +127,10 @@ def build_id_sort(build_infos, dedup=True):
     :rtype: list[dict]
     """
 
+    build_infos = filter(None, build_infos)
+
     if dedup:
-        builds = dict((b["id"], b) for b in build_infos if b)
+        builds = dict((b["id"], b) for b in build_infos)
         return [b for _bid, b in sorted(iteritems(builds))]
     else:
         return sorted(build_infos, key=itemgetter("id"))
@@ -144,8 +147,7 @@ def build_dedup(build_infos):
     :rtype: list[dict]
     """
 
-    dedup = OrderedDict((b["id"], b) for b in build_infos if b)
-    return list(itervalues(dedup))
+    return unique(filter(None, build_infos), key="id")
 
 
 def iter_bulk_tag_builds(session, tag, build_infos,
@@ -377,7 +379,7 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
     # convert build_infos into an id:info dict -- this also helps us
     # ensure that the sequence of build_infos is preserved, for cases
     # where it might have been a generator
-    builds = OrderedDict((b["id"], b) for b in build_infos)
+    builds = OrderedDict((b["id"], b) for b in build_infos if b)
 
     # we'll only decorate the build infos which aren't already
     # decorated
