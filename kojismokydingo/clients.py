@@ -22,6 +22,11 @@ Some simple functions for working with the local client configuration
 """
 
 
+__all__ = (
+    "rebuild_client_config",
+)
+
+
 def rebuild_client_config(session, goptions):
     """
     Reconstructs a koji client configuration based on the fields of a

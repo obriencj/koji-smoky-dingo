@@ -29,6 +29,11 @@ from . import NoSuchChannel, iter_bulk_load
 from .common import globfilter, parse_datetime
 
 
+__all__ = (
+    "gather_hosts_checkins",
+)
+
+
 def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     """
     Similar to session.listHosts, but results are decorated with a new
