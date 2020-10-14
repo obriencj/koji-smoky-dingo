@@ -40,4 +40,4 @@ References
 
 * :py:obj:`kojismokydingo.cli.tags.AffectedTargets`
 * :py:func:`kojismokydingo.cli.tags.cli_affected_targets`
-* :py:func:`kojismokydingo.tags.get_affected_targets`
+* :py:func:`kojismokydingo.tags.gather_affected_targets`

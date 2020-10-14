@@ -31,6 +31,18 @@ from . import (
     bulk_load, bulk_load_tags)
 
 
+__all__ = (
+    "collect_tag_extras",
+    "convert_tag_extras",
+    "ensure_tag",
+    "find_inheritance_parent",
+    "gather_affected_targets",
+    "gather_tag_ids",
+    "renum_inheritance",
+    "resolve_tag",
+)
+
+
 def ensure_tag(session, name):
     """
     Given a name, resolve it to a tag info dict. If there is no such
@@ -90,7 +102,7 @@ def resolve_tag(session, name, target=False):
     return as_taginfo(session, name)
 
 
-def get_affected_targets(session, tagnames):
+def gather_affected_targets(session, tagnames):
     """
     Returns the list of target info dicts representing the targets
     which inherit any of the given named tags. That is to say, the

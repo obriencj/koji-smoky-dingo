@@ -35,7 +35,7 @@ from . import (
     printerr, pretty_json, tabulate)
 from .. import BadDingo, FeatureUnavailable, NoSuchTag, version_require
 from ..tags import (
-    collect_tag_extras, find_inheritance_parent, get_affected_targets,
+    collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag)
 
 
@@ -66,7 +66,7 @@ def cli_affected_targets(session, tag_list,
     if quiet is None:
         quiet = not sys.stdout.isatty()
 
-    targets = get_affected_targets(session, tag_list)
+    targets = gather_affected_targets(session, tag_list)
 
     debug = printerr if not quiet else lambda *m: None
 
