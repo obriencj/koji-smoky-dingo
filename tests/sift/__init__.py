@@ -264,6 +264,11 @@ class SifterTest(TestCase):
         """
         self.assertRaises(SifterError, self.compile_sifter, src)
 
+        src = """
+        (name "Pizza
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
 
     def test_comments(self):
         src = """

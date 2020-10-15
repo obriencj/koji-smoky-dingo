@@ -160,11 +160,18 @@ def parse_quoted(srciter, quotec='\"'):
     esc = False
 
     for c in srciter:
-        if not esc and c == quotec:
+        if esc:
+            token.write(c)
+            esc = False
+        elif c == quotec:
             break
+        elif c == '\\':
+            esc = True
         else:
             token.write(c)
-            esc = (c == '\\') and (not esc)
+    else:
+        msg = "Unterminated matcher: missing closing %r" % quotec
+        raise SifterError(msg)
 
     val = token.getvalue()
 
