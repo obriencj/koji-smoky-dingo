@@ -38,16 +38,44 @@ __all__ = (
 
 
 class NameSieve(PropertySieve):
+    """
+    Usage: ``(name NAME [NAME...])``
+
+    filters for dict infos whose `name` key matches any of the given
+    NAME matchers.
+    """
+
     name = "name"
     field = "name"
 
 
 class VersionSieve(PropertySieve):
+    """
+    Usage: ``(version VER [VER...])``
+
+    filters for dict infos whose `version` key matches any of the given
+    VER matchers.
+    """
+
     name = "version"
     field = "version"
 
 
 class StateSieve(PropertySieve):
+    """
+    Usage: ``(state BUILD_STATE [BUILD_STATE...])``
+
+    filters for dict infos whose `state` key matches any of the given
+    koji build states. Build states may be specified as either an integer
+    or one of the following strings or symbols
+
+    * BUILDING
+    * COMPLETE
+    * DELETED
+    * FAILED
+    * CANCELED
+    """
+
     name = "state"
     field = "state"
 

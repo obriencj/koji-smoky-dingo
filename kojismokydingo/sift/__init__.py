@@ -24,6 +24,7 @@ import re
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from functools import partial
+from operator import itemgetter
 from six import add_metaclass, iteritems, itervalues
 from six.moves import StringIO
 
@@ -91,28 +92,20 @@ class Glob(object):
         return "Glob(%r)" % self._glob
 
 
-def parse_quoted(srciter, quotec='\"'):
-    token = StringIO()
-    esc = False
-
-    for c in srciter:
-        if not esc and c == quotec:
-            break
-        else:
-            token.write(c)
-            esc = (c == '\\') and (not esc)
-
-    val = token.getvalue()
-
-    if quotec == "/":
-        return Regex(val)
-    elif quotec == "|":
-        return Glob(val)
-    else:
-        return val
-
-
 def parse_exprs(srciter):
+    """
+    Simple s-expr parser. Reads from a string or character iterator,
+    emits expressions as nested lists. Lenient about closing
+    expressions.
+    """
+
+    # I've been re-using this code for over a decade. It was
+    # originally in a command-line tool I wrote named 'deli' which
+    # worked with del.icio.us for finding and filtering through my
+    # bookmarks. Then I used it in Spexy and a form of it is the basis
+    # for Sibilant's parser as well. And now it lives here, in Koji
+    # Smoky Dingo.
+
     if isinstance(srciter, str):
         srciter = iter(srciter)
 
@@ -149,7 +142,45 @@ def parse_exprs(srciter):
         yield Symbol(token.getvalue())
 
 
+def parse_quoted(srciter, quotec='\"'):
+    """
+    Helper function for parse_exprs, will parse quoted values and
+    return the appropriate wrapper type depending on the quoting
+    character.
+
+    * ``"foo"`` is a str
+    * ``/foo/`` is a Regex
+    * ``|foo|`` is a Glob
+
+    Symbols are generated in the parse_exprs function directly, as
+    they are not quoted.
+    """
+
+    token = StringIO()
+    esc = False
+
+    for c in srciter:
+        if not esc and c == quotec:
+            break
+        else:
+            token.write(c)
+            esc = (c == '\\') and (not esc)
+
+    val = token.getvalue()
+
+    if quotec == "/":
+        return Regex(val)
+    elif quotec == "|":
+        return Glob(val)
+    else:
+        return val
+
+
 def ensure_symbol(value, msg=None):
+    """
+    Checks that the value is a Symbol. If not, raises a SifterError.
+    """
+
     if isinstance(value, Symbol):
         return value
     else:
@@ -160,6 +191,11 @@ def ensure_symbol(value, msg=None):
 
 
 def ensure_str(value, msg=None):
+    """
+    Checks that value is either a str or Symbol. If not, raises a
+    SifterError.
+    """
+
     if isinstance(value, (str, Symbol)):
         return str(value)
     else:
@@ -170,19 +206,33 @@ def ensure_str(value, msg=None):
 
 
 def ensure_int_or_str(value, msg=None):
-    if isinstance(value, (str, Symbol)):
+    """
+    Checks that value is either a str or Symbol. If it is a Symbol,
+    attempts to parse it as an unsigned integer. If not a str or
+    Symbol, raises a SifterError.
+    """
+
+    if isinstance(value, str):
+        return value
+
+    elif isinstance(value, Symbol):
         if value.isdigit():
             return int(value)
         else:
             return value
     else:
         if not msg:
-            msg = "Value must be an int or string"
+            msg = "Value must be an int, string, or symbol"
         raise SifterError("%s: %r (type %s)" %
                           (msg, value, type(value).__name__))
 
 
 def ensure_matcher(value, msg=None):
+    """
+    Checks that value is either a str, Symbol, Regex, or Glob
+    instance.  If not, raises a SifterError.
+    """
+
     if isinstance(value, (str, Symbol, Regex, Glob)):
         return value
     else:
@@ -193,10 +243,20 @@ def ensure_matcher(value, msg=None):
 
 
 def ensure_matchers(values, msg=None):
+    """
+    Checks that all of the elements in values are either a str,
+    Symbol, Regex, or Glob instance.  If not, raises a SifterError.
+    """
+
     return [ensure_matcher(v, msg) for v in values]
 
 
 def ensure_sieve(value, msg=None):
+    """
+    Checks that value is a Sieve instance.  If not, raises a
+    SifterError.
+    """
+
     if isinstance(value, Sieve):
         return value
     else:
@@ -207,17 +267,46 @@ def ensure_sieve(value, msg=None):
 
 
 def ensure_sieves(values, msg=None):
+    """
+    Checks that all of the elements in values are Sieve instance.  If
+    not, raises a SifterError.
+    """
+
     return [ensure_sieve(v, msg) for v in values]
 
 
 class Sifter(object):
 
-    def __init__(self, sieves, source_str, id_key="id"):
+    def __init__(self, sieves, source_str, key="id"):
         """
-        :type predicates: list[type[SiftPredicate]]
+        A flagging data filter, compiled from an s-expression syntax.
+
+        Sifter instances are callable, and when invoked with a session
+        and a list of info dicts will perform filtering tests on the
+        data to determine which items match the predicates from the
+        source syntax.
+
+        :param sieves: list of classes to use in compiling the source
+          str. Each class should be a subclass of Sieve. The name
+          attribute of each class is used as the lookup value when
+          compiling a sieve expression
+
+        :type sieves: list[type[Sieve]]
+
+        :param source_str: Sieve expressions
+
+        :type source_str: str
+
+        :param key: Unique hashable identifier key for the info
+          dicts. This is used to deduplicate or otherwise correlate
+          the incoming information. Default, use the "id" value.
+
+        :type key: str, optional
         """
 
-        self.key = id_key
+        if not callable(key):
+            key = itemgetter(key)
+        self.key = key
 
         # {flagname: set(data_id)}
         self._flags = {}
@@ -230,19 +319,37 @@ class Sifter(object):
             sieves = dict((sieve.name, sieve) for sieve in sieves)
 
         self._sieve_classes = sieves
-        self._exprs = self._compile(source_str) if source_str else []
+
+        exprs = self._compile(source_str) if source_str else []
+        self._exprs = ensure_sieves(exprs)
 
 
     def sieve_exprs(self):
+        """
+        The list of Sieve expressions in this Sifter
+        """
+
         return self._exprs
 
 
     def _compile(self, source_str):
+        """
+        Turns a source string into a list of Sieve instances
+        """
+
         return [self._convert(p) for p in parse_exprs(source_str)]
 
 
     def _convert(self, parsed):
+        """
+        Takes the simple parse tree and turns it into a series of nested
+        Sieve instances
+        """
+
         if isinstance(parsed, list):
+            if not parsed:
+                raise SifterError("Empty expression: ()")
+
             name = ensure_symbol(parsed[0], "Sieve names must be symbols")
 
             cls = self._sieve_classes.get(name)
@@ -257,8 +364,7 @@ class Sifter(object):
 
     def __call__(self, session, info_dicts):
 
-        id_key = self.key
-        data = dict((b[id_key], b) for b in info_dicts)
+        data = dict((self.key(b), b) for b in info_dicts)
 
         for expr in self._exprs:
             if isinstance(expr, Flagger):
@@ -269,7 +375,7 @@ class Sifter(object):
             flgd = self.flagged(flagname)
 
             for binfo in expr(session, itervalues(data)):
-                bid = binfo[id_key]
+                bid = self.key(binfo)
 
                 flgd.add(bid)
                 self.data_flags(bid).add(flagname)
@@ -309,6 +415,32 @@ class Sifter(object):
 
 @add_metaclass(ABCMeta)
 class Sieve(object):
+    """
+    The abstract base type for all Sieve expressions.
+
+    A Sieve is a callable instance which is passed a session and a
+    sequence of info dicts, and returns a filtered subset of those
+    info dicts.
+
+    The default ``__call__`` implementation will trigger the `prep`
+    method first, and then use the `check` method on each info dict to
+    determine whether it should be included in the results or not.
+    Subclasses can therefore easily write just the check method.
+
+    The prep method is there in the event that additional queries
+    should be called on the whole set of incoming data (enabling
+    multicall optimizations).
+
+    Sieves are typically instanciated by a Sifter when it compiles the
+    sieve expression string.
+
+    Sieve subclasses must provide a ``name`` class property or
+    attribute. This property is the key used to define how the Sieve
+    is invoked by the source. For example, a source of
+    ``(check-enabled X)`` is going to expect that the Sifter has a
+    Sieve class available with a name of `"check-enabled"`
+    """
+
 
     @abstractproperty
     def name(self):
@@ -317,13 +449,23 @@ class Sieve(object):
 
     def __init__(self, sifter):
         self.sifter = sifter
+        self.key = sifter.key
 
 
     @abstractmethod
-    def check(self, session, binfo):
+    def check(self, session, info):
         """
         Override to return True if the predicate matches the given
         info dict.
+
+        This is used by the default `__call__` implementation in a
+        filter. Only the info dicts which return True from this method
+        will be included in the results.
+
+        :param info: The info dict to be checked.
+        :type info: dict
+
+        :rtype: bool
         """
         pass
 
@@ -334,12 +476,18 @@ class Sieve(object):
         allows bulk operations to be performed over the entire set of
         info dicts to be filtered, rather than one at a time in the
         `check` method
+
+        :type info_dicts: list[dict]
+        :rtype: None
         """
         pass
 
 
     def __call__(self, session, info_dicts):
         """
+        Use this Sieve instance to select and return a subset of the
+        info_dicts sequence.
+
         :type info_dicts: list[dict]
         :rtype: list[dict]
         """
@@ -367,6 +515,11 @@ class Logic(Sieve):
 
 
 class LogicAnd(Logic):
+    """
+    Usage:  ``(and EXPR [EXPR...])``
+
+    filters for info dicts which match all sub expressions.
+    """
 
     name = "and"
 
@@ -378,12 +531,16 @@ class LogicAnd(Logic):
 
 
 class LogicOr(Logic):
+    """
+    Usage: ``(or EXPR [EXPR...])``
+
+    filters for info dicts which match any of the sub expressions.
+    """
 
     name = "or"
 
     def __call__(self, session, info_dicts):
-        id_key = self.sifter.key
-        work = dict((b[id_key], b) for b in info_dicts)
+        work = dict((self.key(b), b) for b in info_dicts)
         results = {}
 
         for expr in self._exprs:
@@ -391,7 +548,7 @@ class LogicOr(Logic):
                 break
 
             for b in expr(session, list(itervalues(work))):
-                bid = b[id_key]
+                bid = self.key(b)
                 del work[bid]
                 results[bid] = b
 
@@ -399,23 +556,34 @@ class LogicOr(Logic):
 
 
 class LogicNot(Logic):
+    """
+    Usage: ``(not EXPR [EXPR...])``
+
+    filters for info dicts which match none of the sub expressions.
+    """
 
     name = "not"
 
     def __call__(self, session, info_dicts):
-        id_key = self.sifter.key
-        work = dict((b[id_key], b) for b in info_dicts)
+        work = dict((self.key(b), b) for b in info_dicts)
 
         for expr in self._exprs:
             if not work:
                 break
+
             for b in expr(session, list(itervalues(work))):
-                del work[b[id_key]]
+                del work[self.key(b)]
 
         return list(itervalues(work))
 
 
 class Flagger(LogicAnd):
+    """
+    Usage: ``(flag NAME EXPR [EXPR...])``
+
+    filters for info dicts which match all of the sub expressions, and
+    marks them with the given named flag.
+    """
 
     name = "flag"
 
@@ -425,6 +593,12 @@ class Flagger(LogicAnd):
 
 
 class Flagged(Sieve):
+    """
+    Usage: ``(flagged NAME [NAME...])``
+
+    filters for info dicts which have been marked with any of the
+    given named flags
+    """
 
     name = "flagged"
 
@@ -434,8 +608,7 @@ class Flagged(Sieve):
 
 
     def check(self, session, binfo):
-        id_key = self.sifter.key
-        bflgs = self.sifter.data_flags(binfo[id_key])
+        bflgs = self.sifter.data_flags(self.key(binfo))
         return not self._flags.isdisjoint(bflgs)
 
 
@@ -445,6 +618,15 @@ class Flagged(Sieve):
 
 @add_metaclass(ABCMeta)
 class VariadicSieve(Sieve):
+    """
+    Utility class which automatically applies an outer ``(or ...)`` when
+    presented with more than one argument.
+
+    This allows for example ``(name foo bar baz)`` to automatically
+    become ``(or (name foo) (name bar) (name baz))`` while the
+    ``name`` sieve only needs to be written to check for a single
+    value.
+    """
 
     def __new__(cls, sifter, expr, *exprs):
         if exprs:
@@ -465,6 +647,13 @@ class VariadicSieve(Sieve):
 
 @add_metaclass(ABCMeta)
 class PropertySieve(VariadicSieve):
+    """
+    A VariadicSieve which performs a comparison by fetching a named
+    key from the info dict.
+
+    Subclasses must provide a `field` attribute which will be used as
+    a key to fetch a comparison value from any checked info dicts.
+    """
 
     @abstractproperty
     def field(self):

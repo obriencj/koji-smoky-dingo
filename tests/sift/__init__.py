@@ -16,7 +16,7 @@ from unittest import TestCase
 
 from kojismokydingo.sift import (
     DEFAULT_SIEVES,
-    Glob, PropertySieve, Regex, Sifter, Symbol,
+    Glob, PropertySieve, Regex, Sifter, SifterError, Symbol,
 )
 
 
@@ -193,7 +193,9 @@ class SifterTest(TestCase):
 
     def test_logic(self):
         src = """
-        (flag good (or (type food) (and (type drink) (not (name Draino)))))
+        (flag good (or (type food)
+                       (and (type drink)
+                            (not (name Draino)))))
         """
 
         sifter = self.compile_sifter(src)
@@ -208,6 +210,83 @@ class SifterTest(TestCase):
         self.assertTrue("good" in res)
 
         self.assertEqual(res["good"], [TACOS, PIZZA, BEER])
+
+
+    def test_flag_implicit_and(self):
+        src = """
+        (flag gross (name Pizza) (type drink))
+        (flagged gross)
+        """
+
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 2)
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+
+        self.assertTrue("default" in res)
+        self.assertTrue("gross" in res)
+
+        self.assertEqual(res["default"], [])
+        self.assertEqual(res["gross"], [])
+
+
+    def test_syntax_error(self):
+        src = """
+        ((name Pizza))
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
+        src = """
+        ("name" Pizza)
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
+        src = """
+        (/name/ Pizza)
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
+        src = """
+        (|name| Pizza)
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
+        src = """
+        ()
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
+        src = """
+        name Pizza
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
+
+    def test_comments(self):
+        src = """
+        # ()
+        """
+        sifter = self.compile_sifter(src)
+        self.assertEqual(len(sifter.sieve_exprs()), 0)
+
+
+        src = """
+        (name Pizza) # ()
+        """
+        sifter = self.compile_sifter(src)
+        self.assertEqual(len(sifter.sieve_exprs()), 1)
+
+
+        src = """
+        ; this is a comment
+        (name Pizza) ; () is as well
+        ; so is this
+        """
+        sifter = self.compile_sifter(src)
+        self.assertEqual(len(sifter.sieve_exprs()), 1)
 
 
 #
