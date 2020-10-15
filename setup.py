@@ -89,6 +89,7 @@ def config():
             "koji_cli_plugins",
             "kojismokydingo",
             "kojismokydingo.cli",
+            "kojismokydingo.sift",
         ],
 
         "install_requires": [
