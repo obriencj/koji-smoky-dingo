@@ -22,7 +22,10 @@ Koji Smoky Dingo - Sifter filtering
 
 from koji import BUILD_STATES
 
-from . import DEFAULT_SIEVES, PropertySieve, Sifter, ensure_int_or_str
+from . import (
+    DEFAULT_SIEVES,
+    PropertySieve, Sieve, Sifter,
+    ensure_int_or_str,)
 from .. import bulk_load_builds
 from ..builds import build_dedup
 
@@ -32,7 +35,10 @@ __all__ = (
 
     "NameSieve",
     "VersionSieve",
+    "ReleaseSieve",
+    "EpochSieve",
     "StateSieve",
+    "ImportedSieve",
 
     "build_info_sieves",
     "build_info_sifter",
@@ -66,6 +72,30 @@ class VersionSieve(PropertySieve):
     field = "version"
 
 
+class ReleaseSieve(PropertySieve):
+    """
+    Usage: ``(release REL [REL...])``
+
+    filters for dict infos whose `release` key matches any of the given
+    REL matchers.
+    """
+
+    name = "release"
+    field = "release"
+
+
+class EpochSieve(PropertySieve):
+    """
+    Usage: ``(epoch EPOCH [EPOCH...])``
+
+    filters for dict infos whose `epoch` key matches any of the given
+    EPOCH matchers.
+    """
+
+    name = "epoch"
+    field = "epoch"
+
+
 class StateSieve(PropertySieve):
     """
     Usage: ``(state BUILD_STATE [BUILD_STATE...])``
@@ -74,11 +104,11 @@ class StateSieve(PropertySieve):
     koji build states. Build states may be specified as either an integer
     or one of the following strings or symbols
 
-    * BUILDING
-    * COMPLETE
-    * DELETED
-    * FAILED
-    * CANCELED
+    * ``BUILDING``
+    * ``COMPLETE``
+    * ``DELETED``
+    * ``FAILED``
+    * ``CANCELED``
     """
 
     name = "state"
@@ -86,21 +116,45 @@ class StateSieve(PropertySieve):
 
     def __init__(self, sifter, pattern):
         pattern = ensure_int_or_str(pattern)
+
         if pattern not in BUILD_STATES:
             raise SifterError("Unknown build state: %r" % pattern)
+
         if not isinstance(pattern, int):
             pattern = BUILD_STATES[pattern]
+
         super(PropertySieve, self).__init__(sifter, pattern)
+
+
+class ImportedSieve(Sieve):
+    """
+    Usage: ``(imported)``
+
+    filters for build info dicts whose task ID is empty or null.
+    """
+
+    name = "imported"
+
+    def check(self, session, binfo):
+        return not binfo.get("task_id")
+
 
 
 DEFAULT_BUILD_INFO_SIEVES = [
     NameSieve,
     VersionSieve,
+    ReleaseSieve,
+    EpochSieve,
     StateSieve,
+    ImportedSieve,
 ]
 
 
 def build_info_sieves():
+    """
+    :rtype: list[type[Sieve]]
+    """
+
     sieves = []
 
     # TODO: grab some more via entry_points
@@ -112,6 +166,13 @@ def build_info_sieves():
 
 def build_info_sifter(src_str):
     """
+    Create a Sifter from the source using the default build info
+    Sieves.
+
+    :param src_str: sieve expressions source
+    :type src_str: src
+
+    :rtype: Sifter
     """
 
     return Sifter(build_info_sieves(), src_str)
@@ -119,7 +180,13 @@ def build_info_sifter(src_str):
 
 def sift_builds(session, src_str, build_infos):
     """
+    :param src_str: sieve expressions source
+    :type src_str: src
 
+    :param build_infos: list of build info dicts to filter
+    :type build_infos: list[dict]
+
+    :rtype: dict[str,list[dict]]
     """
 
     sifter = builf_info_sifter(src_str)
@@ -128,6 +195,13 @@ def sift_builds(session, src_str, build_infos):
 
 def sift_nvrs(session, src_str, nvrs):
     """
+    :param src_str: sieve expressions source
+    :type src_str: src
+
+    :param nvrs: list of NVRs to load and filter
+    :type nvrs: list[str]
+
+    :rtype: dict[str,list[dict]]
     """
 
     loaded = bulk_load_builds(session, nvrs, err=False)
