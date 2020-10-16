@@ -49,14 +49,17 @@ __all__ = (
     "Flagged",
     "Flagger",
     "Glob",
+    "ItemSieve",
     "Logic",
     "LogicAnd",
     "LogicNot",
     "LogicOr",
+    "Null",
     "Regex",
     "Sifter",
     "SifterError",
     "Symbol",
+    "VariadicSieve",
 
     "ensure_int_or_str",
     "ensure_matcher",
@@ -444,8 +447,7 @@ class Sifter(object):
         return result
 
 
-    def __call__(self, session, info_dicts):
-
+    def run(self, session, info_dicts):
         data = dict((self.key(b), b) for b in info_dicts if b)
 
         for expr in self._exprs:
@@ -459,6 +461,10 @@ class Sifter(object):
             results[flag] = [data[bid] for bid in bids]
 
         return results
+
+
+    def __call__(self, session, info_dicts):
+        return self.run(session, info_dicts)
 
 
     def reset_flags(self):
@@ -558,7 +564,7 @@ class Sieve(object):
         pass
 
 
-    def __call__(self, session, info_dicts):
+    def run(self, session, info_dicts):
         """
         Use this Sieve instance to select and return a subset of the
         info_dicts sequence.
@@ -569,6 +575,10 @@ class Sieve(object):
 
         self.prep(session, info_dicts)
         return filter(partial(self.check, session), info_dicts)
+
+
+    def __call__(self, session, info_dicts):
+        return self.run(session, info_dicts)
 
 
     def __repr__(self):
@@ -730,7 +740,7 @@ class Flagged(VariadicSieve):
 
 
 @add_metaclass(ABCMeta)
-class PropertySieve(VariadicSieve):
+class ItemSieve(VariadicSieve):
     """
     A VariadicSieve which performs a comparison by fetching a named
     key from the info dict.
@@ -746,7 +756,7 @@ class PropertySieve(VariadicSieve):
 
     def __init__(self, sifter, pattern=None):
         pattern = ensure_matcher(pattern)
-        super(PropertySieve, self).__init__(sifter, pattern)
+        super(ItemSieve, self).__init__(sifter, pattern)
 
 
     def check(self, session, info):

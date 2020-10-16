@@ -25,7 +25,7 @@ from six import itervalues
 
 from . import (
     DEFAULT_SIEVES,
-    PropertySieve, Sieve, Sifter, SifterError,
+    ItemSieve, Sieve, Sifter, SifterError,
     ensure_int_or_str,)
 from .. import bulk_load_builds, bulk_load_users
 from ..builds import build_dedup
@@ -51,7 +51,7 @@ __all__ = (
 )
 
 
-class NVRSieve(PropertySieve):
+class NVRSieve(ItemSieve):
     """
     Usage: ``(nvr NVR [NVR...])``
 
@@ -62,7 +62,7 @@ class NVRSieve(PropertySieve):
     name = field = "nvr"
 
 
-class NameSieve(PropertySieve):
+class NameSieve(ItemSieve):
     """
     Usage: ``(name NAME [NAME...])``
 
@@ -73,7 +73,7 @@ class NameSieve(PropertySieve):
     name = field = "name"
 
 
-class VersionSieve(PropertySieve):
+class VersionSieve(ItemSieve):
     """
     Usage: ``(version VER [VER...])``
 
@@ -84,7 +84,7 @@ class VersionSieve(PropertySieve):
     name = field = "version"
 
 
-class ReleaseSieve(PropertySieve):
+class ReleaseSieve(ItemSieve):
     """
     Usage: ``(release REL [REL...])``
 
@@ -95,7 +95,7 @@ class ReleaseSieve(PropertySieve):
     name = field = "release"
 
 
-class EpochSieve(PropertySieve):
+class EpochSieve(ItemSieve):
     """
     Usage: ``(epoch EPOCH [EPOCH...])``
 
@@ -106,7 +106,7 @@ class EpochSieve(PropertySieve):
     name = field = "epoch"
 
 
-class StateSieve(PropertySieve):
+class StateSieve(ItemSieve):
     """
     Usage: ``(state BUILD_STATE [BUILD_STATE...])``
 
@@ -132,10 +132,10 @@ class StateSieve(PropertySieve):
         if not isinstance(pattern, int):
             pattern = BUILD_STATES[pattern]
 
-        super(PropertySieve, self).__init__(sifter, pattern)
+        super(ItemSieve, self).__init__(sifter, pattern)
 
 
-class SourceSieve(PropertySieve):
+class SourceSieve(ItemSieve):
     """
     Usage: ``(source URI [URI...])``
 

@@ -17,16 +17,16 @@ from unittest import TestCase
 from kojismokydingo.sift import (
     DEFAULT_SIEVES,
     Flagged, Glob, LogicNot, LogicOr,
-    PropertySieve, Regex, Sifter, SifterError, Symbol,
+    ItemSieve, Regex, Sifter, SifterError, Symbol,
 )
 
 
-class NameSieve(PropertySieve):
+class NameSieve(ItemSieve):
     name = "name"
     field = "name"
 
 
-class TypeSieve(PropertySieve):
+class TypeSieve(ItemSieve):
     name = "type"
     field = "type"
 
@@ -82,7 +82,7 @@ class SifterTest(TestCase):
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 1)
         self.assertTrue(isinstance(sieves[0], NameSieve))
-        self.assertTrue(isinstance(sieves[0], PropertySieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
         self.assertEqual(sieves[0].name, "name")
         self.assertEqual(sieves[0].field, "name")
         self.assertTrue(isinstance(sieves[0].token, Symbol))
@@ -105,7 +105,7 @@ class SifterTest(TestCase):
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 1)
         self.assertTrue(isinstance(sieves[0], NameSieve))
-        self.assertTrue(isinstance(sieves[0], PropertySieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
         self.assertEqual(sieves[0].name, "name")
         self.assertEqual(sieves[0].field, "name")
         self.assertTrue(isinstance(sieves[0].token, str))
@@ -128,7 +128,7 @@ class SifterTest(TestCase):
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 1)
         self.assertTrue(isinstance(sieves[0], NameSieve))
-        self.assertTrue(isinstance(sieves[0], PropertySieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
         self.assertEqual(sieves[0].name, "name")
         self.assertEqual(sieves[0].field, "name")
         self.assertTrue(isinstance(sieves[0].token, Regex))
@@ -151,7 +151,7 @@ class SifterTest(TestCase):
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 1)
         self.assertTrue(isinstance(sieves[0], NameSieve))
-        self.assertTrue(isinstance(sieves[0], PropertySieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
         self.assertEqual(sieves[0].name, "name")
         self.assertEqual(sieves[0].field, "name")
         self.assertTrue(isinstance(sieves[0].token, Glob))
