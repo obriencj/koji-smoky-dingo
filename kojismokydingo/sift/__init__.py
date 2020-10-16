@@ -704,10 +704,9 @@ class VariadicSieve(Sieve):
     value.
     """
 
-    def __new__(cls, sifter, expr, *exprs):
-        if exprs:
-            wrapped = [cls(sifter, expr)]
-            wrapped.extend(cls(sifter, expr) for expr in exprs)
+    def __new__(cls, sifter, *exprs):
+        if len(exprs) > 1:
+            wrapped = [cls(sifter, expr) for expr in exprs]
             return LogicOr(sifter, *wrapped)
         else:
             return object.__new__(cls)
@@ -747,6 +746,13 @@ class ItemSieve(VariadicSieve):
 
     Subclasses must provide a `field` attribute which will be used as
     a key to fetch a comparison value from any checked info dicts.
+
+    If a pattern is specified, then the predicate matches if the info
+    dict has an item by the given field key, and the value of that
+    item matches the pattern.
+
+    If a pattern is absent then this predicate will only check that
+    given field key exists and is not None.
     """
 
     @abstractproperty
@@ -755,15 +761,17 @@ class ItemSieve(VariadicSieve):
 
 
     def __init__(self, sifter, pattern=None):
-        pattern = ensure_matcher(pattern)
+        if pattern is not None:
+            pattern = ensure_matcher(pattern)
         super(ItemSieve, self).__init__(sifter, pattern)
 
 
     def check(self, session, info):
         if self.token is None:
-            return bool(info.get(self.field))
+            return info.get(self.field) is not None
         else:
-            return self.token == info.get(self.field)
+            return ((self.field in info) and
+                    (self.token == info[self.field]))
 
 
     def __repr__(self):

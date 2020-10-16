@@ -22,13 +22,15 @@ from kojismokydingo.sift import (
 
 
 class NameSieve(ItemSieve):
-    name = "name"
-    field = "name"
+    name = field = "name"
 
 
 class TypeSieve(ItemSieve):
-    name = "type"
-    field = "type"
+    name = field = "type"
+
+
+class BrandSieve(ItemSieve):
+    name = field = "brand"
 
 
 TACOS = {
@@ -41,6 +43,7 @@ PIZZA = {
     "id": 2,
     "type": "food",
     "name": "Pizza",
+    "brand": None,
 }
 
 BEER = {
@@ -53,6 +56,7 @@ DRAINO = {
     "id": 4,
     "type": "drink",
     "name": "Draino",
+    "brand": "Draino",
 }
 
 
@@ -65,13 +69,51 @@ class SifterTest(TestCase):
 
 
     def compile_sifter(self, src):
-        sieves = [NameSieve, TypeSieve]
+        sieves = [NameSieve, TypeSieve, BrandSieve]
         sieves.extend(DEFAULT_SIEVES)
 
         return Sifter(sieves, src)
 
 
-    def test_symbol_property(self):
+    def test_truth_item(self):
+
+        src = """
+        (brand)
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], BrandSieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
+        self.assertEqual(repr(sieves[0]), "(brand)")
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+        self.assertTrue("default" in res)
+        self.assertEqual(res["default"], [DRAINO])
+
+
+    def test_null_item(self):
+
+        src = """
+        (brand null)
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], BrandSieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
+        self.assertEqual(repr(sieves[0]), "(brand null)")
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+        self.assertTrue("default" in res)
+        self.assertEqual(res["default"], [PIZZA])
+
+
+    def test_symbol_item(self):
 
         src = """
         (name Pizza)
@@ -93,7 +135,7 @@ class SifterTest(TestCase):
         self.assertEqual(res["default"], [PIZZA])
 
 
-    def test_str_property(self):
+    def test_str_item(self):
 
         src = """
         (name "Pizza")
@@ -115,7 +157,7 @@ class SifterTest(TestCase):
         self.assertEqual(res["default"], [PIZZA])
 
 
-    def test_regex_property(self):
+    def test_regex_item(self):
 
         src = """
         (name /zza$/)
@@ -137,7 +179,7 @@ class SifterTest(TestCase):
         self.assertEqual(res["default"], [PIZZA])
 
 
-    def test_glob_property(self):
+    def test_glob_item(self):
 
         src = """
         (name |P*a|)
