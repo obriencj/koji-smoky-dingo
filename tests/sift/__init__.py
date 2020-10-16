@@ -76,7 +76,6 @@ class SifterTest(TestCase):
         src = """
         (name Pizza)
         """
-
         sifter = self.compile_sifter(src)
 
         sieves = sifter.sieve_exprs()
@@ -99,7 +98,6 @@ class SifterTest(TestCase):
         src = """
         (name "Pizza")
         """
-
         sifter = self.compile_sifter(src)
 
         sieves = sifter.sieve_exprs()
@@ -122,7 +120,6 @@ class SifterTest(TestCase):
         src = """
         (name /zza$/)
         """
-
         sifter = self.compile_sifter(src)
 
         sieves = sifter.sieve_exprs()
@@ -145,7 +142,6 @@ class SifterTest(TestCase):
         src = """
         (name |P*a|)
         """
-
         sifter = self.compile_sifter(src)
 
         sieves = sifter.sieve_exprs()
@@ -171,7 +167,6 @@ class SifterTest(TestCase):
         (flag poison (name Draino))
         (flag yum (flagged munch gulp) (not (flagged poison)))
         """
-
         sifter = self.compile_sifter(src)
 
         sieves = sifter.sieve_exprs()
@@ -193,12 +188,12 @@ class SifterTest(TestCase):
 
 
     def test_logic(self):
+
         src = """
         (flag good (or (type food)
                        (and (type drink)
                             (not (name Draino)))))
         """
-
         sifter = self.compile_sifter(src)
 
         sieves = sifter.sieve_exprs()
@@ -214,6 +209,7 @@ class SifterTest(TestCase):
 
 
     def test_flag_implicit_and(self):
+
         src = """
         (flag fine (name Pizza) (type food))
         (flagged fine)
@@ -380,13 +376,11 @@ class SifterTest(TestCase):
         sifter = self.compile_sifter(src)
         self.assertEqual(len(sifter.sieve_exprs()), 0)
 
-
         src = """
         (name Pizza) # ()
         """
         sifter = self.compile_sifter(src)
         self.assertEqual(len(sifter.sieve_exprs()), 1)
-
 
         src = """
         ; this is a comment
