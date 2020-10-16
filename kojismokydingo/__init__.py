@@ -62,6 +62,7 @@ __all__ = (
     "bulk_load_rpm_sigs",
     "bulk_load_tags",
     "bulk_load_tasks",
+    "bulk_load_users",
     "iter_bulk_load",
     "version_check",
     "version_require",
@@ -354,7 +355,7 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     :type nvrs: Iterator[str] or Iterator[int]
 
     :param err: Raise an exception if an NVR fails to load. Default,
-      bad or missing NVRs will be absent from the results mapping.
+      True.
 
     :type err: bool, optional
 
@@ -368,9 +369,8 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
 
     for key, info in iter_bulk_load(session, session.getBuild, nvrs,
                                     False, size):
-        if not info:
-            if err:
-                raise NoSuchBuild(key)
+        if err and not info:
+            raise NoSuchBuild(key)
         else:
             results[key] = info
 
@@ -385,9 +385,8 @@ def bulk_load_tasks(session, task_ids, request=False,
     fn = partial(session.getTaskInfo, request=request)
 
     for key, info in iter_bulk_load(session, fn, task_ids, False, size):
-        if not info:
-            if err:
-                raise NoSuchTask(key)
+        if err and not info:
+            raise NoSuchTask(key)
         else:
             results[key] = info
 
@@ -404,9 +403,8 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
         fn = session.getTag
 
     for key, info in iter_bulk_load(session, fn, tags, False, size):
-        if not info:
-            if err:
-                raise NoSuchTag(key)
+        if err and not info:
+            raise NoSuchTag(key)
         else:
             results[key] = info
 
@@ -505,6 +503,61 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
     results = OrderedDict() if results is None else results
     results.update(iter_bulk_load(session, session.getBuildroot,
                                   broot_ids, True, size))
+    return results
+
+
+def bulk_load_users(session, users, err=True, size=100, results=None):
+    """
+    Load many userinfo dicts from a koji client session and a sequence of
+    user identifiers.
+
+    Returns an OrderedDict associating the individual identifiers with
+    their resulting userinfo.
+
+    If err is True (default) then any missing user info will raise a
+    NoSuchUser exception. If err is False, then a None will be
+    substituted into the ordered dict for the result.
+
+    If results is non-None, it must support dict assignment, and will
+    be used in place of a newly allocated OrderedDict to store and
+    return the results.
+    """
+
+    users = list(users)
+    results = OrderedDict() if results is None else results
+
+    if not users:
+        return results
+
+    session_vars = vars(session)
+    new_get_user = session_vars.get("__new_get_user")
+
+    if new_get_user is None:
+        key = users[0]
+        try:
+            results[key] = as_userinfo(session, key)
+        except NoSuchUser:
+            if err:
+                raise
+            else:
+                results[key] = None
+
+        # the use of as_userinfo will have updates the __new_get_user
+        # sentinel attribute to either True or False
+        new_get_user = session_vars.get("__new_get_user")
+        users = users[1:]
+
+    if new_get_user:
+        fn = lambda u: session.getUser(u, False, True)
+    else:
+        fn = session.getUser
+
+    for key, info in iter_bulk_load(session, fn, users, False, size):
+        if err and not info:
+            raise NoSuchUser(key)
+        else:
+            results[key] = info
+
     return results
 
 
@@ -632,14 +685,29 @@ def as_userinfo(session, user):
     """
 
     if isinstance(user, (str, int)):
-        # an API incompatibility emerged at some point in Koji's past,
-        # so we need to try the new way first and fall back to the
-        # older signature if that fails. This happened before Koji hub
-        # started reporting its version, so we cannot use the
-        # version_check function to gate this.
-        try:
+        session_vars = vars(session)
+        new_get_user = session_vars.get("__new_get_user")
+
+        if new_get_user:
+            # we've tried the new way and it worked, so keep doing it.
             info = session.getUser(user, False, True)
-        except ParameterError:
+
+        elif new_get_user is None:
+            # an API incompatibility emerged at some point in Koji's
+            # past, so we need to try the new way first and fall back
+            # to the older signature if that fails. This happened
+            # before Koji hub started reporting its version, so we
+            # cannot use the version_check function to gate this.
+            try:
+                info = session.getUser(user, False, True)
+                session_vars["__new_get_user"] = True
+
+            except ParameterError:
+                info = session.getUser(user)
+                session_vars["__new_get_user"] = False
+
+        else:
+            # we've already tried the new way once and it didn't work.
             info = session.getUser(user)
 
     elif isinstance(user, dict):

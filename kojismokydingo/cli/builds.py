@@ -392,7 +392,8 @@ def cli_list_components(session, nvr_list,
     components = gather_component_build_ids(session, bids)
 
     # now we need to turn those components build IDs into build_infos
-    found = bulk_load_builds(session, chain(*itervalues(components)))
+    component_ids = unique(chain(*itervalues(components)))
+    found = bulk_load_builds(session, component_ids)
 
     # we'll also want the underlying builds used to produce any
     # standalone wrapperRPM builds, as those are not recorded as
@@ -412,6 +413,9 @@ def cli_list_components(session, nvr_list,
 
     elif sorting == SORT_BY_ID:
         builds = build_id_sort(builds)
+
+    else:
+        builds = build_dedup(builds)
 
     # print("Identified %i components of %s:" % (len(builds), nvr))
     for binfo in builds:
@@ -525,7 +529,7 @@ def cli_filter_builds(session, nvr_list,
         builds = build_id_sort(builds, dedup=False)
 
     else:
-        builds = list(builds)
+        builds = build_dedup(builds)
 
     if json:
         pretty_json(builds)

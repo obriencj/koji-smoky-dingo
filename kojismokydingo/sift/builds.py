@@ -27,26 +27,39 @@ from . import (
     DEFAULT_SIEVES,
     PropertySieve, Sieve, Sifter, SifterError,
     ensure_int_or_str,)
-from .. import bulk_load_builds
+from .. import bulk_load_builds, bulk_load_users
 from ..builds import build_dedup
 
 
 __all__ = (
     "DEFAULT_BUILD_INFO_SIEVES",
 
-    "NameSieve",
-    "VersionSieve",
-    "ReleaseSieve",
     "EpochSieve",
-    "StateSieve",
     "ImportedSieve",
+    "NameSieve",
+    "NVRSieve",
+    "OwnerSieve",
+    "ReleaseSieve",
+    "SourceSieve",
+    "StateSieve",
+    "VersionSieve",
 
     "build_info_sieves",
     "build_info_sifter",
-
     "sift_builds",
     "sift_nvrs",
 )
+
+
+class NVRSieve(PropertySieve):
+    """
+    Usage: ``(nvr NVR [NVR...])``
+
+    filters for dict infos whose `nvr` key matches any of the given
+    NVR matchers.
+    """
+
+    name = field = "nvr"
 
 
 class NameSieve(PropertySieve):
@@ -57,8 +70,7 @@ class NameSieve(PropertySieve):
     NAME matchers.
     """
 
-    name = "name"
-    field = "name"
+    name = field = "name"
 
 
 class VersionSieve(PropertySieve):
@@ -69,8 +81,7 @@ class VersionSieve(PropertySieve):
     VER matchers.
     """
 
-    name = "version"
-    field = "version"
+    name = field = "version"
 
 
 class ReleaseSieve(PropertySieve):
@@ -81,8 +92,7 @@ class ReleaseSieve(PropertySieve):
     REL matchers.
     """
 
-    name = "release"
-    field = "release"
+    name = field = "release"
 
 
 class EpochSieve(PropertySieve):
@@ -93,8 +103,7 @@ class EpochSieve(PropertySieve):
     EPOCH matchers.
     """
 
-    name = "epoch"
-    field = "epoch"
+    name = field = "epoch"
 
 
 class StateSieve(PropertySieve):
@@ -112,8 +121,7 @@ class StateSieve(PropertySieve):
     * ``CANCELED``
     """
 
-    name = "state"
-    field = "state"
+    name = field = "state"
 
     def __init__(self, sifter, pattern):
         pattern = ensure_int_or_str(pattern)
@@ -125,6 +133,46 @@ class StateSieve(PropertySieve):
             pattern = BUILD_STATES[pattern]
 
         super(PropertySieve, self).__init__(sifter, pattern)
+
+
+class SourceSieve(PropertySieve):
+    """
+    Usage: ``(source URI [URI...])``
+
+    filters for dict infos whose `source` key matches any of the given
+    URI matchers.
+    """
+
+    name = field = "source"
+
+
+class OwnerSieve(Sieve):
+    """
+    Usage: ``(owner USER [USER...])```
+
+    filters for builds whose `owner_name` or `owner_id` key matches
+    any of the given USERs.
+
+    The users will be validated at the time of the sieve's first
+    invocation, which may result in a NoSuchUser error.
+    """
+
+    name = "owner"
+
+    def __init__(self, sifter, user, *users):
+        self.users = [user]
+        self.users.extend(users)
+        self._user_ids = None
+
+
+    def prep(self, session, _build_infos):
+        if self._user_ids is None:
+            loaded = bulk_load_users(session, self.users)
+            self._user_ids = set(u["id"] for u in itervalues(loaded))
+
+
+    def check(self, session, binfo):
+        return binfo["owner_id"] in self._user_ids
 
 
 class ImportedSieve(Sieve):
@@ -140,14 +188,16 @@ class ImportedSieve(Sieve):
         return not binfo.get("task_id")
 
 
-
 DEFAULT_BUILD_INFO_SIEVES = [
-    NameSieve,
-    VersionSieve,
-    ReleaseSieve,
     EpochSieve,
-    StateSieve,
     ImportedSieve,
+    NameSieve,
+    NVRSieve,
+    OwnerSieve,
+    ReleaseSieve,
+    SourceSieve,
+    StateSieve,
+    VersionSieve,
 ]
 
 

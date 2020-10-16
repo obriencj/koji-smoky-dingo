@@ -15,6 +15,27 @@
 """
 Koji Smoky Dingo - Sifter filtering
 
+This is a mini-language based on S-Expressions used for filtering
+sequences of dict data. The core language only supports some simple
+logical constructs and a facility for setting and checking flags. The
+language must be extended to add more predicates specific to the
+schema of the data being filtered to become useful.
+
+This mini-language has nothing to do with the Sieve email filtering
+language. I just thought that Sifter and Sieve were good names for
+something that filters stuff.
+
+
+Example:
+
+.. ::
+  (flag newcomer (joined-after 2020-10-01) (status ACTIVE))
+  (flag old-guard (!flagged newcomer) (status ACTIVE))
+
+This example presumes two predicates have been created,
+``joined-after`` and ``status``. When the
+
+
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
 """
@@ -23,6 +44,7 @@ Koji Smoky Dingo - Sifter filtering
 import re
 
 from abc import ABCMeta, abstractmethod, abstractproperty
+from collections import OrderedDict
 from functools import partial
 from operator import itemgetter
 from six import add_metaclass, iteritems, itervalues
@@ -62,6 +84,14 @@ __all__ = (
 
 class SifterError(BadDingo):
     complaint = "Error compiling Sifter"
+
+
+class Null(object):
+    def __repr__(self):
+        return "null"
+
+    def __eq__(self, val):
+        return val is None
 
 
 class Symbol(str):
@@ -113,9 +143,9 @@ def parse_exprs(srciter):
 
     for c in srciter:
 
-        if c in ';#|/\"\'() \n\r\t':
+        if c in ' ();#|/\"\'\n\r\t':
             if token:
-                yield Symbol(token.getvalue())
+                yield parse_token(token.getvalue())
                 token = None
         else:
             if not token:
@@ -139,7 +169,27 @@ def parse_exprs(srciter):
             yield parse_quoted(srciter, c)
 
     if token:
-        yield Symbol(token.getvalue())
+        # we could make this raise an exception instead, but currently
+        # let's just be permissive and implicitly close unterminated
+        # lists
+        yield parse_token(token.getvalue())
+
+
+def parse_token(val):
+    """
+    Converts unquoted values.
+    All digit value become unsigned int. None, null, nil become a Null.
+    Everything else becomes a Symbol
+    """
+
+    if val in (None, "None", "null", "nil"):
+        return Null()
+
+    elif val.isdigit():
+        return int(val)
+
+    else:
+        return Symbol(val)
 
 
 def parse_quoted(srciter, quotec='\"'):
@@ -219,7 +269,7 @@ def ensure_int_or_str(value, msg=None):
     Symbol, raises a SifterError.
     """
 
-    if isinstance(value, str):
+    if isinstance(value, (int, str)):
         return value
 
     elif isinstance(value, Symbol):
@@ -240,7 +290,7 @@ def ensure_matcher(value, msg=None):
     instance.  If not, raises a SifterError.
     """
 
-    if isinstance(value, (str, Symbol, Regex, Glob)):
+    if isinstance(value, (str, Symbol, Regex, Glob, Null)):
         return value
     else:
         if not msg:
@@ -318,10 +368,6 @@ class Sifter(object):
         # {flagname: set(data_id)}
         self._flags = {}
 
-        # {data_id: set(flagname)}
-        self._data_flags = {}
-
-
         if not isinstance(sieves, dict):
             sieves = dict((sieve.name, sieve) for sieve in sieves)
 
@@ -347,6 +393,37 @@ class Sifter(object):
         return [self._convert(p) for p in parse_exprs(source_str)]
 
 
+    def _convert_sym_aliases(self, sym):
+        if sym == "!":
+            # treat ! as an alias for not
+            sym = Symbol("not")
+
+        elif sym == "?":
+            # tread ? as an alias for flagged
+            sym = Symbol("flagged")
+
+        elif sym.startswith("!"):
+            # treat !foo as an alias for not-foo
+            sym = Symbol("not-" + sym[1:])
+
+        return sym
+
+
+    def _convert_sieve_aliases(self, sym, args):
+        if sym.startswith("not-"):
+            # converts (not-foo 1) into (not (foo 1))
+            subexpr = [Symbol(sym[4:])]
+            subexpr.extend(args)
+            return Symbol("not"), (subexpr,)
+
+        elif sym.endswith("?") and not args:
+            # converts (bar?) into (flagged bar)
+            return Symbol("flagged"), (Symbol(sym[:-1]),)
+
+        else:
+            return sym, args
+
+
     def _convert(self, parsed):
         """
         Takes the simple parse tree and turns it into a series of nested
@@ -358,34 +435,35 @@ class Sifter(object):
                 raise SifterError("Empty expression: ()")
 
             name = ensure_symbol(parsed[0], "Sieve names must be symbols")
+            name = self._convert_sym_aliases(name)
+            args = parsed[1:]
 
             cls = self._sieve_classes.get(name)
+
+            if cls is None:
+                newname, args = self._convert_sieve_aliases(name, args)
+                cls = self._sieve_classes.get(newname)
+
             if cls is None:
                 raise SifterError("No such sieve: %s" % name)
 
-            return cls(self, *map(self._convert, parsed[1:]))
+            result = cls(self, *map(self._convert, args))
 
         else:
-            return parsed
+            result = parsed
+
+        return result
 
 
     def __call__(self, session, info_dicts):
 
-        data = dict((self.key(b), b) for b in info_dicts)
+        data = dict((self.key(b), b) for b in info_dicts if b)
 
         for expr in self._exprs:
-            if isinstance(expr, Flagger):
-                flagname = expr.flag
-            else:
-                flagname = "default"
-
-            flgd = self.flagged(flagname)
-
+            autoflag = not isinstance(expr, Flagger)
             for binfo in expr(session, itervalues(data)):
-                bid = self.key(binfo)
-
-                flgd.add(bid)
-                self.data_flags(bid).add(flagname)
+                if autoflag:
+                    self.set_flag("default", binfo)
 
         results = {}
         for flag, bids in iteritems(self._flags):
@@ -394,30 +472,31 @@ class Sifter(object):
         return results
 
 
-    def flagged(self, flagname):
-        """
-        The set of data IDs associated with the given flag name
+    def reset_flags(self):
+        self._flags = {}
 
-        :rtype: set(int)
+
+    def is_flagged(self, flagname, data):
+        """
+        True if the data has been flagged with the given flagname, either
+        via a ``(flag ...)`` sieve expression, or via `set_flag`
+        """
+        return ((flagname in self._flags) and
+                (self.key(data) in self._flags[flagname]))
+
+
+    def set_flag(self, flagname, data):
+        """
+        Records the given data as having been flagged with the given
+        flagname.
         """
 
         bfl = self._flags.get(flagname)
         if bfl is None:
-            bfl = self._flags[flagname] = set()
-        return bfl
+            # we want to preserve the order
+            bfl = self._flags[flagname] = OrderedDict()
 
-
-    def data_flags(self, data_id):
-        """
-        The set of flag names associated with the given data ID
-
-        :rtype: set(str)
-        """
-
-        bfl = self._data_flags.get(data_id)
-        if bfl is None:
-            bfl = self._data_flags[data_id] = set()
-        return bfl
+        bfl[self.key(data)] = True
 
 
 @add_metaclass(ABCMeta)
@@ -596,31 +675,22 @@ class Flagger(LogicAnd):
 
     def __init__(self, sifter, flag, expr, *exprs):
         super(Flagger, self).__init__(sifter, expr, *exprs)
-        self.flag = ensure_str(flag)
+        self.flag = ensure_symbol(flag)
 
 
-class Flagged(Sieve):
-    """
-    Usage: ``(flagged NAME [NAME...])``
+    def __call__(self, session, info_dicts):
+        results = super(Flagger, self).__call__(session, info_dicts)
 
-    filters for info dicts which have been marked with any of the
-    given named flags
-    """
+        for info in results:
+            self.sifter.set_flag(self.flag, info)
 
-    name = "flagged"
-
-    def __init__(self, sifter, *names):
-        super(Flagged, self).__init__(sifter)
-        self._flags = set(ensure_str(n) for n in names)
-
-
-    def check(self, session, binfo):
-        bflgs = self.sifter.data_flags(self.key(binfo))
-        return not self._flags.isdisjoint(bflgs)
+        return results
 
 
     def __repr__(self):
-        return "".join(("(", self.name, " ".join(self._flags), ")"))
+        e = " ".join(map(repr, self._exprs))
+        return "".join(("(", self.name, " ", repr(self.flag),
+                        " " if e else "", e, ")"))
 
 
 @add_metaclass(ABCMeta)
@@ -652,6 +722,24 @@ class VariadicSieve(Sieve):
         return "".join(("(", self.name, " ", repr(self.token), ")"))
 
 
+class Flagged(VariadicSieve):
+    """
+    Usage: ``(flagged NAME [NAME...])``
+
+    filters for info dicts which have been marked with any of the
+    given named flags
+    """
+
+    name = "flagged"
+
+    def __init__(self, sifter, name):
+        super(Flagged, self).__init__(sifter, ensure_symbol(name))
+
+
+    def check(self, _session, info):
+        return self.sifter.is_flagged(self.token, info)
+
+
 @add_metaclass(ABCMeta)
 class PropertySieve(VariadicSieve):
     """
@@ -667,13 +755,23 @@ class PropertySieve(VariadicSieve):
         pass
 
 
-    def __init__(self, sifter, pattern):
+    def __init__(self, sifter, pattern=None):
         pattern = ensure_matcher(pattern)
         super(PropertySieve, self).__init__(sifter, pattern)
 
 
-    def check(self, session, binfo):
-        return self.token == binfo[self.field]
+    def check(self, session, info):
+        if self.token is None:
+            return bool(info.get(self.field))
+        else:
+            return self.token == info.get(self.field)
+
+
+    def __repr__(self):
+        if self.token is None:
+            return "".join(("(", self.name, ")"))
+        else:
+            return "".join(("(", self.name, " ", repr(self.token), ")"))
 
 
 DEFAULT_SIEVES = [

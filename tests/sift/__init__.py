@@ -16,7 +16,8 @@ from unittest import TestCase
 
 from kojismokydingo.sift import (
     DEFAULT_SIEVES,
-    Glob, PropertySieve, Regex, Sifter, SifterError, Symbol,
+    Flagged, Glob, LogicNot, LogicOr,
+    PropertySieve, Regex, Sifter, SifterError, Symbol,
 )
 
 
@@ -214,10 +215,9 @@ class SifterTest(TestCase):
 
     def test_flag_implicit_and(self):
         src = """
-        (flag gross (name Pizza) (type drink))
-        (flagged gross)
+        (flag fine (name Pizza) (type food))
+        (flagged fine)
         """
-
         sifter = self.compile_sifter(src)
 
         sieves = sifter.sieve_exprs()
@@ -227,10 +227,113 @@ class SifterTest(TestCase):
         self.assertTrue(isinstance(res, dict))
 
         self.assertTrue("default" in res)
-        self.assertTrue("gross" in res)
+        self.assertTrue("fine" in res)
 
-        self.assertEqual(res["default"], [])
-        self.assertEqual(res["gross"], [])
+        self.assertEqual(res["fine"], [PIZZA])
+        self.assertEqual(res["default"], [PIZZA])
+
+        src = """
+        (flag gross (name Pizza) (type drink))
+        (flagged gross)
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 2)
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+
+        self.assertFalse("default" in res)
+        self.assertFalse("gross" in res)
+
+
+    def check_not_aliases(self, src):
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 2)
+
+        self.assertTrue(isinstance(sieves[1], LogicNot))
+        self.assertEqual(len(sieves[1]._exprs), 1)
+        self.assertTrue(isinstance(sieves[1]._exprs[0], Flagged))
+
+        res = sifter(None, DATA)
+        self.assertEqual(res["poison"], [DRAINO])
+        self.assertEqual(res["default"], [TACOS, PIZZA, BEER])
+
+
+    def test_not_aliases(self):
+        # these should all be equivalent
+        sources = [
+            """
+            (flag poison (name Draino))
+            (!flagged poison)
+            """,
+
+            """
+            (flag poison (name Draino))
+            (not-flagged poison)
+            """,
+
+            """
+            (flag poison (name Draino))
+            (! (flagged poison))
+            """,
+
+            """
+            (flag poison (name Draino))
+            (not (flagged poison))
+            """,
+
+            """
+            (flag poison (name Draino))
+            (!? poison)
+            """,
+
+            """
+            (flag poison (name Draino))
+            (!poison?)
+            """,
+        ]
+
+        for src in sources:
+            self.check_not_aliases(src)
+
+
+    def check_flagged_aliases(self, src):
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 2)
+
+        self.assertTrue(isinstance(sieves[1], Flagged))
+
+        res = sifter(None, DATA)
+        self.assertEqual(res["poison"], [DRAINO])
+        self.assertEqual(res["default"], [DRAINO])
+
+
+    def test_flagged_aliases(self):
+        sources = [
+            """
+            (flag poison (name Draino))
+            (flagged poison)
+            """,
+
+            """
+            (flag poison (name Draino))
+            (? poison)
+            """,
+
+            """
+            (flag poison (name Draino))
+            (poison?)
+            """,
+        ]
+
+        for src in sources:
+            self.check_flagged_aliases(src)
 
 
     def test_syntax_error(self):
