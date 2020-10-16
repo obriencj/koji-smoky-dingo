@@ -8,6 +8,7 @@ Documentation Index Table of Contents
 
    overview
    commands
+   siftylang
    kojismokydingo
    kojismokydingo/sift
    kojismokydingo/cli

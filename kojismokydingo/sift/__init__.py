@@ -13,7 +13,7 @@
 
 
 """
-Koji Smoky Dingo - Sifter filtering
+Koji Smoky Dingo - Filtering Language Sifty Dingo
 
 This is a mini-language based on S-Expressions used for filtering
 sequences of dict data. The core language only supports some simple
@@ -21,20 +21,9 @@ logical constructs and a facility for setting and checking flags. The
 language must be extended to add more predicates specific to the
 schema of the data being filtered to become useful.
 
-This mini-language has nothing to do with the Sieve email filtering
-language. I just thought that Sifter and Sieve were good names for
-something that filters stuff.
-
-
-Example:
-
-.. ::
-  (flag newcomer (joined-after 2020-10-01) (status ACTIVE))
-  (flag old-guard (!flagged newcomer) (status ACTIVE))
-
-This example presumes two predicates have been created,
-``joined-after`` and ``status``. When the
-
+This mini-language has nothing to do with Sifty, nor the Sieve email
+filtering language. I just thought that Sifter and Sieve were good
+names for something that filters stuff.
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
