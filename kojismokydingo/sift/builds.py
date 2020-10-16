@@ -21,10 +21,11 @@ Koji Smoky Dingo - Sifter filtering
 
 
 from koji import BUILD_STATES
+from six import itervalues
 
 from . import (
     DEFAULT_SIEVES,
-    PropertySieve, Sieve, Sifter,
+    PropertySieve, Sieve, Sifter, SifterError,
     ensure_int_or_str,)
 from .. import bulk_load_builds
 from ..builds import build_dedup
@@ -189,7 +190,7 @@ def sift_builds(session, src_str, build_infos):
     :rtype: dict[str,list[dict]]
     """
 
-    sifter = builf_info_sifter(src_str)
+    sifter = build_info_sifter(src_str)
     return sifter(session, build_infos)
 
 
