@@ -9,5 +9,6 @@ Documentation Index Table of Contents
    overview
    commands
    kojismokydingo
+   kojismokydingo/sift
    kojismokydingo/cli
    release_notes
