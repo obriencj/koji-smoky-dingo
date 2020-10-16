@@ -503,8 +503,8 @@ class Sieve(object):
     sequence of info dicts, and returns a filtered subset of those
     info dicts.
 
-    The default ``__call__`` implementation will trigger the `prep`
-    method first, and then use the `check` method on each info dict to
+    The default ``run`` implementation will trigger the `prep` method
+    first, and then use the `check` method on each info dict to
     determine whether it should be included in the results or not.
     Subclasses can therefore easily write just the check method.
 
@@ -539,7 +539,7 @@ class Sieve(object):
         Override to return True if the predicate matches the given
         info dict.
 
-        This is used by the default `__call__` implementation in a
+        This is used by the default `run` implementation in a
         filter. Only the info dicts which return True from this method
         will be included in the results.
 
@@ -608,7 +608,7 @@ class LogicAnd(Logic):
 
     name = "and"
 
-    def __call__(self, session, info_dicts):
+    def run(self, session, info_dicts):
         work = info_dicts
         for expr in self._exprs:
             work = expr(session, work)
@@ -624,7 +624,7 @@ class LogicOr(Logic):
 
     name = "or"
 
-    def __call__(self, session, info_dicts):
+    def run(self, session, info_dicts):
         work = dict((self.key(b), b) for b in info_dicts)
         results = {}
 
@@ -649,7 +649,7 @@ class LogicNot(Logic):
 
     name = "not"
 
-    def __call__(self, session, info_dicts):
+    def run(self, session, info_dicts):
         work = dict((self.key(b), b) for b in info_dicts)
 
         for expr in self._exprs:
@@ -677,8 +677,8 @@ class Flagger(LogicAnd):
         self.flag = ensure_symbol(flag)
 
 
-    def __call__(self, session, info_dicts):
-        results = super(Flagger, self).__call__(session, info_dicts)
+    def run(self, session, info_dicts):
+        results = super(Flagger, self).run(session, info_dicts)
 
         for info in results:
             self.sifter.set_flag(self.flag, info)
