@@ -23,6 +23,8 @@ Koji Smoky Dingo - Sifter filtering
 from koji import BUILD_STATES
 
 from . import DEFAULT_SIEVES, PropertySieve, Sifter, ensure_int_or_str
+from .. import bulk_load_builds
+from ..builds import build_dedup
 
 
 __all__ = (
@@ -34,6 +36,9 @@ __all__ = (
 
     "build_info_sieves",
     "build_info_sifter",
+
+    "sift_builds",
+    "sift_nvrs",
 )
 
 
@@ -81,6 +86,8 @@ class StateSieve(PropertySieve):
 
     def __init__(self, sifter, pattern):
         pattern = ensure_int_or_str(pattern)
+        if pattern not in BUILD_STATES:
+            raise SifterError("Unknown build state: %r" % pattern)
         if not isinstance(pattern, int):
             pattern = BUILD_STATES[pattern]
         super(PropertySieve, self).__init__(sifter, pattern)
@@ -104,7 +111,28 @@ def build_info_sieves():
 
 
 def build_info_sifter(src_str):
+    """
+    """
+
     return Sifter(build_info_sieves(), src_str)
+
+
+def sift_builds(session, src_str, build_infos):
+    """
+
+    """
+
+    sifter = builf_info_sifter(src_str)
+    return sifter(session, build_infos)
+
+
+def sift_nvrs(session, src_str, nvrs):
+    """
+    """
+
+    loaded = bulk_load_builds(session, nvrs, err=False)
+    builds = build_dedup(itervalues(loaded))
+    return sift_builds(session, src_str, builds)
 
 
 #
