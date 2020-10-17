@@ -36,6 +36,7 @@ except ImportError:
 # these all cmp to 0
 RPM_STR_CMP_0 = [
     ("", ""),
+    ("0", "0"),
     ("1", "1"),
     ("1.0", "1.0"),
     ("1.1", "1..1"),
