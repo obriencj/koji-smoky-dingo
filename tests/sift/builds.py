@@ -50,7 +50,7 @@ USER_SANTA = {
 }
 
 
-class TestBuildSifter(TestCase):
+class SifterTest(TestCase):
 
     maxDiff = None
 
@@ -279,6 +279,53 @@ class TestBuildSifter(TestCase):
 
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_1_1, BUILD_SAMPLE_4])
+
+
+    def test_state(self):
+        src = """
+        (state 1)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(None, BUILD_SAMPLES)
+
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        src = """
+        (state COMPLETE)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(None, BUILD_SAMPLES)
+
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+        src = """
+        (state 2)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(None, BUILD_SAMPLES)
+
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2])
+
+        src = """
+        (state DELETED)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(None, BUILD_SAMPLES)
+
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2])
+
+        src = """
+        (state 999)
+        """
+        self.assertRaises(SifterError, build_info_sifter, src)
+
+        src = """
+        (state INCOMPREHENSIBLE)
+        """
+        self.assertRaises(SifterError, build_info_sifter, src)
 
 
 #

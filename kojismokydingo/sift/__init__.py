@@ -298,7 +298,7 @@ def ensure_str(value, msg=None):
 
 def ensure_int(value, msg=None):
     if isinstance(value, int):
-        return value
+        return int(value)
 
     if not msg:
         msg = "Value must be an int"
@@ -310,13 +310,17 @@ def ensure_int_or_str(value, msg=None):
     """
     Checks that value is either a int, Number, str, or Symbol. If not,
     raises a SifterError.
+
+    :rtype: int or str
     """
 
-    if isinstance(value, (int, str)):
-        return value
+    if isinstance(value, int):
+        return int(value)
+    elif isinstance(value, str):
+        return str(value)
 
     if not msg:
-        msg = "Value must be an int, string, or symbol"
+        msg = "Value must be an int, Number, str, or Symbol"
     raise SifterError("%s: %r (type %s)" %
                       (msg, value, type(value).__name__))
 

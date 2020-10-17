@@ -803,7 +803,7 @@ class EnsureTypeTest(TestCase):
     def test_ensure_int(self):
         values = (1, Number(5))
         for val in values:
-            self.assertTrue(val is ensure_int(val))
+            self.assertTrue(int(val) is ensure_int(val))
 
         bad_values = (None, Null(), Glob("*"), Regex(".*"),
                       Symbol("100"), "100", [], ())
@@ -812,9 +812,17 @@ class EnsureTypeTest(TestCase):
 
 
     def test_ensure_int_or_str(self):
-        values = (1, Number(5), "hello", Symbol("hello"))
+        values = (1, Number(5))
         for val in values:
-            self.assertTrue(val is ensure_int_or_str(val))
+            res = ensure_int_or_str(val)
+            self.assertTrue(type(res), int)
+            self.assertTrue(val == res)
+
+        values = ("hello", Symbol("hello"))
+        for val in values:
+            res = ensure_int_or_str(val)
+            self.assertTrue(type(res), str)
+            self.assertTrue(val == res)
 
         bad_values = (None, Null(), Glob("*"), Regex(".*"), [], ())
         for val in bad_values:

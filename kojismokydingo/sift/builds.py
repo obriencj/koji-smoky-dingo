@@ -127,15 +127,16 @@ class StateSieve(ItemSieve):
     name = field = "state"
 
     def __init__(self, sifter, pattern):
-        pattern = ensure_int_or_str(pattern)
+        state = ensure_int_or_str(pattern)
 
-        if pattern not in BUILD_STATES:
+        found = BUILD_STATES.get(state)
+        if found is None:
             raise SifterError("Unknown build state: %r" % pattern)
 
-        if not isinstance(pattern, int):
-            pattern = BUILD_STATES[pattern]
+        if isinstance(state, str):
+            state = found
 
-        super(ItemSieve, self).__init__(sifter, pattern)
+        super(ItemSieve, self).__init__(sifter, state)
 
 
 class SourceSieve(ItemSieve):
