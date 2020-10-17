@@ -20,15 +20,18 @@ Koji Smoky Dingo - Sifter filtering
 """
 
 
+import operator
+
 from koji import BUILD_STATES
 from six import itervalues
 
 from . import (
     DEFAULT_SIEVES,
     ItemSieve, Sieve, Sifter, SifterError,
-    ensure_int_or_str,)
+    ensure_int_or_str, ensure_str, )
 from .. import bulk_load_builds, bulk_load_users
 from ..builds import build_dedup
+from ..common import rpm_evr_compare
 
 
 __all__ = (
@@ -169,10 +172,11 @@ class OwnerSieve(Sieve):
         if self._user_ids is None:
             loaded = bulk_load_users(session, self.users)
             self._user_ids = set(u["id"] for u in itervalues(loaded))
+            print("user IDs", self._user_ids)
 
 
     def check(self, session, binfo):
-        return binfo["owner_id"] in self._user_ids
+        return binfo.get("owner_id") in self._user_ids
 
 
 class ImportedSieve(Sieve):
@@ -188,6 +192,103 @@ class ImportedSieve(Sieve):
         return not binfo.get("task_id")
 
 
+OPMAP = {
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">": operator.gt,
+    ">=": operator.ge,
+    "<": operator.lt,
+    "<=": operator.le,
+}
+
+
+class EVRCompare(Sieve):
+    """
+    Usage: ``(COMPARISON VER)``
+
+    Valid COMPARISON values are
+    * ``==``
+    * ``!=``
+    * ``>``
+    * ``>=``
+    * ``<``
+    * ``<=``
+
+    VER can be in any of the following forms
+    * EPOCH:VERSION
+    * EPOCH:VERSION-RELEASE
+    * VERSION
+    * VERSION-RELEASE
+
+    If EPOCH is omitted, it is presumed to be 0.
+    If RELEASE is omitted, it is presumed to be equivalent.
+
+    Passes builds whose EVR compares as requested.
+    """
+
+    def __init__(self, sifter, version):
+        super(EVRCompare, self).__init__(sifter)
+        self.token = version = ensure_str(version)
+
+        if ":" in version:
+            epoch, version = version.split(":", 1)
+        else:
+            epoch = "0"
+
+        if "-" in version:
+            version, release = version.split("-", 1)
+        else:
+            release = None
+
+        self.epoch = epoch
+        self.version = version
+        self.release = release
+
+        self.op = OPMAP[self.name]
+
+
+    def get_cache(self, binfo):
+        return self.sifter.get_cache("evr-compare", binfo)
+
+
+    def check(self, session, binfo):
+        other = (binfo["epoch"], binfo["version"], binfo["release"])
+        other = tuple((str(x) if x else "0") for x in other)
+
+        ours = (self.epoch, self.version, self.release or other[2])
+
+        relative = rpm_evr_compare(other, ours)
+        return self.op(relative, 0)
+
+
+    def __repr__(self):
+        return "".join(("(", self.name, " ", self.token, ")"))
+
+
+class EVRCompareEQ(EVRCompare):
+    name = "=="
+
+
+class EVRCompareNE(EVRCompare):
+    name = "!="
+
+
+class EVRCompareGT(EVRCompare):
+    name = ">"
+
+
+class EVRCompareGE(EVRCompare):
+    name = ">="
+
+
+class EVRCompareLT(EVRCompare):
+    name = "<"
+
+
+class EVRCompareLE(EVRCompare):
+    name = "<="
+
+
 DEFAULT_BUILD_INFO_SIEVES = [
     EpochSieve,
     ImportedSieve,
@@ -198,6 +299,12 @@ DEFAULT_BUILD_INFO_SIEVES = [
     SourceSieve,
     StateSieve,
     VersionSieve,
+    EVRCompareEQ,
+    EVRCompareNE,
+    EVRCompareGT,
+    EVRCompareGE,
+    EVRCompareLT,
+    EVRCompareLE,
 ]
 
 
