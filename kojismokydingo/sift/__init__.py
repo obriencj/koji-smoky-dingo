@@ -79,6 +79,7 @@ class SifterError(BadDingo):
     complaint = "Error compiling Sifter"
 
 
+@add_metaclass(ABCMeta)
 class Matcher(object):
     pass
 
@@ -114,6 +115,7 @@ class Number(int, Matcher):
 
 
 class Regex(Matcher):
+
     def __init__(self, src):
         self._src = src
         self._re = re.compile(src)
@@ -129,6 +131,7 @@ class Regex(Matcher):
 
 
 class Glob(Matcher):
+
     def __init__(self, src):
         self._src = src
 
@@ -439,10 +442,6 @@ class Sifter(object):
             # tread ? as an alias for flagged
             sym = Symbol("flagged")
 
-        elif sym.startswith("!"):
-            # treat !foo as an alias for not-foo
-            sym = Symbol("not-" + sym[1:])
-
         return sym
 
 
@@ -450,6 +449,12 @@ class Sifter(object):
         if sym.startswith("not-"):
             # converts (not-foo 1) into (not (foo 1))
             subexpr = [Symbol(sym[4:])]
+            subexpr.extend(args)
+            return Symbol("not"), (subexpr,)
+
+        elif sym.startswith("!"):
+            # converts (!foo 1) into (not (foo 1))
+            subexpr = [Symbol(sym[1:])]
             subexpr.extend(args)
             return Symbol("not"), (subexpr,)
 
@@ -495,11 +500,12 @@ class Sifter(object):
     def run(self, session, info_dicts):
         self._flags.clear()
 
-        data = dict((self.key(b), b) for b in info_dicts if b)
+        data = OrderedDict((self.key(b), b) for b in info_dicts if b)
+        work = tuple(itervalues(data))
 
         for expr in self._exprs:
             autoflag = not isinstance(expr, Flagger)
-            for binfo in expr(session, itervalues(data)):
+            for binfo in expr(session, work):
                 if autoflag:
                     self.set_flag("default", binfo)
 
@@ -722,7 +728,7 @@ class LogicNot(Logic):
 
 
     def run(self, session, info_dicts):
-        work = dict((self.key(b), b) for b in info_dicts)
+        work = OrderedDict((self.key(b), b) for b in info_dicts)
 
         for expr in self._exprs:
             if not work:
