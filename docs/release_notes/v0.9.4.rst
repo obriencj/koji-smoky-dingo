@@ -3,6 +3,12 @@ Koji Smoky Dingo preview 0.9.4 Release Notes
 
 *Unreleased*
 
+Introducing a new mini language, Sifty Dingo
+
+- you can now write filtering expressions for the list-components and
+  filter-builds commands
+- filter into multiple buckets at a time with a single set of rules
+
 Chugging along and collecting feedback
 
 - list-build-archives now accepts multiple NVRs
@@ -21,6 +27,7 @@ Chugging along and collecting feedback
   otherwise unhashable values
 - parse_datetime now accepts a 'strict=' parameter to let it return
   None instead of raising an Exception when parsing fails
+-
 
 Closed Issues:
 <https://github.com/obriencj/koji-smoky-dingo/milestone/4?closed=1>
