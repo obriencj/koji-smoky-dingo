@@ -248,10 +248,6 @@ class EVRCompare(Sieve):
         self.op = OPMAP[self.name]
 
 
-    def get_cache(self, binfo):
-        return self.sifter.get_cache("evr-compare", binfo)
-
-
     def check(self, session, binfo):
         other = (binfo["epoch"], binfo["version"], binfo["release"])
         other = tuple((str(x) if x else "0") for x in other)

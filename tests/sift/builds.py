@@ -21,7 +21,8 @@ from kojismokydingo.sift.builds import (
     EVRCompareEQ, EVRCompareNE,
     EVRCompareLT, EVRCompareLE,
     EVRCompareGT, EVRCompareGE,
-    build_info_sifter,
+    ImportedSieve, StateSieve,
+    build_info_sifter, sift_builds, sift_nvrs,
 )
 
 from ..builds import (
@@ -70,6 +71,12 @@ class SifterTest(TestCase):
         res = sifter(None, BUILD_SAMPLES)
         self.assertEqual(res["default"], [BUILD_SAMPLE_1])
 
+        src = """
+        (== 1:5.5.1-1)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_5])
+
 
     def test_evr_compare_ne(self):
         src = """
@@ -96,8 +103,7 @@ class SifterTest(TestCase):
         src = """
         (!= 9.9)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"], BUILD_SAMPLES)
 
 
@@ -122,15 +128,13 @@ class SifterTest(TestCase):
         src = """
         (< 0)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertFalse(res)
 
         src = """
         (< 1:0)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1,
                           BUILD_SAMPLE_2, BUILD_SAMPLE_3])
@@ -138,8 +142,7 @@ class SifterTest(TestCase):
         src = """
         (< 1:9.9)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"], BUILD_SAMPLES)
 
 
@@ -163,15 +166,13 @@ class SifterTest(TestCase):
         src = """
         (<= 0)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertFalse(res)
 
         src = """
         (<= 1:0)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1,
                           BUILD_SAMPLE_2, BUILD_SAMPLE_3])
@@ -179,8 +180,7 @@ class SifterTest(TestCase):
         src = """
         (<= 1:9-9)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"], BUILD_SAMPLES)
 
 
@@ -204,23 +204,20 @@ class SifterTest(TestCase):
         src = """
         (> 0)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"], BUILD_SAMPLES)
 
         src = """
         (> 1:0)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_4, BUILD_SAMPLE_5])
 
         src = """
         (> 1:9.9)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertFalse(res)
 
 
@@ -245,23 +242,20 @@ class SifterTest(TestCase):
         src = """
         (>= 0)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"], BUILD_SAMPLES)
 
         src = """
         (>= 1:0)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_4, BUILD_SAMPLE_5])
 
         src = """
         (>= 1:9.9)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertFalse(res)
 
 
@@ -274,9 +268,7 @@ class SifterTest(TestCase):
         src = """
         (owner siege)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(session, BUILD_SAMPLES)
-
+        res = sift_builds(session, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_1_1, BUILD_SAMPLE_4])
 
@@ -286,34 +278,34 @@ class SifterTest(TestCase):
         (state 1)
         """
         sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
 
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], StateSieve))
+        self.assertEqual(repr(sieves[0]), "(state 1)")
+
+        res = sifter(None, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
 
         src = """
         (state COMPLETE)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
-
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
         src = """
         (state 2)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
-
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2])
 
         src = """
         (state DELETED)
         """
-        sifter = build_info_sifter(src)
-        res = sifter(None, BUILD_SAMPLES)
-
+        res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2])
 
@@ -326,6 +318,49 @@ class SifterTest(TestCase):
         (state INCOMPREHENSIBLE)
         """
         self.assertRaises(SifterError, build_info_sifter, src)
+
+
+    def test_imported(self):
+        src = """
+        (imported)
+        """
+        sifter = build_info_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], ImportedSieve))
+        self.assertEqual(repr(sieves[0]), "(imported)")
+
+        res = sifter(None, BUILD_SAMPLES)
+        self.assertEqual(res["default"], BUILD_SAMPLES[:-1])
+
+        src = """
+        (!imported)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLES[-1]])
+
+
+class SiftNVRsTest(TestCase):
+
+    def test_sift_nvrs(self):
+
+        session = MagicMock()
+
+        mc = session.multiCall
+        mc.side_effect = [([bld] for bld in BUILD_SAMPLES), ]
+
+        src = """
+        (>= 1:0)
+        """
+
+        nvrs = (bld["nvr"] for bld in BUILD_SAMPLES)
+
+        res = sift_nvrs(session, src, nvrs)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        self.assertEqual(session.getBuild.call_count, len(BUILD_SAMPLES))
+        self.assertEqual(mc.call_count, 1)
 
 
 #

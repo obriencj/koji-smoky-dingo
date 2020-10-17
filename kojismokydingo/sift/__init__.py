@@ -608,6 +608,10 @@ class Sieve(object):
         return tuple(self.run(session, work)) if work else work
 
 
+    def __repr__(self):
+        return "".join(("(", self.name, ")"))
+
+
     @abstractmethod
     def check(self, session, info):
         """
