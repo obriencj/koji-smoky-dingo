@@ -16,8 +16,10 @@ from unittest import TestCase
 
 from kojismokydingo.sift import (
     DEFAULT_SIEVES,
-    Flagged, Glob, LogicNot, LogicOr,
-    ItemSieve, Regex, Sifter, SifterError, Symbol,
+    Flagged, Glob, ItemSieve, LogicNot, LogicOr, Null, Number,
+    Regex, Sieve, Sifter, SifterError, Symbol,
+    ensure_int, ensure_int_or_str, ensure_matcher, ensure_matchers,
+    ensure_str, ensure_symbol, parse_exprs,
 )
 
 
@@ -29,19 +31,47 @@ class TypeSieve(ItemSieve):
     name = field = "type"
 
 
+class CategorySieve(ItemSieve):
+    name = field = "category"
+
+
 class BrandSieve(ItemSieve):
     name = field = "brand"
+
+
+class Poke(Sieve):
+    # for testing cache. Increments a poke counter each time it sees a
+    # data item. If a maximum value is provided, then filters for only
+    # those items which have been poked up-to that many times
+    # previously. Thus (poke 0) will poke and then filter for only
+    # those items never previously poked.
+
+    name = "poke"
+
+    def __init__(self, sifter, count=-1):
+        super(Poke, self).__init__(sifter)
+        self._max = ensure_int(count)
+
+
+    def check(self, _session, data):
+        cache = self.get_cache(data)
+        seen = cache.get("count", 0)
+        cache["count"] = seen + 1
+
+        return (self._max < 0) or (seen <= self._max)
 
 
 TACOS = {
     "id": 1,
     "type": "food",
+    "category": 1,
     "name": "Tacos",
 }
 
 PIZZA = {
     "id": 2,
     "type": "food",
+    "category": "1",
     "name": "Pizza",
     "brand": None,
 }
@@ -49,12 +79,14 @@ PIZZA = {
 BEER = {
     "id": 3,
     "type": "drink",
+    "category": "1",
     "name": "Beer",
 }
 
 DRAINO = {
     "id": 4,
     "type": "drink",
+    "category": 2,
     "name": "Draino",
     "brand": "Draino",
 }
@@ -65,17 +97,227 @@ DATA = [
 ]
 
 
+class ParserTest(TestCase):
+
+
+    def parse(self, src):
+        return list(parse_exprs(src))
+
+
+    def check_empty(self, src):
+        res = self.parse(src)
+        self.assertEqual(res, [])
+
+
+    def test_empty(self):
+        sources = [
+            "",
+
+            """
+            """,
+
+            """
+            ; comment
+            """,
+
+            """
+            # comment
+            """,
+        ]
+
+        for src in sources:
+            self.check_empty(src)
+
+
+    def test_empty_list(self):
+
+        src = """
+        ()
+        """
+        res = self.parse(src)
+        self.assertEqual(res, [[]])
+
+
+    def test_unterminated_list(self):
+
+        src = """
+        (
+        """
+        res = self.parse(src)
+        self.assertEqual(res, [[]])
+
+        src = """
+        (hello
+        """
+        res = self.parse(src)
+        self.assertEqual(res, [[Symbol("hello")]])
+
+        src = "(hello"
+        res = self.parse(src)
+        self.assertEqual(res, [[Symbol("hello")]])
+
+
+    def check_null(self, src):
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), Null)
+        self.assertEqual(str(res[0]), "null")
+        self.assertEqual(repr(res[0]), "Null")
+
+
+    def test_null(self):
+        sources = [
+            """
+            None
+            """,
+
+            """
+            null
+            """,
+
+            """
+            nil
+            """,
+        ]
+
+        for src in sources:
+            self.check_null(src)
+
+
+    def test_quoted(self):
+
+        src = """
+        "Hello"
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), str)
+        self.assertEqual(str(res[0]), "Hello")
+        self.assertEqual(repr(res[0]), "'Hello'")
+
+        src = r"""
+        "\"Hello\""
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), str)
+        self.assertEqual(str(res[0]), "\"Hello\"")
+        self.assertEqual(repr(res[0]), "'\"Hello\"'")
+
+        src = """
+        /World/
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), Regex)
+        self.assertEqual(str(res[0]), "World")
+        self.assertEqual(repr(res[0]), "Regex('World')")
+
+        src = r"""
+        /Wor\/ld/
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), Regex)
+        self.assertEqual(str(res[0]), "Wor/ld")
+        self.assertEqual(repr(res[0]), "Regex('Wor/ld')")
+
+        src = """
+        |How|
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), Glob)
+        self.assertEqual(str(res[0]), "How")
+        self.assertEqual(repr(res[0]), "Glob('How')")
+
+        src = r"""
+        |H\|o\|w|
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), Glob)
+        self.assertEqual(str(res[0]), "H|o|w")
+        self.assertEqual(repr(res[0]), "Glob('H|o|w')")
+
+        src = """
+        Goes
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), Symbol)
+        self.assertEqual(str(res[0]), "Goes")
+        self.assertEqual(repr(res[0]), "Symbol('Goes')")
+
+        src = r"""
+        \G\|o\/e\"s
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), Symbol)
+        self.assertEqual(str(res[0]), "G|o/e\"s")
+        self.assertEqual(repr(res[0]), "Symbol('G|o/e\"s')")
+
+        src = """
+        "Hello"/World/|How|Goes
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 4)
+        self.assertEqual(type(res[0]), str)
+        self.assertEqual(str(res[0]), "Hello")
+        self.assertEqual(type(res[1]), Regex)
+        self.assertEqual(str(res[1]), "World")
+        self.assertEqual(type(res[2]), Glob)
+        self.assertEqual(str(res[2]), "How")
+        self.assertEqual(type(res[3]), Symbol)
+        self.assertEqual(str(res[3]), "Goes")
+
+
 class SifterTest(TestCase):
 
 
     def compile_sifter(self, src):
-        sieves = [NameSieve, TypeSieve, BrandSieve]
+        sieves = [NameSieve, TypeSieve, BrandSieve, CategorySieve, Poke]
         sieves.extend(DEFAULT_SIEVES)
 
         return Sifter(sieves, src)
 
 
-    def test_truth_item(self):
+    def test_int_item(self):
+        src = """
+        (category 1)
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], CategorySieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
+        self.assertEqual(repr(sieves[0]), "(category Number(1))")
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+        self.assertTrue("default" in res)
+        self.assertEqual(res["default"], [TACOS, PIZZA, BEER])
+
+        src = """
+        (category 2)
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], CategorySieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
+        self.assertEqual(repr(sieves[0]), "(category Number(2))")
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+        self.assertTrue("default" in res)
+        self.assertEqual(res["default"], [DRAINO])
+
+
+    def test_has_item(self):
 
         src = """
         (brand)
@@ -105,7 +347,7 @@ class SifterTest(TestCase):
         self.assertEqual(len(sieves), 1)
         self.assertTrue(isinstance(sieves[0], BrandSieve))
         self.assertTrue(isinstance(sieves[0], ItemSieve))
-        self.assertEqual(repr(sieves[0]), "(brand null)")
+        self.assertEqual(repr(sieves[0]), "(brand Null)")
 
         res = sifter(None, DATA)
         self.assertTrue(isinstance(res, dict))
@@ -213,6 +455,8 @@ class SifterTest(TestCase):
 
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 4)
+        self.assertEqual(repr(sieves[0]),
+                         "(flag Symbol('munch') (type Symbol('food')))")
 
         res = sifter(None, DATA)
         self.assertTrue(isinstance(res, dict))
@@ -250,6 +494,57 @@ class SifterTest(TestCase):
         self.assertEqual(res["good"], [TACOS, PIZZA, BEER])
 
 
+    def test_not(self):
+
+        src = """
+        (not (type))
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+
+        self.assertEqual(repr(sieves[0]),
+                         "(not (type))")
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+        self.assertFalse(res)
+
+        src = """
+        (flag everything)
+        (not (everything?) (or (type food drink)))
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 2)
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+
+        self.assertFalse("default" in res)
+        self.assertTrue("everything" in res)
+        self.assertEqual(res["everything"], DATA)
+
+
+    def test_or(self):
+        src = """
+        (or (name) (type))
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+
+        self.assertEqual(repr(sieves[0]),
+                         "(or (name) (type))")
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+        self.assertEqual(res["default"], DATA)
+
+
     def test_flag_implicit_and(self):
 
         src = """
@@ -261,6 +556,9 @@ class SifterTest(TestCase):
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 2)
 
+        self.assertEqual(repr(sieves[1]),
+                         "(flagged Symbol('fine'))")
+
         res = sifter(None, DATA)
         self.assertTrue(isinstance(res, dict))
 
@@ -271,13 +569,16 @@ class SifterTest(TestCase):
         self.assertEqual(res["default"], [PIZZA])
 
         src = """
-        (flag gross (name Pizza) (type drink))
+        (flag gross (name Pizza) (type drink) (type food))
         (flagged gross)
         """
         sifter = self.compile_sifter(src)
 
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 2)
+
+        self.assertEqual(repr(sieves[1]),
+                         "(flagged Symbol('gross'))")
 
         res = sifter(None, DATA)
         self.assertTrue(isinstance(res, dict))
@@ -374,7 +675,7 @@ class SifterTest(TestCase):
             self.check_flagged_aliases(src)
 
 
-    def test_syntax_error(self):
+    def test_sifter_error(self):
         src = """
         ((name Pizza))
         """
@@ -396,6 +697,11 @@ class SifterTest(TestCase):
         self.assertRaises(SifterError, self.compile_sifter, src)
 
         src = """
+        (999 Pizza)
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
+        src = """
         ()
         """
         self.assertRaises(SifterError, self.compile_sifter, src)
@@ -407,6 +713,11 @@ class SifterTest(TestCase):
 
         src = """
         (name "Pizza
+        """
+        self.assertRaises(SifterError, self.compile_sifter, src)
+
+        src = """
+        (blame Pizza)
         """
         self.assertRaises(SifterError, self.compile_sifter, src)
 
@@ -432,6 +743,116 @@ class SifterTest(TestCase):
         sifter = self.compile_sifter(src)
         self.assertEqual(len(sifter.sieve_exprs()), 1)
 
+
+    def test_cache(self):
+        src = """
+        (poke)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], DATA)
+
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], DATA)
+
+        src = """
+        (poke 0)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], DATA)
+
+        res = sifter(None, DATA)
+        self.assertFalse(res)
+
+        sifter.reset()
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], DATA)
+
+        src = """
+        (flag 1st (type food) (poke))
+        (flag 2nd (name Draino) (poke))
+        (flag 3rd (type drink) (poke 0))
+        (flag keep (poke 1))
+        (!poke 2)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+
+        self.assertEqual(res["1st"], [TACOS, PIZZA])
+        self.assertEqual(res["2nd"], [DRAINO])
+        self.assertEqual(res["3rd"], [BEER])
+        self.assertEqual(res["keep"], [TACOS, PIZZA, BEER])
+        self.assertEqual(res["default"], [DRAINO])
+
+        che = sifter.get_cache("poke", TACOS)
+        self.assertEqual(che["count"], 3)
+
+        che = sifter.get_cache("poke", PIZZA)
+        self.assertEqual(che["count"], 3)
+
+        che = sifter.get_cache("poke", BEER)
+        self.assertEqual(che["count"], 3)
+
+        che = sifter.get_cache("poke", DRAINO)
+        self.assertEqual(che["count"], 4)
+
+
+class EnsureTypeTest(TestCase):
+
+    def test_ensure_int(self):
+        values = (1, Number(5))
+        for val in values:
+            self.assertTrue(val is ensure_int(val))
+
+        bad_values = (None, Null(), Glob("*"), Regex(".*"),
+                      Symbol("100"), "100", [], ())
+        for val in bad_values:
+            self.assertRaises(SifterError, ensure_int, val)
+
+
+    def test_ensure_int_or_str(self):
+        values = (1, Number(5), "hello", Symbol("hello"))
+        for val in values:
+            self.assertTrue(val is ensure_int_or_str(val))
+
+        bad_values = (None, Null(), Glob("*"), Regex(".*"), [], ())
+        for val in bad_values:
+            self.assertRaises(SifterError, ensure_int_or_str, val)
+
+
+    def test_ensure_matcher(self):
+        values = ("hello", Null(), Number(5), Symbol("hello"),
+                  Glob("*"), Regex(".*"))
+        for val in values:
+            self.assertTrue(val is ensure_matcher(val))
+
+        bad_values = (None, [], (), 123)
+        for val in bad_values:
+            self.assertRaises(SifterError, ensure_matcher, val)
+
+        self.assertEqual(list(values), ensure_matchers(values))
+        self.assertRaises(SifterError, ensure_matchers, bad_values)
+
+
+    def test_ensure_str(self):
+        values = (1, Number(5), "1", Symbol("hello"))
+        for val in values:
+            self.assertEqual(str(val), ensure_str(val))
+
+        bad_values = (None, Null(), Glob("*"), Regex(".*"), [], ())
+        for val in bad_values:
+            self.assertRaises(SifterError, ensure_str, val)
+
+
+    def test_ensure_symbol(self):
+        val = Symbol("Hello")
+        self.assertTrue(val is ensure_symbol(val))
+
+        bad_values = (None, Null(), 123, Number(5), "wut",
+                      Glob("*"), Regex(".*"), [], ())
+        for val in bad_values:
+            self.assertRaises(SifterError, ensure_symbol, val)
 
 #
 # The end.
