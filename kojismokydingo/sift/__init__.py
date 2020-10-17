@@ -61,6 +61,7 @@ __all__ = (
     "Symbol",
     "VariadicSieve",
 
+    "ensure_int",
     "ensure_int_or_str",
     "ensure_matcher",
     "ensure_matchers",
@@ -78,40 +79,67 @@ class SifterError(BadDingo):
     complaint = "Error compiling Sifter"
 
 
-class Null(object):
-    def __repr__(self):
-        return "null"
+class Matcher(object):
+    pass
+
+
+class Null(Matcher):
 
     def __eq__(self, val):
         return val is None
 
+    def __str__(self):
+        return "null"
 
-class Symbol(str):
+    def __repr__(self):
+        return "Null"
+
+
+class Symbol(str, Matcher):
     def __repr__(self):
         return "Symbol(%r)" % str(self)
 
 
-class Regex(object):
+class Number(int, Matcher):
+
+    def __eq__(self, val):
+        if isinstance(val, str):
+            if val.isdigit():
+                val = int(val)
+
+        return int(self) == val
+
+    def __repr__(self):
+        return "Number(%i)" % self
+
+
+class Regex(Matcher):
     def __init__(self, src):
         self._src = src
         self._re = re.compile(src)
 
     def __eq__(self, val):
-        return bool(self._re.findall(val))
+        return bool(self._re.findall(str(val)))
+
+    def __str__(self):
+        return self._src
 
     def __repr__(self):
         return "Regex(%r)" % self._src
 
 
-class Glob(object):
+class Glob(Matcher):
     def __init__(self, src):
-        self._glob = src
+        self._src = src
 
     def __eq__(self, val):
-        return fnmatches(val, (self._glob,))
+        return fnmatches(str(val), (self._src,))
+
+    def __str__(self):
+        return self._src
 
     def __repr__(self):
-        return "Glob(%r)" % self._glob
+        return "Glob(%r)" % self._src
 
 
 def parse_exprs(srciter):
@@ -132,10 +160,21 @@ def parse_exprs(srciter):
         srciter = iter(srciter)
 
     token = None
+    esc = False
 
     for c in srciter:
+        if esc:
+            if not token:
+                token = StringIO()
+            token.write(c)
+            esc = False
+            continue
 
-        if c in ' ();#|/\"\'\n\r\t':
+        elif c == '\\':
+            esc = True
+            continue
+
+        elif c in ' ();#|/\"\'\n\r\t':
             if token:
                 yield parse_token(token.getvalue())
                 token = None
@@ -178,7 +217,7 @@ def parse_token(val):
         return Null()
 
     elif val.isdigit():
-        return int(val)
+        return Number(val)
 
     else:
         return Symbol(val)
@@ -218,11 +257,11 @@ def parse_quoted(srciter, quotec='\"'):
     val = token.getvalue()
 
     if quotec == "/":
-        return Regex(val)
+        val = Regex(val)
     elif quotec == "|":
-        return Glob(val)
-    else:
-        return val
+        val = Glob(val)
+
+    return val
 
 
 def ensure_symbol(value, msg=None):
@@ -232,11 +271,11 @@ def ensure_symbol(value, msg=None):
 
     if isinstance(value, Symbol):
         return value
-    else:
-        if not msg:
-            msg = "Value must be a symbol"
-        raise SifterError("%s: %r (type %s)" %
-                          (msg, value, type(value).__name__))
+
+    if not msg:
+        msg = "Value must be a symbol"
+    raise SifterError("%s: %r (type %s)" %
+                      (msg, value, type(value).__name__))
 
 
 def ensure_str(value, msg=None):
@@ -245,50 +284,53 @@ def ensure_str(value, msg=None):
     SifterError.
     """
 
-    if isinstance(value, (str, Symbol)):
+    if isinstance(value, (int, str)):
         return str(value)
-    else:
-        if not msg:
-            msg = "Value must be a string"
-        raise SifterError("%s: %r (type %s)" %
-                          (msg, value, type(value).__name__))
+
+    if not msg:
+        msg = "Value must be a string"
+    raise SifterError("%s: %r (type %s)" %
+                      (msg, value, type(value).__name__))
+
+
+def ensure_int(value, msg=None):
+    if isinstance(value, int):
+        return value
+
+    if not msg:
+        msg = "Value must be an int"
+    raise SifterError("%s: %r (type %s)" %
+                      (msg, value, type(value).__name__))
 
 
 def ensure_int_or_str(value, msg=None):
     """
-    Checks that value is either a str or Symbol. If it is a Symbol,
-    attempts to parse it as an unsigned integer. If not a str or
-    Symbol, raises a SifterError.
+    Checks that value is either a int, Number, str, or Symbol. If not,
+    raises a SifterError.
     """
 
     if isinstance(value, (int, str)):
         return value
 
-    elif isinstance(value, Symbol):
-        if value.isdigit():
-            return int(value)
-        else:
-            return value
-    else:
-        if not msg:
-            msg = "Value must be an int, string, or symbol"
-        raise SifterError("%s: %r (type %s)" %
-                          (msg, value, type(value).__name__))
+    if not msg:
+        msg = "Value must be an int, string, or symbol"
+    raise SifterError("%s: %r (type %s)" %
+                      (msg, value, type(value).__name__))
 
 
 def ensure_matcher(value, msg=None):
     """
-    Checks that value is either a str, Symbol, Regex, or Glob
-    instance.  If not, raises a SifterError.
+    Checks that value is either a str, or a Matcher instance. If not,
+    raises a SifterError.
     """
 
-    if isinstance(value, (str, Symbol, Regex, Glob, Null)):
+    if isinstance(value, (str, Matcher)):
         return value
-    else:
-        if not msg:
-            msg = "Value must be a string, regex, or glob"
-        raise SifterError("%s: %r (type %s)" %
-                          (msg, value, type(value).__name__))
+
+    if not msg:
+        msg = "Value must be a string, regex, or glob"
+    raise SifterError("%s: %r (type %s)" %
+                      (msg, value, type(value).__name__))
 
 
 def ensure_matchers(values, msg=None):
@@ -308,11 +350,11 @@ def ensure_sieve(value, msg=None):
 
     if isinstance(value, Sieve):
         return value
-    else:
-        if not msg:
-            msg = "Value must be a sieve expression"
-        raise SifterError("%s: %r (type %s)" %
-                          (msg, value, type(value).__name__))
+
+    if not msg:
+        msg = "Value must be a sieve expression"
+    raise SifterError("%s: %r (type %s)" %
+                      (msg, value, type(value).__name__))
 
 
 def ensure_sieves(values, msg=None):
@@ -359,6 +401,9 @@ class Sifter(object):
 
         # {flagname: set(data_id)}
         self._flags = {}
+
+        # {(cachename, data_id): {}}
+        self._cache = {}
 
         if not isinstance(sieves, dict):
             sieves = dict((sieve.name, sieve) for sieve in sieves)
@@ -448,6 +493,8 @@ class Sifter(object):
 
 
     def run(self, session, info_dicts):
+        self._flags.clear()
+
         data = dict((self.key(b), b) for b in info_dicts if b)
 
         for expr in self._exprs:
@@ -464,11 +511,16 @@ class Sifter(object):
 
 
     def __call__(self, session, info_dicts):
-        return self.run(session, info_dicts)
+        work = tuple(info_dicts)
+        return self.run(session, work) if work else {}
 
 
-    def reset_flags(self):
-        self._flags = {}
+    def reset(self):
+        """
+        Clears data caches
+        """
+
+        self._cache.clear()
 
 
     def is_flagged(self, flagname, data):
@@ -476,6 +528,7 @@ class Sifter(object):
         True if the data has been flagged with the given flagname, either
         via a ``(flag ...)`` sieve expression, or via `set_flag`
         """
+
         return ((flagname in self._flags) and
                 (self.key(data) in self._flags[flagname]))
 
@@ -492,6 +545,14 @@ class Sifter(object):
             bfl = self._flags[flagname] = OrderedDict()
 
         bfl[self.key(data)] = True
+
+
+    def get_cache(self, cachename, data):
+        cachekey = (cachename, self.key(data))
+        cch = self._cache.get(cachekey)
+        if cch is None:
+            cch = self._cache[cachekey] = OrderedDict()
+        return cch
 
 
 @add_metaclass(ABCMeta)
@@ -522,7 +583,6 @@ class Sieve(object):
     Sieve class available with a name of `"check-enabled"`
     """
 
-
     @abstractproperty
     def name(self):
         pass
@@ -533,21 +593,27 @@ class Sieve(object):
         self.key = sifter.key
 
 
+    def __call__(self, session, info_dicts):
+        work = tuple(info_dicts)
+        return tuple(self.run(session, work)) if work else work
+
+
     @abstractmethod
     def check(self, session, info):
         """
         Override to return True if the predicate matches the given
         info dict.
 
-        This is used by the default `run` implementation in a
-        filter. Only the info dicts which return True from this method
-        will be included in the results.
+        This is used by the default `run` implementation in a filter.
+        Only the info dicts which return True from this method will be
+        included in the results.
 
         :param info: The info dict to be checked.
         :type info: dict
 
         :rtype: bool
         """
+
         pass
 
 
@@ -561,6 +627,7 @@ class Sieve(object):
         :type info_dicts: list[dict]
         :rtype: None
         """
+
         pass
 
 
@@ -577,12 +644,8 @@ class Sieve(object):
         return filter(partial(self.check, session), info_dicts)
 
 
-    def __call__(self, session, info_dicts):
-        return self.run(session, info_dicts)
-
-
-    def __repr__(self):
-        return "".join(("(", self.name, ")"))
+    def get_cache(self, info):
+        return self.sifter.get_cache(self.name, info)
 
 
 @add_metaclass(ABCMeta)
@@ -590,9 +653,11 @@ class Logic(Sieve):
 
     check = None
 
+
     def __init__(self, sifter, *exprs):
         super(Logic, self).__init__(sifter)
         self._exprs = ensure_sieves(exprs)
+
 
     def __repr__(self):
         e = " ".join(map(repr, self._exprs))
@@ -608,10 +673,15 @@ class LogicAnd(Logic):
 
     name = "and"
 
+
     def run(self, session, info_dicts):
         work = info_dicts
+
         for expr in self._exprs:
+            if not work:
+                break
             work = expr(session, work)
+
         return work
 
 
@@ -624,20 +694,21 @@ class LogicOr(Logic):
 
     name = "or"
 
+
     def run(self, session, info_dicts):
-        work = dict((self.key(b), b) for b in info_dicts)
-        results = {}
+        work = OrderedDict((self.key(b), b) for b in info_dicts)
+        results = OrderedDict()
 
         for expr in self._exprs:
             if not work:
                 break
 
-            for b in expr(session, list(itervalues(work))):
+            for b in expr(session, itervalues(work)):
                 bid = self.key(b)
                 del work[bid]
                 results[bid] = b
 
-        return list(itervalues(results))
+        return itervalues(results)
 
 
 class LogicNot(Logic):
@@ -649,6 +720,7 @@ class LogicNot(Logic):
 
     name = "not"
 
+
     def run(self, session, info_dicts):
         work = dict((self.key(b), b) for b in info_dicts)
 
@@ -656,10 +728,10 @@ class LogicNot(Logic):
             if not work:
                 break
 
-            for b in expr(session, list(itervalues(work))):
+            for b in expr(session, itervalues(work)):
                 del work[self.key(b)]
 
-        return list(itervalues(work))
+        return itervalues(work)
 
 
 class Flagger(LogicAnd):
@@ -672,8 +744,9 @@ class Flagger(LogicAnd):
 
     name = "flag"
 
-    def __init__(self, sifter, flag, expr, *exprs):
-        super(Flagger, self).__init__(sifter, expr, *exprs)
+
+    def __init__(self, sifter, flag, *exprs):
+        super(Flagger, self).__init__(sifter, *exprs)
         self.flag = ensure_symbol(flag)
 
 
@@ -711,6 +784,7 @@ class VariadicSieve(Sieve):
         else:
             return object.__new__(cls)
 
+
     def __init__(self, sifter, token):
         super(VariadicSieve, self).__init__(sifter)
         self.token = token
@@ -729,6 +803,7 @@ class Flagged(VariadicSieve):
     """
 
     name = "flagged"
+
 
     def __init__(self, sifter, name):
         super(Flagged, self).__init__(sifter, ensure_symbol(name))
