@@ -56,6 +56,7 @@ __all__ = (
     "LogicOr",
     "Null",
     "Regex",
+    "RegexError",
     "Sifter",
     "SifterError",
     "Symbol",
@@ -77,6 +78,10 @@ __all__ = (
 
 class SifterError(BadDingo):
     complaint = "Error compiling Sifter"
+
+
+class RegexError(SifterError):
+    complaint = "Error compiling Regex"
 
 
 @add_metaclass(ABCMeta)
@@ -121,7 +126,10 @@ class Regex(Matcher):
         self._re = re.compile(src)
 
     def __eq__(self, val):
-        return bool(self._re.findall(str(val)))
+        try:
+            return bool(self._re.findall(val))
+        except TypeError:
+            return False
 
     def __str__(self):
         return self._src
@@ -136,7 +144,10 @@ class Glob(Matcher):
         self._src = src
 
     def __eq__(self, val):
-        return fnmatches(str(val), (self._src,))
+        try:
+            return fnmatches(val, (self._src,))
+        except TypeError:
+            return False
 
     def __str__(self):
         return self._src
@@ -260,7 +271,11 @@ def parse_quoted(srciter, quotec='\"'):
     val = token.getvalue()
 
     if quotec == "/":
-        val = Regex(val)
+        try:
+            val = Regex(val)
+        except re.error as exc:
+            raise RegexError(str(exc))
+
     elif quotec == "|":
         val = Glob(val)
 
