@@ -122,27 +122,7 @@ def build_nvr_sort(build_infos, dedup=True):
     If dedup is True (the default), then duplicate NVRs will be
     omitted.
 
-    :param build_infos: build infos to be sorted and de-duplicated
-    :type build_infos: list[dict]
-
-    :param dedup: remove duplicate entries. Default, True
-    :type dedup: bool, optional
-
-    :rtype: list[dict]
-    """
-
-    if dedup:
-        build_infos = build_dedup(build_infos)
-    else:
-        build_infos = filter(None, build_infos)
-
-    return sorted(build_infos, key=BuildNEVRCompare)
-
-
-def build_id_sort(build_infos, dedup=True):
-    """
-    Given a sequence of build info dictionaries, return a de-duplicated
-    list of same, sorted by the build ID
+    All None infos will be dropped.
 
     :param build_infos: build infos to be sorted and de-duplicated
     :type build_infos: list[dict]
@@ -156,16 +136,41 @@ def build_id_sort(build_infos, dedup=True):
     build_infos = filter(None, build_infos)
 
     if dedup:
-        builds = dict((b["id"], b) for b in build_infos)
-        return [b for _bid, b in sorted(iteritems(builds))]
-    else:
-        return sorted(build_infos, key=itemgetter("id"))
+        build_infos = unique(build_infos, key="id")
+
+    return sorted(build_infos, key=BuildNEVRCompare)
+
+
+def build_id_sort(build_infos, dedup=True):
+    """
+    Given a sequence of build info dictionaries, return a de-duplicated
+    list of same, sorted by the build ID
+
+    All None infos will be dropped.
+
+    :param build_infos: build infos to be sorted and de-duplicated
+    :type build_infos: list[dict]
+
+    :param dedup: remove duplicate entries. Default, True
+    :type dedup: bool, optional
+
+    :rtype: list[dict]
+    """
+
+    build_infos = filter(None, build_infos)
+
+    if dedup:
+        build_infos = unique(build_infos, key="id")
+
+    return sorted(build_infos, key=itemgetter("id"))
 
 
 def build_dedup(build_infos):
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, with order preserved.
+
+    All None infos will be dropped.
 
     :param build_infos: build infos to be de-duplicated.
     :type build_infos: list[dict]

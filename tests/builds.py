@@ -298,17 +298,17 @@ class TestSorting(TestCase):
 
     def test_nvr_sort(self):
 
-        res = build_id_sort(BUILD_SAMPLES)
+        res = build_nvr_sort(BUILD_SAMPLES)
         self.assertEqual([b["nvr"] for b in res],
                          [b["nvr"] for b in BUILD_SAMPLES])
         self.assertTrue(res is not BUILD_SAMPLES)
 
-        res = build_id_sort(UNSORTED_BUILDS, dedup=True)
+        res = build_nvr_sort(UNSORTED_BUILDS, dedup=True)
         self.assertEqual([b["nvr"] for b in res],
                          [b["nvr"] for b in BUILD_SAMPLES])
         self.assertTrue(res is not UNSORTED_BUILDS)
 
-        res = build_id_sort(UNSORTED_BUILDS, dedup=False)
+        res = build_nvr_sort(UNSORTED_BUILDS, dedup=False)
         self.assertEqual([b["nvr"] for b in res],
                          [b["nvr"] for b in SORTED_BUILDS])
         self.assertTrue(res is not SORTED_BUILDS)
