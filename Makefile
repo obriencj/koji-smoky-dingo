@@ -123,7 +123,7 @@ $(ARCHIVE): $(GITHEADREF)
 
 
 ##@ Documentation
-docs: docs/overview.rst	## Build sphinx docs
+docs: clean-docs docs/overview.rst	## Build sphinx docs
 	@$(PYTHON) -B setup.py docs
 
 

@@ -38,6 +38,12 @@ __all__ = (
     "DEFAULT_BUILD_INFO_SIEVES",
 
     "EpochSieve",
+    "EVRCompareEQ",
+    "EVRCompareNE",
+    "EVRCompareLT",
+    "EVRCompareLE",
+    "EVRCompareGT",
+    "EVRCompareGE",
     "ImportedSieve",
     "NameSieve",
     "NVRSieve",
@@ -205,26 +211,14 @@ OPMAP = {
 
 class EVRCompare(Sieve):
     """
-    Usage: ``(COMPARISON VER)``
+    Valid comparison values are
 
-    Valid COMPARISON values are
     * ``==``
     * ``!=``
     * ``>``
     * ``>=``
     * ``<``
     * ``<=``
-
-    VER can be in any of the following forms
-    * EPOCH:VERSION
-    * EPOCH:VERSION-RELEASE
-    * VERSION
-    * VERSION-RELEASE
-
-    If EPOCH is omitted, it is presumed to be 0.
-    If RELEASE is omitted, it is presumed to be equivalent.
-
-    Passes builds whose EVR compares as requested.
     """
 
     def __init__(self, sifter, version):
@@ -263,26 +257,122 @@ class EVRCompare(Sieve):
 
 
 class EVRCompareEQ(EVRCompare):
+    """
+    Usage: ``(== VER)``
+
+    ``VER`` can be in any of the following forms
+
+    * ``EPOCH:VERSION``
+    * ``EPOCH:VERSION-RELEASE``
+    * ``VERSION``
+    * ``VERSION-RELEASE``
+
+    If ``EPOCH`` is omitted, it is presumed to be ``0``.
+    If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+    Passes builds whose EVR compares as requested.
+    """
+
     name = "=="
 
 
 class EVRCompareNE(EVRCompare):
+    """
+    Usage: ``(!= VER)``
+
+    ``VER`` can be in any of the following forms
+
+    * ``EPOCH:VERSION``
+    * ``EPOCH:VERSION-RELEASE``
+    * ``VERSION``
+    * ``VERSION-RELEASE``
+
+    If ``EPOCH`` is omitted, it is presumed to be ``0``.
+    If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+    Passes builds whose EVR compares as requested.
+    """
+
     name = "!="
 
 
 class EVRCompareGT(EVRCompare):
+    """
+    Usage: ``(> VER)``
+
+    ``VER`` can be in any of the following forms
+
+    * ``EPOCH:VERSION``
+    * ``EPOCH:VERSION-RELEASE``
+    * ``VERSION``
+    * ``VERSION-RELEASE``
+
+    If ``EPOCH`` is omitted, it is presumed to be ``0``.
+    If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+    Passes builds whose EVR compares as requested.
+    """
+
     name = ">"
 
 
 class EVRCompareGE(EVRCompare):
+    """
+    Usage: ``(>= VER)``
+
+    ``VER`` can be in any of the following forms
+
+    * ``EPOCH:VERSION``
+    * ``EPOCH:VERSION-RELEASE``
+    * ``VERSION``
+    * ``VERSION-RELEASE``
+
+    If ``EPOCH`` is omitted, it is presumed to be ``0``.
+    If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+    Passes builds whose EVR compares as requested.
+    """
+
     name = ">="
 
 
 class EVRCompareLT(EVRCompare):
+    """
+    Usage: ``(< VER)``
+
+    ``VER`` can be in any of the following forms
+
+    * ``EPOCH:VERSION``
+    * ``EPOCH:VERSION-RELEASE``
+    * ``VERSION``
+    * ``VERSION-RELEASE``
+
+    If ``EPOCH`` is omitted, it is presumed to be ``0``.
+    If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+    Passes builds whose EVR compares as requested.
+    """
+
     name = "<"
 
 
 class EVRCompareLE(EVRCompare):
+    """
+    Usage: ``(<= VER)``
+
+    ``VER`` can be in any of the following forms
+
+    * ``EPOCH:VERSION``
+    * ``EPOCH:VERSION-RELEASE``
+    * ``VERSION``
+    * ``VERSION-RELEASE``
+
+    If ``EPOCH`` is omitted, it is presumed to be ``0``.
+    If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+    Passes builds whose EVR compares as requested.
+    """
+
     name = "<="
 
 
