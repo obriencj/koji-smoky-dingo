@@ -33,14 +33,15 @@ names for something that filters stuff.
 import re
 
 from abc import ABCMeta, abstractmethod, abstractproperty
+from codecs import decode
 from collections import OrderedDict
+from fnmatch import fnmatchcase
 from functools import partial
 from operator import itemgetter
-from six import add_metaclass, iteritems, itervalues
+from six import add_metaclass, iteritems, itervalues, text_type
 from six.moves import StringIO
 
 from .. import BadDingo
-from ..common import fnmatches
 
 
 __all__ = (
@@ -106,6 +107,15 @@ class Symbol(str, Matcher):
         return "Symbol(%r)" % str(self)
 
 
+# class SymbolGroup(Matcher):
+#     def __init__(self, val):
+#         self.syms = [Symbol(s) for s in iter_symbol_groups(val)]
+#         pass
+
+#     def __eq__(self, val):
+#         return any(map(lambda s: s == val, self.syms))
+
+
 class Number(int, Matcher):
 
     def __eq__(self, val):
@@ -145,7 +155,7 @@ class Glob(Matcher):
 
     def __eq__(self, val):
         try:
-            return fnmatches(val, (self._src,))
+            return fnmatchcase(val, self._src,)
         except TypeError:
             return False
 
@@ -156,7 +166,7 @@ class Glob(Matcher):
         return "Glob(%r)" % self._src
 
 
-def parse_exprs(srciter):
+def parse_exprs(srciter, start="(", stop=")"):
     """
     Simple s-expr parser. Reads from a string or character iterator,
     emits expressions as nested lists. Lenient about closing
@@ -170,6 +180,11 @@ def parse_exprs(srciter):
     # for Sibilant's parser as well. And now it lives here, in Koji
     # Smoky Dingo.
 
+    assert len(start) == 1
+    assert len(stop) == 1
+
+    token_breaks = "".join((start, stop, ' ;#|/\"\'\n\r\t'))
+
     if isinstance(srciter, str):
         srciter = iter(srciter)
 
@@ -178,25 +193,25 @@ def parse_exprs(srciter):
 
     for c in srciter:
         if esc:
+            esc = False
             if not token:
                 token = StringIO()
             token.write(c)
-            esc = False
             continue
 
         elif c == '\\':
             esc = True
             continue
 
-        elif c in ' ();#|/\"\'\n\r\t':
+        elif c in token_breaks:
             if token:
                 yield parse_token(token.getvalue())
                 token = None
+
         else:
             if not token:
                 token = StringIO()
             token.write(c)
-            continue
 
         if c in ';#':
             # comments run to end of line
@@ -204,10 +219,10 @@ def parse_exprs(srciter):
                 if c in "\n\r":
                     break
 
-        elif c == '(':
-            yield list(parse_exprs(srciter))
+        elif c == start:
+            yield list(parse_exprs(srciter, start, stop))
 
-        elif c == ')':
+        elif c == stop:
             return
 
         elif c in '\'\"/|':
@@ -218,6 +233,16 @@ def parse_exprs(srciter):
         # let's just be permissive and implicitly close unterminated
         # lists
         yield parse_token(token.getvalue())
+
+
+ESCAPE_SEQUENCE_RE = re.compile(r'''
+(\\U........
+| \\u....
+| \\x..
+| \\[0-7]{1,3}
+| \\N\{[^}]+\}
+| \\[\\'"abfnrtv]
+)''', re.UNICODE | re.VERBOSE)
 
 
 def parse_token(val):
@@ -233,8 +258,15 @@ def parse_token(val):
     elif val.isdigit():
         return Number(val)
 
+    # elif "{" in val:
+    #    return SymbolGroup(val)
+
     else:
         return Symbol(val)
+
+
+def parse_itempath(prefix, srciter):
+    pass
 
 
 def parse_quoted(srciter, quotec='\"'):
@@ -256,19 +288,25 @@ def parse_quoted(srciter, quotec='\"'):
 
     for c in srciter:
         if esc:
+            if c != quotec:
+                token.write(esc)
             token.write(c)
             esc = False
         elif c == quotec:
             break
         elif c == '\\':
-            esc = True
+            esc = c
         else:
             token.write(c)
+
     else:
         msg = "Unterminated matcher: missing closing %r" % quotec
         raise SifterError(msg)
 
-    val = token.getvalue()
+    def descape(m):
+        return decode(m.group(0), 'unicode-escape')
+
+    val = ESCAPE_SEQUENCE_RE.sub(descape, token.getvalue())
 
     if quotec == "/":
         try:
@@ -331,7 +369,8 @@ def ensure_int_or_str(value, msg=None):
 
     if isinstance(value, int):
         return int(value)
-    elif isinstance(value, str):
+    elif isinstance(value, (str, text_type)):
+        # Symbol is a subclass of str, so convert it back
         return str(value)
 
     if not msg:
@@ -346,7 +385,7 @@ def ensure_matcher(value, msg=None):
     raises a SifterError.
     """
 
-    if isinstance(value, (str, Matcher)):
+    if isinstance(value, (str, Matcher, text_type)):
         return value
 
     if not msg:

@@ -13,6 +13,7 @@
 
 
 import re
+import six
 
 from unittest import TestCase
 
@@ -29,6 +30,7 @@ class MatcherTest(TestCase):
 
     DATA = [
         1, 2, "3", "4", "Hello", "World", (), [], 99, 98, 0, "", None,
+        "987", "98",
     ]
 
 
@@ -93,6 +95,14 @@ class MatcherTest(TestCase):
 
         self.in_data(Regex("^.o"), 5, "World")
         self.in_data(Regex("d$"), 5, "World")
+
+        self.in_data(Regex(r"\d"), 2, "3")
+        self.in_data(Regex(r"\d\d\d"), 13, "987")
+        self.in_data(Regex(r"^\d{3}$"), 13, "987")
+        self.in_data(Regex(r"\d\d"), 13, "987")
+        self.in_data(Regex(r"\d{2}"), 13, "987")
+        self.in_data(Regex(r"^\d\d$"), 14, "98")
+        self.in_data(Regex(r"^\d{2}$"), 14, "98")
 
         self.in_data(Regex(""), 2, "3")
         self.in_data(Regex("()"), 2, "3")
@@ -501,6 +511,27 @@ class SifterTest(TestCase):
         self.assertTrue("default" in res)
         self.assertEqual(res["default"], [PIZZA])
 
+        src = r"""
+        (name "Pizza\nBeer")
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], NameSieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
+        self.assertEqual(sieves[0].name, "name")
+        self.assertEqual(sieves[0].field, "name")
+        self.assertTrue(isinstance(sieves[0].token, six.text_type))
+
+        if six.PY3:
+            self.assertEqual(repr(sieves[0]), r"(name 'Pizza\nBeer')")
+        elif six.PY2:
+            self.assertEqual(repr(sieves[0]), r"(name u'Pizza\nBeer')")
+
+        res = sifter(None, DATA)
+        self.assertFalse(res)
+
 
     def test_regex_item(self):
 
@@ -522,6 +553,25 @@ class SifterTest(TestCase):
         self.assertTrue(isinstance(res, dict))
         self.assertTrue("default" in res)
         self.assertEqual(res["default"], [PIZZA])
+
+        src = r"""
+        (category /\d/)
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], CategorySieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
+        self.assertEqual(sieves[0].name, "category")
+        self.assertEqual(sieves[0].field, "category")
+        self.assertTrue(isinstance(sieves[0].token, Regex))
+        self.assertEqual(repr(sieves[0]), r"(category Regex('\\d'))")
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+        self.assertTrue("default" in res)
+        self.assertEqual(res["default"], [PIZZA, BEER])
 
 
     def test_glob_item(self):
