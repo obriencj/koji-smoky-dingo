@@ -22,14 +22,12 @@ from kojismokydingo.sift.builds import (
     EVRCompareLT, EVRCompareLE,
     EVRCompareGT, EVRCompareGE,
     ImportedSieve, StateSieve,
-    build_info_sifter, sift_builds, sift_nvrs,
-)
+    build_info_sifter, sift_builds, sift_nvrs, )
 
 from ..builds import (
     BUILD_SAMPLE_1, BUILD_SAMPLE_1_1,
     BUILD_SAMPLE_2, BUILD_SAMPLE_3,
-    BUILD_SAMPLE_4, BUILD_SAMPLE_5, BUILD_SAMPLES,
-)
+    BUILD_SAMPLE_4, BUILD_SAMPLE_5, BUILD_SAMPLES, )
 
 
 BUILD_SAMPLES = list(BUILD_SAMPLES)
