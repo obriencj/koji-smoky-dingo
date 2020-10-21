@@ -344,6 +344,10 @@ class SifterTest(TestCase):
 class SiftNVRsTest(TestCase):
 
     def test_sift_nvrs(self):
+        # most of the interactions with EVR filtering are covered in
+        # the SifterTest, this is just verifying that the simplified
+        # interface via sift_nvrs (and subsequently sift_builds) works
+        # as well
 
         session = MagicMock()
 
