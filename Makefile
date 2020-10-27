@@ -57,7 +57,7 @@ help:  ## Display this help
 
 
 ##@ Local Build and Install
-build: clean	## Produces a wheel using the default system python
+build: clean-built	## Produces a wheel using the default system python
 	@$(PYTHON) setup.py $(FLAKE8) $(BDIST)
 
 
@@ -74,10 +74,13 @@ tidy:	## Removes stray eggs and .pyc files
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
 		\( -type f -iname '*.pyc' -exec rm -f {} + \)
 
-
-clean: tidy	## Removes built content, test logs, coverage reports
-	@rm -rf .coverage* build/* dist/* htmlcov/* logs/*
+clean-built:
+	@rm -rf build/* dist/*
 	@if [ -f "$(ARCHIVE)" ] ; then rm -f "$(ARCHIVE)" ; fi
+
+
+clean: clean-built tidy	## Removes built content, test logs, coverage reports
+	@rm -rf .coverage* htmlcov/* logs/*
 
 
 ##@ Containerized RPMs
