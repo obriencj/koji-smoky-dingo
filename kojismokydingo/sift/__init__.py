@@ -37,9 +37,10 @@ from codecs import decode
 from collections import OrderedDict
 from fnmatch import fnmatchcase
 from functools import partial
+from itertools import chain, product
 from operator import itemgetter
 from six import add_metaclass, iteritems, itervalues, text_type
-from six.moves import StringIO
+from six.moves import StringIO, map
 
 from .. import BadDingo
 
@@ -47,9 +48,14 @@ from .. import BadDingo
 __all__ = (
     "DEFAULT_SIEVES",
 
+    "AllItems",
     "Flagged",
     "Flagger",
     "Glob",
+    "Item",
+    "ItemMatch",
+    "ItemPath",
+    "ItemPathSieve",
     "ItemSieve",
     "Logic",
     "LogicAnd",
@@ -73,7 +79,6 @@ __all__ = (
     "ensure_symbol",
 
     "parse_exprs",
-    "parse_quoted",
 )
 
 
@@ -95,25 +100,38 @@ class Null(Matcher):
     def __eq__(self, val):
         return val is None
 
+
     def __str__(self):
         return "null"
+
 
     def __repr__(self):
         return "Null"
 
 
 class Symbol(str, Matcher):
+
     def __repr__(self):
         return "Symbol(%r)" % str(self)
 
 
-# class SymbolGroup(Matcher):
-#     def __init__(self, val):
-#         self.syms = [Symbol(s) for s in iter_symbol_groups(val)]
-#         pass
+class SymbolGroup(Matcher):
 
-#     def __eq__(self, val):
-#         return any(map(lambda s: s == val, self.syms))
+    def __init__(self, src, groups):
+        self.src = src
+        self.groups = groups
+
+
+    def __iter__(self):
+        return map("".join, product(*self.groups))
+
+
+    def __eq__(self, val):
+        return any(map(lambda s: s == val, self))
+
+
+    def __repr__(self):
+        return "SymbolGroup(%r)" % self.src
 
 
 class Number(int, Matcher):
@@ -125,6 +143,7 @@ class Number(int, Matcher):
 
         return int(self) == val
 
+
     def __repr__(self):
         return "Number(%i)" % self
 
@@ -135,14 +154,17 @@ class Regex(Matcher):
         self._src = src
         self._re = re.compile(src)
 
+
     def __eq__(self, val):
         try:
             return bool(self._re.findall(val))
         except TypeError:
             return False
 
+
     def __str__(self):
         return self._src
+
 
     def __repr__(self):
         return "Regex(%r)" % self._src
@@ -153,37 +175,101 @@ class Glob(Matcher):
     def __init__(self, src):
         self._src = src
 
+
     def __eq__(self, val):
         try:
             return fnmatchcase(val, self._src,)
         except TypeError:
             return False
 
+
     def __str__(self):
         return self._src
+
 
     def __repr__(self):
         return "Glob(%r)" % self._src
 
 
-def parse_exprs(srciter, start="(", stop=")"):
-    """
-    Simple s-expr parser. Reads from a string or character iterator,
-    emits expressions as nested lists. Lenient about closing
-    expressions.
-    """
+class Item(object):
 
-    # I've been re-using this code for over a decade. It was
-    # originally in a command-line tool I wrote named 'deli' which
-    # worked with del.icio.us for finding and filtering through my
-    # bookmarks. Then I used it in Spexy and a form of it is the basis
-    # for Sibilant's parser as well. And now it lives here, in Koji
-    # Smoky Dingo.
+    def __init__(self, key):
+        if isinstance(key, int):
+            key = int(key)
+        elif isinstance(key, str):
+            key = str(key)
 
-    assert len(start) == 1
-    assert len(stop) == 1
+        self.key = key
 
-    token_breaks = "".join((start, stop, ' ;#|/\"\'\n\r\t'))
+
+    def get(self, d):
+        key = self.key
+        try:
+            if isinstance(key, slice):
+                for v in d[key]:
+                    yield v
+            else:
+                yield d[key]
+
+        except (IndexError, KeyError):
+            # do not catch TypeError
+            pass
+
+
+class ItemMatch(Item):
+
+    def get(self, d):
+        if not d:
+            return
+        elif isinstance(d, dict):
+            data = iteritems(d)
+        else:
+            data = enumerate(d)
+
+        key = self.key
+        for k, v in data:
+            if key == k:
+                yield v
+
+
+class AllItems(Item):
+
+    def __init__(self):
+        pass
+
+
+    def get(self, d):
+        if isinstance(d, dict):
+            return itervalues(d)
+        else:
+            return iter(d)
+
+
+class ItemPath(object):
+
+    def __init__(self, paths):
+        self.paths = list(paths)
+
+        for i, p in enumerate(paths):
+            if isinstance(p, Item):
+                continue
+            elif isinstance(p, (str, int, slice)):
+                self.paths[i] = Item(p)
+            elif isinstance(p, Matcher):
+                self.paths[i] = ItemMatch(p)
+            else:
+                msg = "Unexpected path element in ItemPath: %r" % p
+                raise SifterError(msg)
+
+
+    def get(self, data):
+        work = [data]
+        for element in self.paths:
+            work = chain(*map(element.get, filter(None, work)))
+        return work
+
+
+def parse_symbol_groups(srciter):
 
     if isinstance(srciter, str):
         srciter = iter(srciter)
@@ -203,9 +289,129 @@ def parse_exprs(srciter, start="(", stop=")"):
             esc = True
             continue
 
+        elif c == '{':
+            if token:
+                yield [token.getvalue()]
+                token = None
+            yield convert_group(parse_quoted(srciter, '}'))
+            continue
+
+        else:
+            if not token:
+                token = StringIO()
+            token.write(c)
+            continue
+
+    if token:
+        yield [token.getvalue()]
+        token = None
+
+
+def _trailing_esc(val):
+    return len(val) - len(val.rstrip("\\"))
+
+
+def convert_group(grp):
+    if "," not in grp:
+        if ".." in grp:
+            return list(convert_range(grp))
+        else:
+            return ["".join(("{", grp, "}"))]
+
+    work = []
+    for brk in grp.split(","):
+        if work and _trailing_esc(work[-1][-1]) & 1:
+            work[-1] = ",".join((work[-1][:-1], brk))
+        else:
+            work.append(brk)
+
+    if len(work) == 1:
+        return ["".join(("{", work[0], "}"))]
+    else:
+        return work
+
+
+def convert_range(rng):
+    broken = rng.split("..")
+    blen = len(broken)
+
+    if blen == 2:
+        start, stop = broken
+        step = 1
+    elif blen == 3:
+        start, stop, step = broken
+    else:
+        return ["".join(("{", rng, "}"))]
+
+    try:
+        istart = int(start)
+        istop = int(stop) + 1
+        istep = int(step)
+    except ValueError:
+        return ["".join(("{", rng, "}"))]
+
+    sss = (start, stop)
+    if any(map(lambda v: len(v) > 1 and v.startswith("0"), sss)):
+        pad_to = max(map(len, sss))
+        fmt = "{0:0%id}" % pad_to
+    else:
+        fmt = "{0:d}"
+
+    return map(fmt.format, range(istart, istop, istep))
+
+
+def parse_exprs(srciter, start="(", stop=")"):
+    """
+    Simple s-expr parser. Reads from a string or character iterator,
+    emits expressions as nested lists. Lenient about closing
+    expressions.
+    """
+
+    # I've been re-using this code for over a decade. It was
+    # originally in a command-line tool I wrote named 'deli' which
+    # worked with del.icio.us for finding and filtering through my
+    # bookmarks. Then I used it in Spexy and a form of it is the basis
+    # for Sibilant's parser as well. And now it lives here, in Koji
+    # Smoky Dingo.
+
+    assert len(start) == 1
+    assert len(stop) == 1
+
+    if isinstance(srciter, str):
+        srciter = iter(srciter)
+
+    token_breaks = "".join((start, stop, ' [;#|/\"\'\n\r\t'))
+
+    token = None
+    esc = False
+
+    for c in srciter:
+        if esc:
+            if not token:
+                token = StringIO()
+            if c not in token_breaks:
+                token.write(esc)
+            token.write(c)
+            esc = False
+            continue
+
+        elif c == '\\':
+            esc = c
+            continue
+
+        elif c == '.' and token is None:
+            yield parse_itempath(srciter, '', c)
+
+        elif c == '[':
+            prefix = ""
+            if token:
+                prefix = token.getvalue()
+                token = None
+            yield parse_itempath(srciter, prefix, c)
+
         elif c in token_breaks:
             if token:
-                yield parse_token(token.getvalue())
+                yield convert_token(token.getvalue())
                 token = None
 
         else:
@@ -232,7 +438,7 @@ def parse_exprs(srciter, start="(", stop=")"):
         # we could make this raise an exception instead, but currently
         # let's just be permissive and implicitly close unterminated
         # lists
-        yield parse_token(token.getvalue())
+        yield convert_token(token.getvalue())
 
 
 ESCAPE_SEQUENCE_RE = re.compile(r'''
@@ -245,7 +451,13 @@ ESCAPE_SEQUENCE_RE = re.compile(r'''
 )''', re.UNICODE | re.VERBOSE)
 
 
-def parse_token(val):
+def convert_escapes(s):
+    def descape(m):
+        return decode(m.group(0), 'unicode-escape')
+    return ESCAPE_SEQUENCE_RE.sub(descape, s)
+
+
+def convert_token(val):
     """
     Converts unquoted values.
     All digit value become unsigned int. None, null, nil become a Null.
@@ -258,18 +470,108 @@ def parse_token(val):
     elif val.isdigit():
         return Number(val)
 
-    # elif "{" in val:
-    #    return SymbolGroup(val)
+    else:
+        val = convert_escapes(val)
+
+        if "{" in val:
+            grps = list(parse_symbol_groups(val))
+            if all(map(lambda v: len(v) == 1, grps)):
+                val = "".join(g[0] for g in grps)
+                return Symbol(val)
+            else:
+                return SymbolGroup(val, grps)
+
+        else:
+            return Symbol(val)
+
+
+def parse_itempath(srciter, prefix=None, char=None):
+    paths = []
+
+    if prefix:
+        paths.append(convert_token(prefix))
+
+    if char == "[":
+        paths.append(parse_index(srciter))
+
+    token_breaks = '.[]();#|/\"\'\n\r\t'
+
+    token = None
+    esc = False
+    for c in srciter:
+        if esc:
+            if token is None:
+                token = StringIO()
+            if c not in token_breaks:
+                c.write(esc)
+            token.write(c)
+            esc = False
+            continue
+
+        elif c == '\\':
+            esc = c
+            continue
+
+        elif c in token_breaks:
+            if token:
+                paths.append(convert_token(token.getvalue()))
+                token = None
+
+            if c == "[":
+                paths.append(parse_index(srciter))
+            elif c == "]":
+                msg = "Unexpected closer: %r" % c
+                raise SifterError(msg)
+            elif c == ".":
+                pass
+            else:
+                break
+
+        else:
+            if token is None:
+                token = StringIO()
+            token.write(c)
+
+    if token:
+        paths.append(convert_token(token.getvalue()))
+        token = None
+
+    return ItemPath(paths)
+
+
+_slice_like = Regex(r"^("
+                    r":|::|"
+                    r"[+-]?\d*:|"
+                    r":[+-]?\d*|"
+                    r"[+-]?\d*:[+-]?\d*|"
+                    r"[+-]?\d*:[+-]?\d*:[+-]?\d*"
+                    r")$")
+
+
+def convert_slice(val):
+    vals = ((int(v) if v else None) for v in val.split(":"))
+    return slice(*vals)
+
+
+def parse_index(srciter):
+    val = list(parse_exprs(srciter, '[', ']'))
+    lval = len(val)
+
+    if lval == 0:
+        return AllItems()
+
+    elif lval == 1:
+        val = val[0]
+        if _slice_like == val:
+            val = convert_slice(val)
+        return val
 
     else:
-        return Symbol(val)
+        msg = "Too many arguments in item index: %r" % val
+        raise SifterError(msg)
 
 
-def parse_itempath(prefix, srciter):
-    pass
-
-
-def parse_quoted(srciter, quotec='\"'):
+def parse_quoted(srciter, quotec='\"', advanced_escapes=True):
     """
     Helper function for parse_exprs, will parse quoted values and
     return the appropriate wrapper type depending on the quoting
@@ -288,7 +590,7 @@ def parse_quoted(srciter, quotec='\"'):
 
     for c in srciter:
         if esc:
-            if c != quotec:
+            if advanced_escapes and c != quotec:
                 token.write(esc)
             token.write(c)
             esc = False
@@ -303,10 +605,9 @@ def parse_quoted(srciter, quotec='\"'):
         msg = "Unterminated matcher: missing closing %r" % quotec
         raise SifterError(msg)
 
-    def descape(m):
-        return decode(m.group(0), 'unicode-escape')
-
-    val = ESCAPE_SEQUENCE_RE.sub(descape, token.getvalue())
+    val = token.getvalue()
+    if advanced_escapes:
+        val = convert_escapes(val)
 
     if quotec == "/":
         try:
@@ -534,9 +835,14 @@ class Sifter(object):
             if not parsed:
                 raise SifterError("Empty expression: ()")
 
-            name = ensure_symbol(parsed[0], "Sieve names must be symbols")
-            name = self._convert_sym_aliases(name)
-            args = parsed[1:]
+            if isinstance(parsed[0], ItemPath):
+                name = Symbol("item")
+                args = parsed
+
+            else:
+                name = ensure_symbol(parsed[0], "Sieve names must be symbols")
+                name = self._convert_sym_aliases(name)
+                args = parsed[1:]
 
             cls = self._sieve_classes.get(name)
 
@@ -924,9 +1230,39 @@ class ItemSieve(VariadicSieve):
             return "".join(("(", self.name, " ", repr(self.token), ")"))
 
 
+class ItemPathSieve(Sieve):
+
+    name = "item"
+
+
+    def __init__(self, path, *values):
+        if not isinstance(path, ItemPath):
+            path = ItemPath([path])
+
+        self.path = path
+        self.values = ensure_matchers(values)
+
+
+    def check(self, _session, data):
+        work = self.path.get(data)
+
+        if self.values:
+            for pathv in work:
+                for val in self.values:
+                    if val == pathv:
+                        return True
+        else:
+            for pathv in work:
+                if pathv is not None:
+                    return True
+
+        return False
+
+
 DEFAULT_SIEVES = [
     Flagged, Flagger,
     LogicAnd, LogicOr, LogicNot,
+    ItemPathSieve,
 ]
 
 
