@@ -206,6 +206,7 @@ TACOS = {
     "type": "food",
     "category": 1,
     "name": "Tacos",
+    "keywords": ["yummy", "crunchy", "spicy", "beef", "cheese", "lettuce"],
 }
 
 PIZZA = {
@@ -214,6 +215,7 @@ PIZZA = {
     "category": "1",
     "name": "Pizza",
     "brand": None,
+    "keywords": ["yummy", "cheese", "pepperoni"],
 }
 
 BEER = {
@@ -221,6 +223,7 @@ BEER = {
     "type": "drink",
     "category": "1",
     "name": "Beer",
+    "keywords": ["yummy", "hops", "alcohol"],
 }
 
 DRAINO = {
@@ -229,6 +232,7 @@ DRAINO = {
     "category": 2,
     "name": "Draino",
     "brand": "Draino",
+    "keywords": ["yucky", "deadly", "poison"],
 }
 
 
@@ -302,7 +306,7 @@ class ParserTest(TestCase):
         self.assertEqual(len(res), 1)
         self.assertEqual(type(res[0]), Null)
         self.assertEqual(str(res[0]), "null")
-        self.assertEqual(repr(res[0]), "Null")
+        self.assertEqual(repr(res[0]), "Null()")
 
 
     def test_null(self):
@@ -503,6 +507,16 @@ class ParserTest(TestCase):
         self.assertNotEqual(res[0], "bar")
 
         src = """
+        hi{foo,null,None,nil}
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), SymbolGroup)
+        self.assertEqual(repr(res[0]), "SymbolGroup('hi{foo,null,None,nil}')")
+        self.assertEqual(res[0], "hifoo")
+        self.assertEqual(res[0], "hiNone")
+
+        src = """
         {foo,bar}_{01..05}
         """
         res = self.parse(src)
@@ -621,6 +635,16 @@ class ParserTest(TestCase):
         src = """
         .foo
         """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), ItemPath)
+
+        pth = res[0]
+        self.assertEqual(len(pth.paths), 1)
+        self.assertEqual(type(pth.paths[0]), Item)
+        self.assertEqual(pth.paths[0].key, "foo")
+
+        src = ".foo"
         res = self.parse(src)
         self.assertEqual(len(res), 1)
         self.assertEqual(type(res[0]), ItemPath)
@@ -752,7 +776,7 @@ class ParserTest(TestCase):
         self.assertEqual(pth.paths[0].key, slice(1, 2, -1))
 
 
-    def test_item_path_match(self):
+    def test_item_path_index(self):
         src = """
         [foo]
         """
@@ -779,6 +803,58 @@ class ParserTest(TestCase):
         self.assertEqual(type(pth.paths[0].key), int)
         self.assertEqual(pth.paths[0].key, 9)
 
+        src = r"""
+        [wut\]]
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), ItemPath)
+
+        pth = res[0]
+        self.assertEqual(len(pth.paths), 1)
+        self.assertEqual(type(pth.paths[0]), Item)
+        self.assertEqual(type(pth.paths[0].key), str)
+        self.assertEqual(pth.paths[0].key, "wut]")
+
+        src = r"""
+        [\[wut\]]
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), ItemPath)
+
+        pth = res[0]
+        self.assertEqual(len(pth.paths), 1)
+        self.assertEqual(type(pth.paths[0]), Item)
+        self.assertEqual(type(pth.paths[0].key), str)
+        self.assertEqual(pth.paths[0].key, "[wut]")
+
+        src = r"""
+        .\n
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), ItemPath)
+
+        pth = res[0]
+        self.assertEqual(len(pth.paths), 1)
+        self.assertEqual(type(pth.paths[0]), Item)
+        self.assertEqual(type(pth.paths[0].key), str)
+        self.assertEqual(pth.paths[0].key, "\n")
+
+        src = r"""
+        \n[]
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), ItemPath)
+
+        pth = res[0]
+        self.assertEqual(len(pth.paths), 2)
+        self.assertEqual(type(pth.paths[0]), Item)
+        self.assertEqual(type(pth.paths[0].key), str)
+        self.assertEqual(pth.paths[0].key, "\n")
+
         src = """
         ["foo"]
         """
@@ -792,6 +868,8 @@ class ParserTest(TestCase):
         self.assertEqual(type(pth.paths[0].key), str)
         self.assertEqual(pth.paths[0].key, "foo")
 
+
+    def test_item_path_match(self):
         src = """
         [{foo,bar}]
         """
@@ -818,6 +896,29 @@ class ParserTest(TestCase):
         self.assertEqual(type(pth.paths[0]), ItemMatch)
         self.assertEqual(type(pth.paths[0].key), Glob)
         self.assertEqual(pth.paths[0].key, "foo")
+
+
+    def test_item_path_err(self):
+
+        src = """
+        .foo]
+        """
+        self.assertRaises(SifterError, self.parse, src)
+
+        src = """
+        []]
+        """
+        self.assertRaises(SifterError, self.parse, src)
+
+        src = """
+        .foo[]]
+        """
+        self.assertRaises(SifterError, self.parse, src)
+
+        src = """
+        .foo[bar baz]
+        """
+        self.assertRaises(SifterError, self.parse, src)
 
 
     def test_bad_regex(self):
@@ -902,7 +1003,7 @@ class SifterTest(TestCase):
         self.assertEqual(len(sieves), 1)
         self.assertTrue(isinstance(sieves[0], BrandSieve))
         self.assertTrue(isinstance(sieves[0], ItemSieve))
-        self.assertEqual(repr(sieves[0]), "(brand Null)")
+        self.assertEqual(repr(sieves[0]), "(brand Null())")
 
         res = sifter(None, DATA)
         self.assertTrue(isinstance(res, dict))
@@ -1339,6 +1440,127 @@ class SifterTest(TestCase):
         self.assertEqual(len(sifter.sieve_exprs()), 1)
 
 
+    def test_item(self):
+        src = """
+        (item name Pizza)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [PIZZA])
+
+        src = """
+        (item name Pizza Tacos)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS, PIZZA])
+
+        src = """
+        (keywords[] spicy)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS])
+
+        src = """
+        (item keywords[] spicy)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS])
+
+        src = """
+        (not (.keywords[] spicy poison))
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [PIZZA, BEER])
+
+        src = """
+        (!item .keywords[] spicy poison)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [PIZZA, BEER])
+
+        src = """
+        (.keywords[0] yummy)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS, PIZZA, BEER])
+
+        src = """
+        (.keywords[{0,1}] cheese)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [PIZZA])
+
+        src = """
+        (keywords[] |c*|)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS, PIZZA])
+
+        src = """
+        (keywords[] /mm/)
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS, PIZZA, BEER])
+
+        src = """
+        ([])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS, PIZZA, BEER, DRAINO])
+
+        src = """
+        ([])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, [{}])
+        self.assertFalse(res)
+
+        src = """
+        ([0])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, [[], []])
+        self.assertFalse(res)
+
+        src = """
+        ([{0..1}][/ran/])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, [[], []])
+        self.assertFalse(res)
+
+        src = """
+        ([0])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, [])
+        self.assertFalse(res)
+
+        src = """
+        (.foo[{0..1}])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, [])
+        self.assertFalse(res)
+
+        src = """
+        ([/ran/])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [DRAINO])
+
+
     def test_cache(self):
         src = """
         (poke)
@@ -1391,6 +1613,12 @@ class SifterTest(TestCase):
 
         che = sifter.get_cache("poke", DRAINO)
         self.assertEqual(che["count"], 4)
+
+
+class TestItemPath(TestCase):
+
+    def test_err(self):
+        self.assertRaises(SifterError, ItemPath, [None])
 
 
 class EnsureTypeTest(TestCase):

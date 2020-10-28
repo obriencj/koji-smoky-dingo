@@ -106,7 +106,7 @@ class Null(Matcher):
 
 
     def __repr__(self):
-        return "Null"
+        return "Null()"
 
 
 class Symbol(str, Matcher):
@@ -123,7 +123,11 @@ class SymbolGroup(Matcher):
 
 
     def __iter__(self):
-        return map("".join, product(*self.groups))
+        for k in map("".join, product(*self.groups)):
+            if k.isdigit():
+                yield Number(k)
+            else:
+                yield Symbol(k)
 
 
     def __eq__(self, val):
@@ -219,9 +223,7 @@ class Item(object):
 class ItemMatch(Item):
 
     def get(self, d):
-        if not d:
-            return
-        elif isinstance(d, dict):
+        if isinstance(d, dict):
             data = iteritems(d)
         else:
             data = enumerate(d)
@@ -494,7 +496,7 @@ def parse_itempath(srciter, prefix=None, char=None):
     if char == "[":
         paths.append(parse_index(srciter))
 
-    token_breaks = '.[]();#|/\"\'\n\r\t'
+    token_breaks = ' .[]();#|/\"\'\n\r\t'
 
     token = None
     esc = False
@@ -503,7 +505,7 @@ def parse_itempath(srciter, prefix=None, char=None):
             if token is None:
                 token = StringIO()
             if c not in token_breaks:
-                c.write(esc)
+                token.write(esc)
             token.write(c)
             esc = False
             continue
@@ -1235,7 +1237,9 @@ class ItemPathSieve(Sieve):
     name = "item"
 
 
-    def __init__(self, path, *values):
+    def __init__(self, sifter, path, *values):
+        super(ItemPathSieve, self).__init__(sifter)
+
         if not isinstance(path, ItemPath):
             path = ItemPath([path])
 
@@ -1261,8 +1265,8 @@ class ItemPathSieve(Sieve):
 
 DEFAULT_SIEVES = [
     Flagged, Flagger,
-    LogicAnd, LogicOr, LogicNot,
     ItemPathSieve,
+    LogicAnd, LogicOr, LogicNot,
 ]
 
 
