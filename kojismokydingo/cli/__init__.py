@@ -30,13 +30,14 @@ import sys
 
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
+from contextlib import contextmanager
 from functools import partial
 from json import dump
 from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os.path import basename
 from six import add_metaclass
-from six.moves import filter, map, zip_longest
+from six.moves import StringIO, filter, map, zip_longest
 
 from kojismokydingo import BadDingo, NotPermitted
 
@@ -115,6 +116,34 @@ def resplit(arglist, sep=","):
 
     work = map(str.strip, sep.join(arglist).split(sep))
     return list(filter(None, work))
+
+
+@contextmanager
+def open_output(filename="-", append=False):
+    """
+    Context manager for a CLI output file.
+
+    Files will be opened for text-mode output, and closed when the
+    context exits.
+
+    If the filename is ``"-"`` then stdout will be used as the output file
+    stream, but it will not be closed.
+
+    If the filename is ``None`` then a StringIO will be created and the
+    results will be discarded.
+    """
+
+    if filename is None:
+        stream = StringIO()
+    elif filename == "-":
+        stream = sys.stdout
+    else:
+        stream = open(filename, "at" if append else "wt")
+
+    yield stream
+
+    if filename != "-":
+        stream.close()
 
 
 def clean_lines(lines, skip_comments=True):
