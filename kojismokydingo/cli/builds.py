@@ -34,7 +34,8 @@ from six import iteritems, itervalues
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
-    int_or_str, pretty_json, printerr, read_clean_lines, resplit)
+    int_or_str, pretty_json, open_output,
+    printerr, read_clean_lines, resplit)
 from .. import (
     NoSuchUser,
     as_buildinfo, as_taginfo,
@@ -46,6 +47,7 @@ from ..builds import (
     decorate_build_archive_data, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_tag_builds)
+from ..sift.builds import build_info_sifter
 from ..tags import ensure_tag, gather_tag_ids
 from ..common import chunkseq, unique
 
@@ -334,10 +336,57 @@ class BuildFiltering():
                dest="state", default=None,
                help="Limit to deleted builds")
 
+        grp = parser.add_argument_group("Filtering with Sifty sieves")
+        addarg = grp.add_argument
+
+        addarg("--output", "-o", action="append", default=list(),
+               dest="outputs", metavar="FLAG=FILENAME",
+               help="Divert results marked with the given FLAG to"
+               " FILENAME. If FILENAME is '-', output to stdout."
+               " The 'default' flag is output to stdout by default,"
+               " and other flags are discarded")
+
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--filter", action="store", default=None,
+               help="Use the given sifty filter predicates")
+
+        addarg("--filter-file", "-F", action="store", default=None,
+               metavar="FILTER_FILE",
+               help="Load sifty filter predictes from file")
+
         return parser
 
 
-    def build_filter(self, options):
+    def get_outputs(self, options):
+        result = {}
+
+        for opt in resplit(options.outputs):
+            if "=" in opt:
+                flag, dest = opt.split("=", 1)
+            else:
+                flag = opt
+                dest = "-"
+
+            result[flag] = dest or None
+
+        return result
+
+
+    def get_sifter(self, options):
+        if options.filter:
+            filter_src = options.filter
+        elif options.filter_file:
+            with open(options.filter_file, "rt") as fin:
+                filter_src = fin.read()
+        else:
+            return None
+
+        return build_info_sifter(filter_src)
+
+
+    def get_filter(self, options):
         session = self.session
 
         # setup the limit as a set of IDs for each tag named in the
@@ -350,7 +399,7 @@ class BuildFiltering():
         lookaside_ids = gather_tag_ids(session, deep=options.lookaside,
                                        shallow=options.shallow_lookaside)
 
-        return BuildFilter(self.session,
+        return BuildFilter(session,
                            limit_tag_ids=limit_ids,
                            lookaside_tag_ids=lookaside_ids,
                            imported=options.imported,
@@ -361,7 +410,8 @@ class BuildFiltering():
 
 def cli_list_components(session, nvr_list,
                         tag=None, inherit=False, latest=False,
-                        build_filter=None, sorting=None):
+                        build_filter=None, build_sifter=None,
+                        sorting=None, outputs=None):
 
     """
     CLI handler for `koji list-component-builds`
@@ -404,22 +454,28 @@ def cli_list_components(session, nvr_list,
     builds = list(itervalues(found))
     builds.extend(itervalues(wrapped))
 
-    # do the filtering
     if build_filter:
         builds = build_filter(builds)
 
-    if sorting == SORT_BY_NVR:
-        builds = build_nvr_sort(builds)
-
-    elif sorting == SORT_BY_ID:
-        builds = build_id_sort(builds)
-
+    if build_sifter:
+        results = build_sifter(session, builds)
     else:
-        builds = build_dedup(builds)
+        results = {"default": builds}
 
-    # print("Identified %i components of %s:" % (len(builds), nvr))
-    for binfo in builds:
-        print(binfo["nvr"])
+    if sorting == SORT_BY_NVR:
+        sortfn = build_nvr_sort
+    elif sorting == SORT_BY_ID:
+        sortfn = build_id_sort
+    else:
+        sortfn = build_dedup
+
+    if outputs is None:
+        outputs = {"default": "-"}
+
+    for flag, dest in iteritems(outputs):
+        with open_output(dest) as dout:
+            for bld in sortfn(results[flag]):
+                print(bld["nvr"], out=dout)
 
 
 class ListComponents(AnonSmokyDingo, BuildFiltering):
@@ -478,20 +534,26 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
-        bf = self.build_filter(options)
+        bf = self.get_filter(options)
+        bs = self.get_sifter(options)
+        sorting = options.sorting
+        outputs = self.get_outputs(options)
 
         return cli_list_components(self.session, nvrs,
                                    tag=options.tag,
                                    inherit=options.inherit,
                                    latest=options.latest,
                                    build_filter=bf,
-                                   sorting=options.sorting)
+                                   build_sifter=bs,
+                                   sorting=sorting,
+                                   outputs=outputs)
 
 
 def cli_filter_builds(session, nvr_list,
                       tag=None, inherit=False, latest=False,
-                      build_filter=None, sorting=None, strict=False,
-                      json=False):
+                      build_filter=None, build_sifter=None,
+                      sorting=None, outputs=None,
+                      strict=False):
 
     """
     CLI handler for `koji filter-builds`
@@ -510,33 +572,44 @@ def cli_filter_builds(session, nvr_list,
         listTagged = partial(session.listTagged, taginfo["id"],
                              inherit=inherit, latest=latest)
 
-        builds = list(builds)
-
         # server-side optimization if we're doing filtering by btype
         if build_filter and build_filter._btypes:
+            tagged = []
             for btype in build_filter._btypes:
-                builds.extend(listTagged(type=btype))
+                tagged.extend(listTagged(type=btype))
         else:
-            builds.extend(listTagged())
+            tagged = listTagged()
+
+        if tagged:
+            builds = list(builds)
+            known_ids = set(b["id"] for b in builds)
+            tagged_ids = set(b["id"] for b in tagged)
+            loaded = bulk_load_builds(session, tagged_ids - known_ids)
+            if loaded:
+                builds.extend(itervalues(loaded))
 
     if build_filter:
         builds = build_filter(builds)
 
-    if sorting == SORT_BY_NVR:
-        builds = build_nvr_sort(builds, dedup=False)
-
-    elif sorting == SORT_BY_ID:
-        builds = build_id_sort(builds, dedup=False)
-
+    if build_sifter:
+        results = build_sifter(session, builds)
     else:
-        builds = build_dedup(builds)
+        results = {"default": builds}
 
-    if json:
-        pretty_json(builds)
-        return
+    if sorting == SORT_BY_NVR:
+        sortfn = build_nvr_sort
+    elif sorting == SORT_BY_ID:
+        sortfn = build_id_sort
+    else:
+        sortfn = build_dedup
 
-    for binfo in builds:
-        print(binfo["nvr"])
+    if not outputs:
+        outputs = {"default": "-"}
+
+    for flag, dest in iteritems(outputs):
+        with open_output(dest) as dout:
+            for bld in sortfn(results.get(flag, ())):
+                print(bld["nvr"], file=dout)
 
 
 class FilterBuilds(AnonSmokyDingo, BuildFiltering):
@@ -598,14 +671,19 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
-        bf = self.build_filter(options)
+        bf = self.get_filter(options)
+        bs = self.get_sifter(options)
+        sorting = options.sorting
+        outputs = self.get_outputs(options)
 
         return cli_filter_builds(self.session, nvrs,
-                                 build_filter=bf,
                                  tag=options.tag,
                                  inherit=options.inherit,
                                  latest=options.latest,
-                                 sorting=options.sorting)
+                                 build_filter=bf,
+                                 build_sifter=bs,
+                                 sorting=sorting,
+                                 outputs=outputs)
 
 
 def cli_list_btypes(session, nvr=None, json=False, quiet=False):
