@@ -866,7 +866,8 @@ class Sifter(object):
     def run(self, session, info_dicts):
         self._flags.clear()
 
-        data = OrderedDict((self.key(b), b) for b in info_dicts if b)
+        key = self.key
+        data = OrderedDict((key(b), b) for b in info_dicts if b)
         work = tuple(itervalues(data))
 
         for expr in self._exprs:
