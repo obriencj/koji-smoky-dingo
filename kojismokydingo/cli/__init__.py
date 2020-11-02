@@ -52,6 +52,7 @@ __all__ = (
 
     "clean_lines",
     "int_or_str",
+    "open_output",
     "pretty_json",
     "printerr",
     "read_clean_lines",
