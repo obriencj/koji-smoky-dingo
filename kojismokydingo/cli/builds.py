@@ -371,6 +371,9 @@ class BuildFiltering():
 
             result[flag] = dest or None
 
+        if "default" not in result:
+            result["default"] = "-"
+
         return result
 
 
