@@ -1290,8 +1290,8 @@ class SifterTest(TestCase):
         self.assertEqual(len(sieves), 2)
 
         self.assertTrue(isinstance(sieves[1], LogicNot))
-        self.assertEqual(len(sieves[1]._exprs), 1)
-        self.assertTrue(isinstance(sieves[1]._exprs[0], Flagged))
+        self.assertEqual(len(sieves[1].tokens), 1)
+        self.assertTrue(isinstance(sieves[1].tokens[0], Flagged))
 
         res = sifter(None, DATA)
         self.assertEqual(res["poison"], [DRAINO])

@@ -961,9 +961,10 @@ class Sieve(object):
         pass
 
 
-    def __init__(self, sifter):
+    def __init__(self, sifter, tokens=None):
         self.sifter = sifter
         self.key = sifter.key
+        self.tokens = tokens
 
 
     def __call__(self, session, info_dicts):
@@ -972,7 +973,11 @@ class Sieve(object):
 
 
     def __repr__(self):
-        return "".join(("(", self.name, ")"))
+        if self.tokens:
+            e = " ".join(map(repr, self.tokens))
+            return "".join(("(", self.name, " ", e, ")"))
+        else:
+            return "".join(("(", self.name, ")"))
 
 
     @abstractmethod
@@ -1032,13 +1037,8 @@ class Logic(Sieve):
 
 
     def __init__(self, sifter, *exprs):
-        super(Logic, self).__init__(sifter)
-        self._exprs = ensure_sieves(exprs)
-
-
-    def __repr__(self):
-        e = " ".join(map(repr, self._exprs))
-        return "".join(("(", self.name, " " if e else "", e, ")"))
+        exprs = ensure_sieves(exprs)
+        super(Logic, self).__init__(sifter, exprs)
 
 
 class LogicAnd(Logic):
@@ -1054,7 +1054,7 @@ class LogicAnd(Logic):
     def run(self, session, info_dicts):
         work = info_dicts
 
-        for expr in self._exprs:
+        for expr in self.tokens:
             if not work:
                 break
             work = expr(session, work)
@@ -1076,7 +1076,7 @@ class LogicOr(Logic):
         work = OrderedDict((self.key(b), b) for b in info_dicts)
         results = OrderedDict()
 
-        for expr in self._exprs:
+        for expr in self.tokens:
             if not work:
                 break
 
@@ -1101,7 +1101,7 @@ class LogicNot(Logic):
     def run(self, session, info_dicts):
         work = OrderedDict((self.key(b), b) for b in info_dicts)
 
-        for expr in self._exprs:
+        for expr in self.tokens:
             if not work:
                 break
 
@@ -1137,7 +1137,7 @@ class Flagger(LogicAnd):
 
 
     def __repr__(self):
-        e = " ".join(map(repr, self._exprs))
+        e = " ".join(map(repr, self.tokens))
         return "".join(("(", self.name, " ", repr(self.flag),
                         " " if e else "", e, ")"))
 
@@ -1239,21 +1239,21 @@ class ItemPathSieve(Sieve):
 
 
     def __init__(self, sifter, path, *values):
-        super(ItemPathSieve, self).__init__(sifter)
-
         if not isinstance(path, ItemPath):
             path = ItemPath([path])
 
+        values = ensure_matchers(values)
+        super(ItemPathSieve, self).__init__(sifter, values)
+
         self.path = path
-        self.values = ensure_matchers(values)
 
 
     def check(self, _session, data):
         work = self.path.get(data)
 
-        if self.values:
+        if self.tokens:
             for pathv in work:
-                for val in self.values:
+                for val in self.tokens:
                     if val == pathv:
                         return True
         else:
