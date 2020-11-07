@@ -23,15 +23,16 @@ Koji Smoky Dingo - Sifter filtering
 import operator
 
 from koji import BUILD_STATES
-from six import itervalues
+from six import iteritems, itervalues
 
 from . import (
     DEFAULT_SIEVES,
     ItemSieve, Sieve, Sifter, SifterError,
-    ensure_int_or_str, ensure_str, )
-from .. import bulk_load_builds, bulk_load_users
+    ensure_int_or_str, ensure_matchers, ensure_str, )
+from .. import bulk_load, bulk_load_builds, bulk_load_users
 from ..builds import build_dedup
 from ..common import rpm_evr_compare
+from ..tags import gather_tag_ids
 
 
 __all__ = (
@@ -376,6 +377,115 @@ class EVRCompareLE(EVRCompare):
     name = "<="
 
 
+class TaggedSieve(Sieve):
+    """
+    usage: (tagged [TAG...])
+
+    If no TAG patterns are specified, matches builds which have any
+    tags at all.
+
+    If TAG patterns are specified, then only matches builds which have
+    a tag that matches any of the given patterns.
+    """
+
+    name = "tagged"
+
+
+    def __init__(self, sifter, *tagnames):
+        super(TaggedSieve, self).__init__(sifter)
+        self.tagnames = ensure_matchers(tagnames)
+
+
+    def prep(self, session, binfos):
+
+        needed = {}
+        for binfo in binfos:
+            cache = self.get_cache(binfo)
+            if "tag_names" not in cache:
+                needed[binfo["id"]] = binfo
+
+        if needed:
+            fn = lambda i: session.listTags(build=i)
+            for bid, tags in iteritems(bulk_load(session, fn, needed)):
+                cache = self.get_cache(needed[bid])
+                cache["tag_names"] = [t["name"] for t in tags]
+                cache["tag_ids"] = [t["id"] for t in tags]
+
+
+    def check(self, session, binfo):
+        cache = self.get_cache(binfo)
+
+        tag_names = cache.get("tag_names", ())
+        tag_ids = cache.get("tag_ids", ())
+
+        if not self.tagnames:
+            # when used as simply (tagged) then we're checking that
+            # there are ANY tags.
+            return bool(tag_names)
+
+        for match in self.tagnames:
+            # try to validate all of our potential matchers against
+            # both names and IDs
+            if match in tag_names or match in tag_ids:
+                return True
+
+        return False
+
+
+class InheritedSieve(Sieve):
+    """
+    usage: (inherited TAG [TAG...])
+
+    Matches builds which are tagged into any of the given tags or
+    their parent tags. Each TAG must be a tag name or tag ID, patterns
+    are not allowed.
+    """
+
+    name = "inherited"
+
+
+    def __init__(self, sifter, tagname, *tagnames):
+        tags = [tagname] + tagnames
+        tags = ensure_str(tags)
+
+        super(InheritedSieve, self).__init__(sifter, tags)
+        self.tag_ids = None
+
+
+    def get_cache(self, binfo):
+        # let's use the same caches that the Tagged sieve uses
+        return self.sifter.get_cache("tagged", binfo)
+
+
+    def prep(self, session, binfos):
+        if self.tag_ids is None:
+            self.tag_ids = gather_tag_ids(session, deep=self.tagnames)
+
+        needed = {}
+        for binfo in binfos:
+            cache = self.get_cache(binfo)
+            if "tag_names" not in cache:
+                needed[binfo["id"]] = binfo
+
+        if needed:
+            fn = lambda i: session.listTags(build=i)
+            for bid, tags in iteritems(bulk_load(session, fn, needed)):
+                cache = self.get_cache(needed[bid])
+                cache["tag_names"] = [t["name"] for t in tags]
+                cache["tag_ids"] = [t["id"] for t in tags]
+
+
+    def check(self, session, binfo):
+        inheritance = self.tag_ids
+        cache = self.get_cache(binfo)
+
+        for tid in cache.get("tag_ids", ()):
+            if tid in inheritance:
+                return True
+
+        return False
+
+
 DEFAULT_BUILD_INFO_SIEVES = [
     EpochSieve,
     ImportedSieve,
@@ -392,11 +502,18 @@ DEFAULT_BUILD_INFO_SIEVES = [
     EVRCompareGE,
     EVRCompareLT,
     EVRCompareLE,
+    TaggedSieve,
+    InheritedSieve,
 ]
 
 
 def build_info_sieves():
     """
+    A new list containing the default build-info sieve classes.
+
+    This function is used by `build_info_sifter` when creating its
+    `Sifter` instance.
+
     :rtype: list[type[Sieve]]
     """
 
@@ -411,7 +528,7 @@ def build_info_sieves():
 
 def build_info_sifter(src_str):
     """
-    Create a Sifter from the source using the default build info
+    Create a Sifter from the source using the default build-info
     Sieves.
 
     :param src_str: sieve expressions source
