@@ -35,7 +35,7 @@ import re
 from abc import ABCMeta, abstractmethod, abstractproperty
 from codecs import decode
 from collections import OrderedDict
-from fnmatch import fnmatchcase
+from fnmatch import translate
 from functools import partial
 from itertools import chain, product
 from operator import itemgetter
@@ -62,6 +62,7 @@ __all__ = (
     "LogicNot",
     "LogicOr",
     "Null",
+    "Reader",
     "Regex",
     "RegexError",
     "Sifter",
@@ -157,9 +158,12 @@ class Number(int, Matcher):
 
 class Regex(Matcher):
 
-    def __init__(self, src):
+    def __init__(self, src, flags=None):
         self._src = src
-        self._re = re.compile(src)
+        self._flagstr = flags
+
+        fint = sum(getattr(re, c.upper(), 0) for c in flags) if flags else 0
+        self._re = re.compile(src, fint)
 
 
     def __eq__(self, val):
@@ -174,18 +178,23 @@ class Regex(Matcher):
 
 
     def __repr__(self):
-        return "Regex(%r)" % self._src
+        if self._flagstr:
+            return "Regex(%r, flags=%r)" % (self._src, self._flagstr)
+        else:
+            return "Regex(%r)" % self._src
 
 
 class Glob(Matcher):
 
-    def __init__(self, src):
+    def __init__(self, src, ignorecase=False):
         self._src = src
+        self._ignorecase = ignorecase
+        self._re = re.compile(translate(src), re.I if ignorecase else 0)
 
 
     def __eq__(self, val):
         try:
-            return fnmatchcase(val, self._src,)
+            return self._re.match(val) is not None
         except TypeError:
             return False
 
@@ -195,7 +204,10 @@ class Glob(Matcher):
 
 
     def __repr__(self):
-        return "Glob(%r)" % self._src
+        if self._ignorecase:
+            return "Glob(%r, ignorecase=True)" % self._src
+        else:
+            return "Glob(%r)" % self._src
 
 
 class Item(object):
@@ -286,14 +298,30 @@ class ItemPath(object):
         return "ItemPath(%r)" % self.paths
 
 
-def parse_symbol_groups(srciter):
+class Reader(StringIO):
 
-    if isinstance(srciter, str):
-        srciter = iter(srciter)
+
+    def __init__(self, source):
+        # overridden to mandate a source for read-mode
+        super(Reader, self).__init__(source)
+
+
+    def peek(self, count=1):
+        where = self.tell()
+        val = self.read(count)
+        self.seek(where)
+        return val
+
+
+def parse_symbol_groups(reader):
+
+    if isinstance(reader, str):
+        reader = Reader(reader)
 
     token = None
     esc = False
 
+    srciter = iter(partial(reader.read, 1), '')
     for c in srciter:
         if esc:
             esc = False
@@ -310,7 +338,7 @@ def parse_symbol_groups(srciter):
             if token:
                 yield [token.getvalue()]
                 token = None
-            yield convert_group(parse_quoted(srciter, '}'))
+            yield convert_group(parse_quoted(reader, '}'))
             continue
 
         else:
@@ -377,7 +405,7 @@ def convert_range(rng):
     return map(fmt.format, range(istart, istop, istep))
 
 
-def parse_exprs(srciter, start="(", stop=")"):
+def parse_exprs(reader, start="(", stop=")"):
     """
     Simple s-expr parser. Reads from a string or character iterator,
     emits expressions as nested lists. Lenient about closing
@@ -394,14 +422,15 @@ def parse_exprs(srciter, start="(", stop=")"):
     assert len(start) == 1
     assert len(stop) == 1
 
-    if isinstance(srciter, str):
-        srciter = iter(srciter)
-
     token_breaks = "".join((start, stop, ' [;#|/\"\'\n\r\t'))
+
+    if isinstance(reader, str):
+        reader = Reader(reader)
 
     token = None
     esc = False
 
+    srciter = iter(partial(reader.read, 1), '')
     for c in srciter:
         if esc:
             if not token:
@@ -412,19 +441,19 @@ def parse_exprs(srciter, start="(", stop=")"):
             esc = False
             continue
 
-        elif c == '\\':
+        if c == '\\':
             esc = c
             continue
 
         elif c == '.' and token is None:
-            yield parse_itempath(srciter, '', c)
+            yield parse_itempath(reader, '', c)
 
         elif c == '[':
             prefix = ""
             if token:
                 prefix = token.getvalue()
                 token = None
-            yield parse_itempath(srciter, prefix, c)
+            yield parse_itempath(reader, prefix, c)
 
         elif c in token_breaks:
             if token:
@@ -438,18 +467,16 @@ def parse_exprs(srciter, start="(", stop=")"):
 
         if c in ';#':
             # comments run to end of line
-            for c in srciter:
-                if c in "\n\r":
-                    break
+            reader.readline()
 
         elif c == start:
-            yield list(parse_exprs(srciter, start, stop))
+            yield list(parse_exprs(reader, start, stop))
 
         elif c == stop:
             return
 
         elif c in '\'\"/|':
-            yield parse_quoted(srciter, c)
+            yield parse_quoted(reader, c)
 
     if token:
         # we could make this raise an exception instead, but currently
@@ -510,24 +537,26 @@ def convert_token(val):
             return Symbol(val)
 
 
-def parse_itempath(src, prefix=None, char=None):
+def parse_itempath(reader, prefix=None, char=None):
 
-    if isinstance(src, str):
-        src = iter(src)
+    if isinstance(reader, str):
+        reader = Reader(reader)
 
     paths = []
 
     if prefix:
         paths.append(convert_token(prefix))
 
-    if char == "[":
-        paths.append(parse_index(src))
+    if char == '[':
+        paths.append(parse_index(reader, char))
 
     token_breaks = ' .[]();#|/\"\'\n\r\t'
 
     token = None
     esc = False
-    for c in src:
+
+    srciter = iter(partial(reader.read, 1), '')
+    for c in srciter:
         if esc:
             if token is None:
                 token = StringIO()
@@ -547,7 +576,7 @@ def parse_itempath(src, prefix=None, char=None):
                 token = None
 
             if c == "[":
-                paths.append(parse_index(src))
+                paths.append(parse_index(reader, c))
             elif c == "]":
                 msg = "Unexpected closer: %r" % c
                 raise SifterError(msg)
@@ -582,8 +611,19 @@ def convert_slice(val):
     return slice(*vals)
 
 
-def parse_index(src):
-    val = list(parse_exprs(src, '[', ']'))
+def parse_index(reader, start=None):
+
+    if not start:
+        start = reader.read(1)
+
+    if not start:
+        msg = "Unterminated item index, missing closing %r" % stop
+        raise SiftError(msg)
+    elif start != '[':
+        msg = "Unknown item index start: %r" % start
+        raise SiftError(msg)
+
+    val = list(parse_exprs(reader, '[', ']'))
     lval = len(val)
 
     if lval == 0:
@@ -600,7 +640,7 @@ def parse_index(src):
         raise SifterError(msg)
 
 
-def parse_quoted(src, quotec='\"', advanced_escapes=True):
+def parse_quoted(reader, quotec='\"', advanced_escapes=True):
     """
     Helper function for parse_exprs, will parse quoted values and
     return the appropriate wrapper type depending on the quoting
@@ -620,16 +660,20 @@ def parse_quoted(src, quotec='\"', advanced_escapes=True):
     that it should be taken from the first character of the src.
     """
 
-    if isinstance(src, str):
-        src = iter(src)
+    if isinstance(reader, str):
+        reader = Reader(reader)
 
     if quotec is None:
-        quotec = next(src)
+        quotec = reader.read(1)
+        if not quotec:
+            msg = "Unterminated matcher: missing closing %r" % quotec
+            raise SifterError(msg)
 
     token = StringIO()
     esc = False
 
-    for c in src:
+    srciter = iter(partial(reader.read, 1), '')
+    for c in srciter:
         if esc:
             if advanced_escapes and c != quotec:
                 token.write(esc)
@@ -651,13 +695,21 @@ def parse_quoted(src, quotec='\"', advanced_escapes=True):
         val = convert_escapes(val)
 
     if quotec == "/":
+        flags = []
+        while reader.peek(1) in "aiLmsux":
+            flags.append(reader.read(1))
+
         try:
-            val = Regex(val)
+            val = Regex(val, "".join(flags))
         except re.error as exc:
             raise RegexError(str(exc))
 
     elif quotec == "|":
-        val = Glob(val)
+        flags = False
+        if reader.peek(1) == 'i':
+            reader.read(1)
+            flags = True
+        val = Glob(val, ignorecase=flags)
 
     return val
 

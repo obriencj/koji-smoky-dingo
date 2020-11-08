@@ -78,6 +78,13 @@ class MatcherTest(TestCase):
         self.in_data(Glob("*ll*"), 4, "Hello")
         self.in_data(Glob("*o"), 4, "Hello")
 
+        self.in_data(Glob("HELLO", True), 4, "Hello")
+        self.in_data(Glob("*LL*", True), 4, "Hello")
+        self.in_data(Glob("*O", True), 4, "Hello")
+        self.in_data(Glob("hello", True), 4, "Hello")
+        self.in_data(Glob("*ll*", True), 4, "Hello")
+        self.in_data(Glob("*o", True), 4, "Hello")
+
         self.in_data(Glob("?o*"), 5, "World")
         self.in_data(Glob("*d"), 5, "World")
 
@@ -96,6 +103,13 @@ class MatcherTest(TestCase):
         self.in_data(Regex("Hello"), 4, "Hello")
         self.in_data(Regex("ll"), 4, "Hello")
         self.in_data(Regex("o$"), 4, "Hello")
+
+        self.in_data(Regex("HELLO", "i"), 4, "Hello")
+        self.in_data(Regex("LL", "i"), 4, "Hello")
+        self.in_data(Regex("O$", "i"), 4, "Hello")
+        self.in_data(Regex("hello", "i"), 4, "Hello")
+        self.in_data(Regex("ll", "i"), 4, "Hello")
+        self.in_data(Regex("o$", "i"), 4, "Hello")
 
         self.in_data(Regex("^.o"), 5, "World")
         self.in_data(Regex("d$"), 5, "World")
@@ -406,6 +420,25 @@ class SifterTest(TestCase):
         self.assertEqual(sieves[0].field, "name")
         self.assertTrue(isinstance(sieves[0].token, Regex))
         self.assertEqual(repr(sieves[0]), "(name Regex('zza$'))")
+
+        res = sifter(None, DATA)
+        self.assertTrue(isinstance(res, dict))
+        self.assertTrue("default" in res)
+        self.assertEqual(res["default"], [PIZZA])
+
+        src = """
+        (name /ZZA$/i)
+        """
+        sifter = self.compile_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], NameSieve))
+        self.assertTrue(isinstance(sieves[0], ItemSieve))
+        self.assertEqual(sieves[0].name, "name")
+        self.assertEqual(sieves[0].field, "name")
+        self.assertTrue(isinstance(sieves[0].token, Regex))
+        self.assertEqual(repr(sieves[0]), "(name Regex('ZZA$', flags='i'))")
 
         res = sifter(None, DATA)
         self.assertTrue(isinstance(res, dict))
