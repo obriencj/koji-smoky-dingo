@@ -28,7 +28,8 @@ from six import iteritems, itervalues
 from . import (
     DEFAULT_SIEVES,
     ItemSieve, Sieve, Sifter, SifterError,
-    ensure_int_or_str, ensure_matchers, ensure_str, )
+    ensure_all_matcher, ensure_all_int_or_str,
+    ensure_int_or_str, ensure_str, )
 from .. import bulk_load, bulk_load_builds, bulk_load_users
 from ..builds import build_dedup
 from ..common import rpm_evr_compare
@@ -180,7 +181,6 @@ class OwnerSieve(Sieve):
         if self._user_ids is None:
             loaded = bulk_load_users(session, self.users)
             self._user_ids = set(u["id"] for u in itervalues(loaded))
-            print("user IDs", self._user_ids)
 
 
     def check(self, session, binfo):
@@ -223,8 +223,9 @@ class EVRCompare(Sieve):
     """
 
     def __init__(self, sifter, version):
-        super(EVRCompare, self).__init__(sifter)
-        self.token = version = ensure_str(version)
+        version = ensure_str(version)
+        super(EVRCompare, self).__init__(sifter, version)
+        self.token = version
 
         if ":" in version:
             epoch, version = version.split(":", 1)
@@ -254,6 +255,8 @@ class EVRCompare(Sieve):
 
 
     def __repr__(self):
+        # we don't want to auto-quote the token which the default
+        # Sieve impl does.
         return "".join(("(", self.name, " ", self.token, ")"))
 
 
@@ -392,8 +395,8 @@ class TaggedSieve(Sieve):
 
 
     def __init__(self, sifter, *tagnames):
-        super(TaggedSieve, self).__init__(sifter)
-        self.tagnames = ensure_matchers(tagnames)
+        tagnames = ensure_all_matcher(tagnames)
+        super(TaggedSieve, self).__init__(sifter, *tagnames)
 
 
     def prep(self, session, binfos):
@@ -418,12 +421,12 @@ class TaggedSieve(Sieve):
         tag_names = cache.get("tag_names", ())
         tag_ids = cache.get("tag_ids", ())
 
-        if not self.tagnames:
+        if not self.tokens:
             # when used as simply (tagged) then we're checking that
             # there are ANY tags.
             return bool(tag_names)
 
-        for match in self.tagnames:
+        for match in self.tokens:
             # try to validate all of our potential matchers against
             # both names and IDs
             if match in tag_names or match in tag_ids:
@@ -445,10 +448,11 @@ class InheritedSieve(Sieve):
 
 
     def __init__(self, sifter, tagname, *tagnames):
-        tags = [tagname] + tagnames
-        tags = ensure_str(tags)
+        tags = [tagname]
+        tags.extend(tagnames)
+        tags = ensure_all_int_or_str(tags)
 
-        super(InheritedSieve, self).__init__(sifter, tags)
+        super(InheritedSieve, self).__init__(sifter, *tags)
         self.tag_ids = None
 
 
@@ -459,7 +463,7 @@ class InheritedSieve(Sieve):
 
     def prep(self, session, binfos):
         if self.tag_ids is None:
-            self.tag_ids = gather_tag_ids(session, deep=self.tagnames)
+            self.tag_ids = gather_tag_ids(session, deep=self.tokens)
 
         needed = {}
         for binfo in binfos:

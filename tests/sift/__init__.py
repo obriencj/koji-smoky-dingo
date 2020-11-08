@@ -24,8 +24,9 @@ from kojismokydingo.sift import (
     Item, ItemMatch, ItemPath, ItemPathSieve, ItemSieve,
     LogicNot, LogicOr, Null, Number,
     Regex, Sieve, Sifter, SifterError, Symbol, SymbolGroup,
-    ensure_int, ensure_int_or_str, ensure_matcher, ensure_matchers,
-    ensure_str, ensure_symbol, parse_exprs,
+    ensure_all_int_or_str, ensure_all_matcher, ensure_all_symbol,
+    ensure_int, ensure_int_or_str, ensure_matcher,
+    ensure_str, ensure_symbol,
 )
 
 
@@ -133,7 +134,6 @@ class MatcherTest(TestCase):
 
 class ItemPathTest(TestCase):
 
-
     DATA = {
         "foo": [1, 9],
         "bar": [2, 3, 4, 5, 6],
@@ -164,18 +164,22 @@ class ItemPathTest(TestCase):
 
 
 class NameSieve(ItemSieve):
+
     name = field = "name"
 
 
 class TypeSieve(ItemSieve):
+
     name = field = "type"
 
 
 class CategorySieve(ItemSieve):
+
     name = field = "category"
 
 
 class BrandSieve(ItemSieve):
+
     name = field = "brand"
 
 
@@ -241,696 +245,7 @@ DATA = [
 ]
 
 
-class ParserTest(TestCase):
-
-
-    def parse(self, src):
-        return list(parse_exprs(src))
-
-
-    def check_empty(self, src):
-        res = self.parse(src)
-        self.assertEqual(res, [])
-
-
-    def test_empty(self):
-        sources = [
-            "",
-
-            """
-            """,
-
-            """
-            ; comment
-            """,
-
-            """
-            # comment
-            """,
-        ]
-
-        for src in sources:
-            self.check_empty(src)
-
-
-    def test_empty_list(self):
-
-        src = """
-        ()
-        """
-        res = self.parse(src)
-        self.assertEqual(res, [[]])
-
-
-    def test_unterminated_list(self):
-
-        src = """
-        (
-        """
-        res = self.parse(src)
-        self.assertEqual(res, [[]])
-
-        src = """
-        (hello
-        """
-        res = self.parse(src)
-        self.assertEqual(res, [[Symbol("hello")]])
-
-        src = "(hello"
-        res = self.parse(src)
-        self.assertEqual(res, [[Symbol("hello")]])
-
-
-    def check_null(self, src):
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Null)
-        self.assertEqual(str(res[0]), "null")
-        self.assertEqual(repr(res[0]), "Null()")
-
-
-    def test_null(self):
-        sources = [
-            """
-            None
-            """,
-
-            """
-            null
-            """,
-
-            """
-            nil
-            """,
-        ]
-
-        for src in sources:
-            self.check_null(src)
-
-
-    def test_quoted(self):
-
-        src = """
-        "Hello"
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), str)
-        self.assertEqual(str(res[0]), "Hello")
-        self.assertEqual(repr(res[0]), "'Hello'")
-
-        src = r"""
-        "\"Hello\""
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), str)
-        self.assertEqual(str(res[0]), "\"Hello\"")
-        self.assertEqual(repr(res[0]), "'\"Hello\"'")
-
-        src = """
-        /World/
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Regex)
-        self.assertEqual(str(res[0]), "World")
-        self.assertEqual(repr(res[0]), "Regex('World')")
-
-        src = r"""
-        /Wor\/ld/
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Regex)
-        self.assertEqual(str(res[0]), "Wor/ld")
-        self.assertEqual(repr(res[0]), "Regex('Wor/ld')")
-
-        src = """
-        |How|
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Glob)
-        self.assertEqual(str(res[0]), "How")
-        self.assertEqual(repr(res[0]), "Glob('How')")
-
-        src = r"""
-        |H\|o\|w|
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Glob)
-        self.assertEqual(str(res[0]), "H|o|w")
-        self.assertEqual(repr(res[0]), "Glob('H|o|w')")
-
-        src = """
-        "Hello"/World/|How|Goes
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 4)
-        self.assertEqual(type(res[0]), str)
-        self.assertEqual(str(res[0]), "Hello")
-        self.assertEqual(type(res[1]), Regex)
-        self.assertEqual(str(res[1]), "World")
-        self.assertEqual(type(res[2]), Glob)
-        self.assertEqual(str(res[2]), "How")
-        self.assertEqual(type(res[3]), Symbol)
-        self.assertEqual(str(res[3]), "Goes")
-
-
-    def test_symbol(self):
-
-        src = """
-        Goes
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(str(res[0]), "Goes")
-        self.assertEqual(repr(res[0]), "Symbol('Goes')")
-
-        src = r"""
-        G\|o\/e\"s
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(str(res[0]), "G|o/e\"s")
-        self.assertEqual(repr(res[0]), "Symbol('G|o/e\"s')")
-
-        src = r"""
-        \\wut
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(str(res[0]), r"\wut")
-        self.assertEqual(repr(res[0]), r"Symbol('\\wut')")
-
-        src = r"""
-        \wut
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(str(res[0]), r"\wut")
-        self.assertEqual(repr(res[0]), r"Symbol('\\wut')")
-
-
-    def test_symbol_group(self):
-
-        src = """
-        foo{1..5}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), SymbolGroup)
-        self.assertEqual(repr(res[0]), "SymbolGroup('foo{1..5}')")
-        self.assertEqual(res[0], "foo1")
-        self.assertEqual(res[0], "foo2")
-        self.assertEqual(res[0], "foo3")
-        self.assertEqual(res[0], "foo4")
-        self.assertEqual(res[0], "foo5")
-        self.assertNotEqual(res[0], "foo0")
-        self.assertNotEqual(res[0], "foo6")
-        self.assertNotEqual(res[0], "foo")
-
-        src = """
-        foo{01..05}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), SymbolGroup)
-        self.assertEqual(repr(res[0]), "SymbolGroup('foo{01..05}')")
-        self.assertEqual(res[0], "foo01")
-        self.assertEqual(res[0], "foo02")
-        self.assertEqual(res[0], "foo03")
-        self.assertEqual(res[0], "foo04")
-        self.assertEqual(res[0], "foo05")
-        self.assertNotEqual(res[0], "foo")
-        self.assertNotEqual(res[0], "foo0")
-        self.assertNotEqual(res[0], "foo1")
-        self.assertNotEqual(res[0], "foo00")
-        self.assertNotEqual(res[0], "foo06")
-
-        src = """
-        foo{01..05..2}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), SymbolGroup)
-        self.assertEqual(repr(res[0]), "SymbolGroup('foo{01..05..2}')")
-        self.assertEqual(res[0], "foo01")
-        self.assertNotEqual(res[0], "foo02")
-        self.assertEqual(res[0], "foo03")
-        self.assertNotEqual(res[0], "foo04")
-        self.assertEqual(res[0], "foo05")
-        self.assertNotEqual(res[0], "foo")
-        self.assertNotEqual(res[0], "foo0")
-        self.assertNotEqual(res[0], "foo1")
-        self.assertNotEqual(res[0], "foo00")
-        self.assertNotEqual(res[0], "foo06")
-
-        src = """
-        hi{foo,bar}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), SymbolGroup)
-        self.assertEqual(repr(res[0]), "SymbolGroup('hi{foo,bar}')")
-        self.assertEqual(res[0], "hifoo")
-        self.assertEqual(res[0], "hibar")
-        self.assertNotEqual(res[0], "hibaz")
-        self.assertNotEqual(res[0], "hi")
-        self.assertNotEqual(res[0], "foo")
-        self.assertNotEqual(res[0], "bar")
-
-        src = """
-        hi{foo,null,None,nil}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), SymbolGroup)
-        self.assertEqual(repr(res[0]), "SymbolGroup('hi{foo,null,None,nil}')")
-        self.assertEqual(res[0], "hifoo")
-        self.assertEqual(res[0], "hiNone")
-
-        src = """
-        {foo,bar}_{01..05}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), SymbolGroup)
-        self.assertEqual(repr(res[0]), "SymbolGroup('{foo,bar}_{01..05}')")
-        self.assertEqual(res[0], "foo_03")
-        self.assertEqual(res[0], "bar_04")
-        self.assertNotEqual(res[0], "foo01")
-        self.assertNotEqual(res[0], "bar01")
-
-        src = """
-        {foo,bar}\ {01..05}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), SymbolGroup)
-        self.assertEqual(repr(res[0]), "SymbolGroup('{foo,bar} {01..05}')")
-        self.assertEqual(res[0], "foo 03")
-        self.assertEqual(res[0], "bar 04")
-        self.assertNotEqual(res[0], "foo01")
-        self.assertNotEqual(res[0], "bar01")
-
-
-    def test_symbol_ungroup(self):
-
-        src = """
-        \{foo,bar}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(repr(res[0]), "Symbol('{foo,bar}')")
-
-        src = r"""
-        lo\{foo,bar}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(res[0], "lo{foo,bar}")
-        self.assertNotEqual(res[0], "lofoo")
-        self.assertNotEqual(res[0], "lobar")
-        self.assertNotEqual(res[0], "lo")
-        self.assertNotEqual(res[0], "foo")
-        self.assertNotEqual(res[0], "bar")
-
-        src = r"""
-        lo{foo\,bar}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(res[0], "lo{foo,bar}")
-        self.assertNotEqual(res[0], "lofoo")
-        self.assertNotEqual(res[0], "lobar")
-        self.assertNotEqual(res[0], "lo")
-        self.assertNotEqual(res[0], "foo")
-        self.assertNotEqual(res[0], "bar")
-
-        src = r"""
-        lo{foo}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(res[0], "lo{foo}")
-        self.assertNotEqual(res[0], "lofoo")
-        self.assertNotEqual(res[0], "lobar")
-        self.assertNotEqual(res[0], "lo")
-        self.assertNotEqual(res[0], "foo")
-        self.assertNotEqual(res[0], "bar")
-
-        src = """
-        foo{1..}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(repr(res[0]), "Symbol('foo{1..}')")
-
-        src = """
-        foo{1..a}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(repr(res[0]), "Symbol('foo{1..a}')")
-
-        src = """
-        foo{1..1..}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(repr(res[0]), "Symbol('foo{1..1..}')")
-
-        src = """
-        foo{1..1..a}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(repr(res[0]), "Symbol('foo{1..1..a}')")
-
-        src = """
-        foo{1..1..1..1}
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Symbol)
-        self.assertEqual(repr(res[0]), "Symbol('foo{1..1..1..1}')")
-
-
-    def test_item_path_dotted(self):
-        src = """
-        .foo
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(pth.paths[0].key, "foo")
-
-        src = ".foo"
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(pth.paths[0].key, "foo")
-
-        src = """
-        .foo.bar
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 2)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[1]), Item)
-        self.assertEqual(pth.paths[0].key, "foo")
-        self.assertEqual(pth.paths[1].key, "bar")
-
-
-    def test_item_path_all(self):
-        src = """
-        []
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), AllItems)
-
-        src = """
-        foo[]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 2)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[1]), AllItems)
-        self.assertEqual(pth.paths[0].key, "foo")
-
-        src = """
-        foo[]bar
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 3)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[1]), AllItems)
-        self.assertEqual(type(pth.paths[2]), Item)
-        self.assertEqual(pth.paths[0].key, "foo")
-        self.assertEqual(pth.paths[2].key, "bar")
-
-        src = """
-        .foo[].bar
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 3)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[1]), AllItems)
-        self.assertEqual(type(pth.paths[2]), Item)
-        self.assertEqual(pth.paths[0].key, "foo")
-        self.assertEqual(pth.paths[2].key, "bar")
-
-
-    def test_item_path_slice(self):
-
-        src = """
-        [:]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(pth.paths[0].key, slice(None))
-
-        src = """
-        [::]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(pth.paths[0].key, slice(None))
-
-        src = """
-        [:-1]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(pth.paths[0].key, slice(None, -1))
-
-        src = """
-        [1:2:-1]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(pth.paths[0].key, slice(1, 2, -1))
-
-
-    def test_item_path_index(self):
-        src = """
-        [foo]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[0].key), str)
-        self.assertEqual(pth.paths[0].key, "foo")
-
-        src = """
-        [9]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[0].key), int)
-        self.assertEqual(pth.paths[0].key, 9)
-
-        src = r"""
-        [wut\]]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[0].key), str)
-        self.assertEqual(pth.paths[0].key, "wut]")
-
-        src = r"""
-        [\[wut\]]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[0].key), str)
-        self.assertEqual(pth.paths[0].key, "[wut]")
-
-        src = r"""
-        .\n
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[0].key), str)
-        self.assertEqual(pth.paths[0].key, "\n")
-
-        src = r"""
-        \n[]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 2)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[0].key), str)
-        self.assertEqual(pth.paths[0].key, "\n")
-
-        src = """
-        ["foo"]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), Item)
-        self.assertEqual(type(pth.paths[0].key), str)
-        self.assertEqual(pth.paths[0].key, "foo")
-
-
-    def test_item_path_match(self):
-        src = """
-        [{foo,bar}]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), ItemMatch)
-        self.assertEqual(type(pth.paths[0].key), SymbolGroup)
-        self.assertEqual(pth.paths[0].key, "foo")
-        self.assertEqual(pth.paths[0].key, "bar")
-
-        src = """
-        [|f*|]
-        """
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), ItemPath)
-
-        pth = res[0]
-        self.assertEqual(len(pth.paths), 1)
-        self.assertEqual(type(pth.paths[0]), ItemMatch)
-        self.assertEqual(type(pth.paths[0].key), Glob)
-        self.assertEqual(pth.paths[0].key, "foo")
-
-
-    def test_item_path_err(self):
-
-        src = """
-        .foo]
-        """
-        self.assertRaises(SifterError, self.parse, src)
-
-        src = """
-        []]
-        """
-        self.assertRaises(SifterError, self.parse, src)
-
-        src = """
-        .foo[]]
-        """
-        self.assertRaises(SifterError, self.parse, src)
-
-        src = """
-        .foo[bar baz]
-        """
-        self.assertRaises(SifterError, self.parse, src)
-
-
-    def test_bad_regex(self):
-
-        src = """
-        /[/
-        """
-        self.assertRaises(SifterError, self.parse, src)
-
-
 class SifterTest(TestCase):
-
 
     def compile_sifter(self, src):
         sieves = [NameSieve, TypeSieve, BrandSieve, CategorySieve, Poke]
@@ -1299,6 +614,7 @@ class SifterTest(TestCase):
 
 
     def test_not_aliases(self):
+
         # these should all be equivalent
         sources = [
             """
@@ -1350,6 +666,7 @@ class SifterTest(TestCase):
 
 
     def test_flagged_aliases(self):
+
         sources = [
             """
             (flag poison (name Draino))
@@ -1372,6 +689,7 @@ class SifterTest(TestCase):
 
 
     def test_sifter_error(self):
+
         src = """
         ((name Pizza))
         """
@@ -1419,6 +737,7 @@ class SifterTest(TestCase):
 
 
     def test_comments(self):
+
         src = """
         # ()
         """
@@ -1441,6 +760,7 @@ class SifterTest(TestCase):
 
 
     def test_item(self):
+
         src = """
         (item name Pizza)
         """
@@ -1562,6 +882,7 @@ class SifterTest(TestCase):
 
 
     def test_cache(self):
+
         src = """
         (poke)
         """
@@ -1615,12 +936,6 @@ class SifterTest(TestCase):
         self.assertEqual(che["count"], 4)
 
 
-class TestItemPath(TestCase):
-
-    def test_err(self):
-        self.assertRaises(SifterError, ItemPath, [None])
-
-
 class EnsureTypeTest(TestCase):
 
     def test_ensure_int(self):
@@ -1635,14 +950,14 @@ class EnsureTypeTest(TestCase):
 
 
     def test_ensure_int_or_str(self):
-        values = (1, Number(5))
-        for val in values:
+        int_values = (1, Number(5))
+        for val in int_values:
             res = ensure_int_or_str(val)
             self.assertTrue(type(res), int)
             self.assertTrue(val == res)
 
-        values = ("hello", Symbol("hello"))
-        for val in values:
+        str_values = ("hello", Symbol("hello"))
+        for val in str_values:
             res = ensure_int_or_str(val)
             self.assertTrue(type(res), str)
             self.assertTrue(val == res)
@@ -1650,6 +965,13 @@ class EnsureTypeTest(TestCase):
         bad_values = (None, Null(), Glob("*"), Regex(".*"), [], ())
         for val in bad_values:
             self.assertRaises(SifterError, ensure_int_or_str, val)
+
+        good_values = []
+        good_values.extend(int_values)
+        good_values.extend(str_values)
+
+        self.assertEqual(good_values, ensure_all_int_or_str(good_values))
+        self.assertRaises(SifterError, ensure_all_int_or_str, bad_values)
 
 
     def test_ensure_matcher(self):
@@ -1662,8 +984,8 @@ class EnsureTypeTest(TestCase):
         for val in bad_values:
             self.assertRaises(SifterError, ensure_matcher, val)
 
-        self.assertEqual(list(values), ensure_matchers(values))
-        self.assertRaises(SifterError, ensure_matchers, bad_values)
+        self.assertEqual(list(values), ensure_all_matcher(values))
+        self.assertRaises(SifterError, ensure_all_matcher, bad_values)
 
 
     def test_ensure_str(self):
@@ -1680,10 +1002,16 @@ class EnsureTypeTest(TestCase):
         val = Symbol("Hello")
         self.assertTrue(val is ensure_symbol(val))
 
+        good_values = [val]
+
         bad_values = (None, Null(), 123, Number(5), "wut",
                       Glob("*"), Regex(".*"), [], ())
         for val in bad_values:
             self.assertRaises(SifterError, ensure_symbol, val)
+
+        self.assertEqual(good_values, ensure_all_symbol(good_values))
+        self.assertRaises(SifterError, ensure_all_symbol, bad_values)
+
 
 #
 # The end.

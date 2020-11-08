@@ -67,14 +67,17 @@ __all__ = (
     "Sifter",
     "SifterError",
     "Symbol",
+    "SymbolGroup",
     "VariadicSieve",
 
+    "ensure_all_int_or_str",
+    "ensure_all_matcher",
+    "ensure_all_sieve",
+    "ensure_all_symbol",
     "ensure_int",
     "ensure_int_or_str",
     "ensure_matcher",
-    "ensure_matchers",
     "ensure_sieve",
-    "ensure_sieves",
     "ensure_str",
     "ensure_symbol",
 
@@ -220,6 +223,10 @@ class Item(object):
             pass
 
 
+    def __repr__(self):
+        return "%s(%r)" % (type(self).__name__, self.key)
+
+
 class ItemMatch(Item):
 
     def get(self, d):
@@ -247,6 +254,10 @@ class AllItems(Item):
             return iter(d)
 
 
+    def __repr__(self):
+        return "AllItems()"
+
+
 class ItemPath(object):
 
     def __init__(self, paths):
@@ -269,6 +280,10 @@ class ItemPath(object):
         for element in self.paths:
             work = chain(*map(element.get, filter(None, work)))
         return work
+
+
+    def __repr__(self):
+        return "ItemPath(%r)" % self.paths
 
 
 def parse_symbol_groups(srciter):
@@ -461,9 +476,17 @@ def convert_escapes(s):
 
 def convert_token(val):
     """
-    Converts unquoted values.
-    All digit value become unsigned int. None, null, nil become a Null.
-    Everything else becomes a Symbol
+    Converts unquoted values to a Matcher instance.
+
+    * An all-digit value will become Number
+    * None, null, nil become a Null
+    * Use of {} may become a SymbolGroup or Symbol
+    * Everything else becomes a Symbol.
+
+    :param val: token value to be converted
+    :type val: str
+
+    :rtype: Matcher
     """
 
     if val in (None, "None", "null", "nil"):
@@ -487,20 +510,24 @@ def convert_token(val):
             return Symbol(val)
 
 
-def parse_itempath(srciter, prefix=None, char=None):
+def parse_itempath(src, prefix=None, char=None):
+
+    if isinstance(src, str):
+        src = iter(src)
+
     paths = []
 
     if prefix:
         paths.append(convert_token(prefix))
 
     if char == "[":
-        paths.append(parse_index(srciter))
+        paths.append(parse_index(src))
 
     token_breaks = ' .[]();#|/\"\'\n\r\t'
 
     token = None
     esc = False
-    for c in srciter:
+    for c in src:
         if esc:
             if token is None:
                 token = StringIO()
@@ -520,7 +547,7 @@ def parse_itempath(srciter, prefix=None, char=None):
                 token = None
 
             if c == "[":
-                paths.append(parse_index(srciter))
+                paths.append(parse_index(src))
             elif c == "]":
                 msg = "Unexpected closer: %r" % c
                 raise SifterError(msg)
@@ -555,8 +582,8 @@ def convert_slice(val):
     return slice(*vals)
 
 
-def parse_index(srciter):
-    val = list(parse_exprs(srciter, '[', ']'))
+def parse_index(src):
+    val = list(parse_exprs(src, '[', ']'))
     lval = len(val)
 
     if lval == 0:
@@ -573,7 +600,7 @@ def parse_index(srciter):
         raise SifterError(msg)
 
 
-def parse_quoted(srciter, quotec='\"', advanced_escapes=True):
+def parse_quoted(src, quotec='\"', advanced_escapes=True):
     """
     Helper function for parse_exprs, will parse quoted values and
     return the appropriate wrapper type depending on the quoting
@@ -585,12 +612,24 @@ def parse_quoted(srciter, quotec='\"', advanced_escapes=True):
 
     Symbols are generated in the parse_exprs function directly, as
     they are not quoted.
+
+    It is expected that the first quoting character will have been
+    read already from src prior to this function being invoked. If
+    that is not the case, and the first quoting character is still in
+    the src iterable, then a quotec of None can be used to indicate
+    that it should be taken from the first character of the src.
     """
+
+    if isinstance(src, str):
+        src = iter(src)
+
+    if quotec is None:
+        quotec = next(src)
 
     token = StringIO()
     esc = False
 
-    for c in srciter:
+    for c in src:
         if esc:
             if advanced_escapes and c != quotec:
                 token.write(esc)
@@ -625,7 +664,10 @@ def parse_quoted(srciter, quotec='\"', advanced_escapes=True):
 
 def ensure_symbol(value, msg=None):
     """
-    Checks that the value is a Symbol. If not, raises a SifterError.
+    Checks that the value is a Symbol, and returns it. If value was
+    not a Symbol, raises a SifterError.
+
+    :rtype: Symbol
     """
 
     if isinstance(value, Symbol):
@@ -633,14 +675,31 @@ def ensure_symbol(value, msg=None):
 
     if not msg:
         msg = "Value must be a symbol"
+
     raise SifterError("%s: %r (type %s)" %
                       (msg, value, type(value).__name__))
 
 
+def ensure_all_symbol(values, msg=None):
+    """
+    Checks that all of the elements in values are Symbols, and returns
+    them as a new list.  If not, raises a SifterError.
+
+    :type values: list
+
+    :rtype: list[Symbol]
+    """
+
+    return [ensure_symbol(val, msg) for val in values]
+
+
 def ensure_str(value, msg=None):
     """
-    Checks that value is either a str or Symbol. If not, raises a
-    SifterError.
+    Checks that value is either an int, str, or Symbol, and returns a
+    str version of it. If value is not an int, str, or Symbol, raises
+    a SifterError.
+
+    :rtype: str
     """
 
     if isinstance(value, (int, str)):
@@ -648,24 +707,32 @@ def ensure_str(value, msg=None):
 
     if not msg:
         msg = "Value must be a string"
+
     raise SifterError("%s: %r (type %s)" %
                       (msg, value, type(value).__name__))
 
 
 def ensure_int(value, msg=None):
+    """
+    Checks that valie is an int or Number, and returns it as an
+    int. If value is not an int or Number, raises a SifterError.
+    """
+
     if isinstance(value, int):
         return int(value)
 
     if not msg:
         msg = "Value must be an int"
+
     raise SifterError("%s: %r (type %s)" %
                       (msg, value, type(value).__name__))
 
 
 def ensure_int_or_str(value, msg=None):
     """
-    Checks that value is either a int, Number, str, or Symbol. If not,
-    raises a SifterError.
+    Checks that value is either a int, Number, str, or Symbol. Returns
+    an int or str as appropriate. If value is not an int, Number, str,
+    nor Symbol, raises a SifterError.
 
     :rtype: int or str
     """
@@ -678,14 +745,32 @@ def ensure_int_or_str(value, msg=None):
 
     if not msg:
         msg = "Value must be an int, Number, str, or Symbol"
+
     raise SifterError("%s: %r (type %s)" %
                       (msg, value, type(value).__name__))
 
 
+def ensure_all_int_or_str(values, msg=None):
+    """
+    Checks that all values are either a int, Number, str, or Symbol.
+    Returns each as an int or str as appropriate in a new list. If any
+    value is not an int, Number, str, nor Symbol, raises a
+    SifterError.
+
+    :type values: list
+
+    :rtype: list[int or str]
+    """
+
+    return [ensure_int_or_str(v, msg) for v in values]
+
+
 def ensure_matcher(value, msg=None):
     """
-    Checks that value is either a str, or a Matcher instance. If not,
-    raises a SifterError.
+    Checks that value is either a str, or a Matcher instance, and
+    returns it. If not, raises a SifterError.
+
+    :rtype: Matcher
     """
 
     if isinstance(value, (str, Matcher, text_type)):
@@ -693,14 +778,20 @@ def ensure_matcher(value, msg=None):
 
     if not msg:
         msg = "Value must be a string, regex, or glob"
+
     raise SifterError("%s: %r (type %s)" %
                       (msg, value, type(value).__name__))
 
 
-def ensure_matchers(values, msg=None):
+def ensure_all_matcher(values, msg=None):
     """
     Checks that all of the elements in values are either a str,
-    Symbol, Regex, or Glob instance.  If not, raises a SifterError.
+    Symbol, Regex, or Glob instance, and returns them as a new list.
+    If not, raises a SifterError.
+
+    :type values: list
+
+    :rtype: list[Matcher]
     """
 
     return [ensure_matcher(v, msg) for v in values]
@@ -708,8 +799,10 @@ def ensure_matchers(values, msg=None):
 
 def ensure_sieve(value, msg=None):
     """
-    Checks that value is a Sieve instance.  If not, raises a
-    SifterError.
+    Checks that value is a Sieve instance, and returns it.  If not,
+    raises a SifterError.
+
+    :rtype: Sieve
     """
 
     if isinstance(value, Sieve):
@@ -717,14 +810,19 @@ def ensure_sieve(value, msg=None):
 
     if not msg:
         msg = "Value must be a sieve expression"
+
     raise SifterError("%s: %r (type %s)" %
                       (msg, value, type(value).__name__))
 
 
-def ensure_sieves(values, msg=None):
+def ensure_all_sieve(values, msg=None):
     """
-    Checks that all of the elements in values are Sieve instance.  If
-    not, raises a SifterError.
+    Checks that all of the elements in values are Sieve instances, and
+    returns them in a new list. If not, raises a SifterError.
+
+    :type values: list
+
+    :rtype: list[Sieve]
     """
 
     return [ensure_sieve(v, msg) for v in values]
@@ -775,7 +873,7 @@ class Sifter(object):
         self._sieve_classes = sieves
 
         exprs = self._compile(source_str) if source_str else []
-        self._exprs = ensure_sieves(exprs)
+        self._exprs = ensure_all_sieve(exprs)
 
 
     def sieve_exprs(self):
@@ -807,6 +905,17 @@ class Sifter(object):
 
 
     def _convert_sieve_aliases(self, sym, args):
+        """
+        When there is no sieve with a matchin name for sym, we check if it
+        could be a convenience alias for some other forms.
+
+        * (not-FOO ARGS...)  becomes  (not (FOO ARGS...))
+        * (!FOO ARGS...)  becomes  (not (FOO ARGS...))
+        * (BAR?)  becomes  (flagged BAR)
+
+        :rtype: Symbol, tuple
+        """
+
         if sym.startswith("not-"):
             # converts (not-foo 1) into (not (foo 1))
             subexpr = [Symbol(sym[4:])]
@@ -864,6 +973,13 @@ class Sifter(object):
 
 
     def run(self, session, info_dicts):
+        """
+        Clears existing flags and runs contained sieves on the given
+        info_dicts.
+
+        :rtype: dict[str,list[dict]]
+        """
+
         self._flags.clear()
 
         key = self.key
@@ -884,16 +1000,25 @@ class Sifter(object):
 
 
     def __call__(self, session, info_dicts):
+        """
+        Invokes run if there are any elements in info_dicts sequence. If
+        there are not any elements, returns an empty dict.
+
+        This bypassing of `run` would prevent the prep methods being
+        invoked on any of the sieves.
+        """
+
         work = tuple(info_dicts)
         return self.run(session, work) if work else {}
 
 
     def reset(self):
         """
-        Clears data caches
+        Clears flags and data caches
         """
 
         self._cache.clear()
+        self._flags.clear()
 
 
     def is_flagged(self, flagname, data):
@@ -961,7 +1086,7 @@ class Sieve(object):
         pass
 
 
-    def __init__(self, sifter, tokens=None):
+    def __init__(self, sifter, *tokens):
         self.sifter = sifter
         self.key = sifter.key
         self.tokens = tokens
@@ -1037,8 +1162,8 @@ class Logic(Sieve):
 
 
     def __init__(self, sifter, *exprs):
-        exprs = ensure_sieves(exprs)
-        super(Logic, self).__init__(sifter, exprs)
+        exprs = ensure_all_sieve(exprs)
+        super(Logic, self).__init__(sifter, *exprs)
 
 
 class LogicAnd(Logic):
@@ -1163,12 +1288,8 @@ class VariadicSieve(Sieve):
 
 
     def __init__(self, sifter, token):
-        super(VariadicSieve, self).__init__(sifter)
+        super(VariadicSieve, self).__init__(sifter, token)
         self.token = token
-
-
-    def __repr__(self):
-        return "".join(("(", self.name, " ", repr(self.token), ")"))
 
 
 class Flagged(VariadicSieve):
@@ -1242,8 +1363,8 @@ class ItemPathSieve(Sieve):
         if not isinstance(path, ItemPath):
             path = ItemPath([path])
 
-        values = ensure_matchers(values)
-        super(ItemPathSieve, self).__init__(sifter, values)
+        values = ensure_all_matcher(values)
+        super(ItemPathSieve, self).__init__(sifter, *values)
 
         self.path = path
 

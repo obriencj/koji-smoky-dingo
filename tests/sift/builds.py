@@ -29,6 +29,12 @@ from ..builds import (
     BUILD_SAMPLE_2, BUILD_SAMPLE_3,
     BUILD_SAMPLE_4, BUILD_SAMPLE_5, BUILD_SAMPLES, )
 
+from ..tags import (
+    TAG_1, TAG_1_CANDIDATE, TAG_1_RELEASED,
+    TAG_2, TAG_2_CANDIDATE, TAG_2_RELEASED,
+    TAGS, inheritance,
+)
+
 
 BUILD_SAMPLES = list(BUILD_SAMPLES)
 
@@ -318,6 +324,187 @@ class SifterTest(TestCase):
         self.assertRaises(SifterError, build_info_sifter, src)
 
 
+TAGGED = {
+    BUILD_SAMPLE_1["id"]: [],
+    BUILD_SAMPLE_1_1["id"]: [],
+    BUILD_SAMPLE_2["id"]: [],
+    BUILD_SAMPLE_3["id"]: [TAG_1_RELEASED, TAG_1_CANDIDATE],
+    BUILD_SAMPLE_4["id"]: [TAG_1_CANDIDATE],
+    BUILD_SAMPLE_5["id"]: [TAG_2_CANDIDATE],
+}
+
+
+class InheritedSieveTest(TestCase):
+
+
+    def get_session(self):
+
+        wanted = []
+        inhers = []
+        blds = []
+
+        def mc(strict=False):
+            if wanted:
+                res = [[TAGS.get(w)] for w in wanted]
+                wanted[:] = []
+            elif inhers:
+                res = [[inheritance(TAGS.get(w))] for w in inhers]
+                inhers[:] = []
+            elif blds:
+                res = [[TAGGED.get(b, ())] for b in blds]
+                blds[:] = []
+            else:
+                self.assertFalse(True)
+            return res
+
+        sess = MagicMock()
+        sess.getTag.side_effect = wanted.append
+        sess.getFullInheritance.side_effect = inhers.append
+        sess.listTags.side_effect = lambda build: blds.append(build)
+        sess.multiCall.side_effect = mc
+        sess.getKojiVersion.side_effect = ["1.22"]
+
+        return sess
+
+
+    def test_inherited(self):
+        src = """
+        (inherited tag-1.0)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertFalse(res)
+
+        src = """
+        (inherited tag-1.0-released)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_3])
+
+        src = """
+        (inherited tag-2.0-released)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_3])
+
+
+class TaggedSieveTest(TestCase):
+
+
+    def get_session(self, tag_map=TAGGED):
+
+        blds = []
+
+        def get_tags(strict=False):
+            return [[tag_map.get(b, ())] for b in blds]
+
+        sess = MagicMock()
+        sess.listTags.side_effect = lambda build: blds.append(build)
+        sess.multiCall.side_effect = get_tags
+
+        return sess
+
+
+    def test_tagged(self):
+        src = """
+        (tagged)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"], BUILD_SAMPLES[3:])
+
+        src = """
+        (!tagged)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2])
+
+        src = """
+        (tagged tag-1.0-released)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_3])
+
+        src = """
+        (tagged 1013)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_3])
+
+        src = """
+        (tagged |*-released|)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_3])
+
+        src = """
+        (tagged tag-1.0-candidate tag-2.0-candidate)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        src = """
+        (tagged 1012 1022)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        src = """
+        (tagged |*-candidate|)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+
+    def test_tagged_symgroup(self):
+
+        src = """
+        (tagged {1012,1022})
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        src = """
+        (tagged {1010..1019})
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_3, BUILD_SAMPLE_4])
+
+        src = """
+        (tagged {1020..1029})
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_5])
+
+        src = """
+        (tagged tag-{1,2}.0-candidate)
+        """
+        sifter = build_info_sifter(src)
+        res = sifter(self.get_session(), BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+
+class ImportedSieveTest(TestCase):
+
+
     def test_imported(self):
         src = """
         (imported)
@@ -340,6 +527,7 @@ class SifterTest(TestCase):
 
 
 class SiftNVRsTest(TestCase):
+
 
     def test_sift_nvrs(self):
         # most of the interactions with EVR filtering are covered in

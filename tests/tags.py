@@ -13,10 +13,120 @@
 
 
 from mock import MagicMock
+from operator import itemgetter
 from unittest import TestCase
 
 from kojismokydingo import NoSuchTag
-from kojismokydingo.tags import ensure_tag
+from kojismokydingo.common import unique
+from kojismokydingo.tags import ensure_tag, gather_tag_ids
+
+
+TAG_1 = {
+    "id": 1011,
+    "name": "tag-1.0",
+    "parents": [],
+}
+
+TAG_1_RELEASED = {
+    "id": 1013,
+    "name": "tag-1.0-released",
+    "parents": [1011],
+}
+
+TAG_1_CANDIDATE = {
+    "id": 1012,
+    "name": "tag-1.0-candidate",
+    "parents": [1011],
+}
+
+TAG_2 = {
+    "id": 1021,
+    "name": "tag-2.0",
+    "parents": [1011],
+}
+
+TAG_2_RELEASED = {
+    "id": 1023,
+    "name": "tag-2.0-released",
+    "parents": [1021, 1013],
+}
+
+TAG_2_CANDIDATE = {
+    "id": 1022,
+    "name": "tag-2.0-candidate",
+    "parents": [1021],
+}
+
+_TAGS = (
+    TAG_1, TAG_1_CANDIDATE, TAG_1_RELEASED,
+    TAG_2, TAG_2_CANDIDATE, TAG_2_RELEASED,
+)
+TAGS = dict((t["name"], t) for t in _TAGS)
+TAGS.update((t["id"], t) for t in _TAGS)
+
+TAG_NAMES = [t["name"] for t in _TAGS]
+TAG_IDS = [t["id"] for t in _TAGS]
+
+
+def inheritance(taginfo):
+    res = []
+
+    for pid in taginfo["parents"]:
+        res.append({"parent_id": pid})
+        res.extend(inheritance(TAGS[pid]))
+
+    return unique(res, key=itemgetter("parent_id"))
+
+
+class TestGatherTagIDs(TestCase):
+
+
+    def get_session(self, ver="1.22"):
+
+        wanted = []
+        inhers = []
+
+        def mc(strict=False):
+            if wanted:
+                res = [[TAGS.get(w)] for w in wanted]
+                wanted[:] = []
+            elif inhers:
+                res = [[inheritance(TAGS.get(w))] for w in inhers]
+                inhers[:] = []
+            else:
+                self.assertFalse(True)
+            return res
+
+        sess = MagicMock()
+        sess.getTag.side_effect = lambda t, blocked=False: wanted.append(t)
+        sess.getFullInheritance.side_effect = inhers.append
+        sess.multiCall.side_effect = mc
+        sess.getKojiVersion.side_effect = [ver]
+
+        return sess
+
+
+    def test_gather_tag_ids(self):
+
+        res = set()
+        tids = gather_tag_ids(None, results=res)
+        self.assertTrue(tids is res)
+
+        tids = gather_tag_ids(None)
+        self.assertFalse(tids)
+
+        tids = gather_tag_ids(self.get_session(), shallow=TAG_NAMES)
+        self.assertEqual(tids, set(TAG_IDS))
+
+        tids = gather_tag_ids(self.get_session(), deep=TAG_NAMES)
+        self.assertEqual(tids, set(TAG_IDS))
+
+        tids = gather_tag_ids(self.get_session(), deep=["tag-2.0-released"])
+        self.assertEqual(tids, set([1023, 1021, 1011, 1013]))
+
+        tids = gather_tag_ids(self.get_session(ver="1.24"),
+                              deep=["tag-2.0-released"])
+        self.assertEqual(tids, set([1023, 1021, 1011, 1013]))
 
 
 class TestEnsureTag(TestCase):
