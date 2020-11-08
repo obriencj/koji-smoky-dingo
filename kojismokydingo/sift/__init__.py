@@ -617,11 +617,11 @@ def parse_index(reader, start=None):
         start = reader.read(1)
 
     if not start:
-        msg = "Unterminated item index, missing closing %r" % stop
-        raise SiftError(msg)
+        msg = "Unterminated item index, missing closing ']'"
+        raise SifterError(msg)
     elif start != '[':
         msg = "Unknown item index start: %r" % start
-        raise SiftError(msg)
+        raise SifterError(msg)
 
     val = list(parse_exprs(reader, '[', ']'))
     lval = len(val)
