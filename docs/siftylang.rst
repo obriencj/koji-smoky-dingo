@@ -37,16 +37,103 @@ Loosely translated, this example means:
     nor inactive flags
 
 
-Built-In Sieve Expressions
---------------------------
+Literal Types
+-------------
+
+The language is composed of a series of nested sieve predicates, each
+with a symbol as its first element denoting the name of the
+sieve. Subsequent elements are the arguments to the predicate.
+
+
+Literal Sieve
+^^^^^^^^^^^^^
+::
+
+  (foo)
+  (foo 1 two "three" /four/ \|five|)
+  (and (foo 1) (bar 2))
+  (or (baz 3) (and (qux) (quux 4)))
+
+A sieve predicate bears the form of an S-Expression, with opening and
+closing parenthesis characters denoting the contents. The first
+element is the name of the predicate.
+
+Sieve predicates are not used to evalute to a value -- they are
+True/False tests which are applied to the data which is fed to the
+fully compiled sifter. Because of this, it is rare that they are
+nested except in the case of the logical combining predicates.
+
+
+Literal Symbol
+^^^^^^^^^^^^^^
+::
+
+   foo
+   Tacos-and-Pizza
+   1.2.34
+
+Symbols are unquoted alphanumerics. They are white-space terminated.
+Symbols are used to resolve the class of a predicate. Symbols are a
+valid matching type, which function similarly to a string. A symbol
+cannot be entirely numeric -- it would instead be interpreted as a
+Number in that case.
+
+
+Literal Number
+^^^^^^^^^^^^^^
+::
+
+   123
+   002
+
+Numbers are unquoted numerics. They can be compared with both integer
+values and strings.
+
+
+Literal Symbol Group
+^^^^^^^^^^^^^^^^^^^^
+::
+
+   foo-{001..005}
+   {foo,bar}-001
+   {hello,goodbye}-{cruel,happy}-world
+   109{2,4,5}1
+   10{002..106..2}
+
+A Symbol Group is an entity which represents a collection of symbols
+based on some substitutions. Substitutions are bounded in matching
+``'{'`` and ``'}'`` characters. Substitutions may be either a
+comma-separated list of values, or a double-dotted range. A Symbol
+Group matches any string value that is represented by the product of
+its substitutions.
+
+If a Symbol Group is entirely numeric, it will match with rules
+similar to Number.
+
+If any part of a substitution is malformed, that substitution will be
+treated as a single symbol value. If a Symbol Group contains only one
+possible product, it will become a simple Symbol.
+
+
+Literal Regex
+^^^^^^^^^^^^^
+::
+
+
+
+Built-In Sieve Predicates
+-------------------------
 
 The language supports three logical expressions; ``and``, ``or``, and
 ``not``. Each of these apply a logical constraint on top of other
-expressions.
+expressions. The language also provides a way to set flags via tha
+``flag`` expression, and to check flags via the ``flagged`` predicate.
+There final built-in predicate is ``item`` which is used to do value
+comparisons against the data structures themselves.
 
 
-Logical Expression ``and``
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Logical Predicate ``and``
+^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
   (and EXPR [EXPR...])
@@ -56,8 +143,8 @@ a data item fails to match, it will not be passed along to further
 sub-expressions.
 
 
-Logical Expression ``or``
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Logical Predicate ``or``
+^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
   (or EXPR [EXPR...])
@@ -67,8 +154,8 @@ a data item has been matched, it will not be passed along to further
 sub-expressions.
 
 
-Logical Expression ``not``
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Logical Predicate ``not``
+^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
   (not EXPR [EXPR...])
@@ -115,3 +202,15 @@ In addition, any flag can be used as its own predicate by appending a
   * ``(flagged awesome)``
   * ``(? awesome)``
   * ``(awesome?)``
+
+
+Predicate ``item``
+^^^^^^^^^^^^^^^^^^
+::
+
+   (item PATH [VALUE...])
+
+Resolves an `ItemPath` against each data item. If any values are supplied as
+an argument, then the predicate will pass any data items which has any path
+element that matches to any of the values. If no values are supplied then
+the path elements simply need to be present and non-null.
