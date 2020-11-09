@@ -21,7 +21,7 @@ endif
 
 _FLAKE8CHECK := $(shell $(PYTHON) -c 'import flake8' 2>/dev/null)
 ifeq ($(.SHELLSTATUS),0)
-	FLAKE8 := $(PYTHON) -m flake8
+	FLAKE8 := echo "running flake8" ; $(PYTHON) -B -m flake8
 else
 	FLAKE8 := echo "flake8 not found"
 endif
@@ -57,8 +57,8 @@ help:  ## Display this help
 
 
 ##@ Local Build and Install
-build: clean-built	## Produces a wheel using the default system python
-	@$(FLAKE8)
+build: clean-built flake8	## Produces a wheel using the default system python
+	@echo "Using python" $(PYTHON)
 	@$(PYTHON) setup.py $(BDIST)
 
 
@@ -97,6 +97,10 @@ packaging-test: packaging-build	## Launches all containerized tests
 ##@ Testing
 test: clean	## Launches tox
 	@tox
+
+
+flake8:	## Launches flake8
+	@$(FLAKE8)
 
 
 quick-test: build	## Launches nosetest using the default python
