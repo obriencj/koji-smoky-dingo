@@ -298,7 +298,7 @@ class ItemPath(object):
         return "ItemPath(%r)" % self.paths
 
 
-class Reader(StringIO):
+class Reader(StringIO, object):
 
 
     def __init__(self, source):
