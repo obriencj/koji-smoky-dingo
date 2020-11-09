@@ -117,6 +117,15 @@ treated as a single symbol value. If a Symbol Group contains only one
 possible product, it will become a simple Symbol.
 
 
+Literal String
+^^^^^^^^^^^^^^
+::
+   "Foo bar"
+
+A string is quoted with matching ``'"'`` characters. Normal escape
+sequences are honored.
+
+
 Literal Regex
 ^^^^^^^^^^^^^
 ::
