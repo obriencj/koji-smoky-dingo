@@ -298,12 +298,13 @@ class ItemPath(object):
         return "ItemPath(%r)" % self.paths
 
 
-class Reader(StringIO, object):
-
+class Reader(StringIO):
 
     def __init__(self, source):
-        # overridden to mandate a source for read-mode
-        super(Reader, self).__init__(source)
+        # overridden to mandate a source for read-mode. But we cannot
+        # use super due to our py2 support, where StringIO is an
+        # old-style class.
+        StringIO.__init__(self, source)
 
 
     def peek(self, count=1):
@@ -353,6 +354,9 @@ def parse_symbol_groups(reader):
 
 
 def _trailing_esc(val):
+    # a count of trailing escapes, just to figure out if there's an
+    # odd or even amount (and hence whether there's an unterminated
+    # escape at the end
     return len(val) - len(val.rstrip("\\"))
 
 
