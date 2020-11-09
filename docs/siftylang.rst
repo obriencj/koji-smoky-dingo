@@ -1,6 +1,8 @@
 Sifty Dingo Filtering Language
 ==============================
 
+.. highlight:: none
+
 The `kojismokydingo.sift` package implements a minimal filtering
 language tentatively named "sifty dingo". The language is based on
 predicates written as a sequence of s-expressions.
@@ -8,7 +10,7 @@ predicates written as a sequence of s-expressions.
 
 Language Example
 ----------------
-.. highlight:: none
+::
 
   (flag inactive (!status ACTIVE))
   (flag old-guard (not (inactive?)) (joined-before 2000-01-01))
@@ -47,7 +49,7 @@ sieve. Subsequent elements are the arguments to the predicate.
 
 Literal Sieve
 ^^^^^^^^^^^^^
-.. highlight:: none
+::
 
   (foo)
   (foo 1 two "three" /four/ |five|)
@@ -66,7 +68,7 @@ nested except in the case of the logical combining predicates.
 
 Literal Symbol
 ^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
    foo
    Tacos-and-Pizza
@@ -81,7 +83,7 @@ Number in that case.
 
 Literal Number
 ^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
    123
    002
@@ -92,7 +94,7 @@ values and strings.
 
 Literal Symbol Group
 ^^^^^^^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
    foo-{001..005}
    {foo,bar}-001
@@ -117,7 +119,7 @@ possible product, it will become a simple Symbol.
 
 Literal Regex
 ^^^^^^^^^^^^^
-.. highlight:: none
+::
 
    /^Foo.*Bar$/
    /^FOO.*BAR$/i
@@ -129,7 +131,7 @@ after the closing ``'/'``
 
 Literal Globs
 ^^^^^^^^^^^^^
-.. highlight:: none
+::
 
    |foo*|
    |FOO*|i
@@ -141,7 +143,7 @@ case-insensitive.
 
 Literal Item Path
 ^^^^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
    .foo
    .bar[].qux
@@ -173,7 +175,7 @@ comparisons against the data structures themselves.
 
 Logical Predicate ``and``
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
   (and EXPR [EXPR...])
 
@@ -184,7 +186,7 @@ sub-expressions.
 
 Logical Predicate ``or``
 ^^^^^^^^^^^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
   (or EXPR [EXPR...])
 
@@ -195,7 +197,7 @@ sub-expressions.
 
 Logical Predicate ``not``
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
   (not EXPR [EXPR...])
 
@@ -215,7 +217,7 @@ Any expression can be inverted by prefixing it with ``!`` or
 
 Expression ``flag``
 ^^^^^^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
   (flag NAME EXPR [EXPR...])
 
@@ -226,7 +228,7 @@ data item that matched all sub-expressions.
 
 Predicate ``flagged``
 ^^^^^^^^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
   (flagged NAME [NAME...])
 
@@ -245,7 +247,7 @@ In addition, any flag can be used as its own predicate by appending a
 
 Predicate ``item``
 ^^^^^^^^^^^^^^^^^^
-.. highlight:: none
+::
 
    (item PATH [VALUE...])
 
