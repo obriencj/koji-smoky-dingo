@@ -21,9 +21,9 @@ endif
 
 _FLAKE8CHECK := $(shell $(PYTHON) -c 'import flake8' 2>/dev/null)
 ifeq ($(.SHELLSTATUS),0)
-	FLAKE8 := flake8
+	FLAKE8 := $(PYTHON) -m flake8
 else
-	FLAKE8 :=
+	FLAKE8 := echo "flake8 not found"
 endif
 
 # python 2.6 needed an externally installed argparse, which has weird
@@ -58,7 +58,8 @@ help:  ## Display this help
 
 ##@ Local Build and Install
 build: clean-built	## Produces a wheel using the default system python
-	@$(PYTHON) setup.py $(FLAKE8) $(BDIST)
+	@$(FLAKE8)
+	@$(PYTHON) setup.py $(BDIST)
 
 
 install: build	## Installs using the default python for the current user
