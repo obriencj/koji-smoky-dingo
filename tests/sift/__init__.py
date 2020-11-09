@@ -809,6 +809,20 @@ class SifterTest(TestCase):
         self.assertEqual(res["default"], [TACOS, PIZZA])
 
         src = """
+        ([])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS, PIZZA, BEER, DRAINO])
+
+        src = """
+        ([])
+        """
+        sifter = self.compile_sifter(src)
+        res = sifter(None, [{}])
+        self.assertFalse(res)
+
+        src = """
         (keywords[] spicy)
         """
         sifter = self.compile_sifter(src)
@@ -863,20 +877,6 @@ class SifterTest(TestCase):
         sifter = self.compile_sifter(src)
         res = sifter(None, DATA)
         self.assertEqual(res["default"], [TACOS, PIZZA, BEER])
-
-        src = """
-        ([])
-        """
-        sifter = self.compile_sifter(src)
-        res = sifter(None, DATA)
-        self.assertEqual(res["default"], [TACOS, PIZZA, BEER, DRAINO])
-
-        src = """
-        ([])
-        """
-        sifter = self.compile_sifter(src)
-        res = sifter(None, [{}])
-        self.assertFalse(res)
 
         src = """
         ([0])

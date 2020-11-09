@@ -20,7 +20,7 @@ from kojismokydingo.sift import (
     LogicNot, LogicOr, Null, Number,
     Regex, SifterError, Symbol, SymbolGroup,
 
-    parse_exprs, parse_itempath, parse_quoted,
+    parse_exprs, parse_index, parse_itempath, parse_quoted,
 )
 
 
@@ -69,18 +69,22 @@ class ParserTest(TestCase):
         src = """
         (
         """
-        res = self.parse(src)
-        self.assertEqual(res, [[]])
+        self.assertRaises(SifterError, self.parse, src)
 
         src = """
         (hello
         """
-        res = self.parse(src)
-        self.assertEqual(res, [[Symbol("hello")]])
+        self.assertRaises(SifterError, self.parse, src)
 
         src = "(hello"
+        self.assertRaises(SifterError, self.parse, src)
+
+        src = "hello)"
+        self.assertRaises(SifterError, self.parse, src)
+
+        src = "foo bar"
         res = self.parse(src)
-        self.assertEqual(res, [[Symbol("hello")]])
+        self.assertEqual(res, [Symbol("foo"), Symbol("bar")])
 
 
     def check_null(self, src):
@@ -156,6 +160,15 @@ class ParserTest(TestCase):
         self.assertEqual(type(res[0]), Glob)
         self.assertEqual(str(res[0]), "How")
         self.assertEqual(repr(res[0]), "Glob('How')")
+
+        src = """
+        |How|i
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), Glob)
+        self.assertEqual(str(res[0]), "How")
+        self.assertEqual(repr(res[0]), "Glob('How', ignorecase=True)")
 
         src = r"""
         |H\|o\|w|
@@ -716,18 +729,42 @@ class TestParseQuoted(TestCase):
 
     def test_str(self):
 
+        val = parse_quoted('""', quotec=None)
+        self.assertEqual("", val)
+
         val = parse_quoted('"foo"', quotec=None)
         self.assertEqual("foo", val)
 
         val = parse_quoted('foo"', quotec='"')
         self.assertEqual("foo", val)
 
-        val = parse_quoted('foo"', quotec='"')
-        self.assertEqual("foo", val)
+        val = parse_quoted(r'foo\""', quotec='"')
+        self.assertEqual('foo"', val)
 
 
+    def test_err_str(self):
+        self.assertRaises(SifterError, parse_quoted, '')
+        self.assertRaises(SifterError, parse_quoted, '"foo')
+        self.assertRaises(SifterError, parse_quoted, 'foo', quotec='"')
 
-class TestItemPath(TestCase):
+
+class TestParseIndex(TestCase):
+
+    def test_parse_index(self):
+
+        ix = parse_index("[]")
+        self.assertTrue(isinstance(ix, AllItems))
+
+        ix = parse_index("[1:]")
+        self.assertTrue(isinstance(ix, slice))
+
+        self.assertRaises(SifterError, parse_index, '')
+        self.assertRaises(SifterError, parse_index, "[")
+        self.assertRaises(SifterError, parse_index, "[1:")
+        self.assertRaises(SifterError, parse_index, "]")
+
+
+class TestParseItemPath(TestCase):
 
     def test_repr(self):
 
@@ -801,6 +838,8 @@ class TestItemPath(TestCase):
 
 
     def test_err(self):
+        self.assertRaises(SifterError, parse_itempath, ".foo[")
+        self.assertRaises(SifterError, parse_itempath, ".foo]")
         self.assertRaises(SifterError, ItemPath, [None])
 
 

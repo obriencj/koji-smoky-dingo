@@ -409,11 +409,10 @@ def convert_range(rng):
     return map(fmt.format, range(istart, istop, istep))
 
 
-def parse_exprs(reader, start="(", stop=")"):
+def parse_exprs(reader, start=None, stop=None):
     """
     Simple s-expr parser. Reads from a string or character iterator,
-    emits expressions as nested lists. Lenient about closing
-    expressions.
+    emits expressions as nested lists.
     """
 
     # I've been re-using this code for over a decade. It was
@@ -423,13 +422,16 @@ def parse_exprs(reader, start="(", stop=")"):
     # for Sibilant's parser as well. And now it lives here, in Koji
     # Smoky Dingo.
 
-    assert len(start) == 1
-    assert len(stop) == 1
-
-    token_breaks = "".join((start, stop, ' [;#|/\"\'\n\r\t'))
-
     if isinstance(reader, str):
         reader = Reader(reader)
+
+    if not (start and stop):
+        unterminated = True
+        start, stop = '()'
+    else:
+        unterminated = False
+
+    token_breaks = "".join((start, stop, ' [;#|/\"\'\n\r\t'))
 
     token = None
     esc = False
@@ -450,14 +452,16 @@ def parse_exprs(reader, start="(", stop=")"):
             continue
 
         elif c == '.' and token is None:
-            yield parse_itempath(reader, '', c)
+            yield parse_itempath(reader, None, c)
+            continue
 
         elif c == '[':
-            prefix = ""
+            prefix = None
             if token:
                 prefix = token.getvalue()
                 token = None
             yield parse_itempath(reader, prefix, c)
+            continue
 
         elif c in token_breaks:
             if token:
@@ -468,7 +472,9 @@ def parse_exprs(reader, start="(", stop=")"):
             if not token:
                 token = StringIO()
             token.write(c)
+            continue
 
+        # c is in token_breaks
         if c in ';#':
             # comments run to end of line
             reader.readline()
@@ -477,16 +483,21 @@ def parse_exprs(reader, start="(", stop=")"):
             yield list(parse_exprs(reader, start, stop))
 
         elif c == stop:
-            return
+            if unterminated:
+                raise SifterError("Unexpected closing %r" % c)
+            else:
+                return
 
         elif c in '\'\"/|':
             yield parse_quoted(reader, c)
 
-    if token:
-        # we could make this raise an exception instead, but currently
-        # let's just be permissive and implicitly close unterminated
-        # lists
-        yield convert_token(token.getvalue())
+    if unterminated:
+        # leftovers are therefore allowed
+        if token:
+            yield convert_token(token.getvalue())
+    else:
+        # we shouldn't have reached this
+        raise SifterError("Unexpected EOF, missing closing %r" % stop)
 
 
 ESCAPE_SEQUENCE_RE = re.compile(r'''
@@ -542,6 +553,11 @@ def convert_token(val):
 
 
 def parse_itempath(reader, prefix=None, char=None):
+    """
+    Parses an ItemPath definition from the given reader.
+
+    :rtype: ItemPath
+    """
 
     if isinstance(reader, str):
         reader = Reader(reader)
@@ -559,7 +575,7 @@ def parse_itempath(reader, prefix=None, char=None):
     token = None
     esc = False
 
-    srciter = iter(partial(reader.read, 1), '')
+    srciter = iter(partial(reader.peek, 1), '')
     for c in srciter:
         if esc:
             if token is None:
@@ -568,11 +584,9 @@ def parse_itempath(reader, prefix=None, char=None):
                 token.write(esc)
             token.write(c)
             esc = False
-            continue
 
         elif c == '\\':
             esc = c
-            continue
 
         elif c in token_breaks:
             if token:
@@ -580,10 +594,10 @@ def parse_itempath(reader, prefix=None, char=None):
                 token = None
 
             if c == "[":
-                paths.append(parse_index(reader, c))
+                paths.append(parse_index(reader, reader.read(1)))
+                continue
             elif c == "]":
-                msg = "Unexpected closer: %r" % c
-                raise SifterError(msg)
+                raise SifterError("Unexpected closer: %r" % reader.read(1))
             elif c == ".":
                 pass
             else:
@@ -593,6 +607,9 @@ def parse_itempath(reader, prefix=None, char=None):
             if token is None:
                 token = StringIO()
             token.write(c)
+
+        # actually consume the character from the reader
+        reader.read(1)
 
     if token:
         paths.append(convert_token(token.getvalue()))
@@ -616,6 +633,14 @@ def convert_slice(val):
 
 
 def parse_index(reader, start=None):
+    """
+    Parse an index portion of an ItemPath from the reader
+
+    :rtype: AllItems or slice or Matcher
+    """
+
+    if isinstance(reader, str):
+        reader = Reader(reader)
 
     if not start:
         start = reader.read(1)
@@ -644,7 +669,7 @@ def parse_index(reader, start=None):
         raise SifterError(msg)
 
 
-def parse_quoted(reader, quotec='\"', advanced_escapes=True):
+def parse_quoted(reader, quotec=None, advanced_escapes=True):
     """
     Helper function for parse_exprs, will parse quoted values and
     return the appropriate wrapper type depending on the quoting
@@ -667,7 +692,7 @@ def parse_quoted(reader, quotec='\"', advanced_escapes=True):
     if isinstance(reader, str):
         reader = Reader(reader)
 
-    if quotec is None:
+    if not quotec:
         quotec = reader.read(1)
         if not quotec:
             msg = "Unterminated matcher: missing closing %r" % quotec
