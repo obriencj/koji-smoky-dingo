@@ -405,12 +405,12 @@ class TaggedSieve(Sieve):
         for binfo in binfos:
             cache = self.get_cache(binfo)
             if "tag_names" not in cache:
-                needed[binfo["id"]] = binfo
+                needed[binfo["id"]] = cache
 
         if needed:
             fn = lambda i: session.listTags(build=i)
             for bid, tags in iteritems(bulk_load(session, fn, needed)):
-                cache = self.get_cache(needed[bid])
+                cache = needed[bid]
                 cache["tag_names"] = [t["name"] for t in tags]
                 cache["tag_ids"] = [t["id"] for t in tags]
 
@@ -469,12 +469,12 @@ class InheritedSieve(Sieve):
         for binfo in binfos:
             cache = self.get_cache(binfo)
             if "tag_names" not in cache:
-                needed[binfo["id"]] = binfo
+                needed[binfo["id"]] = cache
 
         if needed:
             fn = lambda i: session.listTags(build=i)
             for bid, tags in iteritems(bulk_load(session, fn, needed)):
-                cache = self.get_cache(needed[bid])
+                cache = needed[bid]
                 cache["tag_names"] = [t["name"] for t in tags]
                 cache["tag_ids"] = [t["id"] for t in tags]
 
@@ -490,24 +490,77 @@ class InheritedSieve(Sieve):
         return False
 
 
+class TypeSieve(Sieve):
+    """
+    usage: (type BTYPE [BTYPE...])
+
+    Passes build infos that have archives of the given btype. Normal
+    btypes are rpm, maven, image, and win.
+    """
+
+    name = "type"
+
+
+    def __init__(self, sifter, btype, *btypes):
+        bts = [btype]
+        bts.extend(btypes)
+        bts = ensure_all_int_or_str(bts)
+
+        super(TypeSieve, self).__init__(sifter, *bts)
+
+
+    def prep(self, session, binfos):
+
+        needed = {}
+        for binfo in binfos:
+            cache = self.get_cache(binfo)
+            if "btypes" not in cache:
+                if "archive_btype_names" in binfo:
+                    # this binfo has been decorated already to include
+                    # the btype names as a set, so let's steal that
+                    # data rather than looking it up again from the
+                    # session.
+                    cache["btypes"] = binfo["archive_btype_names"]
+                else:
+                    needed[binfo["id"]] = cache
+
+        if needed:
+            fn = session.getBuildType
+            for bid, btns in iteritems(bulk_load(session, fn, needed)):
+                cache = needed[bid]
+                cache["btypes"] = set(btns)
+
+
+    def check(self, session, binfo):
+        cache = self.get_cache(binfo)
+        btypes = cache.get("btypes", ())
+
+        for match in self.tokens:
+            if match in btypes:
+                return True
+
+        return False
+
+
 DEFAULT_BUILD_INFO_SIEVES = [
     EpochSieve,
-    ImportedSieve,
-    NameSieve,
-    NVRSieve,
-    OwnerSieve,
-    ReleaseSieve,
-    SourceSieve,
-    StateSieve,
-    VersionSieve,
     EVRCompareEQ,
     EVRCompareNE,
     EVRCompareGT,
     EVRCompareGE,
     EVRCompareLT,
     EVRCompareLE,
-    TaggedSieve,
+    ImportedSieve,
     InheritedSieve,
+    NameSieve,
+    NVRSieve,
+    OwnerSieve,
+    ReleaseSieve,
+    SourceSieve,
+    StateSieve,
+    TaggedSieve,
+    TypeSieve,
+    VersionSieve,
 ]
 
 
