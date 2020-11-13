@@ -94,6 +94,7 @@ def config():
             "kojismokydingo",
             "kojismokydingo.cli",
             "kojismokydingo.sift",
+            "kojismokydingo.standalone",
         ],
 
         "install_requires": [
