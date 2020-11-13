@@ -94,7 +94,7 @@ class ProfileClientSession(ManagedClientSession):
     which can be used via tha ``with`` keyword.
     """
 
-    def __init__(self, profile="koji", anon=False):
+    def __init__(self, profile="koji"):
         conf = read_config(profile)
         server = conf["server"]
         super(ProfileClientSession, self).__init__(server, opts=conf)
