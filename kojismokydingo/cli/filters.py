@@ -24,21 +24,74 @@ from . import AnonSmokyDingo, printerr
 from .builds import FilterBuilds
 
 
+__all__ = (
+    "ksd_filter_builds",
+)
+
+
 def find_action(parser, key):
+    """
+    Hunts through a parser to discover an action who dest or metavar
+    matches the given key.
+    """
+
     for act in parser._actions:
-        if act.metavar == key:
-            return act
-        elif act.dest == key:
+        if key == act.dest or key == act.metavar \
+           or key in act.option_strings:
             return act
     return None
 
 
-class FilterCLI(AnonSmokyDingo):
+class AnonLonelyDingo(AnonSmokyDingo):
     """
-    An adaptive layer to move a BuildFilter command into a stand-alone
-    CLI entry point
+    An adaptive layer to assist in converting an AnonSmokyDingo
+    instance into a callable suitable for use as a console_scripts
+    entry point.
     """
 
+    def __call__(self, args=None):
+
+        if args is None:
+            args = sys.argv[1:]
+
+        parser = self.parser()
+        options = parser.parse_args(args)
+
+        self.validate(parser, options)
+
+        try:
+            with AnonClientSession(options.profile) as session:
+                self.session = session
+                self.pre_handle(options)
+                return self.handle(options) or 0
+
+        except KeyboardInterrupt:
+            printerr()
+            return 130
+
+        except GenericError as kge:
+            printerr(kge)
+            return -1
+
+        except BadDingo as bad:
+            printerr(bad)
+            return -2
+
+        except Exception:
+            # koji CLI hides tracebacks from us. If something goes
+            # wrong, we want to see it
+            import traceback
+            traceback.print_exc()
+            raise
+
+        finally:
+            self.session = None
+
+
+class KSDFilterBuilds(AnonLonelyDingo, FilterBuilds):
+    """
+    Adapter to make the FilterBuilds command into a LonelyDingo.
+    """
 
     def arguments(self, parser):
         addarg = parser.add_argument
@@ -46,7 +99,7 @@ class FilterCLI(AnonSmokyDingo):
                help="File of sifty filter predicates")
 
         parser = self.profile_arguments(parser)
-        return super(FilterCLI, self).arguments(parser)
+        return super(KSDFilterBuilds, self).arguments(parser)
 
 
     def profile_arguments(self, parser):
@@ -106,54 +159,21 @@ class FilterCLI(AnonSmokyDingo):
                 printerr("WARNING: unknown option", key)
 
             elif getattr(options, act.dest) == act.default:
+                # FIXME: this heuristic isn't very good. we're
+                # checking if the options object has what would be the
+                # default value, and presuming that means it wasn't
+                # set to anything, and therefore setting it to the
+                # value of the define in the script. However, this
+                # means one cannot use a command-line switch to
+                # override a define back to its default
+                # value. Something to fix later.
                 act(parser, options, val)
 
-        return super(FilterCLI, self).validate(parser, options)
+        return super(KSDFilterBuilds, self).validate(parser, options)
 
 
-    def __call__(self):
-
-        called = sys.argv[0]
-        args = sys.argv[1:]
-
-        parser = self.parser()
-        options = parser.parse_args(args)
-
-        self.validate(parser, options)
-
-        try:
-            with AnonClientSession(options.profile) as session:
-                self.session = session
-                self.pre_handle(options)
-                return self.handle(options) or 0
-
-        except KeyboardInterrupt:
-            printerr()
-            return 130
-
-        except GenericError as kge:
-            printerr(kge)
-            return -1
-
-        except BadDingo as bad:
-            printerr(bad)
-            return -2
-
-        except Exception:
-            # koji CLI hides tracebacks from us. If something goes
-            # wrong, we want to see it
-            import traceback
-            traceback.print_exc()
-            raise
-
-        finally:
-            self.session = None
-
-
-class KSDFilterBuilds(FilterCLI, FilterBuilds):
-    pass
-
-
+# The console_scripts entry point is an instance of the class, not the
+# class itself.
 ksd_filter_builds = KSDFilterBuilds("ksd-filter-builds")
 
 
