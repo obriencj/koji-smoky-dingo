@@ -39,7 +39,7 @@ from os.path import basename
 from six import add_metaclass
 from six.moves import StringIO, filter, map, zip_longest
 
-from kojismokydingo import BadDingo, NotPermitted
+from .. import BadDingo, NotPermitted
 
 
 __all__ = (
