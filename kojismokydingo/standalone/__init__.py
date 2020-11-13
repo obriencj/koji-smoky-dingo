@@ -12,6 +12,17 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+"""
+Koji Smoky Dingo - Standalone
+
+This package contains adaptive mechanisms for converting a SmokyDingo command
+into a stand-alone console_script entry point.
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:licence: GPL v3
+"""
+
+
 import sys
 
 from argparse import ArgumentParser
@@ -19,12 +30,17 @@ from koji import GenericError
 from os.path import basename
 from six import iteritems
 
-from .. import AnonClientSession, BadDingo
-from . import AnonSmokyDingo, printerr
-from .builds import FilterBuilds
+from .. import AnonClientSession, BadDingo, ProfileClientSession
+from ..cli import AnonSmokyDingo, SmokyDingo, printerr
+from ..cli.builds import FilterBuilds
 
 
 __all__ = (
+    "AnonLonelyDingo",
+    "LonelyDingo",
+
+    "LonelyFilterBuilds",
+
     "ksd_filter_builds",
 )
 
@@ -42,25 +58,36 @@ def find_action(parser, key):
     return None
 
 
-class AnonLonelyDingo(AnonSmokyDingo):
-    """
-    An adaptive layer to assist in converting an AnonSmokyDingo
-    instance into a callable suitable for use as a console_scripts
-    entry point.
-    """
+class LonelyDingo(SmokyDingo):
+
+    def create_session(self, options):
+        return ProfileClientSession(options)
+
+
+    def parser(self):
+        invoke = basename(sys.argv[0])
+        argp = ArgumentParser(prog=invoke, description=self.description)
+        return self.arguments(argp) or argp
+
+
+    def profile_arguments(self, parser):
+        grp = parser.add_argument_group("Koji Profile options")
+        addarg = grp.add_argument
+
+        addarg("--profile", "-p", action="store", default=None,
+               metavar="PROFILE", help="specify a configuration profile")
+
+        return parser
+
 
     def __call__(self, args=None):
-
-        if args is None:
-            args = sys.argv[1:]
-
         parser = self.parser()
         options = parser.parse_args(args)
 
         self.validate(parser, options)
 
         try:
-            with AnonClientSession(options.profile) as session:
+            with self.create_session(options.profile) as session:
                 self.session = session
                 self.pre_handle(options)
                 return self.handle(options) or 0
@@ -88,7 +115,18 @@ class AnonLonelyDingo(AnonSmokyDingo):
             self.session = None
 
 
-class KSDFilterBuilds(AnonLonelyDingo, FilterBuilds):
+class AnonLonelyDingo(AnonSmokyDingo):
+    """
+    An adaptive layer to assist in converting an AnonSmokyDingo
+    instance into a callable suitable for use as a console_scripts
+    entry point.
+    """
+
+    def create_session(self, options):
+        return AnonClientSession(options)
+
+
+class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
     """
     Adapter to make the FilterBuilds command into a LonelyDingo.
     """
@@ -99,17 +137,7 @@ class KSDFilterBuilds(AnonLonelyDingo, FilterBuilds):
                help="File of sifty filter predicates")
 
         parser = self.profile_arguments(parser)
-        return super(KSDFilterBuilds, self).arguments(parser)
-
-
-    def profile_arguments(self, parser):
-        grp = parser.add_argument_group("Koji Profile options")
-        addarg = grp.add_argument
-
-        addarg("--profile", "-p", action="store", default=None,
-               metavar="PROFILE", help="specify a configuration profile")
-
-        return parser
+        return super(LonelyFilterBuilds, self).arguments(parser)
 
 
     def sifter_arguments(self, parser):
@@ -124,12 +152,6 @@ class KSDFilterBuilds(AnonLonelyDingo, FilterBuilds):
                " and other flags are discarded")
 
         return parser
-
-
-    def parser(self):
-        invoke = basename(sys.argv[0])
-        argp = ArgumentParser(prog=invoke, description=self.description)
-        return self.arguments(argp) or argp
 
 
     def validate(self, parser, options):
@@ -169,12 +191,12 @@ class KSDFilterBuilds(AnonLonelyDingo, FilterBuilds):
                 # value. Something to fix later.
                 act(parser, options, val)
 
-        return super(KSDFilterBuilds, self).validate(parser, options)
+        return super(LonelyFilterBuilds, self).validate(parser, options)
 
 
 # The console_scripts entry point is an instance of the class, not the
 # class itself.
-ksd_filter_builds = KSDFilterBuilds("ksd-filter-builds")
+ksd_filter_builds = LonelyFilterBuilds("ksd-filter-builds")
 
 
 #
