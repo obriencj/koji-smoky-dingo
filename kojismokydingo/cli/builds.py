@@ -336,6 +336,10 @@ class BuildFiltering():
                dest="state", default=None,
                help="Limit to deleted builds")
 
+        return parser
+
+
+    def sifter_arguments(self, parser):
         grp = parser.add_argument_group("Filtering with Sifty sieves")
         addarg = grp.add_argument
 
@@ -523,6 +527,7 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
 
         # additional build filtering arguments
         parser = self.filtering_arguments(parser)
+        parser = self.sifter_arguments(parser)
 
         return parser
 
@@ -660,6 +665,7 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
 
         # additional build filtering arguments
         parser = self.filtering_arguments(parser)
+        parser = self.sifter_arguments(parser)
 
         return parser
 

@@ -71,6 +71,10 @@ COMMANDS = {
     "userinfo": "kojismokydingo.cli.users:UserInfo",
 }
 
+CLI = {
+    "ksd-filter-builds": "kojismokydingo.cli.filters:ksd_filter_builds",
+}
+
 
 def config():
     return {
@@ -110,6 +114,7 @@ def config():
 
         "entry_points": {
             "koji_smoky_dingo": ["=".join(c) for c in COMMANDS.items()],
+            "console_scripts":  ["=".join(c) for c in CLI.items()],
         },
     }
 
