@@ -30,9 +30,9 @@ from . import (
     ItemSieve, Sieve, Sifter, SifterError,
     ensure_all_matcher, ensure_all_int_or_str,
     ensure_int_or_str, ensure_str, )
-from .. import bulk_load, bulk_load_builds, bulk_load_users
+from .. import bulk_load, bulk_load_builds, bulk_load_tags, bulk_load_users
 from ..builds import build_dedup
-from ..common import rpm_evr_compare
+from ..common import rpm_evr_compare, unique
 from ..tags import gather_tag_ids
 
 
@@ -47,6 +47,7 @@ __all__ = (
     "EVRCompareGT",
     "EVRCompareGE",
     "ImportedSieve",
+    "LatestSieve",
     "NameSieve",
     "NVRSieve",
     "OwnerSieve",
@@ -542,6 +543,64 @@ class TypeSieve(Sieve):
         return False
 
 
+class LatestSieve(Sieve):
+    """
+    usage: (latest TAG [TAG...])
+
+    Passes build infos that are the latest build of their package name in
+    any of the tags.
+    """
+
+    name = "latest"
+
+
+    @staticmethod
+    def latest_ids(cache={}):
+        """
+        This is a cache mapping a tag ID to latest build IDs in that
+        tag. It's populated by all the LatestSieve instances when they
+        run their prep.
+        """
+
+        return cache
+
+
+    def __init__(self, sifter, tagname, *tagnames):
+        tags = [tagname]
+        tags.extend(tagnames)
+        tags = ensure_all_int_or_str(tags)
+
+        super(LatestSieve, self).__init__(sifter, *tags)
+        self.tag_ids = None
+
+
+    def prep(self, session, binfos):
+
+        # first we need to convert our tokens into tag IDs
+        tids = self.tag_ids
+        if tids is None:
+            tags = bulk_load_tags(session, self.tokens, err=True)
+            self.tag_ids = tids = unique(t["id"] for t in itervalues(tags))
+
+        # for each tag ID, we look through the cache to see if we've
+        # already loaded the latest build IDs
+        cache = self.latest_ids()
+        for tid in tids:
+            if tid not in cache:
+                # if not already loaded, find the latest builds in the tag
+                # and store their IDs
+                found = session.listTagged(tid, inherit=True, latest=True)
+                cache[tid] = set(b["id"] for b in found)
+
+
+    def check(self, session, binfo):
+        cache = self.latest_ids()
+        for tid in self.tag_ids:
+            if binfo["id"] in cache[tid]:
+                return True
+        return False
+
+
 DEFAULT_BUILD_INFO_SIEVES = [
     EpochSieve,
     EVRCompareEQ,
@@ -552,6 +611,7 @@ DEFAULT_BUILD_INFO_SIEVES = [
     EVRCompareLE,
     ImportedSieve,
     InheritedSieve,
+    LatestSieve,
     NameSieve,
     NVRSieve,
     OwnerSieve,
