@@ -70,6 +70,50 @@ def chunkseq(seq, chunksize):
             offset in range(0, seqlen, chunksize))
 
 
+
+def escapable_replace(orig, character, replacement):
+    """
+    Single-character string substitutions. Doubled sentinel characters
+    can be used to represent that exact character.
+
+    Examples:
+
+     * ``escapable_replace('Hello %', '%', 'World')`` returns ``"Hello
+       World"``
+     * ``escapable_replace('Hello %%', '%', 'World')`` returns
+       ``"Hello %"``
+
+    :param orig: Original text
+    :type orig: str
+
+    :param character: Single-character token.
+    :type character: str
+
+    :param replacement: Replacement text
+    :type replacement: str
+    """
+
+    assert len(character) == 1, "escapable_replace requires single characters"
+
+    collect = []
+
+    pieces = iter(orig)
+    for p in pieces:
+        if p == character:
+            n = next(pieces, None)
+            if n is None:
+                collect.append(replacement)
+            elif n == character:
+                collect.append(character)
+            else:
+                collect.append(replacement)
+                collect.append(n)
+        else:
+            collect.append(p)
+
+    return "".join(collect)
+
+
 def fnmatches(value, patterns, ignore_case=False):
     """
     Checks value against multiple glob patterns. Returns True if any

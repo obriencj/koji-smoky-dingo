@@ -12,12 +12,13 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+from datetime import datetime
 from operator import itemgetter
 from six import iteritems
 from unittest import TestCase
 
 from kojismokydingo.common import (
-    chunkseq, fnmatches, globfilter, merge_extend,
+    chunkseq, escapable_replace, fnmatches, globfilter, merge_extend,
     parse_datetime, rpm_evr_compare, unique, update_extend,
     _rpm_str_compare)
 
@@ -126,7 +127,29 @@ class TestEVRSort(TestCase):
             self.assertEqual(rpm_evr_compare(evr_r, evr_l), -1)
 
 
-class TestCommon(TestCase):
+class TestRelace(TestCase):
+
+
+    def test_escapable_replace(self):
+        data = [
+            ("%", "foo", "foo"),
+            ("%.txt", "foo", "foo.txt"),
+            ("foo-%.txt", "bar", "foo-bar.txt"),
+            ("foo-%", "bar", "foo-bar"),
+            ("%%", "wut", "%"),
+            ("%%.txt", "wut", "%.txt"),
+            ("foo-%%.txt", "wut", "foo-%.txt"),
+            ("foo-%%", "wut", "foo-%"),
+            ("", "wut", ""),
+            ("foo", "wut", "foo"),
+        ]
+
+        for orig, repl, expect in data:
+            res = escapable_replace(orig, "%", repl)
+            self.assertEqual(res, expect)
+
+
+class TestExtend(TestCase):
 
 
     def test_update_extend(self):
@@ -165,6 +188,8 @@ class TestCommon(TestCase):
         self.assertEqual(B, Z)
 
 
+class TestUnique(TestCase):
+
     def test_unique(self):
         data = ["one", "two", "one", "two", "three",
                 "three", "three", "one", "two", "three", "four",
@@ -195,6 +220,8 @@ class TestCommon(TestCase):
         self.assertEqual(unique(data, "val"), expect)
 
 
+class TestChunkseq(TestCase):
+
     def test_chunkseq(self):
         data = list(range(0, 25))
         expect = [list(range(0, 5)),
@@ -217,6 +244,8 @@ class TestCommon(TestCase):
         result = list(chunkseq(data, 5))
         self.assertEqual(result, expect)
 
+
+class TestGlob(TestCase):
 
     def test_fnmatches(self):
         data_matches = [
@@ -324,6 +353,8 @@ class TestCommon(TestCase):
         self.assertEqual(gf(["T*"], True, False), dv(data))
 
 
+class TestDates(TestCase):
+
     def test_parse_datetime(self):
         expected = {
             "year": 2020,
@@ -343,6 +374,8 @@ class TestCommon(TestCase):
                 checks = expected
 
             dtv = parse_datetime(src)
+            self.assertTrue(isinstance(dtv, datetime))
+
             for key, val in iteritems(checks):
                 found = getattr(dtv, key, None)
                 if found:
@@ -360,7 +393,8 @@ class TestCommon(TestCase):
         check_datetime("1600705852")
 
         # we'll just validate that it doesn't raise an exception
-        parse_datetime("now")
+        dtv = parse_datetime("now")
+        self.assertTrue(isinstance(dtv, datetime))
 
         bad = "joey ramone"
         self.assertRaises(Exception, parse_datetime, bad)
