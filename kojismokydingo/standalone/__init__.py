@@ -115,7 +115,7 @@ class LonelyDingo(SmokyDingo):
             self.session = None
 
 
-class AnonLonelyDingo(AnonSmokyDingo):
+class AnonLonelyDingo(LonelyDingo):
     """
     An adaptive layer to assist in converting an AnonSmokyDingo
     instance into a callable suitable for use as a console_scripts
@@ -167,15 +167,17 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
         options.filter_file = None
         options.filter = src
 
-        definitions = {}
+        # some options can be specified multiple times, so don't use a
+        # dict
+        defaults = []
         for line in src.splitlines():
-            if line.startswith("#define "):
-                defn = line[8:].split("=", 1)
+            if line.startswith("#default "):
+                defn = line[9:].split("=", 1)
                 key = defn[0].strip()
                 val = "" if len(defn) == 1 else defn[1].strip()
-                definitions[key] = val
+                defaults.append((key, val))
 
-        for key, val in iteritems(definitions):
+        for key, val in defaults:
             act = find_action(parser, key)
             if not act:
                 printerr("WARNING: unknown option", key)
