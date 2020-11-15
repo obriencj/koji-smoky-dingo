@@ -48,6 +48,7 @@ __all__ = (
     "EVRCompareGE",
     "ImportedSieve",
     "LatestSieve",
+    "LatestMavenSieve",
     "NameSieve",
     "NVRSieve",
     "OwnerSieve",
@@ -589,8 +590,12 @@ class LatestSieve(Sieve):
             if tid not in cache:
                 # if not already loaded, find the latest builds in the tag
                 # and store their IDs
-                found = session.listTagged(tid, inherit=True, latest=True)
-                cache[tid] = set(b["id"] for b in found)
+                cache[tid] = self.load_latest_ids(session, tid)
+
+
+    def load_latest_ids(self, session, tagid):
+        found = session.getLatestBuilds(tagid)
+        return set(b["id"] for b in found)
 
 
     def check(self, session, binfo):
@@ -599,6 +604,33 @@ class LatestSieve(Sieve):
             if binfo["id"] in cache[tid]:
                 return True
         return False
+
+
+class LatestMavenSieve(LatestSieve):
+    """
+    usage: (latest-maven TAG [TAG...])
+
+    Passes build infos that have btype maven and are the build of their
+    GAV in any of the tags.
+    """
+
+    name = "latest-maven"
+
+
+    @staticmethod
+    def latest_ids(cache={}):
+        """
+        This is a cache mapping a tag ID to latest build IDs in that
+        tag. It's populated by all the LatestMavenSieve instances when
+        they run their prep.
+        """
+
+        return cache
+
+
+    def load_latest_ids(self, session, tagid):
+        found = session.getLatestMavenArchives(tagid, inherit=True)
+        return set(a["build_id"] for a in found)
 
 
 DEFAULT_BUILD_INFO_SIEVES = [
@@ -612,6 +644,7 @@ DEFAULT_BUILD_INFO_SIEVES = [
     ImportedSieve,
     InheritedSieve,
     LatestSieve,
+    LatestMavenSieve,
     NameSieve,
     NVRSieve,
     OwnerSieve,
