@@ -643,18 +643,18 @@ def build_info_sieves():
     return sieves
 
 
-def build_info_sifter(src_str):
+def build_info_sifter(source):
     """
     Create a Sifter from the source using the default build-info
     Sieves.
 
-    :param src_str: sieve expressions source
-    :type src_str: src
+    :param source: sieve expressions source
+    :type source: stream or str
 
     :rtype: Sifter
     """
 
-    return Sifter(build_info_sieves(), src_str)
+    return Sifter(build_info_sieves(), source)
 
 
 def sift_builds(session, src_str, build_infos):

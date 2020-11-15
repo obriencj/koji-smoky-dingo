@@ -911,7 +911,7 @@ def ensure_all_sieve(values, msg=None):
 
 class Sifter(object):
 
-    def __init__(self, sieves, source_str, key="id"):
+    def __init__(self, sieves, source, key="id"):
         """
         A flagging data filter, compiled from an s-expression syntax.
 
@@ -927,9 +927,9 @@ class Sifter(object):
 
         :type sieves: list[type[Sieve]]
 
-        :param source_str: Sieve expressions
+        :param source: Source from which to parse Sieve expressions
 
-        :type source_str: str
+        :type source: stream or str
 
         :param key: Unique hashable identifier key for the info
           dicts. This is used to deduplicate or otherwise correlate
@@ -953,7 +953,7 @@ class Sifter(object):
 
         self._sieve_classes = sieves
 
-        exprs = self._compile(source_str) if source_str else []
+        exprs = self._compile(source) if source else []
         self._exprs = ensure_all_sieve(exprs)
 
 
@@ -965,12 +965,12 @@ class Sifter(object):
         return self._exprs
 
 
-    def _compile(self, source_str):
+    def _compile(self, source):
         """
         Turns a source string into a list of Sieve instances
         """
 
-        return [self._convert(p) for p in parse_exprs(source_str)]
+        return [self._convert(p) for p in parse_exprs(source)]
 
 
     def _convert_sym_aliases(self, sym):
