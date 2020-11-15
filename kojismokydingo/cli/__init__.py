@@ -35,6 +35,7 @@ from functools import partial
 from json import dump
 from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
+from os import devnull
 from os.path import basename
 from six import add_metaclass
 from six.moves import StringIO, filter, map, zip_longest
@@ -120,7 +121,7 @@ def resplit(arglist, sep=","):
 
 
 @contextmanager
-def open_output(filename="-", append=False):
+def open_output(filename="-", append=None):
     """
     Context manager for a CLI output file.
 
@@ -130,13 +131,26 @@ def open_output(filename="-", append=False):
     If the filename is ``"-"`` then stdout will be used as the output file
     stream, but it will not be closed.
 
-    If the filename is ``None`` then a StringIO will be created and the
-    results will be discarded.
+    If the filename is ``""`` or ``None`` then `os.devnull` will be used.
+
+    If append is True, the file will be appended to. If append is
+    False, the file will be overwritten. If append is None, then the
+    file will be overwriten unless it specified with a prefix of
+    ``"@"``. This prefix will be stripped from the filename in this
+    case only.
     """
 
-    if filename is None:
-        stream = StringIO()
-    elif filename == "-":
+    if filename:
+        if append is None:
+            if filename.startswith("@"):
+                filename = filename[1:]
+                append = True
+            else:
+                append = False
+    else:
+        filename = devnull
+
+    if filename == "-":
         stream = sys.stdout
     else:
         stream = open(filename, "at" if append else "wt")
