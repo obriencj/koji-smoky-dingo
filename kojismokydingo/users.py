@@ -15,8 +15,8 @@
 """
 Koji Smoki Dingo - users and permissions
 
-:author: cobrien@redhat.com
-:license: GPL version 3
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 
