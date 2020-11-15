@@ -57,9 +57,13 @@ help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 
-##@ Local Build and Install
-build: clean-built flake8	## Produces a wheel using the default system python
+report-python:
 	@echo "Using python" $(PYTHON)
+	@$(PYTHON) -VV
+
+
+##@ Local Build and Install
+build: clean-built report-python flake8	## Produces a wheel using the default system python
 	@$(PYTHON) setup.py $(BDIST)
 
 
@@ -100,7 +104,7 @@ test: clean	## Launches tox
 	@tox
 
 
-flake8:	## Launches flake8
+flake8: report-python	## Launches flake8
 	@$(FLAKE8)
 
 
