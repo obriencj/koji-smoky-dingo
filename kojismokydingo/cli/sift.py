@@ -21,6 +21,7 @@ Some CLI adapters for working with Sifty Dingo filtering
 
 from __future__ import print_function
 
+from collections import defaultdict
 from functools import partial
 from operator import itemgetter
 from six import iteritems
@@ -98,10 +99,15 @@ class Sifting(object):
             else:
                 flag = opt
                 dest = "-"
-
             result[flag] = dest or None
 
-        if "default" not in result:
+        if "*" in result:
+            overall = result.pop("*")
+            newresult = defaultdict(lambda: overall)
+            newresult.update(result)
+            result = newresult
+
+        elif "default" not in result:
             result["default"] = "-"
 
         return result
@@ -178,6 +184,14 @@ def output_sifted(results, key="id", outputs=None, sort=None):
     if outputs is None:
         outputs = {"default": "-"}
 
+    # kinda hackish but we need to populate the defaults in this case
+    # because we really want to iterate over the outputs, not the
+    # results in order to make sure every output gets written to, even
+    # if it has no results.
+    if isinstance(outputs, defaultdict):
+        for flag in results:
+            dest = outputs[flag]
+
     for flag, dest in iteritems(outputs):
         if "%" in dest:
             dest = escapable_replace(dest, "%", flag)
@@ -194,7 +208,7 @@ def output_sifted(results, key="id", outputs=None, sort=None):
 
         with open_output(dest, append) as dout:
             for res in map(key, flagged):
-                print(res, out=dout)
+                print(res, file=dout)
 
 
 #
