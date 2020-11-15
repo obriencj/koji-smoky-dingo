@@ -21,7 +21,8 @@ endif
 
 _FLAKE8CHECK := $(shell $(PYTHON) -c 'import flake8' 2>/dev/null)
 ifeq ($(.SHELLSTATUS),0)
-	FLAKE8 := echo "running flake8" ; $(PYTHON) -B -m flake8
+	FLAKE8 := echo "running flake8" ; \
+		$(PYTHON) -B -m flake8 kojismokydingo koji_cli_plugins
 else
 	FLAKE8 := echo "flake8 not found"
 endif
