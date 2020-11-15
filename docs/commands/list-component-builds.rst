@@ -15,7 +15,7 @@ koji list-component-builds
                                    [--image] [--win] [-c CG_NAME]
                                    [--imports | --no-imports]
                                    [--completed | --deleted]
-                                   [--output FLAG=FILENAME]
+                                   [--output FLAG:FILENAME]
                                    [--filter FILTER | --filter-file FILTER_FILE]
                                    [NVR [NVR ...]]
 
@@ -71,13 +71,13 @@ koji list-component-builds
    --deleted             Limit to deleted builds
 
  Filtering with Sifty sieves:
-   --output FLAG=FILENAME, -o FLAG=FILENAME
+   --output FLAG:FILENAME, -o FLAG:FILENAME
                          Divert results marked with the given FLAG to FILENAME.
                          If FILENAME is '-', output to stdout. The 'default'
                          flag is output to stdout by default, and other flags
                          are discarded
    --filter FILTER       Use the given sifty filter predicates
-   --filter-file FILTER_FILE, -F FILTER_FILE
+   --filter-file FILTER_FILE
                          Load sifty filter predictes from file
 
 

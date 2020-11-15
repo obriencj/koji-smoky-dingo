@@ -13,13 +13,10 @@
 
 
 """
-Koji Smoky Dingo - Bulk tagging commands
+Koji Smoky Dingo - CLI Build Commands
 
-Allows for large numbers of builds to be tagged rapidly, via multicall
-to tagBuildBypass
-
-:author: cobrien@redhat.com
-:license: GPL version 3
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 
@@ -36,6 +33,7 @@ from . import (
     AnonSmokyDingo, TagSmokyDingo,
     int_or_str, pretty_json, open_output,
     printerr, read_clean_lines, resplit)
+from .sift import BuildSifting, output_sifted
 from .. import (
     NoSuchUser,
     as_buildinfo, as_taginfo,
@@ -47,7 +45,6 @@ from ..builds import (
     decorate_build_archive_data, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_tag_builds)
-from ..sift.builds import build_info_sifter
 from ..tags import ensure_tag, gather_tag_ids
 from ..common import chunkseq, unique
 
@@ -258,7 +255,7 @@ class BulkTagBuilds(TagSmokyDingo):
                                    strict=options.strict)
 
 
-class BuildFiltering():
+class BuildFiltering(BuildSifting):
 
 
     def filtering_arguments(self, parser):
@@ -337,60 +334,6 @@ class BuildFiltering():
                help="Limit to deleted builds")
 
         return parser
-
-
-    def sifter_arguments(self, parser):
-        grp = parser.add_argument_group("Filtering with Sifty sieves")
-        addarg = grp.add_argument
-
-        addarg("--output", "-o", action="append", default=list(),
-               dest="outputs", metavar="FLAG=FILENAME",
-               help="Divert results marked with the given FLAG to"
-               " FILENAME. If FILENAME is '-', output to stdout."
-               " The 'default' flag is output to stdout by default,"
-               " and other flags are discarded")
-
-        grp = grp.add_mutually_exclusive_group()
-        addarg = grp.add_argument
-
-        addarg("--filter", action="store", default=None,
-               help="Use the given sifty filter predicates")
-
-        addarg("--filter-file", "-F", action="store", default=None,
-               metavar="FILTER_FILE",
-               help="Load sifty filter predictes from file")
-
-        return parser
-
-
-    def get_outputs(self, options):
-        result = {}
-
-        for opt in resplit(options.outputs):
-            if "=" in opt:
-                flag, dest = opt.split("=", 1)
-            else:
-                flag = opt
-                dest = "-"
-
-            result[flag] = dest or None
-
-        if "default" not in result:
-            result["default"] = "-"
-
-        return result
-
-
-    def get_sifter(self, options):
-        if options.filter:
-            filter_src = options.filter
-        elif options.filter_file:
-            with open(options.filter_file, "rt") as fin:
-                filter_src = fin.read()
-        else:
-            return None
-
-        return build_info_sifter(filter_src)
 
 
     def get_filter(self, options):
@@ -473,16 +416,12 @@ def cli_list_components(session, nvr_list,
         sortfn = build_nvr_sort
     elif sorting == SORT_BY_ID:
         sortfn = build_id_sort
-    else:
+    elif not build_sifter:
         sortfn = build_dedup
+    else:
+        sortfn = None
 
-    if outputs is None:
-        outputs = {"default": "-"}
-
-    for flag, dest in iteritems(outputs):
-        with open_output(dest) as dout:
-            for bld in sortfn(results[flag]):
-                print(bld["nvr"], out=dout)
+    output_sifted(results, "nvr", outputs, sort=sortfn)
 
 
 class ListComponents(AnonSmokyDingo, BuildFiltering):
@@ -608,16 +547,12 @@ def cli_filter_builds(session, nvr_list,
         sortfn = build_nvr_sort
     elif sorting == SORT_BY_ID:
         sortfn = build_id_sort
-    else:
+    elif not build_sifter:
         sortfn = build_dedup
+    else:
+        sortfn = None
 
-    if not outputs:
-        outputs = {"default": "-"}
-
-    for flag, dest in iteritems(outputs):
-        with open_output(dest) as dout:
-            for bld in sortfn(results.get(flag, ())):
-                print(bld["nvr"], file=dout)
+    output_sifted(results, "nvr", outputs, sort=sortfn)
 
 
 class FilterBuilds(AnonSmokyDingo, BuildFiltering):
