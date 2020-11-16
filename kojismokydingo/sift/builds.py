@@ -23,15 +23,21 @@ Koji Smoky Dingo - Sifter filtering
 import operator
 
 from koji import BUILD_STATES
+from operator import itemgetter
 from six import iteritems, itervalues
 
 from . import (
     DEFAULT_SIEVES,
-    ItemSieve, Sieve, Sifter, SifterError,
+    ItemSieve, Sieve, Sifter, SifterError, VariadicSieve,
     ensure_all_matcher, ensure_all_int_or_str,
     ensure_int_or_str, ensure_str, )
-from .. import bulk_load, bulk_load_builds, bulk_load_tags, bulk_load_users
-from ..builds import build_dedup
+from .. import (
+    as_taginfo,
+    bulk_load, bulk_load_builds, bulk_load_tags,
+    bulk_load_users, )
+from ..builds import (
+    build_dedup, decorate_maven_builds,
+    gavgetter, iter_latest_maven_builds, )
 from ..common import rpm_evr_compare, unique
 from ..tags import gather_tag_ids
 
@@ -594,8 +600,8 @@ class LatestSieve(Sieve):
 
 
     def load_latest_ids(self, session, tagid):
-        found = session.getLatestBuilds(tagid)
-        return set(b["id"] for b in found)
+        sought = session.getLatestBuilds(tagid)
+        return set(map(itemgetter("id"), sought))
 
 
     def check(self, session, binfo):
@@ -606,7 +612,7 @@ class LatestSieve(Sieve):
         return False
 
 
-class LatestMavenSieve(LatestSieve):
+class LatestMavenSieve(VariadicSieve):
     """
     usage: (latest-maven TAG [TAG...])
 
@@ -617,20 +623,44 @@ class LatestMavenSieve(LatestSieve):
     name = "latest-maven"
 
 
-    @staticmethod
-    def latest_ids(cache={}):
-        """
-        This is a cache mapping a tag ID to latest build IDs in that
-        tag. It's populated by all the LatestMavenSieve instances when
-        they run their prep.
-        """
+    def __init__(self, sifter, tag):
+        super(LatestMavenSieve, self).__init__(sifter, tag)
+        self.tag = ensure_str(tag)
 
-        return cache
+        # mapping (G,A,V):ID for the latest GAV builds
+        # in tag
+        self.cache = {}
 
 
-    def load_latest_ids(self, session, tagid):
-        found = session.getLatestMavenArchives(tagid, inherit=True)
-        return set(a["build_id"] for a in found)
+    def prep(self, session, binfos):
+
+        tag = self.tag = as_taginfo(session, self.tag)
+        cache = self.cache
+
+        # in order to perform the GAV comparisons, we need to have
+        # loaded the various binfos with their maven fields. This
+        # corrects any which were not loaded this way.
+        binfos = decorate_maven_builds(session, binfos)
+
+        # now we'll see which builds have a GAV we don't already
+        # know the latest build for
+        wanted = (bld for bld in binfos if
+                  ("maven_group_id" in bld and
+                   gavgetter(bld) not in cache))
+
+        pkgs = [bld["package_name"] for bld in wanted]
+        if pkgs:
+            # load the GAV,build_id for the packages we need it for,
+            # and update the GAV cache
+            sought = iter_latest_maven_builds(session, tag,
+                                              pkg_names=pkgs,
+                                              inherit=True)
+            cache.update((gav, bld["id"]) for gav, bld in sought)
+
+
+    def check(self, session, binfo):
+        return ("maven_group_id" in binfo and
+                self.cache.get(gavgetter(binfo)) == binfo["id"])
 
 
 DEFAULT_BUILD_INFO_SIEVES = [
