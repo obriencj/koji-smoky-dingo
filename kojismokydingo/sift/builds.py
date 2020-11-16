@@ -154,7 +154,6 @@ class StateSieve(ItemSieve):
         super(ItemSieve, self).__init__(sifter, state)
 
 
-
 class OwnerSieve(Sieve):
     """
     Usage: ``(owner USER [USER...])```
