@@ -59,7 +59,6 @@ __all__ = (
     "NVRSieve",
     "OwnerSieve",
     "ReleaseSieve",
-    "SourceSieve",
     "StateSieve",
     "VersionSieve",
 
@@ -154,16 +153,6 @@ class StateSieve(ItemSieve):
 
         super(ItemSieve, self).__init__(sifter, state)
 
-
-class SourceSieve(ItemSieve):
-    """
-    Usage: ``(source URI [URI...])``
-
-    filters for dict infos whose `source` key matches any of the given
-    URI matchers.
-    """
-
-    name = field = "source"
 
 
 class OwnerSieve(Sieve):
@@ -679,7 +668,6 @@ DEFAULT_BUILD_INFO_SIEVES = [
     NVRSieve,
     OwnerSieve,
     ReleaseSieve,
-    SourceSieve,
     StateSieve,
     TaggedSieve,
     TypeSieve,
