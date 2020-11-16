@@ -34,10 +34,10 @@ from . import (
     bulk_load, bulk_load_build_archives, bulk_load_build_rpms,
     bulk_load_builds, bulk_load_buildroots,
     bulk_load_buildroot_archives, bulk_load_buildroot_rpms,
-    bulk_load_tasks)
+    bulk_load_tasks, iter_bulk_load, )
 from .common import (
     chunkseq, merge_extend, rpm_evr_compare,
-    unique, update_extend)
+    unique, update_extend, )
 
 
 __all__ = (
@@ -56,13 +56,17 @@ __all__ = (
     "bulk_tag_builds",
     "bulk_tag_nvrs",
     "decorate_build_archive_data",
+    "decorate_maven_builds",
     "filter_by_state",
     "filter_by_tags",
     "filter_imported",
     "gather_buildroots",
     "gather_component_build_ids",
     "gather_wrapped_builds",
+    "gavgetter",
     "iter_bulk_tag_builds",
+    "iter_latest_maven_builds",
+    "latest_maven_builds",
 )
 
 
@@ -355,6 +359,84 @@ def bulk_tag_nvrs(session, tag, nvrs,
     return bulk_tag_builds(session, tag, builds,
                            force=force, notify=notify,
                            size=size, strict=strict)
+
+
+gavgetter = itemgetter("maven_group_id", "maven_artifact_id",
+                       "maven_version")
+
+
+def iter_latest_maven_builds(session, tag, pkg_names=None, inherit=True):
+    """
+    Yields ``((G, A, V), build_info)`` representing the latest build for
+    each GAV in the tag.
+
+    If pkg_names is given, then only those builds matching the given
+    package names are yielded.
+
+    :rtype: Generator[tuple[str], dict]
+    """
+
+    taginfo = as_taginfo(session, tag)
+    tid = taginfo["id"]
+
+    pkgs = session.listPackages(tid, inherited=inherit)
+    wanted = set(p['package_name'] for p in pkgs if not p['blocked'])
+
+    if pkg_names:
+        wanted = wanted.union(set(pkg_names))
+
+    latest = set()
+
+    fn = lambda p: session.listTagged(tid, inherit=inherit,
+                                      package=p, type="maven")
+
+    for pkg, builds in iter_bulk_load(session, fn, wanted):
+        for bld in builds:
+            gav = gavgetter(bld)
+            if gav not in latest:
+                latest.add(gav)
+                yield gav, bld
+
+
+def latest_maven_builds(session, tag, pkg_names=None, inherit=True):
+    """
+    Returns a dict mapping each (G, A, V) to a build_info dict,
+    representing the latest build for each GAV in the tag.
+
+    If pkg_names is given, then only those builds matching the given
+    package names are returned.
+
+    :rtype: dict[tuple[str], dict]
+    """
+
+    builds = iter_latest_maven_builds(session, tag, pkg_names, inherit)
+    return dict(builds)
+
+
+def decorate_maven_builds(session, build_infos):
+    """
+    If build_infos were not loaded in a way that provided the maven
+    btype fields, load the maven info and merge it into the build info
+    dicts that need it.
+    """
+
+    build_infos = tuple(build_infos)
+
+    wanted = dict((bld["id"], bld) for bld in build_infos if
+                  ("maven_group_id" not in bld and
+                   "_ksd_maven" not in bld))
+
+    for bid, mvn in iter_bulk_load(session, session.getMavenBuild, wanted):
+        bld = wanted[bid]
+        if mvn:
+            bld["maven_group_id"] = mvn["group_id"]
+            bld["maven_artifact_id"] = mvn["artifact_id"]
+            bld["maven_version"] = mvn["version"]
+            bld["_ksd_maven"] = True
+        else:
+            bld["_ksd_maven"] = False
+
+    return build_infos
 
 
 def decorate_build_archive_data(session, build_infos, with_cg=False):
