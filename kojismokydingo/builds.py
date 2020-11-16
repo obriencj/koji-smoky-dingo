@@ -379,18 +379,19 @@ def iter_latest_maven_builds(session, tag, pkg_names=None, inherit=True):
     taginfo = as_taginfo(session, tag)
     tid = taginfo["id"]
 
-    pkgs = session.listPackages(tid, inherited=inherit)
-    wanted = set(p['package_name'] for p in pkgs if not p['blocked'])
-
-    if pkg_names:
-        wanted = wanted.union(set(pkg_names))
+    if pkg_names is None:
+        # pkgs = session.listPackages(tid, inherited=True)
+        # pkg_names = set(p['package_name'] for p in pkgs if not p['blocked'])
+        pkg_names = [None]
+    else:
+        pkg_names = unique(pkg_names)
 
     latest = set()
 
     fn = lambda p: session.listTagged(tid, inherit=inherit,
                                       package=p, type="maven")
 
-    for pkg, builds in iter_bulk_load(session, fn, wanted):
+    for pkg, builds in iter_bulk_load(session, fn, pkg_names):
         for bld in builds:
             gav = gavgetter(bld)
             if gav not in latest:
