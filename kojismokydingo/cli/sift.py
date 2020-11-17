@@ -24,6 +24,7 @@ from __future__ import print_function
 from collections import defaultdict
 from functools import partial
 from operator import itemgetter
+from os.path import basename
 from six import iteritems
 
 from . import open_output, resplit
@@ -194,7 +195,8 @@ def output_sifted(results, key="id", outputs=None, sort=None):
 
     for flag, dest in iteritems(outputs):
         if "%" in dest:
-            dest = escapable_replace(dest, "%", flag)
+            safe_flag = flag.translate(str.maketrans("/\\ ", "___"))
+            dest = escapable_replace(dest, "%", safe_flag)
 
         if dest.startswith("@"):
             dest = dest[1:]
