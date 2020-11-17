@@ -12,7 +12,6 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-import re
 import six
 
 from collections import OrderedDict
@@ -133,7 +132,7 @@ class MatcherTest(TestCase):
         self.not_in_data(Regex(r"\[\]"))
         self.not_in_data(Regex("None"))
 
-        self.assertRaises(re.error, Regex, "[")
+        self.assertRaises(SifterError, Regex, "[")
 
 
     def test_number(self):
