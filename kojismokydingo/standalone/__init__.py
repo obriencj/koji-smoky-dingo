@@ -32,30 +32,12 @@ from six import iteritems
 
 from .. import AnonClientSession, BadDingo, ProfileClientSession
 from ..cli import AnonSmokyDingo, SmokyDingo, printerr
-from ..cli.builds import FilterBuilds
 
 
 __all__ = (
     "AnonLonelyDingo",
     "LonelyDingo",
-
-    "LonelyFilterBuilds",
-
-    "ksd_filter_builds",
 )
-
-
-def find_action(parser, key):
-    """
-    Hunts through a parser to discover an action who dest or metavar
-    matches the given key.
-    """
-
-    for act in parser._actions:
-        if key == act.dest or key == act.metavar \
-           or key in act.option_strings:
-            return act
-    return None
 
 
 class LonelyDingo(SmokyDingo):
@@ -124,81 +106,6 @@ class AnonLonelyDingo(LonelyDingo):
 
     def create_session(self, options):
         return AnonClientSession(options)
-
-
-class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
-    """
-    Adapter to make the FilterBuilds command into a LonelyDingo.
-    """
-
-    def arguments(self, parser):
-        addarg = parser.add_argument
-        addarg("filter_file", metavar="FILTER_FILE",
-               help="File of sifty filter predicates")
-
-        parser = self.profile_arguments(parser)
-        return super(LonelyFilterBuilds, self).arguments(parser)
-
-
-    def sifter_arguments(self, parser):
-        grp = parser.add_argument_group("Filtering with Sifty sieves")
-        addarg = grp.add_argument
-
-        addarg("--output", "-o", action="append", default=list(),
-               dest="outputs", metavar="FLAG=FILENAME",
-               help="Divert results marked with the given FLAG to"
-               " FILENAME. If FILENAME is '-', output to stdout."
-               " The 'default' flag is output to stdout by default,"
-               " and other flags are discarded")
-
-        return parser
-
-
-    def validate(self, parser, options):
-        # we need to go through the filter_file to look for the define
-        # directives, which is not part of the normal sifty filtering
-        # language. Since we're doing so, we may as well just load the
-        # filter into memory and use it for the sifter parsing as well,
-        # so we'll set filter_file to None and filter to the contents.
-
-        with open(options.filter_file, "rt") as fin:
-            src = fin.read()
-
-        options.filter_file = None
-        options.filter = src
-
-        # some options can be specified multiple times, so don't use a
-        # dict
-        defaults = []
-        for line in src.splitlines():
-            if line.startswith("#default "):
-                defn = line[9:].split("=", 1)
-                key = defn[0].strip()
-                val = "" if len(defn) == 1 else defn[1].strip()
-                defaults.append((key, val))
-
-        for key, val in defaults:
-            act = find_action(parser, key)
-            if not act:
-                printerr("WARNING: unknown option", key)
-
-            elif getattr(options, act.dest) == act.default:
-                # FIXME: this heuristic isn't very good. we're
-                # checking if the options object has what would be the
-                # default value, and presuming that means it wasn't
-                # set to anything, and therefore setting it to the
-                # value of the define in the script. However, this
-                # means one cannot use a command-line switch to
-                # override a define back to its default
-                # value. Something to fix later.
-                act(parser, options, val)
-
-        return super(LonelyFilterBuilds, self).validate(parser, options)
-
-
-# The console_scripts entry point is an instance of the class, not the
-# class itself.
-ksd_filter_builds = LonelyFilterBuilds("ksd-filter-builds")
 
 
 #
