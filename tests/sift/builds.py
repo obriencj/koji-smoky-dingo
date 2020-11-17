@@ -17,11 +17,12 @@ from unittest import TestCase
 
 from kojismokydingo.sift import Sifter, SifterError
 from kojismokydingo.sift.builds import (
-    EVRCompare,
+    CGImportedSieve, EVRCompare,
     EVRCompareEQ, EVRCompareNE,
     EVRCompareLT, EVRCompareLE,
     EVRCompareGT, EVRCompareGE,
-    ImportedSieve, StateSieve,
+    ImportedSieve, TaggedSieve, InheritedSieve,
+    StateSieve, TypeSieve,
     build_info_sifter, sift_builds, sift_nvrs, )
 
 from ..builds import (
@@ -524,6 +525,64 @@ class ImportedSieveTest(TestCase):
         """
         res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"], [BUILD_SAMPLES[-1]])
+
+
+class TypeSieveTest(TestCase):
+
+    def test_type(self):
+        src = """
+        (type rpm)
+        """
+        sifter = build_info_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], TypeSieve))
+        self.assertEqual(repr(sieves[0]), "(type Symbol('rpm'))")
+
+        res = sifter(None, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_5])
+
+        src = """
+        (type)
+        """
+        self.assertRaises(SifterError, build_info_sifter, src)
+
+
+class CGImportedSieveTest(TestCase):
+
+    def test_cg_imported(self):
+        src = """
+        (cg-imported example-cg)
+        """
+        sifter = build_info_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], CGImportedSieve))
+        self.assertEqual(repr(sieves[0]), "(cg-imported Symbol('example-cg'))")
+
+        res = sifter(None, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_3])
+
+        src = """
+        (cg-imported other-cg)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_2, BUILD_SAMPLE_3])
+
+        src = """
+        (cg-imported 902)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_2, BUILD_SAMPLE_3])
+
+        src = """
+        (!cg-imported)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_4, BUILD_SAMPLE_5])
 
 
 class SiftNVRsTest(TestCase):

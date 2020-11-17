@@ -32,12 +32,11 @@ from . import (
     ensure_all_matcher, ensure_all_int_or_str,
     ensure_int_or_str, ensure_str, )
 from .. import (
-    as_taginfo,
-    bulk_load, bulk_load_builds, bulk_load_tags,
+    as_taginfo, bulk_load, bulk_load_builds, bulk_load_tags,
     bulk_load_users, )
 from ..builds import (
-    build_dedup, decorate_maven_builds,
-    gavgetter, iter_latest_maven_builds, )
+    build_dedup, decorate_builds_btypes, decorate_builds_cg_list,
+    decorate_builds_maven, gavgetter, iter_latest_maven_builds, )
 from ..common import rpm_evr_compare, unique
 from ..tags import gather_tag_ids
 
@@ -45,6 +44,7 @@ from ..tags import gather_tag_ids
 __all__ = (
     "DEFAULT_BUILD_INFO_SIEVES",
 
+    "CGImportedSieve",
     "EpochSieve",
     "EVRCompareEQ",
     "EVRCompareNE",
@@ -53,6 +53,7 @@ __all__ = (
     "EVRCompareGT",
     "EVRCompareGE",
     "ImportedSieve",
+    "InheritedSieve",
     "LatestSieve",
     "LatestMavenSieve",
     "NameSieve",
@@ -60,6 +61,8 @@ __all__ = (
     "OwnerSieve",
     "ReleaseSieve",
     "StateSieve",
+    "TaggedSieve",
+    "TypeSieve",
     "VersionSieve",
 
     "build_info_sieves",
@@ -141,6 +144,7 @@ class StateSieve(ItemSieve):
 
     name = field = "state"
 
+
     def __init__(self, sifter, pattern):
         state = ensure_int_or_str(pattern)
 
@@ -167,6 +171,7 @@ class OwnerSieve(Sieve):
 
     name = "owner"
 
+
     def __init__(self, sifter, user, *users):
         self.users = [user]
         self.users.extend(users)
@@ -191,6 +196,7 @@ class ImportedSieve(Sieve):
     """
 
     name = "imported"
+
 
     def check(self, session, binfo):
         return not binfo.get("task_id")
@@ -500,42 +506,59 @@ class TypeSieve(Sieve):
     def __init__(self, sifter, btype, *btypes):
         bts = [btype]
         bts.extend(btypes)
-        bts = ensure_all_int_or_str(bts)
+        bts = ensure_all_matcher(bts)
 
         super(TypeSieve, self).__init__(sifter, *bts)
 
 
     def prep(self, session, binfos):
-
-        needed = {}
-        for binfo in binfos:
-            cache = self.get_cache(binfo)
-            if "btypes" not in cache:
-                if "archive_btype_names" in binfo:
-                    # this binfo has been decorated already to include
-                    # the btype names as a set, so let's steal that
-                    # data rather than looking it up again from the
-                    # session.
-                    cache["btypes"] = binfo["archive_btype_names"]
-                else:
-                    needed[binfo["id"]] = cache
-
-        if needed:
-            fn = session.getBuildType
-            for bid, btns in iteritems(bulk_load(session, fn, needed)):
-                cache = needed[bid]
-                cache["btypes"] = set(btns)
+        decorate_builds_btypes(session, binfos)
 
 
     def check(self, session, binfo):
-        cache = self.get_cache(binfo)
-        btypes = cache.get("btypes", ())
+        bt_names = binfo.get("archive_btype_names", ())
+        bt_ids = binfo.get("archive_btype_ids", ())
 
-        for match in self.tokens:
-            if match in btypes:
+        for t in self.tokens:
+            if t in bt_names or t in bt_ids:
                 return True
-
         return False
+
+
+class CGImportedSieve(Sieve):
+    """
+    usage: (cg-imported [CGNAME...])
+
+    Passes build infos that have been produced via a cg-import by any
+    of the named content generators. If no CGs are named, then passes
+    build infos that have been produced by any content generator.
+    """
+
+    name = "cg-imported"
+
+
+    def __init__(self, sifter, *cgnames):
+        cgnames = ensure_all_matcher(cgnames)
+        super(CGImportedSieve, self).__init__(sifter, *cgnames)
+
+
+    def prep(self, session, binfos):
+        decorate_builds_cg_list(session, binfos)
+
+
+    def check(self, session, binfo):
+        cg_names = binfo.get("archive_cg_names", ())
+        cg_ids = binfo.get("archive_cg_ids", ())
+
+        tokens = self.tokens
+        if tokens:
+            for t in tokens:
+                if t in cg_names or t in cg_ids:
+                    return True
+            return False
+
+        else:
+            return bool(cg_names)
 
 
 class LatestSieve(Sieve):
@@ -617,33 +640,21 @@ class LatestMavenSieve(VariadicSieve):
 
         # mapping (G,A,V):ID for the latest GAV builds
         # in tag
-        self.cache = {}
+        self.cache = None
 
 
     def prep(self, session, binfos):
 
         tag = self.tag = as_taginfo(session, self.tag)
-        cache = self.cache
 
         # in order to perform the GAV comparisons, we need to have
         # loaded the various binfos with their maven fields. This
         # corrects any which were not loaded this way.
-        binfos = decorate_maven_builds(session, binfos)
+        decorate_builds_maven(session, binfos)
 
-        # now we'll see which builds have a GAV we don't already
-        # know the latest build for
-        wanted = (bld for bld in binfos if
-                  ("maven_group_id" in bld and
-                   gavgetter(bld) not in cache))
-
-        pkgs = [bld["package_name"] for bld in wanted]
-        if pkgs:
-            # load the GAV,build_id for the packages we need it for,
-            # and update the GAV cache
-            sought = iter_latest_maven_builds(session, tag,
-                                              pkg_names=pkgs,
-                                              inherit=True)
-            cache.update((gav, bld["id"]) for gav, bld in sought)
+        if self.cache is None:
+            sought = iter_latest_maven_builds(session, tag, inherit=True)
+            self.cache = dict((gav, bld["id"]) for gav, bld in sought)
 
 
     def check(self, session, binfo):
@@ -652,6 +663,7 @@ class LatestMavenSieve(VariadicSieve):
 
 
 DEFAULT_BUILD_INFO_SIEVES = [
+    CGImportedSieve,
     EpochSieve,
     EVRCompareEQ,
     EVRCompareNE,

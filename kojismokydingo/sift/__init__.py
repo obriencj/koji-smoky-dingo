@@ -1045,7 +1045,11 @@ class Sifter(object):
             if cls is None:
                 raise SifterError("No such sieve: %s" % name)
 
-            result = cls(self, *map(self._convert, args))
+            try:
+                result = cls(self, *map(self._convert, args))
+            except TypeError as te:
+                msg = "Error creating Sieve %s: %s" % (name, te)
+                raise SifterError(msg)
 
         else:
             result = parsed

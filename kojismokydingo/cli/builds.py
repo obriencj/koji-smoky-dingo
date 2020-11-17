@@ -42,7 +42,7 @@ from ..builds import (
     BUILD_COMPLETE, BUILD_DELETED,
     BuildFilter,
     build_dedup, build_id_sort, build_nvr_sort,
-    decorate_build_archive_data, filter_imported,
+    decorate_builds_btypes, decorate_builds_cg_list, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_tag_builds)
 from ..tags import ensure_tag, gather_tag_ids
@@ -636,7 +636,7 @@ def cli_list_btypes(session, nvr=None, json=False, quiet=False):
 
     if nvr:
         build = as_buildinfo(session, nvr)
-        decorate_build_archive_data(session, [build], False)
+        decorate_builds_btypes(session, [build])
         build_bts = build["archive_btype_ids"]
 
         for btid in list(btypes):
@@ -700,7 +700,7 @@ def cli_list_cgs(session, nvr=None, json=False, quiet=False):
 
     if nvr:
         build = as_buildinfo(session, nvr)
-        decorate_build_archive_data(session, [build], True)
+        decorate_builds_cg_list(session, [build])
         build_cgs = build["archive_cg_ids"]
 
         for cgid in list(cgs):

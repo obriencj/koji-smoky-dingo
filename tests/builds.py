@@ -29,10 +29,10 @@ BUILD_SAMPLE_1 = {
     "release": "1",
     "epoch": None,
     "task_id": None,
-    "archive_cg_ids": set([901]),
-    "archive_cg_names": set(["example-cg"]),
-    "archive_btype_ids": set([701]),
-    "archive_btype_names": set(["example"]),
+    "archive_cg_ids": [901],
+    "archive_cg_names": ["example-cg"],
+    "archive_btype_ids": [701],
+    "archive_btype_names": ["example"],
 }
 
 # A CG-imported build
@@ -46,10 +46,10 @@ BUILD_SAMPLE_1_1 = {
     "epoch": None,
     "task_id": None,
     "owner_id": 1,
-    "archive_cg_ids": set([901]),
-    "archive_cg_names": set(["example-cg"]),
-    "archive_btype_ids": set([701]),
-    "archive_btype_names": set(["example"]),
+    "archive_cg_ids": [901],
+    "archive_cg_names": ["example-cg"],
+    "archive_btype_ids": [701],
+    "archive_btype_names": ["example"],
 }
 
 # A CG-imported build
@@ -63,10 +63,10 @@ BUILD_SAMPLE_2 = {
     "epoch": None,
     "task_id": None,
     "owner_id": 2,
-    "archive_cg_ids": set([902]),
-    "archive_cg_names": set(["other-cg"]),
-    "archive_btype_ids": set([702]),
-    "archive_btype_names": set(["other"]),
+    "archive_cg_ids": [902],
+    "archive_cg_names": ["other-cg"],
+    "archive_btype_ids": [702],
+    "archive_btype_names": ["other"],
 }
 
 # A CG-imported build from multiple CGs
@@ -80,10 +80,10 @@ BUILD_SAMPLE_3 = {
     "epoch": None,
     "task_id": None,
     "owner_id": 3,
-    "archive_cg_ids": set([901, 902]),
-    "archive_cg_names": set(["example-cg", "other-cg"]),
-    "archive_btype_ids": set([701, 702]),
-    "archive_btype_names": set(["example", "other"]),
+    "archive_cg_ids": [901, 902],
+    "archive_cg_names": ["example-cg", "other-cg"],
+    "archive_btype_ids": [701, 702],
+    "archive_btype_names": ["example", "other"],
 }
 
 # An imported, non-CG build
@@ -97,10 +97,10 @@ BUILD_SAMPLE_4 = {
     "epoch": "1",
     "task_id": None,
     "owner_id": 1,
-    "archive_cg_ids": set(),
-    "archive_cg_names": set(),
-    "archive_btype_ids": set([0]),
-    "archive_btype_names": set(["rpm"]),
+    "archive_cg_ids": [],
+    "archive_cg_names": [],
+    "archive_btype_ids": [],
+    "archive_btype_names": [],
 }
 
 # A non-imported build
@@ -114,10 +114,10 @@ BUILD_SAMPLE_5 = {
     "epoch": "1",
     "task_id": 500,
     "owner_id": 99,
-    "archive_cg_ids": set(),
-    "archive_cg_names": set(),
-    "archive_btype_ids": set([0]),
-    "archive_btype_names": set(["rpm"]),
+    "archive_cg_ids": [],
+    "archive_cg_names": [],
+    "archive_btype_ids": [1],
+    "archive_btype_names": ["rpm"],
 }
 
 
