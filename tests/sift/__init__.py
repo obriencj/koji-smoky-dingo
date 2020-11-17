@@ -156,7 +156,7 @@ class ItemPathTest(TestCase):
 
 
     def in_path(self, paths, expected):
-        pth = ItemPath(paths)
+        pth = ItemPath(*paths)
         self.assertEqual(list(pth.get(self.DATA)), expected)
 
 
@@ -167,6 +167,10 @@ class ItemPathTest(TestCase):
         self.in_path([Symbol("qux"), Symbol("food")], [False])
         self.in_path([Symbol("quxx"), Symbol("food")], [])
 
+        ip = ItemPath(Symbol("quxx"), Symbol("food"))
+        self.assertEqual(repr(ip),
+                         "ItemPath(Item('quxx'), Item('food'))")
+
 
     def test_slice(self):
         self.in_path(["foo", slice(None)], [1, 9])
@@ -174,6 +178,11 @@ class ItemPathTest(TestCase):
 
         self.in_path(["foo", slice(1, None)], [9])
         self.in_path(["bar", slice(1, -1)], [3, 4, 5])
+
+        ip = ItemPath("bar", slice(1, -1))
+        self.assertEqual(repr(ip),
+                         "ItemPath(Item('bar'),"
+                         " Item(slice(1, -1, None)))")
 
 
 class NameSieve(ItemSieve):
@@ -260,11 +269,11 @@ DATA = [
 
 class SifterTest(TestCase):
 
-    def compile_sifter(self, src):
+    def compile_sifter(self, src, **params):
         sieves = [NameSieve, TypeSieve, BrandSieve, CategorySieve, Poke]
         sieves.extend(DEFAULT_SIEVES)
 
-        return Sifter(sieves, src)
+        return Sifter(sieves, src, params=params)
 
 
     def test_int_item(self):
@@ -797,6 +806,12 @@ class SifterTest(TestCase):
         (item name Pizza)
         """
         sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], ItemPathSieve))
+        self.assertEqual(repr(sieves[0]),
+                         "(item ItemPath(Item('name')) Pizza)")
+
         res = sifter(None, DATA)
         self.assertEqual(res["default"], [PIZZA])
 
@@ -966,6 +981,34 @@ class SifterTest(TestCase):
 
         che = sifter.get_cache("poke", DRAINO)
         self.assertEqual(che["count"], 4)
+
+
+    def test_symbol_param(self):
+
+        src = """
+        (.type $TYPE)
+        """
+        sifter = self.compile_sifter(src, TYPE="food")
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS, PIZZA])
+
+        sifter = self.compile_sifter(src, TYPE="drink")
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [BEER, DRAINO])
+
+
+    def test_string_param(self):
+
+        src = """
+        (.type "{TYPE}")
+        """
+        sifter = self.compile_sifter(src, TYPE="food")
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [TACOS, PIZZA])
+
+        sifter = self.compile_sifter(src, TYPE="drink")
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], [BEER, DRAINO])
 
 
 class EnsureTypeTest(TestCase):

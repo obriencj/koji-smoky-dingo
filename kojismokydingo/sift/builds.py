@@ -809,7 +809,7 @@ def build_info_sieves():
     return sieves
 
 
-def build_info_sifter(source):
+def build_info_sifter(source, params=None):
     """
     Create a Sifter from the source using the default build-info
     Sieves.
@@ -820,10 +820,10 @@ def build_info_sifter(source):
     :rtype: Sifter
     """
 
-    return Sifter(build_info_sieves(), source)
+    return Sifter(build_info_sieves(), source, "id", params)
 
 
-def sift_builds(session, src_str, build_infos):
+def sift_builds(session, src_str, build_infos, params=None):
     """
     :param src_str: sieve expressions source
     :type src_str: src
@@ -834,11 +834,11 @@ def sift_builds(session, src_str, build_infos):
     :rtype: dict[str,list[dict]]
     """
 
-    sifter = build_info_sifter(src_str)
+    sifter = build_info_sifter(src_str, params)
     return sifter(session, build_infos)
 
 
-def sift_nvrs(session, src_str, nvrs):
+def sift_nvrs(session, src_str, nvrs, params=None):
     """
     :param src_str: sieve expressions source
     :type src_str: src
@@ -851,7 +851,7 @@ def sift_nvrs(session, src_str, nvrs):
 
     loaded = bulk_load_builds(session, nvrs, err=False)
     builds = build_dedup(itervalues(loaded))
-    return sift_builds(session, src_str, builds)
+    return sift_builds(session, src_str, builds, params)
 
 
 #

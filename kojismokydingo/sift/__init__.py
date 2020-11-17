@@ -276,7 +276,7 @@ class AllItems(Item):
 
 class ItemPath(object):
 
-    def __init__(self, paths):
+    def __init__(self, *paths):
         self.paths = list(paths)
 
         for i, p in enumerate(paths):
@@ -299,7 +299,7 @@ class ItemPath(object):
 
 
     def __repr__(self):
-        return "ItemPath(%r)" % self.paths
+        return "ItemPath(%s)" % ", ".join(map(str, self.paths))
 
 
 class Reader(StringIO):
@@ -619,7 +619,7 @@ def parse_itempath(reader, prefix=None, char=None):
         paths.append(convert_token(token.getvalue()))
         token = None
 
-    return ItemPath(paths)
+    return ItemPath(*paths)
 
 
 _slice_like = Regex(r"^("
@@ -912,7 +912,7 @@ def ensure_all_sieve(values, msg=None):
 
 class Sifter(object):
 
-    def __init__(self, sieves, source, key="id", params={}):
+    def __init__(self, sieves, source, key="id", params=None):
         """
         A flagging data filter, compiled from an s-expression syntax.
 
@@ -947,7 +947,7 @@ class Sifter(object):
             key = itemgetter(key)
         self.key = key
 
-        self.params = params
+        self.params = params or {}
 
         # {flagname: set(data_id)}
         self._flags = {}
@@ -1472,7 +1472,7 @@ class ItemPathSieve(Sieve):
 
     def __init__(self, sifter, path, *values):
         if not isinstance(path, ItemPath):
-            path = ItemPath([path])
+            path = ItemPath(path)
 
         values = ensure_all_matcher(values)
         super(ItemPathSieve, self).__init__(sifter, *values)

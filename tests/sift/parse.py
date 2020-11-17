@@ -769,18 +769,18 @@ class TestParseItemPath(TestCase):
     def test_repr(self):
 
         ip = parse_itempath("foo")
-        self.assertEqual(repr(ip), "ItemPath([Item('foo')])")
+        self.assertEqual(repr(ip), "ItemPath(Item('foo'))")
 
         ip = parse_itempath("[]")
-        self.assertEqual(repr(ip), "ItemPath([AllItems()])")
+        self.assertEqual(repr(ip), "ItemPath(AllItems())")
 
         ip = parse_itempath("[1:]")
         self.assertEqual(repr(ip),
-                         "ItemPath([Item(slice(1, None, None))])")
+                         "ItemPath(Item(slice(1, None, None)))")
 
         ip = parse_itempath("[{foo,bar}]")
         self.assertEqual(repr(ip),
-                         "ItemPath([ItemMatch(SymbolGroup('{foo,bar}'))])")
+                         "ItemPath(ItemMatch(SymbolGroup('{foo,bar}')))")
 
 
     def test_parse_item(self):
