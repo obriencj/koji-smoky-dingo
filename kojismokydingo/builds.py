@@ -484,6 +484,9 @@ def decorate_builds_btypes(session, build_infos, with_fields=True):
             continue
 
         for btn, data in iteritems(bts):
+            if not data:
+                continue
+
             if btn == "win":
                 # the win field doesn't get prefixed with "win_"
                 bld["platform"] = data["platform"]
