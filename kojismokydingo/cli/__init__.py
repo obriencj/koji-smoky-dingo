@@ -52,6 +52,7 @@ __all__ = (
     "TargetSmokyDingo",
 
     "clean_lines",
+    "find_action",
     "int_or_str",
     "open_output",
     "pretty_json",
@@ -99,6 +100,19 @@ def pretty_json(data, output=None, **pretty):
 
     dump(data, output, **pretty_options)
     print(file=output)
+
+
+def find_action(parser, key):
+    """
+    Hunts through a parser to discover an action who dest or metavar
+    matches the given key.
+    """
+
+    for act in parser._actions:
+        if key == act.dest or key == act.metavar \
+           or key in act.option_strings:
+            return act
+    return None
 
 
 def resplit(arglist, sep=","):
