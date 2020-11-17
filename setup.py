@@ -72,7 +72,7 @@ COMMANDS = {
 }
 
 CLI = {
-    "ksd-filter-builds": "kojismokydingo.standalone:ksd_filter_builds",
+    "ksd-filter-builds": "kojismokydingo.standalone.builds:ksd_filter_builds",
 }
 
 
