@@ -32,8 +32,8 @@ from . import (
     ensure_all_matcher, ensure_all_int_or_str,
     ensure_int_or_str, ensure_str, )
 from .. import (
-    as_taginfo, bulk_load, bulk_load_builds, bulk_load_tags,
-    bulk_load_users, )
+    as_taginfo, bulk_load_builds, bulk_load_tags,
+    bulk_load_users, iter_bulk_load, )
 from ..builds import (
     build_dedup, decorate_builds_btypes, decorate_builds_cg_list,
     decorate_builds_maven, gavgetter, iter_latest_maven_builds, )
@@ -59,6 +59,8 @@ __all__ = (
     "NameSieve",
     "NVRSieve",
     "OwnerSieve",
+    "PkgAllowedSieve",
+    "PkgBlockedSieve",
     "ReleaseSieve",
     "StateSieve",
     "TaggedSieve",
@@ -411,7 +413,7 @@ class TaggedSieve(Sieve):
 
         if needed:
             fn = lambda i: session.listTags(build=i)
-            for bid, tags in iteritems(bulk_load(session, fn, needed)):
+            for bid, tags in iter_bulk_load(session, fn, needed):
                 cache = needed[bid]
                 cache["tag_names"] = [t["name"] for t in tags]
                 cache["tag_ids"] = [t["id"] for t in tags]
@@ -475,7 +477,7 @@ class InheritedSieve(Sieve):
 
         if needed:
             fn = lambda i: session.listTags(build=i)
-            for bid, tags in iteritems(bulk_load(session, fn, needed)):
+            for bid, tags in iter_bulk_load(session, fn, needed):
                 cache = needed[bid]
                 cache["tag_names"] = [t["name"] for t in tags]
                 cache["tag_ids"] = [t["id"] for t in tags]
@@ -487,6 +489,106 @@ class InheritedSieve(Sieve):
 
         for tid in cache.get("tag_ids", ()):
             if tid in inheritance:
+                return True
+
+        return False
+
+
+class PkgSieve(Sieve):
+
+    def __init__(self, sifter, tagname, *tagnames):
+        tags = [tagname]
+        tags.extend(tagnames)
+        tags = ensure_all_int_or_str(tags)
+
+        super(PkgSieve, self).__init__(sifter, *tags)
+
+        self.tag_ids = None
+
+
+    @staticmethod
+    def tag_pkglist(cache={}):
+        """
+        ``{tag_id: {"allowed": set(...), "blocked": set(...)}, ...}``
+
+        Shared across all PkgSieve instances. Populated during
+        instance prep from the package listing of their tags
+        """
+
+        return cache
+
+
+    def prep(self, session, binfos):
+        # look up our tags
+        tids = self.tag_ids
+        if tids is None:
+            loaded = bulk_load_tags(session, self.tokens, err=True)
+            self.tag_ids = tids = set(t["id"] for t in itervalues(loaded))
+
+        # see if we are missing a package listing for any of our tags. It
+        # may have been loaded by another instance of a PkgSieve
+        cache = self.tag_pkglist()
+        needed = [tid for tid in tids if tid not in cache]
+
+        if not needed:
+            return
+
+        fn = lambda t: session.listPackages(t, inherited=True)
+        for tid, pkgs in iter_bulk_load(session, fn, needed):
+            allowed = set()
+            blocked = set()
+
+            for pkg in pkgs:
+                if pkg["blocked"]:
+                    blocked.add(pkg["package_name"])
+                else:
+                    allowed.add(pkg["package_name"])
+
+            cache[tid] = {
+                "allowed": allowed,
+                "blocked": blocked
+            }
+
+
+class PkgAllowedSieve(PkgSieve):
+    """
+    usage: (pkg-allowed TAG [TAG...])
+
+    Matches builds which are have their package listing present and
+    not blocked in and of the given tags or their parents.
+    """
+
+    name = "pkg-allowed"
+
+
+    def check(self, session, binfo):
+        cache = self.tag_pkglist()
+        pkg = binfo["name"]
+
+        for tid in self.tag_ids:
+            if pkg in cache[tid]["allowed"]:
+                return True
+
+        return False
+
+
+class PkgBlockedSieve(PkgSieve):
+    """
+    usage: (pkg-blocked TAG [TAG...])
+
+    Matches builds which are have their package name blocked in and of the
+    given tags or their parents.
+    """
+
+    name = "pkg-blocked"
+
+
+    def check(self, session, binfo):
+        cache = self.tag_pkglist()
+        pkg = binfo["name"]
+
+        for tid in self.tag_ids:
+            if pkg in cache[tid]["blocked"]:
                 return True
 
         return False
@@ -678,6 +780,8 @@ DEFAULT_BUILD_INFO_SIEVES = [
     NameSieve,
     NVRSieve,
     OwnerSieve,
+    PkgAllowedSieve,
+    PkgBlockedSieve,
     ReleaseSieve,
     StateSieve,
     TaggedSieve,

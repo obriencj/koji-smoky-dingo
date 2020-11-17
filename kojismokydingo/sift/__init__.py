@@ -21,9 +21,9 @@ logical constructs and a facility for setting and checking flags. The
 language must be extended to add more predicates specific to the
 schema of the data being filtered to become useful.
 
-This mini-language has nothing to do with Sifty, nor the Sieve email
-filtering language. I just thought that Sifter and Sieve were good
-names for something that filters stuff.
+The Sifty Dingo mini-language has nothing to do with the Sifty
+project, nor the Sieve email filtering language. I just thought that
+Sifter and Sieve were good names for something that filters stuff.
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
@@ -163,7 +163,11 @@ class Regex(Matcher):
         self._flagstr = flags
 
         fint = sum(getattr(re, c.upper(), 0) for c in flags) if flags else 0
-        self._re = re.compile(src, fint)
+
+        try:
+            self._re = re.compile(src, fint)
+        except re.error as exc:
+            raise RegexError(str(exc))
 
 
     def __eq__(self, val):
@@ -728,10 +732,7 @@ def parse_quoted(reader, quotec=None, advanced_escapes=True):
         while reader.peek(1) in "aiLmsux":
             flags.append(reader.read(1))
 
-        try:
-            val = Regex(val, "".join(flags))
-        except re.error as exc:
-            raise RegexError(str(exc))
+        val = Regex(val, "".join(flags))
 
     elif quotec == "|":
         flags = False
@@ -911,7 +912,7 @@ def ensure_all_sieve(values, msg=None):
 
 class Sifter(object):
 
-    def __init__(self, sieves, source, key="id"):
+    def __init__(self, sieves, source, key="id", params={}):
         """
         A flagging data filter, compiled from an s-expression syntax.
 
@@ -936,11 +937,17 @@ class Sifter(object):
           the incoming information. Default, use the "id" value.
 
         :type key: str, optional
+
+        :param params: Map of text substitutions for quoted strings
+
+        :type params: dict[str, str], optional
         """
 
         if not callable(key):
             key = itemgetter(key)
         self.key = key
+
+        self.params = params
 
         # {flagname: set(data_id)}
         self._flags = {}
@@ -1050,6 +1057,19 @@ class Sifter(object):
             except TypeError as te:
                 msg = "Error creating Sieve %s: %s" % (name, te)
                 raise SifterError(msg)
+
+        elif isinstance(parsed, Symbol):
+            if parsed.startswith("$") and parsed[1:] in self.params:
+                result = convert_token(self.params[parsed[1:]])
+                result = self._convert(result)
+            else:
+                result = parsed
+
+        elif isinstance(parsed, str):
+            if "{" in parsed:
+                result = parsed.format(**self.params)
+            else:
+                result = parsed
 
         else:
             result = parsed
@@ -1440,6 +1460,12 @@ class ItemSieve(VariadicSieve):
 
 
 class ItemPathSieve(Sieve):
+    """
+    usage: ``(item PATH [VALUE...])``
+
+    Resolves the given PATH on each element and checks that any of the given
+    values match. If any do, the element passes.
+    """
 
     name = "item"
 
@@ -1468,6 +1494,12 @@ class ItemPathSieve(Sieve):
                     return True
 
         return False
+
+
+    def __repr__(self):
+        toks = [self.name, str(self.path)]
+        toks.extend(map(str, self.tokens))
+        return "".join(("(", " ".join(toks), ")"))
 
 
 DEFAULT_SIEVES = [
