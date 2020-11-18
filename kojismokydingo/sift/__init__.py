@@ -96,10 +96,18 @@ class RegexError(SifterError):
 
 @add_metaclass(ABCMeta)
 class Matcher(object):
+    """
+    Base class for special comparison types
+    """
+
     pass
 
 
 class Null(Matcher):
+    """
+    An empty literal, represented by the symbols ``null`` or
+    ``None``. Matches only with the python None value.
+    """
 
     def __eq__(self, val):
         return val is None
@@ -114,12 +122,25 @@ class Null(Matcher):
 
 
 class Symbol(str, Matcher):
+    """
+    An unquoted literal series of characters. A symbol can compare
+    with python str instances.
+    """
 
     def __repr__(self):
         return "Symbol(%r)" % str(self)
 
 
 class SymbolGroup(Matcher):
+    """
+    A symbol group is a literal symbol with multiple permutations. It is
+    represented as a symbol containing groups within curly-braces
+
+    Examples:
+
+    * ``{foo,bar}-candidate`` is equal to foo-candidate and bar-candidate
+    * ``foo-{1..3}`` is equal to any of foo-1, foo-2, foo-3
+    """
 
     def __init__(self, src, groups):
         self.src = src
@@ -128,7 +149,7 @@ class SymbolGroup(Matcher):
 
     def __iter__(self):
         for k in map("".join, product(*self.groups)):
-            if k.isdigit():
+            if NUMBER_RE == k:
                 yield Number(k)
             else:
                 yield Symbol(k)
@@ -143,10 +164,14 @@ class SymbolGroup(Matcher):
 
 
 class Number(int, Matcher):
+    """
+    A number is a literal made entirely of digits. It can compare with
+    both the python int and str types.
+    """
 
     def __eq__(self, val):
         if isinstance(val, str):
-            if val.isdigit():
+            if NUMBER_RE == val:
                 val = int(val)
 
         return int(self) == val
@@ -157,6 +182,14 @@ class Number(int, Matcher):
 
 
 class Regex(Matcher):
+    """
+    A regex is a quoted literal using forward-slashes as quotes
+
+    Examples:
+
+    * ``/.*foo$/`` is a case-sensitive match for text ending in foo
+    * ``/.*foo$/i`` is a case-insensitive match for text ending in foo
+    """
 
     def __init__(self, src, flags=None):
         self._src = src
@@ -189,6 +222,14 @@ class Regex(Matcher):
 
 
 class Glob(Matcher):
+    """
+    A glob is a quoted literal using pipes as quotes
+
+    Examples:
+
+    * ``|*foo|`` is a case-sensitive match for text ending in foo
+    * ``|*foo|i`` is a case-insensitive match for text ending in foo
+    """
 
     def __init__(self, src, ignorecase=False):
         self._src = src
@@ -215,6 +256,9 @@ class Glob(Matcher):
 
 
 class Item(object):
+    """
+    Seeks path members by an int or str key.
+    """
 
     def __init__(self, key):
         if isinstance(key, int):
@@ -244,6 +288,10 @@ class Item(object):
 
 
 class ItemMatch(Item):
+    """
+    Seeks path members by comparison of keys to a matcher (eg. a Glob
+    or Regex)
+    """
 
     def get(self, d):
         if isinstance(d, dict):
@@ -258,6 +306,9 @@ class ItemMatch(Item):
 
 
 class AllItems(Item):
+    """
+    Seeks all path members
+    """
 
     def __init__(self):
         pass
@@ -318,7 +369,11 @@ class Reader(StringIO):
         return val
 
 
-def parse_symbol_groups(reader):
+def split_symbol_groups(reader):
+    """
+    Invoked to by convert_token to split up a symbol into a series of
+    groups which can then be combined to form a SymbolGroup.
+    """
 
     if isinstance(reader, str):
         reader = Reader(reader)
@@ -514,10 +569,19 @@ ESCAPE_SEQUENCE_RE = re.compile(r'''
 )''', re.UNICODE | re.VERBOSE)
 
 
-def convert_escapes(s):
+def convert_escapes(val):
+    """
+    Decodes common escape sequences embedded in a str
+
+    :rtype: str
+    """
+
     def descape(m):
         return decode(m.group(0), 'unicode-escape')
-    return ESCAPE_SEQUENCE_RE.sub(descape, s)
+    return ESCAPE_SEQUENCE_RE.sub(descape, val)
+
+
+NUMBER_RE = Regex(r"^-?\d+$")
 
 
 def convert_token(val):
@@ -538,15 +602,18 @@ def convert_token(val):
     if val in (None, "None", "null", "nil"):
         return Null()
 
-    elif val.isdigit():
+    elif NUMBER_RE == val:
         return Number(val)
 
     else:
         val = convert_escapes(val)
 
         if "{" in val:
-            grps = list(parse_symbol_groups(val))
+            grps = list(split_symbol_groups(val))
             if all(map(lambda v: len(v) == 1, grps)):
+                # in cases where there's only one choice in all the
+                # groups, then we can simply create a single Symbol
+                # from those merged choices.
                 val = "".join(g[0] for g in grps)
                 return Symbol(val)
             else:
@@ -632,6 +699,18 @@ _slice_like = Regex(r"^("
 
 
 def convert_slice(val):
+    """
+    Converted a colon-separated string into a slice. Raises a TypeError
+    if the elements do not convert cleanly to integers
+
+    Examples:
+    * val of ``1:`` results in ``slice(1, None, None)``
+    * val of ``:1`` results in ``slice(None, 1, None)``
+    * val of ``"1:2:3"`` results in ``slice(1, 2, 3)``
+
+    :rtype: slice
+    """
+
     vals = ((int(v) if v else None) for v in val.split(":"))
     return slice(*vals)
 
