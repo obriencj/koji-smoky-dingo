@@ -21,6 +21,8 @@ Some CLI adapters for working with Sifty Dingo filtering
 
 from __future__ import print_function
 
+import os
+
 from collections import defaultdict
 from functools import partial
 from operator import itemgetter
@@ -29,7 +31,7 @@ from six import iteritems
 
 from . import open_output, resplit
 from ..common import escapable_replace
-from ..sift import DEFAULT_SIEVES, Sifter
+from ..sift import DEFAULT_SIEVES, Sifter, SifterError
 from ..sift.builds import build_info_sieves
 
 
@@ -60,6 +62,15 @@ class Sifting(object):
         grp = parser.add_argument_group("Filtering with Sifty sieves")
         addarg = grp.add_argument
 
+        addarg("--param", "-P", action="append", default=list(),
+               dest="params", metavar="KEY=VALUE",
+               help="Provide compile-time values to the sifty"
+               " filter expressions")
+
+        addarg("--env", action="store_true", default=False,
+               dest="use_env",
+               help="Use environment vars for params left unassigned")
+
         addarg("--output", "-o", action="append", default=list(),
                dest="outputs", metavar="FLAG:FILENAME",
                help="Divert results marked with the given FLAG to"
@@ -79,6 +90,41 @@ class Sifting(object):
                help="Load sifty filter predictes from file")
 
         return parser
+
+
+    def default_params(self):
+        params = getattr(self, "_sifter_params", None)
+        if params is None:
+            params = self._sifter_params = {}
+        return params
+
+
+    def get_params(self, options):
+
+        # build up a params dict based on command-line options, param
+        # definitions from the filter file, and finally the
+        # environment if the --env flag was set.
+        cli_params = options.params
+        env_params = os.environ if options.use_env else {}
+        params = self.default_params()
+
+        for opt in resplit(cli_params):
+            if "=" in opt:
+                key, val = opt.split("=", 1)
+            else:
+                key = opt
+                val = None
+            params[key] = val
+
+        for key, val in iteritems(params):
+            if val is None:
+                if key in env_params:
+                    params[key] = env_params[key]
+                else:
+                    msg = "param %s is not defined" % key
+                    raise SifterError(msg)
+
+        return params
 
 
     def get_outputs(self, options):
@@ -135,7 +181,9 @@ class Sifting(object):
         else:
             return None
 
-        return Sifter(self.get_sieves(), filter_src)
+        params = self.get_params(options)
+
+        return Sifter(self.get_sieves(), filter_src, params=params)
 
 
 class BuildSifting(Sifting):

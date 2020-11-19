@@ -13,7 +13,8 @@ koji filter-builds
                            [--limit LIMIT] [--shallow-limit SHALLOW_LIMIT]
                            [--type BUILD_TYPE] [--rpm] [--maven] [--image]
                            [--win] [-c CG_NAME] [--imports | --no-imports]
-                           [--completed | --deleted] [--output FLAG:FILENAME]
+                           [--completed | --deleted] [--param KEY=VALUE]
+                           [--env] [--output FLAG:FILENAME]
                            [--filter FILTER | --filter-file FILTER_FILE]
                            [NVR [NVR ...]]
 
@@ -71,6 +72,10 @@ koji filter-builds
    --deleted             Limit to deleted builds
 
  Filtering with Sifty sieves:
+   --param KEY=VALUE, -P KEY=VALUE
+                         Provide compile-time values to the sifty filter
+                         expressions
+   --env                 Use environment vars for params left unassigned
    --output FLAG:FILENAME, -o FLAG:FILENAME
                          Divert results marked with the given FLAG to FILENAME.
                          If FILENAME is '-', output to stdout. The 'default'

@@ -23,14 +23,11 @@ into a stand-alone console_script entry point.
 """
 
 
-import os
-
 from six import iteritems
 
 from . import AnonLonelyDingo
 from ..cli import find_action, printerr, resplit
 from ..cli.builds import FilterBuilds
-from ..sift import Sifter, SifterError
 
 
 __all__ = (
@@ -54,15 +51,12 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
 
 
     def sifter_arguments(self, parser):
+        # TODO: it might be easier to call the super sifter_arguments
+        # and just remove the args we don't want, rather than
+        # duplicating most of the args here.
+
         grp = parser.add_argument_group("Filtering with Sifty sieves")
         addarg = grp.add_argument
-
-        addarg("--output", "-o", action="append", default=list(),
-               dest="outputs", metavar="FLAG=FILENAME",
-               help="Divert results marked with the given FLAG to"
-               " FILENAME. If FILENAME is '-', output to stdout."
-               " The 'default' flag is output to stdout by default,"
-               " and other flags are discarded")
 
         addarg("--param", "-P", action="append", default=list(),
                dest="params", metavar="KEY=VALUE",
@@ -73,12 +67,14 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
                dest="use_env",
                help="Use environment vars for params left unassigned")
 
+        addarg("--output", "-o", action="append", default=list(),
+               dest="outputs", metavar="FLAG=FILENAME",
+               help="Divert results marked with the given FLAG to"
+               " FILENAME. If FILENAME is '-', output to stdout."
+               " The 'default' flag is output to stdout by default,"
+               " and other flags are discarded")
+
         return parser
-
-
-    def get_sifter(self, options):
-        return Sifter(self.get_sieves(), options.filter,
-                      params=options.params)
 
 
     def validate(self, parser, options):
@@ -127,34 +123,7 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
                 # value. Something to fix later.
                 act(parser, options, val)
 
-        # build up a params dict based on command-line options, param
-        # definitions from the filter file, and finally the
-        # environment if the --env flag was set.
-        cli_params = options.params
-        env_params = os.environ if options.use_env else {}
-        params = dict(params)
-
-        for opt in resplit(cli_params):
-            if "=" in opt:
-                key, val = opt.split("=", 1)
-            else:
-                key = opt
-                val = None
-
-            if key not in params:
-                printerr("WARNING: unexpected param", key)
-            else:
-                params[key] = val
-
-        for key, val in iteritems(params):
-            if val is None:
-                if key in env_params:
-                    params[key] = env_params[key]
-                else:
-                    msg = "param %s is not defined" % key
-                    raise SifterError(msg)
-
-        options.params = params
+        self.default_params().update(params)
 
         return super(LonelyFilterBuilds, self).validate(parser, options)
 
