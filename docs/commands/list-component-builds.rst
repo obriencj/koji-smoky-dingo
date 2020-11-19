@@ -15,7 +15,7 @@ koji list-component-builds
                                    [--image] [--win] [-c CG_NAME]
                                    [--imports | --no-imports]
                                    [--completed | --deleted]
-                                   [--param KEY=VALUE] [--env]
+                                   [--param KEY=VALUE] [--env-params]
                                    [--output FLAG:FILENAME]
                                    [--filter FILTER | --filter-file FILTER_FILE]
                                    [NVR [NVR ...]]
@@ -75,7 +75,7 @@ koji list-component-builds
    --param KEY=VALUE, -P KEY=VALUE
                          Provide compile-time values to the sifty filter
                          expressions
-   --env                 Use environment vars for params left unassigned
+   --env-params          Use environment vars for params left unassigned
    --output FLAG:FILENAME, -o FLAG:FILENAME
                          Divert results marked with the given FLAG to FILENAME.
                          If FILENAME is '-', output to stdout. The 'default'
