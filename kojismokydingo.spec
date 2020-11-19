@@ -166,6 +166,7 @@ Koji Smoky Dingo
 %{python_sitelib}/koji_cli_plugins/
 %{python_sitelib}/kojismokydingo/
 %{python_sitelib}/kojismokydingo-%{version}-py2.?.egg-info/
+%{_bindir}/ksd-filter-builds
 
 %endif
 
@@ -188,6 +189,8 @@ Koji Smoky Dingo
 %{python2_sitelib}/koji_cli_plugins/
 %{python2_sitelib}/kojismokydingo/
 %{python2_sitelib}/kojismokydingo-%{version}.dist-info/
+%{_bindir}/ksd-filter-builds
+
 %doc README.md
 %license LICENSE
 
@@ -212,6 +215,8 @@ Koji Smoky Dingo
 %{python3_sitelib}/koji_cli_plugins/
 %{python3_sitelib}/kojismokydingo/
 %{python3_sitelib}/kojismokydingo-%{version}.dist-info/
+%{_bindir}/ksd-filter-builds
+
 %doc README.md
 %license LICENSE
 
@@ -228,6 +233,10 @@ Koji Smoky Dingo
   otherwise unhashable values
 - parse_datetime now accepts a 'strict=' parameter to let it return
   None instead of raising an Exception when parsing fails
+- filtering expressions support added to list-build-components and
+  filter-builds commands
+- ksd-filter-builds stand-alone command added to act as a shbang for
+  reusable filtering scripts
 
 * Fri Oct 02 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-1
 - add iter_bulk_load generator function
