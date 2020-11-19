@@ -53,6 +53,7 @@ __all__ = (
 
     "clean_lines",
     "find_action",
+    "remove_action",
     "int_or_str",
     "open_output",
     "pretty_json",
@@ -104,8 +105,8 @@ def pretty_json(data, output=None, **pretty):
 
 def find_action(parser, key):
     """
-    Hunts through a parser to discover an action who dest or metavar
-    matches the given key.
+    Hunts through a parser to discover an action whose dest, metavar,
+    or option strings matches the given key.
     """
 
     for act in parser._actions:
@@ -113,6 +114,26 @@ def find_action(parser, key):
            or key in act.option_strings:
             return act
     return None
+
+
+def remove_action(parser, key):
+    """
+    Hunts through a parser to remove an action based on the given key. The
+    key can match either the dest, the metavar, or the option strings.
+    """
+
+    found = find_action(parser, key)
+    if found is None:
+        return
+
+    parser._actions.remove(found)
+
+    if found in parser._optionals._actions:
+        parser._optionals._actions.remove(found)
+
+    for grp in parser._action_groups:
+        if found in grp._group_actions:
+            grp._group_actions.remove(found)
 
 
 def resplit(arglist, sep=","):

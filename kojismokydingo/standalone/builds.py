@@ -26,7 +26,7 @@ into a stand-alone console_script entry point.
 from six import iteritems
 
 from . import AnonLonelyDingo
-from ..cli import find_action, printerr, resplit
+from ..cli import find_action, printerr, remove_action, resplit
 from ..cli.builds import FilterBuilds
 
 
@@ -51,29 +51,9 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
 
 
     def sifter_arguments(self, parser):
-        # TODO: it might be easier to call the super sifter_arguments
-        # and just remove the args we don't want, rather than
-        # duplicating most of the args here.
-
-        grp = parser.add_argument_group("Filtering with Sifty sieves")
-        addarg = grp.add_argument
-
-        addarg("--param", "-P", action="append", default=list(),
-               dest="params", metavar="KEY=VALUE",
-               help="Provide compile-time values to the sifty"
-               " filter expressions")
-
-        addarg("--env", action="store_true", default=False,
-               dest="use_env",
-               help="Use environment vars for params left unassigned")
-
-        addarg("--output", "-o", action="append", default=list(),
-               dest="outputs", metavar="FLAG=FILENAME",
-               help="Divert results marked with the given FLAG to"
-               " FILENAME. If FILENAME is '-', output to stdout."
-               " The 'default' flag is output to stdout by default,"
-               " and other flags are discarded")
-
+        parser = super(LonelyFilterBuilds, self).sifter_arguments(parser)
+        remove_action(parser, "--filter")
+        remove_action(parser, "--filter-file")
         return parser
 
 
