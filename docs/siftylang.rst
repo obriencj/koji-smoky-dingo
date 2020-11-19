@@ -39,16 +39,16 @@ Loosely translated, this example means:
     nor inactive flags
 
 
-Literal Types
--------------
+Basic Syntax
+------------
 
 The language is composed of a series of nested sieve predicates, each
 with a symbol as its first element denoting the name of the
 sieve. Subsequent elements are the arguments to the predicate.
 
 
-Literal Sieve
-^^^^^^^^^^^^^
+Sieve Predicate
+^^^^^^^^^^^^^^^
 ::
 
   (foo)
@@ -58,7 +58,7 @@ Literal Sieve
 
 A sieve predicate bears the form of an S-Expression, with opening and
 closing parenthesis characters denoting the contents. The first
-element is the name of the predicate.
+element identifies the name of the predicate.
 
 Sieve predicates are not used to evalute to a value -- they are
 True/False tests which are applied to the data which is fed to the
@@ -66,8 +66,8 @@ fully compiled sifter. Because of this, it is rare that they are
 nested except in the case of the logical combining predicates.
 
 
-Literal Symbol
-^^^^^^^^^^^^^^
+Symbol
+^^^^^^
 ::
 
    foo
@@ -75,25 +75,31 @@ Literal Symbol
    1.2.34
 
 Symbols are unquoted alphanumerics. They are white-space terminated.
-Symbols are used to resolve the class of a predicate. Symbols are a
-valid matching type, which function similarly to a string. A symbol
-cannot be entirely numeric -- it would instead be interpreted as a
-Number in that case.
+Symbols are used to resolve the class of a predicate when they are the
+first element of a sieve. Symbols are also a valid matching type, and
+they function similarly to a string. A symbol cannot be entirely
+numeric -- it would instead be interpreted as a Number in that case.
+
+Symbols with a leading dollar-sign are interpreted as variables, and
+their value will be substituted from a sifter parameter at compile
+time.
 
 
-Literal Number
-^^^^^^^^^^^^^^
+Number
+^^^^^^
 ::
 
    123
    002
+   -1
 
-Numbers are unquoted numerics. They can be compared with both integer
-values and strings.
+Numbers are unquoted series of digits, with an optional leading
+negative sign. They can be compared with both integer and string
+values.
 
 
-Literal Symbol Group
-^^^^^^^^^^^^^^^^^^^^
+Symbol Group
+^^^^^^^^^^^^
 ::
 
    foo-{001..005}
@@ -117,17 +123,21 @@ treated as a single symbol value. If a Symbol Group contains only one
 possible product, it will become a simple Symbol.
 
 
-Literal String
-^^^^^^^^^^^^^^
+String
+^^^^^^^
 ::
+
    "Foo bar"
 
 A string is quoted with matching ``'"'`` characters. Normal escape
 sequences are honored.
 
+Strings may interpolate variables from the sifter at compile time
+using Python's `str.format` markup rules.
 
-Literal Regex
-^^^^^^^^^^^^^
+
+Regex
+^^^^^
 ::
 
    /^Foo.*Bar$/
@@ -138,8 +148,8 @@ can be appendes to the regex by specifying the characters immediately
 after the closing ``'/'``
 
 
-Literal Globs
-^^^^^^^^^^^^^
+Glob
+^^^^
 ::
 
    |foo*|
@@ -150,8 +160,8 @@ trailing ``'i'`` can be used to indicate the glob matching is
 case-insensitive.
 
 
-Literal Item Path
-^^^^^^^^^^^^^^^^^
+Item Path
+^^^^^^^^^
 ::
 
    .foo
@@ -182,8 +192,8 @@ There final built-in predicate is ``item`` which is used to do value
 comparisons against the data structures themselves.
 
 
-Logical Predicate ``and``
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Logical ``and``
+^^^^^^^^^^^^^^^
 ::
 
   (and EXPR [EXPR...])
@@ -193,8 +203,8 @@ a data item fails to match, it will not be passed along to further
 sub-expressions.
 
 
-Logical Predicate ``or``
-^^^^^^^^^^^^^^^^^^^^^^^^
+Logical ``or``
+^^^^^^^^^^^^^^
 ::
 
   (or EXPR [EXPR...])
@@ -204,8 +214,8 @@ a data item has been matched, it will not be passed along to further
 sub-expressions.
 
 
-Logical Predicate ``not``
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Logical ``not``
+^^^^^^^^^^^^^^^
 ::
 
   (not EXPR [EXPR...])
@@ -224,8 +234,8 @@ Any expression can be inverted by prefixing it with ``!`` or
   * ``(!foo 1)``
 
 
-Expression ``flag``
-^^^^^^^^^^^^^^^^^^^
+Statement ``flag``
+^^^^^^^^^^^^^^^^^^
 ::
 
   (flag NAME EXPR [EXPR...])
@@ -247,7 +257,7 @@ previously.
 As a convenience, ``?`` is a synonym for ``flagged``.
 
 In addition, any flag can be used as its own predicate by appending a
-``?`` to its name. For example, the following are equivalent expressions:
+``?`` to its name. For example, the following are equivalent:
 
   * ``(flagged awesome)``
   * ``(? awesome)``
@@ -264,3 +274,9 @@ Resolves an `ItemPath` against each data item. If any values are supplied as
 an argument, then the predicate will pass any data items which has any path
 element that matches to any of the values. If no values are supplied then
 the path elements simply need to be present and non-null.
+
+The item predicate may be specified implicitly by making the first element
+of the sieve an ItemPath. For example, the following are equivalent:
+
+  * ``(item .foo[].bar {1..100})``
+  * ``(.foo[].bar {1..100})``
