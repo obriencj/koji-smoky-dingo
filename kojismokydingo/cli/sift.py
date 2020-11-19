@@ -67,7 +67,7 @@ class Sifting(object):
                help="Provide compile-time values to the sifty"
                " filter expressions")
 
-        addarg("--env", action="store_true", default=False,
+        addarg("--env-params", action="store_true", default=False,
                dest="use_env",
                help="Use environment vars for params left unassigned")
 
