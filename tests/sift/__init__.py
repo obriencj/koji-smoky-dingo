@@ -19,170 +19,16 @@ from unittest import TestCase
 
 from kojismokydingo.sift import (
     DEFAULT_SIEVES,
-    AllItems, Flagged, Glob,
-    Item, ItemMatch, ItemPath, ItemPathSieve, ItemSieve,
-    LogicNot, LogicOr, Null, Number,
-    Regex, Sieve, Sifter, SifterError, Symbol, SymbolGroup,
+    Flagged, ItemPathSieve, ItemSieve, LogicAnd, LogicNot, LogicOr,
+    Sieve, Sifter, SifterError,
     ensure_all_int_or_str, ensure_all_matcher, ensure_all_symbol,
     ensure_int, ensure_int_or_str, ensure_matcher,
     ensure_str, ensure_symbol,
 )
-
-
-class MatcherTest(TestCase):
-
-    DATA = [
-        1, 2, "3", "4", "Hello", "World", (), [], 99, 98, 0, "", None,
-        "987", "98",
-    ]
-
-
-    def in_data(self, match, expected_index, expected_value):
-        i = self.DATA.index(match)
-        v = self.DATA[i] if i >= 0 else None
-
-        self.assertEqual(i, expected_index, repr(match))
-        self.assertEqual(v, expected_value, repr(match))
-
-
-    def not_in_data(self, match):
-        try:
-            i = self.DATA.index(match)
-        except ValueError:
-            i = -1
-        self.assertEqual(i, -1, repr(match))
-
-
-    def test_null(self):
-        m = Null()
-        self.in_data(m, 12, None)
-
-
-    def test_symbol(self):
-        self.in_data(Symbol("Hello"), 4, "Hello")
-
-        self.in_data(Symbol("3"), 2, "3")
-        self.in_data(Symbol(""), 11, "")
-
-        self.not_in_data(Symbol("hello"))
-        self.not_in_data(Symbol("ell"))
-        self.not_in_data(Symbol("1"))
-        self.not_in_data(Symbol("()"))
-        self.not_in_data(Symbol("[]"))
-        self.not_in_data(Symbol("None"))
-
-
-    def test_glob(self):
-        self.in_data(Glob("Hello"), 4, "Hello")
-        self.in_data(Glob("*ll*"), 4, "Hello")
-        self.in_data(Glob("*o"), 4, "Hello")
-
-        self.in_data(Glob("HELLO", True), 4, "Hello")
-        self.in_data(Glob("*LL*", True), 4, "Hello")
-        self.in_data(Glob("*O", True), 4, "Hello")
-        self.in_data(Glob("hello", True), 4, "Hello")
-        self.in_data(Glob("*ll*", True), 4, "Hello")
-        self.in_data(Glob("*o", True), 4, "Hello")
-
-        self.in_data(Glob("?o*"), 5, "World")
-        self.in_data(Glob("*d"), 5, "World")
-
-        self.in_data(Glob(""), 11, "")
-
-        self.not_in_data(Glob("hello"))
-        self.not_in_data(Glob("ll"))
-        self.not_in_data(Glob("o"))
-        self.not_in_data(Glob("1"))
-        self.not_in_data(Glob("()"))
-        self.not_in_data(Glob("[]"))
-        self.not_in_data(Glob("None"))
-
-
-    def test_regex(self):
-        self.in_data(Regex("Hello"), 4, "Hello")
-        self.in_data(Regex("ll"), 4, "Hello")
-        self.in_data(Regex("o$"), 4, "Hello")
-
-        self.in_data(Regex("HELLO", "i"), 4, "Hello")
-        self.in_data(Regex("LL", "i"), 4, "Hello")
-        self.in_data(Regex("O$", "i"), 4, "Hello")
-        self.in_data(Regex("hello", "i"), 4, "Hello")
-        self.in_data(Regex("ll", "i"), 4, "Hello")
-        self.in_data(Regex("o$", "i"), 4, "Hello")
-
-        self.in_data(Regex("^.o"), 5, "World")
-        self.in_data(Regex("d$"), 5, "World")
-
-        self.in_data(Regex(r"\d"), 2, "3")
-        self.in_data(Regex(r"\d\d\d"), 13, "987")
-        self.in_data(Regex(r"^\d{3}$"), 13, "987")
-        self.in_data(Regex(r"\d\d"), 13, "987")
-        self.in_data(Regex(r"\d{2}"), 13, "987")
-        self.in_data(Regex(r"^\d\d$"), 14, "98")
-        self.in_data(Regex(r"^\d{2}$"), 14, "98")
-
-        self.in_data(Regex(""), 2, "3")
-        self.in_data(Regex("()"), 2, "3")
-        self.in_data(Regex("^$"), 11, "")
-
-        self.in_data(Regex(r"\d"), 2, "3")
-
-        self.not_in_data(Regex("hello"))
-        self.not_in_data(Regex(r"\(\)"))
-        self.not_in_data(Regex(r"\[\]"))
-        self.not_in_data(Regex("None"))
-
-        self.assertRaises(SifterError, Regex, "[")
-
-
-    def test_number(self):
-        self.in_data(Number(1), 0, 1)
-        self.in_data(Number(2), 1, 2)
-        self.in_data(Number(3), 2, "3")
-
-        self.not_in_data(Number(9))
-
-        self.assertRaises(ValueError, Number, "Hello")
-
-
-class ItemPathTest(TestCase):
-
-    DATA = {
-        "foo": [1, 9],
-        "bar": [2, 3, 4, 5, 6],
-        "baz": {"food": True, "drink": False},
-        "qux": {"food": False, "drink": True},
-    }
-
-
-    def in_path(self, paths, expected):
-        pth = ItemPath(*paths)
-        self.assertEqual(list(pth.get(self.DATA)), expected)
-
-
-    def test_symbol(self):
-        self.in_path([Symbol("foo")], [[1, 9]])
-        self.in_path([Symbol("bar")], [[2, 3, 4, 5, 6]])
-        self.in_path([Symbol("baz"), Symbol("food")], [True])
-        self.in_path([Symbol("qux"), Symbol("food")], [False])
-        self.in_path([Symbol("quxx"), Symbol("food")], [])
-
-        ip = ItemPath(Symbol("quxx"), Symbol("food"))
-        self.assertEqual(repr(ip),
-                         "ItemPath(Item('quxx'), Item('food'))")
-
-
-    def test_slice(self):
-        self.in_path(["foo", slice(None)], [1, 9])
-        self.in_path(["bar", slice(None)], [2, 3, 4, 5, 6])
-
-        self.in_path(["foo", slice(1, None)], [9])
-        self.in_path(["bar", slice(1, -1)], [3, 4, 5])
-
-        ip = ItemPath("bar", slice(1, -1))
-        self.assertEqual(repr(ip),
-                         "ItemPath(Item('bar'),"
-                         " Item(slice(1, -1, None)))")
+from kojismokydingo.sift.parse import (
+    AllItems, Glob, Item, ItemMatch, ItemPath,
+    Null, Number, ParserError, Regex, Symbol, SymbolGroup,
+)
 
 
 class NameSieve(ItemSieve):
@@ -767,14 +613,14 @@ class SifterTest(TestCase):
         self.assertRaises(SifterError, self.compile_sifter, src)
 
         src = """
-        (name "Pizza
+        (blame Pizza)
         """
         self.assertRaises(SifterError, self.compile_sifter, src)
 
         src = """
-        (blame Pizza)
+        (name "Pizza
         """
-        self.assertRaises(SifterError, self.compile_sifter, src)
+        self.assertRaises(ParserError, self.compile_sifter, src)
 
 
     def test_comments(self):
