@@ -378,8 +378,10 @@ def int_or_str(value):
     """
 
     if isinstance(value, str):
-        if value.isdigit():
+        try:
             value = int(value)
+        except ValueError:
+            pass
 
     elif not isinstance(value, int):
         value = str(value)

@@ -28,6 +28,7 @@ from functools import partial
 from itertools import chain
 from operator import itemgetter
 from six import iteritems, itervalues
+from six.moves import map
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
@@ -506,7 +507,7 @@ def cli_filter_builds(session, nvr_list,
     CLI handler for `koji filter-builds`
     """
 
-    nvr_list = unique(nvr_list)
+    nvr_list = unique(map(int_or_str, nvr_list))
 
     if nvr_list:
         loaded = bulk_load_builds(session, nvr_list, err=strict)
