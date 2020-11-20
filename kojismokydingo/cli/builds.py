@@ -362,18 +362,19 @@ class BuildFiltering(BuildSifting):
 def cli_list_components(session, nvr_list,
                         tag=None, inherit=False, latest=False,
                         build_filter=None, build_sifter=None,
-                        sorting=None, outputs=None):
+                        sorting=None, outputs=None,
+                        strict=False):
 
     """
     CLI handler for `koji list-component-builds`
     """
 
-    nvr_list = unique(nvr_list)
+    nvr_list = unique(map(int_or_str, nvr_list))
 
     if nvr_list:
         # load the initial set of builds, this also verifies our input
-        found = bulk_load_builds(session, nvr_list)
-        loaded = dict((b["id"], b) for b in itervalues(found))
+        found = bulk_load_builds(session, nvr_list, err=strict)
+        loaded = dict((b["id"], b) for b in itervalues(found) if b)
 
     else:
         loaded = {}
@@ -441,6 +442,10 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
 
+        addarg("--strict", action="store_true", default=False,
+               help="Error if any of the NVRs do not resolve into a"
+               " real build. Otherwise, bad NVRs are ignored.")
+
         group = parser.add_argument_group("Components of tagged builds")
         addarg = group.add_argument
 
@@ -494,7 +499,8 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
                                    build_filter=bf,
                                    build_sifter=bs,
                                    sorting=sorting,
-                                   outputs=outputs)
+                                   outputs=outputs,
+                                   strict=options.strict)
 
 
 def cli_filter_builds(session, nvr_list,
@@ -628,7 +634,8 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
                                  build_filter=bf,
                                  build_sifter=bs,
                                  sorting=sorting,
-                                 outputs=outputs)
+                                 outputs=outputs,
+                                 strict=options.strict)
 
 
 def cli_list_btypes(session, nvr=None, json=False, quiet=False):
