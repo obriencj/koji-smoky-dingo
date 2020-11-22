@@ -22,9 +22,11 @@ Koji Smoky Dingo - Sifter filtering
 
 import operator
 
+from itertools import chain
 from koji import BUILD_STATES
 from operator import itemgetter
 from six import iteritems, itervalues
+from six.moves import filter, map
 
 from . import (
     DEFAULT_SIEVES,
@@ -32,8 +34,9 @@ from . import (
     ensure_all_matcher, ensure_all_int_or_str,
     ensure_int_or_str, ensure_str, )
 from .. import (
-    as_taginfo, bulk_load_builds, bulk_load_tags,
-    bulk_load_users, iter_bulk_load, )
+    as_taginfo, bulk_load_build_rpms, bulk_load_builds,
+    bulk_load_rpm_sigs, bulk_load_tags, bulk_load_users,
+    iter_bulk_load, )
 from ..builds import (
     build_dedup, decorate_builds_btypes, decorate_builds_cg_list,
     decorate_builds_maven, gavgetter, iter_latest_maven_builds, )
@@ -62,6 +65,7 @@ __all__ = (
     "PkgAllowedSieve",
     "PkgBlockedSieve",
     "ReleaseSieve",
+    "SignedSieve",
     "StateSieve",
     "TaggedSieve",
     "TypeSieve",
@@ -764,6 +768,72 @@ class LatestMavenSieve(VariadicSieve):
                 self.cache.get(gavgetter(binfo)) == binfo["id"])
 
 
+class SignedSieve(Sieve):
+    """
+    usage: ``(signed [KEY...])``
+
+    Passes builds which have RPMs signed with any of the given
+    keys. If no keys are specified then passes builds which have RPMs
+    signed with any key at all.
+    """
+
+    name = "signed"
+
+
+    def __init__(self, sifter, *keys):
+        keys = ensure_all_matcher(keys)
+        super(SignedSieve, self).__init__(sifter, *keys)
+        self.keys = keys or None
+
+
+    def prep(self, session, binfos):
+        needed = {}
+        for binfo in binfos:
+            cache = self.get_cache(binfo)
+            if "rpmsigs" not in cache:
+                needed[binfo["id"]] = cache
+
+        if not needed:
+            return
+
+        # first load a mapping of build_id: [RPMS]
+        loaded = bulk_load_build_rpms(session, needed)
+
+        # now load a mapping of rpm_id: [SIGS]
+        rpmids = (rpm["id"] for rpm in chain(*itervalues(loaded)))
+        rpm_sigs = bulk_load_rpm_sigs(session, rpmids)
+
+        # now just correlate the set of sigkeys back to each needed
+        # cache entry
+        for bid, rpms in iteritems(loaded):
+            sigs = set()
+            for rpm in rpms:
+                # we need to drop the unsigned key, which is an empty
+                # string
+                rsigs = (sig["sigkey"] for sig in rpm_sigs[rpm["id"]])
+                sigs.update(filter(None, rsigs))
+
+            # we'll be using matchers to compare, so we need to
+            # convert from a set to a list
+            cache = needed[bid]
+            cache["rpmsigs"] = list(sigs) if sigs else None
+
+
+    def check(self, session, binfo):
+        want_keys = self.keys
+        build_keys = self.get_cache(binfo).get("rpmsigs")
+
+        if want_keys is None:
+            return bool(build_keys)
+        elif build_keys is None:
+            return False
+        else:
+            for wanted in want_keys:
+                if wanted in build_keys:
+                    return True
+            return False
+
+
 DEFAULT_BUILD_INFO_SIEVES = [
     CGImportedSieve,
     EpochSieve,
@@ -783,6 +853,7 @@ DEFAULT_BUILD_INFO_SIEVES = [
     PkgAllowedSieve,
     PkgBlockedSieve,
     ReleaseSieve,
+    SignedSieve,
     StateSieve,
     TaggedSieve,
     TypeSieve,
