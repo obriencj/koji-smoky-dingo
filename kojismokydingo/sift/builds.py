@@ -13,7 +13,10 @@
 
 
 """
-Koji Smoky Dingo - Sifter filtering
+Koji Smoky Dingo - Sifty Dingo filtering for Koji Builds
+
+This module provides sieves for filtering through koji build info
+dicts.
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
@@ -178,14 +181,17 @@ class OwnerSieve(Sieve):
 
 
     def __init__(self, sifter, user, *users):
-        self.users = [user]
-        self.users.extend(users)
+        usernames = [user]
+        usernames.extend(users)
+        usernames = ensure_all_int_or_str(usernames)
+
+        super(OwnerSieve, self).__init__(sifter, *usernames)
         self._user_ids = None
 
 
     def prep(self, session, _build_infos):
         if self._user_ids is None:
-            loaded = bulk_load_users(session, self.users)
+            loaded = bulk_load_users(session, self.tokens)
             self._user_ids = set(u["id"] for u in itervalues(loaded))
 
 
