@@ -22,7 +22,6 @@ Koji Smoky Dingo - Sifter filtering
 
 import operator
 
-from itertools import chain
 from koji import BUILD_STATES
 from operator import itemgetter
 from six import iteritems, itervalues
@@ -34,12 +33,12 @@ from . import (
     ensure_all_matcher, ensure_all_int_or_str,
     ensure_int_or_str, ensure_str, )
 from .. import (
-    as_taginfo, bulk_load_build_rpms, bulk_load_builds,
-    bulk_load_rpm_sigs, bulk_load_tags, bulk_load_users,
+    as_taginfo, bulk_load_builds, bulk_load_tags, bulk_load_users,
     iter_bulk_load, )
 from ..builds import (
     build_dedup, decorate_builds_btypes, decorate_builds_cg_list,
-    decorate_builds_maven, gavgetter, iter_latest_maven_builds, )
+    decorate_builds_maven, gather_rpm_sigkeys, gavgetter,
+    iter_latest_maven_builds, )
 from ..common import rpm_evr_compare, unique
 from ..tags import gather_tag_ids
 
@@ -796,27 +795,11 @@ class SignedSieve(Sieve):
         if not needed:
             return
 
-        # first load a mapping of build_id: [RPMS]
-        loaded = bulk_load_build_rpms(session, needed)
-
-        # now load a mapping of rpm_id: [SIGS]
-        rpmids = (rpm["id"] for rpm in chain(*itervalues(loaded)))
-        rpm_sigs = bulk_load_rpm_sigs(session, rpmids)
-
-        # now just correlate the set of sigkeys back to each needed
-        # cache entry
-        for bid, rpms in iteritems(loaded):
-            sigs = set()
-            for rpm in rpms:
-                # we need to drop the unsigned key, which is an empty
-                # string
-                rsigs = (sig["sigkey"] for sig in rpm_sigs[rpm["id"]])
-                sigs.update(filter(None, rsigs))
-
-            # we'll be using matchers to compare, so we need to
-            # convert from a set to a list
+        for bid, sigs in iteritems(gather_rpm_sigkeys(session, needed)):
+            # we need to drop the unsigned key, which is an empty
+            # string
             cache = needed[bid]
-            cache["rpmsigs"] = list(sigs) if sigs else None
+            cache["rpmsigs"] = list(filter(None, sigs)) or None
 
 
     def check(self, session, binfo):

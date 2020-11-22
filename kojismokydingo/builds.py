@@ -22,6 +22,7 @@ Functions for working with Koji builds
 """
 
 
+from itertools import chain
 from koji import BUILD_STATES
 from collections import OrderedDict
 from operator import itemgetter
@@ -34,7 +35,7 @@ from . import (
     bulk_load, bulk_load_build_archives, bulk_load_build_rpms,
     bulk_load_builds, bulk_load_buildroots,
     bulk_load_buildroot_archives, bulk_load_buildroot_rpms,
-    bulk_load_tasks, iter_bulk_load, )
+    bulk_load_rpm_sigs, bulk_load_tasks, iter_bulk_load, )
 from .common import (
     chunkseq, merge_extend, rpm_evr_compare,
     unique, update_extend, )
@@ -62,6 +63,7 @@ __all__ = (
     "filter_by_tags",
     "filter_imported",
     "gather_buildroots",
+    "gather_rpm_sigkeys",
     "gather_component_build_ids",
     "gather_wrapped_builds",
     "gavgetter",
@@ -832,6 +834,35 @@ def gather_buildroots(session, build_ids):
         broots = (a["buildroot_id"] for a in archive_list)
         broots = unique(filter(None, broots))
         results[build_id] = [buildroots[b] for b in broots]
+
+    return results
+
+
+def gather_rpm_sigkeys(session, build_ids):
+    """
+    Given a sequence of build IDs, collect the available sigkeys for
+    each rpm in each build.
+
+    Returns a dict mapping the original build IDs to a set of the
+    discovered sigkeys.
+    """
+
+    # first load a mapping of build_id: [RPMS]
+    loaded = bulk_load_build_rpms(session, build_ids)
+
+    # now load a mapping of rpm_id: [SIGS]
+    rpmids = (rpm["id"] for rpm in chain(*itervalues(loaded)))
+    rpm_sigs = bulk_load_rpm_sigs(session, rpmids)
+
+    results = {}
+
+    # now just correlate the set of sigkeys back to each needed
+    # cache entry
+    for bid, rpms in iteritems(loaded):
+        results[bid] = sigs = set()
+        for rpm in rpms:
+            rsigs = (sig["sigkey"] for sig in rpm_sigs[rpm["id"]])
+            sigs.update(rsigs)
 
     return results
 
