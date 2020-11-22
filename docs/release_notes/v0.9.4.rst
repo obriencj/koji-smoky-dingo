@@ -3,6 +3,13 @@ Koji Smoky Dingo preview 0.9.4 Release Notes
 
 *Unreleased*
 
+Introducing a new mini language, Sifty Dingo
+
+- you can now write filtering expressions for the list-components and
+  filter-builds commands
+- filter into multiple buckets at a time with a single set of rules
+- implemented under the `kojismokydingo.sift` package
+
 Chugging along and collecting feedback
 
 - list-build-archives now accepts multiple NVRs

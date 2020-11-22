@@ -14,7 +14,9 @@
 
 import koji
 
+from collections import OrderedDict
 from mock import MagicMock, PropertyMock, patch
+from six import iteritems, iterkeys, itervalues
 from six.moves import zip
 from unittest import TestCase
 
@@ -22,10 +24,10 @@ from kojismokydingo import (
     BadDingo, FeatureUnavailable,
     NoSuchBuild, NoSuchTag, NoSuchTarget, NoSuchUser,
     as_buildinfo, as_taginfo, as_targetinfo, as_userinfo,
-    iter_bulk_load, version_check, version_require)
+    bulk_load, iter_bulk_load, version_check, version_require)
 
 
-class TestBulkLoad(TestCase):
+class TestIterBulkLoad(TestCase):
 
     def setUp(self):
         self.prep = patch('koji.ClientSession._prepCall').start()
@@ -76,6 +78,121 @@ class TestBulkLoad(TestCase):
             for i, call in enumerate(calls):
                 self.assertEqual(call['methodName'], "ImpossibleDream")
                 self.assertEqual(call['params'], (i + offset,))
+
+
+class TestBulkLoad(TestCase):
+
+
+    def session(self, data):
+        inputs = []
+
+        def _convert_dat(i):
+            v = data[i]
+            if isinstance(v, dict) and "faultCode" in v:
+                return v
+            else:
+                return [v]
+
+        def do_call(value):
+            inputs.append(value)
+
+        def do_mc(strict=None):
+            results = [_convert_dat(i) for i in inputs]
+            inputs[:] = ()  # python2 doesn't have list.clear()
+            return results
+
+        sess = MagicMock()
+
+        dream = sess.ImpossibleDream
+        dream.side_effect = do_call
+
+        mc = sess.multiCall
+        mc.side_effect = do_mc
+
+        return sess
+
+
+    def fault(self, code=koji.GenericError.faultCode, msg="ohnoes"):
+        return {"faultCode": code, "faultString": msg}
+
+
+    def test_iter_bulk_load(self):
+        data = OrderedDict((val, "dream %i" % val) for val in range(0, 100))
+        expect = OrderedDict(data)
+
+        sess = self.session(data)
+
+        res = iter_bulk_load(sess, sess.ImpossibleDream,
+                             iterkeys(data), size=5)
+
+        for (key, val), hope in zip(res, iterkeys(data)):
+            self.assertEqual(key, hope)
+            self.assertEqual(expect[key], val)
+
+        self.assertEqual(sess.ImpossibleDream.call_count, 100)
+        self.assertEqual(sess.multiCall.call_count, 20)
+
+
+    def test_iter_bulk_load_err(self):
+        data = {
+            "1": "one",
+            "2": self.fault(),
+            "3": "three",
+            "4": None,
+        }
+
+        sess = self.session(data)
+        res = iter_bulk_load(sess, sess.ImpossibleDream, "1234", err=False)
+        self.assertEqual(next(res), ("1", "one"))
+        self.assertEqual(next(res), ("2", None))
+        self.assertEqual(next(res), ("3", "three"))
+        self.assertEqual(next(res), ("4", None))
+        self.assertRaises(StopIteration, next, res)
+
+        sess = self.session(data)
+        res = iter_bulk_load(sess, sess.ImpossibleDream, "1234", err=True)
+        self.assertEqual(next(res), ("1", "one"))
+        self.assertRaises(koji.GenericError, next, res)
+        self.assertRaises(StopIteration, next, res)
+
+
+    def test_bulk_load(self):
+        data = OrderedDict((val, "dream %i" % val) for val in range(0, 100))
+        expect = OrderedDict(data)
+
+        sess = self.session(data)
+
+        res = bulk_load(sess, sess.ImpossibleDream,
+                        iterkeys(data), size=5)
+
+        self.assertTrue(isinstance(res, OrderedDict))
+        self.assertEqual(res, expect)
+        self.assertEqual(sess.ImpossibleDream.call_count, 100)
+        self.assertEqual(sess.multiCall.call_count, 20)
+
+
+    def test_bulk_load_err(self):
+        data = {
+            "1": "one",
+            "2": self.fault(),
+            "3": "three",
+            "4": None,
+        }
+
+        sess = self.session(data)
+        res = bulk_load(sess, sess.ImpossibleDream, "1234", err=False)
+        self.assertTrue(isinstance(res, OrderedDict))
+
+        res = iteritems(res)
+        self.assertEqual(next(res), ("1", "one"))
+        self.assertEqual(next(res), ("2", None))
+        self.assertEqual(next(res), ("3", "three"))
+        self.assertEqual(next(res), ("4", None))
+        self.assertRaises(StopIteration, next, res)
+
+        sess = self.session(data)
+        self.assertRaises(koji.GenericError, bulk_load, sess,
+                          sess.ImpossibleDream, "1234", err=True)
 
 
 class TestVersionCheck(TestCase):
@@ -392,18 +509,36 @@ class TestAsUserinfo(TestCase):
 
         key = "joey_ramone"
 
-        sess, send = self.session([self.DATA])
+        sess, send = self.session([self.DATA, self.DATA])
         res = as_userinfo(sess, key)
         self.assertEqual(res, self.DATA)
         self.assertEqual(send.call_count, 1)
         self.assertEqual(send.call_args_list[0][0], (key, False, True))
 
-        sess, send = self.session([self.err(), self.DATA])
+        sess_vars = vars(sess)
+        self.assertTrue("__new_get_user" in sess_vars)
+        self.assertTrue(sess_vars["__new_get_user"])
+
+        res = as_userinfo(sess, key)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 2)
+        self.assertEqual(send.call_args_list[1][0], (key, False, True))
+
+        sess, send = self.session([self.err(), self.DATA, self.DATA])
         res = as_userinfo(sess, key)
         self.assertEqual(res, self.DATA)
         self.assertEqual(send.call_count, 2)
         self.assertEqual(send.call_args_list[0][0], (key, False, True))
         self.assertEqual(send.call_args_list[1][0], (key,))
+
+        sess_vars = vars(sess)
+        self.assertTrue("__new_get_user" in sess_vars)
+        self.assertFalse(sess_vars["__new_get_user"])
+
+        res = as_userinfo(sess, key)
+        self.assertEqual(res, self.DATA)
+        self.assertEqual(send.call_count, 3)
+        self.assertEqual(send.call_args_list[2][0], (key,))
 
 
     def test_as_userinfo_id(self):

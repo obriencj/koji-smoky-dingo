@@ -18,4 +18,5 @@ CLI Modules
    cli/clients
    cli/hosts
    cli/tags
+   cli/sift
    cli/users

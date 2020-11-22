@@ -13,13 +13,10 @@
 
 
 """
-Koji Smoky Dingo - Bulk tagging commands
+Koji Smoky Dingo - CLI Build Commands
 
-Allows for large numbers of builds to be tagged rapidly, via multicall
-to tagBuildBypass
-
-:author: cobrien@redhat.com
-:license: GPL version 3
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 
@@ -31,10 +28,13 @@ from functools import partial
 from itertools import chain
 from operator import itemgetter
 from six import iteritems, itervalues
+from six.moves import filter, map
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
-    int_or_str, pretty_json, printerr, read_clean_lines, resplit)
+    int_or_str, pretty_json, open_output,
+    printerr, read_clean_lines, resplit)
+from .sift import BuildSifting, output_sifted
 from .. import (
     NoSuchUser,
     as_buildinfo, as_taginfo,
@@ -43,7 +43,7 @@ from ..builds import (
     BUILD_COMPLETE, BUILD_DELETED,
     BuildFilter,
     build_dedup, build_id_sort, build_nvr_sort,
-    decorate_build_archive_data, filter_imported,
+    decorate_builds_btypes, decorate_builds_cg_list, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_tag_builds)
 from ..tags import ensure_tag, gather_tag_ids
@@ -256,7 +256,7 @@ class BulkTagBuilds(TagSmokyDingo):
                                    strict=options.strict)
 
 
-class BuildFiltering():
+class BuildFiltering(BuildSifting):
 
 
     def filtering_arguments(self, parser):
@@ -337,7 +337,7 @@ class BuildFiltering():
         return parser
 
 
-    def build_filter(self, options):
+    def get_filter(self, options):
         session = self.session
 
         # setup the limit as a set of IDs for each tag named in the
@@ -350,7 +350,7 @@ class BuildFiltering():
         lookaside_ids = gather_tag_ids(session, deep=options.lookaside,
                                        shallow=options.shallow_lookaside)
 
-        return BuildFilter(self.session,
+        return BuildFilter(session,
                            limit_tag_ids=limit_ids,
                            lookaside_tag_ids=lookaside_ids,
                            imported=options.imported,
@@ -361,18 +361,20 @@ class BuildFiltering():
 
 def cli_list_components(session, nvr_list,
                         tag=None, inherit=False, latest=False,
-                        build_filter=None, sorting=None):
+                        build_filter=None, build_sifter=None,
+                        sorting=None, outputs=None,
+                        strict=False):
 
     """
     CLI handler for `koji list-component-builds`
     """
 
-    nvr_list = unique(nvr_list)
+    nvr_list = unique(map(int_or_str, nvr_list))
 
     if nvr_list:
         # load the initial set of builds, this also verifies our input
-        found = bulk_load_builds(session, nvr_list)
-        loaded = dict((b["id"], b) for b in itervalues(found))
+        found = bulk_load_builds(session, nvr_list, err=strict)
+        loaded = dict((b["id"], b) for b in itervalues(found) if b)
 
     else:
         loaded = {}
@@ -392,7 +394,8 @@ def cli_list_components(session, nvr_list,
     components = gather_component_build_ids(session, bids)
 
     # now we need to turn those components build IDs into build_infos
-    found = bulk_load_builds(session, chain(*itervalues(components)))
+    component_ids = unique(chain(*itervalues(components)))
+    found = bulk_load_builds(session, component_ids)
 
     # we'll also want the underlying builds used to produce any
     # standalone wrapperRPM builds, as those are not recorded as
@@ -403,19 +406,24 @@ def cli_list_components(session, nvr_list,
     builds = list(itervalues(found))
     builds.extend(itervalues(wrapped))
 
-    # do the filtering
     if build_filter:
         builds = build_filter(builds)
 
+    if build_sifter:
+        results = build_sifter(session, builds)
+    else:
+        results = {"default": builds}
+
     if sorting == SORT_BY_NVR:
-        builds = build_nvr_sort(builds)
-
+        sortfn = build_nvr_sort
     elif sorting == SORT_BY_ID:
-        builds = build_id_sort(builds)
+        sortfn = build_id_sort
+    elif not build_sifter:
+        sortfn = build_dedup
+    else:
+        sortfn = None
 
-    # print("Identified %i components of %s:" % (len(builds), nvr))
-    for binfo in builds:
-        print(binfo["nvr"])
+    output_sifted(results, "nvr", outputs, sort=sortfn)
 
 
 class ListComponents(AnonSmokyDingo, BuildFiltering):
@@ -433,6 +441,10 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
                dest="nvr_file", metavar="NVR_FILE",
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
+
+        addarg("--strict", action="store_true", default=False,
+               help="Error if any of the NVRs do not resolve into a"
+               " real build. Otherwise, bad NVRs are ignored.")
 
         group = parser.add_argument_group("Components of tagged builds")
         addarg = group.add_argument
@@ -460,6 +472,7 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
 
         # additional build filtering arguments
         parser = self.filtering_arguments(parser)
+        parser = self.sifter_arguments(parser)
 
         return parser
 
@@ -474,30 +487,37 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
-        bf = self.build_filter(options)
+        bf = self.get_filter(options)
+        bs = self.get_sifter(options)
+        sorting = options.sorting
+        outputs = self.get_outputs(options)
 
         return cli_list_components(self.session, nvrs,
                                    tag=options.tag,
                                    inherit=options.inherit,
                                    latest=options.latest,
                                    build_filter=bf,
-                                   sorting=options.sorting)
+                                   build_sifter=bs,
+                                   sorting=sorting,
+                                   outputs=outputs,
+                                   strict=options.strict)
 
 
 def cli_filter_builds(session, nvr_list,
                       tag=None, inherit=False, latest=False,
-                      build_filter=None, sorting=None, strict=False,
-                      json=False):
+                      build_filter=None, build_sifter=None,
+                      sorting=None, outputs=None,
+                      strict=False):
 
     """
     CLI handler for `koji filter-builds`
     """
 
-    nvr_list = unique(nvr_list)
+    nvr_list = unique(map(int_or_str, nvr_list))
 
     if nvr_list:
         loaded = bulk_load_builds(session, nvr_list, err=strict)
-        builds = itervalues(loaded)
+        builds = filter(None, itervalues(loaded))
     else:
         builds = ()
 
@@ -506,33 +526,40 @@ def cli_filter_builds(session, nvr_list,
         listTagged = partial(session.listTagged, taginfo["id"],
                              inherit=inherit, latest=latest)
 
-        builds = list(builds)
-
         # server-side optimization if we're doing filtering by btype
         if build_filter and build_filter._btypes:
+            tagged = []
             for btype in build_filter._btypes:
-                builds.extend(listTagged(type=btype))
+                tagged.extend(listTagged(type=btype))
         else:
-            builds.extend(listTagged())
+            tagged = listTagged()
+
+        if tagged:
+            builds = list(builds)
+            known_ids = set(b["id"] for b in builds)
+            tagged_ids = set(b["id"] for b in tagged)
+            loaded = bulk_load_builds(session, tagged_ids - known_ids)
+            if loaded:
+                builds.extend(itervalues(loaded))
 
     if build_filter:
         builds = build_filter(builds)
 
-    if sorting == SORT_BY_NVR:
-        builds = build_nvr_sort(builds, dedup=False)
-
-    elif sorting == SORT_BY_ID:
-        builds = build_id_sort(builds, dedup=False)
-
+    if build_sifter:
+        results = build_sifter(session, builds)
     else:
-        builds = list(builds)
+        results = {"default": builds}
 
-    if json:
-        pretty_json(builds)
-        return
+    if sorting == SORT_BY_NVR:
+        sortfn = build_nvr_sort
+    elif sorting == SORT_BY_ID:
+        sortfn = build_id_sort
+    elif not build_sifter:
+        sortfn = build_dedup
+    else:
+        sortfn = None
 
-    for binfo in builds:
-        print(binfo["nvr"])
+    output_sifted(results, "nvr", outputs, sort=sortfn)
 
 
 class FilterBuilds(AnonSmokyDingo, BuildFiltering):
@@ -580,6 +607,7 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
 
         # additional build filtering arguments
         parser = self.filtering_arguments(parser)
+        parser = self.sifter_arguments(parser)
 
         return parser
 
@@ -594,14 +622,20 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
-        bf = self.build_filter(options)
+        bf = self.get_filter(options)
+        bs = self.get_sifter(options)
+        sorting = options.sorting
+        outputs = self.get_outputs(options)
 
         return cli_filter_builds(self.session, nvrs,
-                                 build_filter=bf,
                                  tag=options.tag,
                                  inherit=options.inherit,
                                  latest=options.latest,
-                                 sorting=options.sorting)
+                                 build_filter=bf,
+                                 build_sifter=bs,
+                                 sorting=sorting,
+                                 outputs=outputs,
+                                 strict=options.strict)
 
 
 def cli_list_btypes(session, nvr=None, json=False, quiet=False):
@@ -610,7 +644,7 @@ def cli_list_btypes(session, nvr=None, json=False, quiet=False):
 
     if nvr:
         build = as_buildinfo(session, nvr)
-        decorate_build_archive_data(session, [build], False)
+        decorate_builds_btypes(session, [build])
         build_bts = build["archive_btype_ids"]
 
         for btid in list(btypes):
@@ -674,7 +708,7 @@ def cli_list_cgs(session, nvr=None, json=False, quiet=False):
 
     if nvr:
         build = as_buildinfo(session, nvr)
-        decorate_build_archive_data(session, [build], True)
+        decorate_builds_cg_list(session, [build])
         build_cgs = build["archive_cg_ids"]
 
         for cgid in list(cgs):

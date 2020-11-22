@@ -21,9 +21,10 @@ endif
 
 _FLAKE8CHECK := $(shell $(PYTHON) -c 'import flake8' 2>/dev/null)
 ifeq ($(.SHELLSTATUS),0)
-	FLAKE8 := flake8
+	FLAKE8 := echo "running flake8" ; \
+		$(PYTHON) -B -m flake8 kojismokydingo koji_cli_plugins
 else
-	FLAKE8 :=
+	FLAKE8 := echo "flake8 not found"
 endif
 
 # python 2.6 needed an externally installed argparse, which has weird
@@ -56,9 +57,14 @@ help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 
+report-python:
+	@echo "Using python" $(PYTHON)
+	@$(PYTHON) -VV
+
+
 ##@ Local Build and Install
-build: clean	## Produces a wheel using the default system python
-	@$(PYTHON) setup.py $(FLAKE8) $(BDIST)
+build: clean-built report-python flake8	## Produces a wheel using the default system python
+	@$(PYTHON) setup.py $(BDIST)
 
 
 install: build	## Installs using the default python for the current user
@@ -74,10 +80,13 @@ tidy:	## Removes stray eggs and .pyc files
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
 		\( -type f -iname '*.pyc' -exec rm -f {} + \)
 
-
-clean: tidy	## Removes built content, test logs, coverage reports
-	@rm -rf .coverage* build/* dist/* htmlcov/* logs/*
+clean-built:
+	@rm -rf build/* dist/*
 	@if [ -f "$(ARCHIVE)" ] ; then rm -f "$(ARCHIVE)" ; fi
+
+
+clean: clean-built tidy	## Removes built content, test logs, coverage reports
+	@rm -rf .coverage* htmlcov/* logs/*
 
 
 ##@ Containerized RPMs
@@ -93,6 +102,10 @@ packaging-test: packaging-build	## Launches all containerized tests
 ##@ Testing
 test: clean	## Launches tox
 	@tox
+
+
+flake8: report-python	## Launches flake8
+	@$(FLAKE8)
 
 
 quick-test: build	## Launches nosetest using the default python
@@ -123,7 +136,7 @@ $(ARCHIVE): $(GITHEADREF)
 
 
 ##@ Documentation
-docs: docs/overview.rst	## Build sphinx docs
+docs: clean-docs docs/overview.rst	## Build sphinx docs
 	@$(PYTHON) -B setup.py docs
 
 

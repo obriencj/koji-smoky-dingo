@@ -5,8 +5,9 @@ koji list-component-builds
 
 ::
 
- usage: koji list-component-builds [-h] [-f NVR_FILE] [--tag TAG] [--inherit]
-                                   [--latest] [--nvr-sort | --id-sort]
+ usage: koji list-component-builds [-h] [-f NVR_FILE] [--strict] [--tag TAG]
+                                   [--inherit] [--latest]
+                                   [--nvr-sort | --id-sort]
                                    [--lookaside LOOKASIDE]
                                    [--shallow-lookaside SHALLOW_LOOKASIDE]
                                    [--limit LIMIT]
@@ -15,6 +16,9 @@ koji list-component-builds
                                    [--image] [--win] [-c CG_NAME]
                                    [--imports | --no-imports]
                                    [--completed | --deleted]
+                                   [--param KEY=VALUE] [--env-params]
+                                   [--output FLAG:FILENAME]
+                                   [--filter FILTER | --filter-file FILTER_FILE]
                                    [NVR [NVR ...]]
 
  List a build's component dependencies
@@ -27,6 +31,8 @@ koji list-component-builds
    -f NVR_FILE, --file NVR_FILE
                          Read list of builds from file, one NVR per line.
                          Specify - to read from stdin.
+   --strict              Error if any of the NVRs do not resolve into a real
+                         build. Otherwise, bad NVRs are ignored.
 
  Components of tagged builds:
    --tag TAG             Look for components of builds in this tag
@@ -67,6 +73,20 @@ koji list-component-builds
  Filtering by state:
    --completed           Limit to completed builds
    --deleted             Limit to deleted builds
+
+ Filtering with Sifty sieves:
+   --param KEY=VALUE, -P KEY=VALUE
+                         Provide compile-time values to the sifty filter
+                         expressions
+   --env-params          Use environment vars for params left unassigned
+   --output FLAG:FILENAME, -o FLAG:FILENAME
+                         Divert results marked with the given FLAG to FILENAME.
+                         If FILENAME is '-', output to stdout. The 'default'
+                         flag is output to stdout by default, and other flags
+                         are discarded
+   --filter FILTER       Use the given sifty filter predicates
+   --filter-file FILTER_FILE
+                         Load sifty filter predictes from file
 
 
 This command identifies the builds used to produce another build.

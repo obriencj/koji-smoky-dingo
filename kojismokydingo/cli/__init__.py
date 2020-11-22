@@ -30,15 +30,17 @@ import sys
 
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
+from contextlib import contextmanager
 from functools import partial
 from json import dump
 from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
+from os import devnull
 from os.path import basename
 from six import add_metaclass
-from six.moves import filter, map, zip_longest
+from six.moves import StringIO, filter, map, zip_longest
 
-from kojismokydingo import BadDingo, NotPermitted
+from .. import BadDingo, NotPermitted
 
 
 __all__ = (
@@ -50,7 +52,10 @@ __all__ = (
     "TargetSmokyDingo",
 
     "clean_lines",
+    "find_action",
+    "remove_action",
     "int_or_str",
+    "open_output",
     "pretty_json",
     "printerr",
     "read_clean_lines",
@@ -98,6 +103,39 @@ def pretty_json(data, output=None, **pretty):
     print(file=output)
 
 
+def find_action(parser, key):
+    """
+    Hunts through a parser to discover an action whose dest, metavar,
+    or option strings matches the given key.
+    """
+
+    for act in parser._actions:
+        if key == act.dest or key == act.metavar \
+           or key in act.option_strings:
+            return act
+    return None
+
+
+def remove_action(parser, key):
+    """
+    Hunts through a parser to remove an action based on the given key. The
+    key can match either the dest, the metavar, or the option strings.
+    """
+
+    found = find_action(parser, key)
+    if found is None:
+        return
+
+    parser._actions.remove(found)
+
+    if found in parser._optionals._actions:
+        parser._optionals._actions.remove(found)
+
+    for grp in parser._action_groups:
+        if found in grp._group_actions:
+            grp._group_actions.remove(found)
+
+
 def resplit(arglist, sep=","):
     """
     Collapses comma-separated and multi-specified items into a single
@@ -115,6 +153,47 @@ def resplit(arglist, sep=","):
 
     work = map(str.strip, sep.join(arglist).split(sep))
     return list(filter(None, work))
+
+
+@contextmanager
+def open_output(filename="-", append=None):
+    """
+    Context manager for a CLI output file.
+
+    Files will be opened for text-mode output, and closed when the
+    context exits.
+
+    If the filename is ``"-"`` then stdout will be used as the output file
+    stream, but it will not be closed.
+
+    If the filename is ``""`` or ``None`` then `os.devnull` will be used.
+
+    If append is True, the file will be appended to. If append is
+    False, the file will be overwritten. If append is None, then the
+    file will be overwriten unless it specified with a prefix of
+    ``"@"``. This prefix will be stripped from the filename in this
+    case only.
+    """
+
+    if filename:
+        if append is None:
+            if filename.startswith("@"):
+                filename = filename[1:]
+                append = True
+            else:
+                append = False
+    else:
+        filename = devnull
+
+    if filename == "-":
+        stream = sys.stdout
+    else:
+        stream = open(filename, "at" if append else "wt")
+
+    yield stream
+
+    if filename != "-":
+        stream.close()
 
 
 def clean_lines(lines, skip_comments=True):
@@ -299,8 +378,10 @@ def int_or_str(value):
     """
 
     if isinstance(value, str):
-        if value.isdigit():
+        try:
             value = int(value)
+        except ValueError:
+            pass
 
     elif not isinstance(value, int):
         value = str(value)

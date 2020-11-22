@@ -13,12 +13,10 @@
 
 
 """
-Koji Smoky Dingo - info command client-config
+Koji Smoky Dingo - CLI Client Commands
 
-Get information about local client configuration settings
-
-:author: cobrien@redhat.com
-:license: GPL version 3
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 

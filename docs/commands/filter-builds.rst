@@ -13,7 +13,9 @@ koji filter-builds
                            [--limit LIMIT] [--shallow-limit SHALLOW_LIMIT]
                            [--type BUILD_TYPE] [--rpm] [--maven] [--image]
                            [--win] [-c CG_NAME] [--imports | --no-imports]
-                           [--completed | --deleted]
+                           [--completed | --deleted] [--param KEY=VALUE]
+                           [--env-params] [--output FLAG:FILENAME]
+                           [--filter FILTER | --filter-file FILTER_FILE]
                            [NVR [NVR ...]]
 
  Filter a list of NVRs by various criteria
@@ -68,6 +70,20 @@ koji filter-builds
  Filtering by state:
    --completed           Limit to completed builds
    --deleted             Limit to deleted builds
+
+ Filtering with Sifty sieves:
+   --param KEY=VALUE, -P KEY=VALUE
+                         Provide compile-time values to the sifty filter
+                         expressions
+   --env-params          Use environment vars for params left unassigned
+   --output FLAG:FILENAME, -o FLAG:FILENAME
+                         Divert results marked with the given FLAG to FILENAME.
+                         If FILENAME is '-', output to stdout. The 'default'
+                         flag is output to stdout by default, and other flags
+                         are discarded
+   --filter FILTER       Use the given sifty filter predicates
+   --filter-file FILTER_FILE
+                         Load sifty filter predictes from file
 
 
 Given a list of NVRs, output only those which match a set of filtering

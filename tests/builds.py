@@ -21,23 +21,40 @@ from kojismokydingo.builds import (
 
 # A CG-imported build
 BUILD_SAMPLE_1 = {
-    "id": 1,
+    "id": 10,
     "state": 2,
-    "nvr": "sample-1-1",
+    "nvr": "sample-1.0-1",
     "name": "sample",
-    "version": "1",
+    "version": "1.0",
     "release": "1",
     "epoch": None,
     "task_id": None,
-    "archive_cg_ids": set([901]),
-    "archive_cg_names": set(["example-cg"]),
-    "archive_btype_ids": set([701]),
-    "archive_btype_names": set(["example"]),
+    "archive_cg_ids": [901],
+    "archive_cg_names": ["example-cg"],
+    "archive_btype_ids": [701],
+    "archive_btype_names": ["example"],
+}
+
+# A CG-imported build
+BUILD_SAMPLE_1_1 = {
+    "id": 11,
+    "state": 2,
+    "nvr": "sample-1.1-1",
+    "name": "sample",
+    "version": "1.1",
+    "release": "1",
+    "epoch": None,
+    "task_id": None,
+    "owner_id": 1,
+    "archive_cg_ids": [901],
+    "archive_cg_names": ["example-cg"],
+    "archive_btype_ids": [701],
+    "archive_btype_names": ["example"],
 }
 
 # A CG-imported build
 BUILD_SAMPLE_2 = {
-    "id": 2,
+    "id": 20,
     "state": 2,
     "nvr": "sample-2-1",
     "name": "sample",
@@ -45,15 +62,16 @@ BUILD_SAMPLE_2 = {
     "release": "1",
     "epoch": None,
     "task_id": None,
-    "archive_cg_ids": set([902]),
-    "archive_cg_names": set(["other-cg"]),
-    "archive_btype_ids": set([702]),
-    "archive_btype_names": set(["other"]),
+    "owner_id": 2,
+    "archive_cg_ids": [902],
+    "archive_cg_names": ["other-cg"],
+    "archive_btype_ids": [702],
+    "archive_btype_names": ["other"],
 }
 
 # A CG-imported build from multiple CGs
 BUILD_SAMPLE_3 = {
-    "id": 3,
+    "id": 30,
     "state": 1,
     "nvr": "sample-3-1",
     "name": "sample",
@@ -61,47 +79,51 @@ BUILD_SAMPLE_3 = {
     "release": "1",
     "epoch": None,
     "task_id": None,
-    "archive_cg_ids": set([901, 902]),
-    "archive_cg_names": set(["example-cg", "other-cg"]),
-    "archive_btype_ids": set([701, 702]),
-    "archive_btype_names": set(["example", "other"]),
+    "owner_id": 3,
+    "archive_cg_ids": [901, 902],
+    "archive_cg_names": ["example-cg", "other-cg"],
+    "archive_btype_ids": [701, 702],
+    "archive_btype_names": ["example", "other"],
 }
 
 # An imported, non-CG build
 BUILD_SAMPLE_4 = {
-    "id": 4,
+    "id": 40,
     "state": 1,
-    "nvr": "sample-4-1",
+    "nvr": "sample-4.0-1",
     "name": "sample",
-    "version": "4",
+    "version": "4.0",
     "release": "1",
-    "epoch": None,
+    "epoch": "1",
     "task_id": None,
-    "archive_cg_ids": set(),
-    "archive_cg_names": set(),
-    "archive_btype_ids": set([0]),
-    "archive_btype_names": set(["rpm"]),
+    "owner_id": 1,
+    "archive_cg_ids": [],
+    "archive_cg_names": [],
+    "archive_btype_ids": [],
+    "archive_btype_names": [],
 }
 
 # A non-imported build
 BUILD_SAMPLE_5 = {
-    "id": 5,
+    "id": 55,
     "state": 1,
-    "nvr": "sample-5-1",
+    "nvr": "sample-5.5.1-1",
     "name": "sample",
-    "version": "5",
+    "version": "5.5.1",
     "release": "1",
-    "epoch": None,
+    "epoch": "1",
     "task_id": 500,
-    "archive_cg_ids": set(),
-    "archive_cg_names": set(),
-    "archive_btype_ids": set([0]),
-    "archive_btype_names": set(["rpm"]),
+    "owner_id": 99,
+    "archive_cg_ids": [],
+    "archive_cg_names": [],
+    "archive_btype_ids": [1],
+    "archive_btype_names": ["rpm"],
 }
 
 
 BUILD_SAMPLES = (
     BUILD_SAMPLE_1,
+    BUILD_SAMPLE_1_1,
     BUILD_SAMPLE_2,
     BUILD_SAMPLE_3,
     BUILD_SAMPLE_4,
@@ -130,7 +152,8 @@ class TestFilterImported(TestCase):
 
     def test_filter_any_normal(self):
         match = self._filter_imported(("any",))
-        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3)
+        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_1_1,
+                    BUILD_SAMPLE_2, BUILD_SAMPLE_3)
         self.assertEqual(match, expected)
 
 
@@ -142,7 +165,7 @@ class TestFilterImported(TestCase):
 
     def test_filter_example_normal(self):
         match = self._filter_imported(("example-cg",))
-        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_3)
+        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_3)
         self.assertEqual(match, expected)
 
 
@@ -160,13 +183,14 @@ class TestFilterImported(TestCase):
 
     def test_filter_other_negate(self):
         match = self._filter_imported(("other-cg",), negate=True)
-        expected = (BUILD_SAMPLE_1,)
+        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_1_1)
         self.assertEqual(match, expected)
 
 
     def test_filter_both_normal(self):
         match = self._filter_imported(("example-cg", "other-cg"))
-        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3)
+        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_1_1,
+                    BUILD_SAMPLE_2, BUILD_SAMPLE_3)
         self.assertEqual(match, expected)
 
 
@@ -184,7 +208,8 @@ class TestFilterImported(TestCase):
 
     def test_filter_neither_negate(self):
         match = self._filter_imported(("absent-cg",), negate=True)
-        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3)
+        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_1_1,
+                    BUILD_SAMPLE_2, BUILD_SAMPLE_3)
         self.assertEqual(match, expected)
 
 
@@ -208,7 +233,7 @@ class TestFilterState(TestCase):
 
     def test_filter_deleted(self):
         res = self._filter_by_state(2)
-        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_2)
+        expected = (BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2)
         self.assertEqual(res, expected)
 
 
@@ -222,6 +247,7 @@ UNSORTED_BUILDS = (
     BUILD_SAMPLE_5,
     BUILD_SAMPLE_3,
     BUILD_SAMPLE_5,
+    BUILD_SAMPLE_1_1,
     BUILD_SAMPLE_1,
     BUILD_SAMPLE_4,
     BUILD_SAMPLE_2,
@@ -231,6 +257,7 @@ UNSORTED_BUILDS = (
 SORTED_BUILDS = (
     BUILD_SAMPLE_1,
     BUILD_SAMPLE_1,
+    BUILD_SAMPLE_1_1,
     BUILD_SAMPLE_2,
     BUILD_SAMPLE_3,
     BUILD_SAMPLE_4,
@@ -241,6 +268,7 @@ SORTED_BUILDS = (
 DEDUP_BUILDS = (
     BUILD_SAMPLE_5,
     BUILD_SAMPLE_3,
+    BUILD_SAMPLE_1_1,
     BUILD_SAMPLE_1,
     BUILD_SAMPLE_4,
     BUILD_SAMPLE_2,
@@ -270,17 +298,17 @@ class TestSorting(TestCase):
 
     def test_nvr_sort(self):
 
-        res = build_id_sort(BUILD_SAMPLES)
+        res = build_nvr_sort(BUILD_SAMPLES)
         self.assertEqual([b["nvr"] for b in res],
                          [b["nvr"] for b in BUILD_SAMPLES])
         self.assertTrue(res is not BUILD_SAMPLES)
 
-        res = build_id_sort(UNSORTED_BUILDS, dedup=True)
+        res = build_nvr_sort(UNSORTED_BUILDS, dedup=True)
         self.assertEqual([b["nvr"] for b in res],
                          [b["nvr"] for b in BUILD_SAMPLES])
         self.assertTrue(res is not UNSORTED_BUILDS)
 
-        res = build_id_sort(UNSORTED_BUILDS, dedup=False)
+        res = build_nvr_sort(UNSORTED_BUILDS, dedup=False)
         self.assertEqual([b["nvr"] for b in res],
                          [b["nvr"] for b in SORTED_BUILDS])
         self.assertTrue(res is not SORTED_BUILDS)

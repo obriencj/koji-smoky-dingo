@@ -22,6 +22,7 @@ Functions for working with Koji builds
 """
 
 
+from itertools import chain
 from koji import BUILD_STATES
 from collections import OrderedDict
 from operator import itemgetter
@@ -34,10 +35,10 @@ from . import (
     bulk_load, bulk_load_build_archives, bulk_load_build_rpms,
     bulk_load_builds, bulk_load_buildroots,
     bulk_load_buildroot_archives, bulk_load_buildroot_rpms,
-    bulk_load_tasks)
+    bulk_load_rpm_sigs, bulk_load_tasks, iter_bulk_load, )
 from .common import (
     chunkseq, merge_extend, rpm_evr_compare,
-    unique, update_extend)
+    unique, update_extend, )
 
 
 __all__ = (
@@ -55,14 +56,20 @@ __all__ = (
     "build_nvr_sort",
     "bulk_tag_builds",
     "bulk_tag_nvrs",
-    "decorate_build_archive_data",
+    "decorate_builds_btypes",
+    "decorate_builds_cg_list",
+    "decorate_builds_maven",
     "filter_by_state",
     "filter_by_tags",
     "filter_imported",
     "gather_buildroots",
+    "gather_rpm_sigkeys",
     "gather_component_build_ids",
     "gather_wrapped_builds",
+    "gavgetter",
     "iter_bulk_tag_builds",
+    "iter_latest_maven_builds",
+    "latest_maven_builds",
 )
 
 
@@ -122,27 +129,7 @@ def build_nvr_sort(build_infos, dedup=True):
     If dedup is True (the default), then duplicate NVRs will be
     omitted.
 
-    :param build_infos: build infos to be sorted and de-duplicated
-    :type build_infos: list[dict]
-
-    :param dedup: remove duplicate entries. Default, True
-    :type dedup: bool, optional
-
-    :rtype: list[dict]
-    """
-
-    if dedup:
-        build_infos = build_dedup(build_infos)
-    else:
-        build_infos = filter(None, build_infos)
-
-    return sorted(build_infos, key=BuildNEVRCompare)
-
-
-def build_id_sort(build_infos, dedup=True):
-    """
-    Given a sequence of build info dictionaries, return a de-duplicated
-    list of same, sorted by the build ID
+    All None infos will be dropped.
 
     :param build_infos: build infos to be sorted and de-duplicated
     :type build_infos: list[dict]
@@ -156,16 +143,41 @@ def build_id_sort(build_infos, dedup=True):
     build_infos = filter(None, build_infos)
 
     if dedup:
-        builds = dict((b["id"], b) for b in build_infos)
-        return [b for _bid, b in sorted(iteritems(builds))]
-    else:
-        return sorted(build_infos, key=itemgetter("id"))
+        build_infos = unique(build_infos, key="id")
+
+    return sorted(build_infos, key=BuildNEVRCompare)
+
+
+def build_id_sort(build_infos, dedup=True):
+    """
+    Given a sequence of build info dictionaries, return a de-duplicated
+    list of same, sorted by the build ID
+
+    All None infos will be dropped.
+
+    :param build_infos: build infos to be sorted and de-duplicated
+    :type build_infos: list[dict]
+
+    :param dedup: remove duplicate entries. Default, True
+    :type dedup: bool, optional
+
+    :rtype: list[dict]
+    """
+
+    build_infos = filter(None, build_infos)
+
+    if dedup:
+        build_infos = unique(build_infos, key="id")
+
+    return sorted(build_infos, key=itemgetter("id"))
 
 
 def build_dedup(build_infos):
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, with order preserved.
+
+    All None infos will be dropped.
 
     :param build_infos: build infos to be de-duplicated.
     :type build_infos: list[dict]
@@ -352,25 +364,155 @@ def bulk_tag_nvrs(session, tag, nvrs,
                            size=size, strict=strict)
 
 
-def decorate_build_archive_data(session, build_infos, with_cg=False):
+gavgetter = itemgetter("maven_group_id", "maven_artifact_id",
+                       "maven_version")
+
+
+def iter_latest_maven_builds(session, tag, pkg_names=None, inherit=True):
+    """
+    Yields ``((G, A, V), build_info)`` representing the latest build for
+    each GAV in the tag.
+
+    If pkg_names is given, then only those builds matching the given
+    package names are yielded.
+
+    :rtype: Generator[tuple[str], dict]
+    """
+
+    taginfo = as_taginfo(session, tag)
+    tid = taginfo["id"]
+
+    if pkg_names is None:
+        # pkgs = session.listPackages(tid, inherited=True)
+        # pkg_names = [p['package_name'] for p in pkgs if not p['blocked']]
+        pkg_names = [None]
+    else:
+        pkg_names = unique(pkg_names)
+
+    latest = set()
+
+    fn = lambda p: session.listTagged(tid, inherit=inherit,
+                                      package=p, type="maven")
+
+    for pkg, builds in iter_bulk_load(session, fn, pkg_names):
+        for bld in builds:
+            gav = gavgetter(bld)
+            if gav not in latest:
+                latest.add(gav)
+                yield gav, bld
+
+
+def latest_maven_builds(session, tag, pkg_names=None, inherit=True):
+    """
+    Returns a dict mapping each (G, A, V) to a build_info dict,
+    representing the latest build for each GAV in the tag.
+
+    If pkg_names is given, then only those builds matching the given
+    package names are returned.
+
+    :rtype: dict[tuple[str], dict]
+    """
+
+    builds = iter_latest_maven_builds(session, tag, pkg_names, inherit)
+    return dict(builds)
+
+
+def decorate_builds_maven(session, build_infos):
+    """
+    For any build info which does not have a maven_group_id and hasn't
+    already been checked for additional btype data, augment the btype
+    data.
+    """
+
+    build_infos = tuple(build_infos)
+
+    wanted = tuple(bld for bld in build_infos if
+                   ("maven_group_id" not in bld))
+
+    if wanted:
+        decorate_builds_btypes(session, wanted, with_fields=True)
+
+    return build_infos
+
+
+def decorate_builds_btypes(session, build_infos, with_fields=True):
+    """
+    Augments a list of build_info dicts with two new keys:
+
+    * archive_btype_ids is a list of BType IDs for the build
+
+    * archive_btype_names is a list of BType names for the build
+
+    Returns a tuple of the original input of build_infos. Any
+    build_infos which had not been previously decorated will be
+    mutated with their new keys.
+
+    If with_fields is True (the default) then any special btype fields
+    will be merged into the build info dict as well.
+
+    :param session: an active koji session
+
+    :type session: koji.ClientSession
+
+    :param build_infos: list of build infos to decorate and return
+
+    :type build_infos: list[dict] or Iterator[dict]
+
+    :param with_fields: also decorate btype-specific fields. Default,
+      True
+
+    :type with_fields: bool, optional
+
+    :rtype: tuple[dict]
+    """
+
+    build_infos = tuple(build_infos)
+
+    wanted = dict((bld["id"], bld) for bld in build_infos if
+                  "archive_btype_names" not in bld)
+
+    if not wanted:
+        return build_infos
+
+    btypes = dict((bt["name"], bt["id"]) for bt in session.listBTypes())
+
+    for bid, bts in iter_bulk_load(session, session.getBuildType, wanted):
+        bld = wanted[bid]
+
+        bld["archive_btype_names"] = btype_names = list(bts)
+        bld["archive_btype_ids"] = [btypes[b] for b in btype_names]
+
+        if not with_fields:
+            continue
+
+        for btn, data in iteritems(bts):
+            if not data:
+                continue
+
+            if btn == "win":
+                # the win field doesn't get prefixed with "win_"
+                bld["platform"] = data["platform"]
+            else:
+                # everything else gets prefixed with its type name and
+                # an underscore
+                del data["build_id"]
+                for key, val in iteritems(data):
+                    bld["_".join((btn, key))] = val
+
+    return build_infos
+
+
+def decorate_builds_cg_list(session, build_infos):
     """
     Augments a list of build_info dicts with two or four new keys:
 
-    * archive_btype_ids is a set of btype IDs for each archive of the
-      build
+    * archive_cg_ids is a list of content generator IDs for each
+      archive of the build
 
-    * archive_btype_names is a set of btype names for each archive of
-      the build
+    * archive_cg_names is a list of content generator names for each
+      archive of the build
 
-    * archive_cg_ids is a set of content generator IDs for each
-      archive of the build if with_cg is True, absent if with_cg is
-      False
-
-    * archive_cg_names is a set of content generator names for each
-      archive of the build if with_cg is True, absent if with_cg is
-      False
-
-    Returns a de-duplicated sequence of the build_infos. Any
+    Returns a tuple of the original input of build_infos. Any
     build_infos which had not been previously decorated will be
     mutated with their new keys.
 
@@ -382,13 +524,7 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
 
     :type build_infos: list[dict] or Iterator[dict]
 
-    :param with_cg: load buildroot data for each archive of each build
-      to determine the CG names and IDs. Default, does not load
-      buildroot data.
-
-    :type with_cg: bool, optional
-
-    :rtype: Iterator[dict]
+    :rtype: tuple[dict]
     """
 
     # some of the facets we might consider as a property of the build
@@ -402,49 +538,18 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
     # possible while farming all the data, and we also make it so that
     # we do not re-decorate builds which have already been decorated.
 
-    # convert build_infos into an id:info dict -- this also helps us
-    # ensure that the sequence of build_infos is preserved, for cases
-    # where it might have been a generator
-    builds = OrderedDict((b["id"], b) for b in build_infos if b)
+    build_infos = tuple(build_infos)
 
-    # we'll only decorate the build infos which aren't already
-    # decorated
-    needed = []
+    wanted = dict((bld["id"], bld) for bld in build_infos if
+                  "archive_cg_names" not in bld)
 
-    for bid, bld in iteritems(builds):
-        if with_cg:
-            if "archive_cg_ids" not in bld:
-                needed.append(bid)
-        else:
-            if "archive_btype_ids" not in bld:
-                needed.append(bid)
-
-    if not needed:
-        # everything seems to be decorated already, let's call it done!
-        return itervalues(builds)
-
-    btypes = dict((bt["name"], bt["id"]) for bt in session.listBTypes())
-
-    if not with_cg:
-        # no need to go fetching all those buildroots, let's offload
-        # some of the lifting to the hub. In cases where we do want
-        # the CG info, these fields will get filled in from the
-        # archives -- we'll correlate it ourselves rather than having
-        # koji look it up for us twice.
-
-        needful = bulk_load(session, session.getBuildType, needed)
-        for bid, btns in iteritems(needful):
-            bld = builds[bid]
-            bld["archive_btype_names"] = set(btns)
-            bld["archive_btype_ids"] = set(btypes[b] for b in btns)
-
-        # Done!
-        return itervalues(builds)
+    if not wanted:
+        return build_infos
 
     # multicall to fetch the artifacts and rpms for all build IDs that
     # need decorating
-    archives = bulk_load_build_archives(session, needed)
-    rpms = bulk_load_build_rpms(session, needed)
+    archives = bulk_load_build_archives(session, wanted)
+    rpms = bulk_load_build_rpms(session, wanted)
 
     # gather all the buildroot IDs, based on both the archives and
     # RPMs of the build.
@@ -464,20 +569,15 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
                 root_ids.add(broot_id)
 
     # multicall to fetch all the buildroots
-    buildroots = bulk_load_buildroots(session, list(root_ids))
+    buildroots = bulk_load_buildroots(session, root_ids)
 
     for build_id, archive_list in iteritems(archives):
-        # always decorate with the initial values
-        bld = builds[build_id]
-        bld["archive_btype_ids"] = btype_ids = set()
-        bld["archive_btype_names"] = btype_names = set()
-        bld["archive_cg_ids"] = cg_ids = set()
-        bld["archive_cg_names"] = cg_names = set()
+        bld = wanted[build_id]
+
+        cg_ids = []
+        cg_names = []
 
         for archive in archive_list:
-            btype_ids.add(archive["btype_id"])
-            btype_names.add(archive["btype"])
-
             broot_id = archive["buildroot_id"]
             if not broot_id:
                 # no buildroot, thus no CG info, skip
@@ -490,22 +590,22 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
 
             cg_id = broot.get("cg_id")
             if cg_id:
-                cg_ids.add(cg_id)
+                cg_ids.append(cg_id)
 
             cg_name = broot.get("cg_name")
             if cg_name:
-                cg_names.add(cg_name)
+                cg_names.append(cg_name)
+
+        bld["archive_cg_ids"] = unique(cg_ids)
+        bld["archive_cg_names"] = unique(cg_names)
 
     for build_id, rpm_list in iteritems(rpms):
         if not rpm_list:
             continue
 
-        bld = builds[build_id]
+        bld = wanted[build_id]
         cg_ids = bld["archive_cg_ids"]
         cg_names = bld["archive_cg_names"]
-
-        bld["archive_btype_ids"].add(btypes.get("rpm", 0))
-        bld["archive_btype_names"].add("rpm")
 
         for rpm in rpm_list:
             broot_id = rpm["buildroot_id"]
@@ -520,13 +620,16 @@ def decorate_build_archive_data(session, build_infos, with_cg=False):
 
             cg_id = broot.get("cg_id")
             if cg_id:
-                cg_ids.add(cg_id)
+                cg_ids.append(cg_id)
 
             cg_name = broot.get("cg_name")
             if cg_name:
-                cg_names.add(cg_name)
+                cg_names.append(cg_name)
 
-    return itervalues(builds)
+        bld["archive_cg_ids"] = unique(cg_ids)
+        bld["archive_cg_names"] = unique(cg_names)
+
+    return build_infos
 
 
 def filter_by_tags(session, build_infos,
@@ -622,7 +725,7 @@ def filter_imported(build_infos, by_cg=(), negate=False):
     imports.
 
     build_infos may have been decorated by the
-    `decorate_build_archive_data` function. This provides an accurate
+    `decorate_builds_cg_list` function. This provides an accurate
     listing of the content generators which have been used to import
     the build (if any). In the event that they have not been thus
     decorated, the cg filtering will rely on the cg_name setting on
@@ -665,7 +768,7 @@ def filter_imported(build_infos, by_cg=(), negate=False):
 
         # either get the decorated archive cg names, or start a fresh
         # one based on the possible cg_name associated with this build
-        build_cgs = build.get("archive_cg_names", set())
+        build_cgs = set(build.get("archive_cg_names", ()))
         cg_name = build.get("cg_name")
         if cg_name:
             build_cgs.add(cg_name)
@@ -731,6 +834,35 @@ def gather_buildroots(session, build_ids):
         broots = (a["buildroot_id"] for a in archive_list)
         broots = unique(filter(None, broots))
         results[build_id] = [buildroots[b] for b in broots]
+
+    return results
+
+
+def gather_rpm_sigkeys(session, build_ids):
+    """
+    Given a sequence of build IDs, collect the available sigkeys for
+    each rpm in each build.
+
+    Returns a dict mapping the original build IDs to a set of the
+    discovered sigkeys.
+    """
+
+    # first load a mapping of build_id: [RPMS]
+    loaded = bulk_load_build_rpms(session, build_ids)
+
+    # now load a mapping of rpm_id: [SIGS]
+    rpmids = (rpm["id"] for rpm in chain(*itervalues(loaded)))
+    rpm_sigs = bulk_load_rpm_sigs(session, rpmids)
+
+    results = {}
+
+    # now just correlate the set of sigkeys back to each needed
+    # cache entry
+    for bid, rpms in iteritems(loaded):
+        results[bid] = sigs = set()
+        for rpm in rpms:
+            rsigs = (sig["sigkey"] for sig in rpm_sigs[rpm["id"]])
+            sigs.update(rsigs)
 
     return results
 
@@ -889,23 +1021,28 @@ class BuildFilter(object):
 
 
     def filter_by_btype(self, build_infos):
+
         bt = self._btypes
-        if bt:
-            def test(b):
-                btn = b.get("archive_btype_names")
-                return btn and not bt.isdisjoint(btn)
+        if not bt:
+            return build_infos
 
-            build_infos = filter(test, build_infos)
+        def test(b):
+            btn = set(b.get("archive_btype_names", ()))
+            return btn and not bt.isdisjoint(btn)
 
-        return build_infos
+        build_infos = decorate_builds_btypes(self._session, build_infos)
+        return filter(test, build_infos)
 
 
     def filter_imported(self, build_infos):
         if self._cg_list or self._imported is not None:
             negate = not (self._imported or self._imported is None)
-            build_infos = filter_imported(build_infos, self._cg_list, negate)
 
-        return build_infos
+            build_infos = decorate_builds_cg_list(build_infos)
+            return filter_imported(build_infos, self._cg_list, negate)
+
+        else:
+            return build_infos
 
 
     def filter_by_state(self, build_infos):
@@ -930,12 +1067,6 @@ class BuildFilter(object):
 
         # first stage filtering, based on tag membership
         work = self.filter_by_tags(work)
-
-        # check if we're going to need the decorated additional data
-        # for filtering, and if so decorate
-        with_cg = bool(self._cg_list) or self._imported is not None
-        if self._btypes or with_cg:
-            work = decorate_build_archive_data(self._session, work, with_cg)
 
         # filtering by btype (provided by decorated addtl data)
         work = self.filter_by_btype(work)
