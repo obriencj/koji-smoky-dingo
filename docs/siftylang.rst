@@ -181,8 +181,8 @@ for invoking the ``item`` predicate. These are equivalent expressions:
   * ``(item .foo {100..200})``
 
 
-Built-In Sieve Predicates
--------------------------
+Core Sieves
+-----------
 
 The language supports three logical expressions; ``and``, ``or``, and
 ``not``. Each of these apply a logical constraint on top of other
@@ -190,6 +190,17 @@ expressions. The language also provides a way to set flags via tha
 ``flag`` expression, and to check flags via the ``flagged`` predicate.
 There final built-in predicate is ``item`` which is used to do value
 comparisons against the data structures themselves.
+
+
+Statement ``flag``
+^^^^^^^^^^^^^^^^^^
+::
+
+  (flag NAME EXPR [EXPR...])
+
+Acts like the ``and`` logical expression. In addition to passing its
+matches, this expression will also set the given flag name on each
+data item that matched all sub-expressions.
 
 
 Logical ``and``
@@ -234,17 +245,6 @@ Any expression can be inverted by prefixing it with ``!`` or
   * ``(!foo 1)``
 
 
-Statement ``flag``
-^^^^^^^^^^^^^^^^^^
-::
-
-  (flag NAME EXPR [EXPR...])
-
-Acts like the ``and`` logical expression. In addition to passing its
-matches, this expression will also set the given flag name on each
-data item that matched all sub-expressions.
-
-
 Predicate ``flagged``
 ^^^^^^^^^^^^^^^^^^^^^
 ::
@@ -280,3 +280,262 @@ of the sieve an ItemPath. For example, the following are equivalent:
 
   * ``(item .foo[].bar {1..100})``
   * ``(.foo[].bar {1..100})``
+
+
+Build Sieves
+------------
+
+To facilitate filtering sequences of koji build info dicts, there are
+a number of available sieves provided in the
+`kojismokydingo.sift.builds` module.
+
+A sifter instance with these and the core sieves available by default can be
+created via :py:func:`kojismokydingo.sift.builds.build_info_sifter`
+
+
+EVR Comparison Predicates
+^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (OP VER)
+
+``OP`` can be any of the following comparison operators:
+
+  * ``==``
+  * ``!=``
+  * ``>``
+  * ``>=``
+  * ``<``
+  * ``<=``
+
+``VER`` can be in any of the following forms:
+
+  * ``EPOCH:VERSION``
+  * ``EPOCH:VERSION-RELEASE``
+  * ``VERSION``
+  * ``VERSION-RELEASE``
+
+If ``EPOCH`` is omitted, it is presumed to be ``0``.
+If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+These predicates filter by using RPM EVR comparison rules against the
+epoch, version, and release values of the builds.
+
+
+Predicate ``cg-imported``
+^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (cg-imported [CGNAME...])
+
+Filters for builds which were produced by a koji Content Generator via
+the ``CGImport`` API. Such builds would have no task ID associated
+with them.
+
+If any optional ``CGNAME`` matchers are supplied, then filters for
+builds which are produced by matching content generators only.
+
+
+Predicate ``epoch``
+^^^^^^^^^^^^^^^^^^^^
+::
+
+   (epoch EPOCH [EPOCH...])
+
+Filters for builds whose epoch value matches any of the given ``EPOCH``
+patterns.
+
+
+Predicate ``imported``
+^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (imported)
+
+Filters for builds which have no task ID. These builds could be either raw
+imports or from a content generator.
+
+
+Predicate ``inherited``
+^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (inherited TAG [TAG...])
+
+Filters for builds which are tagged in any of the given ``TAG`` or
+their parents.
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
+Predicate ``latest``
+^^^^^^^^^^^^^^^^^^^^
+::
+
+   (latest TAG [TAG...])
+
+Filters for builds which are the latest of their package name in any
+of the given ``TAG``, following inheritance and honoring package
+listings and blocks.
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
+Predicate ``latest-maven``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (latest-maven TAG [TAG...])
+
+Filters for maven builds which are the latest of their GAV (group,
+artifact, version) in any of the given ``TAG``, following inheritance
+and honoring package listings and blocks.
+
+This differs from the ``latest`` predicate in that multiple copies of
+the same package may be considered the latest using this method. The
+uniqueness is by the GAV rather than the package name.
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
+Predicate ``name``
+^^^^^^^^^^^^^^^^^^
+::
+
+   (name NAME [NAME...])
+
+Filters for builds which have a name matching any of the given
+``NAME`` patterns.
+
+
+Predicate ``nvr``
+^^^^^^^^^^^^^^^^^
+::
+
+   (nvr NVR [NVR...])
+
+Filters for builds which have an NVR matching any of the given ``NVR``
+(name-version-release) patterns.
+
+
+Predicate ``owner``
+^^^^^^^^^^^^^^^^^^^
+::
+
+   (owner USER [USER...])
+
+Filters for builds whose owner's name or ID matches any of the given
+``USER``. ``USER`` may be specified by either name or ID, but not by
+pattern. ``USER`` will be validated when the sieve is first run --
+this may result in a `kojismokydingo.NoSuchUser` exception being
+raised.
+
+
+Predicate ``pkg-allowed``
+^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-allowed TAG [TAG...])
+
+Filters for builds whose package name is allowed in any of the given
+tags, honoring inheritance.
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
+Predicate ``pkg-blocked``
+^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-blocked TAG [TAG...])
+
+Filters for builds whose package name is explicitly blocked in any of
+the given tags, honoring inheritance.
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
+Predicate ``release``
+^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (release REL [REL...])
+
+Filters for builds which have a release matching any of the given
+``REL`` patterns.
+
+
+Predicate ``signed``
+^^^^^^^^^^^^^^^^^^^^
+::
+
+   (signed [SIGKEY...])
+
+Filters for builds which have an RPM archive that has been signed with
+a key matching any of the given ``SIGKEY`` patterns.
+
+If no ``SIGKEY`` patterns are supplied, then filters for builds which
+have an RPM archive that has been signed with any key.
+
+
+Predicate ``state``
+^^^^^^^^^^^^^^^^^^^
+::
+
+   (state STATE [STATE...])
+
+Filters for builds which are in one of the given build states. Each
+``STATE`` may be specified as either a name or a state ID, but each
+must be a valid koji build state.
+
+Valid states are:
+
+  * ``1`` ``BUILDING``
+  * ``2`` ``COMPLETE``
+  * ``3`` ``DELETED``
+  * ``4`` ``FAILED``
+  * ``5`` ``CANCELED``
+
+
+Predicate ``tagged``
+^^^^^^^^^^^^^^^^^^^^
+::
+
+   (tagged [TAG...])
+
+Filters for builds which are tagged with a tag having a name or ID
+matching any of the given ``TAG`` patterns.
+
+If no ``TAG`` patterns are specified, then filters for builds which
+have any tags at all.
+
+
+Predicate ``type``
+^^^^^^^^^^^^^^^^^^
+::
+
+   (type BTYPE [BTYPE...])
+
+Filters for builds which have archives of the given build type. Normal
+build types are rpm, maven, image, and win. Koji instances may support
+plugins which extend the available build types beyond these.
+
+
+Predicate ``version``
+^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (version VER [VER...])
+
+Filters for builds which have a version matching any of the given
+``VER`` patterns.
