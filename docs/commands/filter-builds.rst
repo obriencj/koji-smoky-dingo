@@ -105,6 +105,19 @@ detected to not be a TTY, then the list of NVRs will be read from
 stdin.
 
 
+Sifty Dingo Filtering
+---------------------
+
+This command supports filtering using the _`Sifty Dingo Filtering
+Language`. Sieve predicates can be specified inline using the
+``--filter`` option or loaded from a file using the ``--filter-file``
+option.
+
+It's important to note that sifty dingo filtering only happens after
+any conventional filtering has been applied.
+
+
+
 References
 ----------
 
