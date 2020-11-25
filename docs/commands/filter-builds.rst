@@ -105,8 +105,8 @@ detected to not be a TTY, then the list of NVRs will be read from
 stdin.
 
 
-Sifty Dingo Filtering
----------------------
+Filtering Builds with Sifty Dingo
+---------------------------------
 
 This command supports filtering using the :ref:`Sifty Dingo Filtering
 Language`. Sieve predicates can be specified inline using the
@@ -117,7 +117,6 @@ It's important to note that sifty dingo filtering only happens after
 any conventional filtering has been applied, and thus only those
 builds which have passed the conventional filters will be fed into the
 sifter.
-
 
 
 References
