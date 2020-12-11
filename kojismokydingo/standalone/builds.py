@@ -46,7 +46,6 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
         addarg("filter_file", metavar="FILTER_FILE",
                help="File of sifty filter predicates")
 
-        parser = self.profile_arguments(parser)
         return super(LonelyFilterBuilds, self).arguments(parser)
 
 

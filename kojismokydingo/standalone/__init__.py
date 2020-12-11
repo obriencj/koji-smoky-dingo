@@ -42,6 +42,14 @@ __all__ = (
 
 class LonelyDingo(SmokyDingo):
 
+    default_profile = None
+
+
+    @classmethod
+    def main(cls, name=None, args=None):
+        return cls(name)(args)
+
+
     def create_session(self, options):
         return ProfileClientSession(options)
 
@@ -49,6 +57,7 @@ class LonelyDingo(SmokyDingo):
     def parser(self):
         invoke = basename(sys.argv[0])
         argp = ArgumentParser(prog=invoke, description=self.description)
+        argp = self.profile_arguments(argp) or argp
         return self.arguments(argp) or argp
 
 
@@ -56,8 +65,12 @@ class LonelyDingo(SmokyDingo):
         grp = parser.add_argument_group("Koji Profile options")
         addarg = grp.add_argument
 
-        addarg("--profile", "-p", action="store", default=None,
-               metavar="PROFILE", help="specify a configuration profile")
+        profile = self.default_profile
+        required = profile is None
+
+        addarg("--profile", "-p", action="store", metavar="PROFILE",
+               default=profile, required=required,
+               help="specify a configuration profile")
 
         return parser
 

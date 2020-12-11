@@ -432,12 +432,19 @@ class SmokyDingo(object):
     permission = None
 
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name=None):
+        if name is not None:
+            self.name = name
+
+        elif getattr(self, "name", None) is None:
+            # check that the class doesn't already define a name as a
+            # default. Failing that, use a squished version of the
+            # classname
+            self.name = type(self).__name__.lower()
 
         # this is used to register the command with koji in a manner
         # that it expects to deal with
-        self.__name__ = "handle_" + name.replace("-", "_")
+        self.__name__ = "handle_" + self.name.replace("-", "_")
 
         # this is necessary for koji to recognize us as a cli command.
         # We only set this on instances, not on the class itself,
@@ -596,7 +603,7 @@ class AnonSmokyDingo(SmokyDingo):
     permission = None
 
 
-    def __init__(self, name):
+    def __init__(self, name=None):
         super(AnonSmokyDingo, self).__init__(name)
 
         # koji won't even bother fully authenticating our session for
