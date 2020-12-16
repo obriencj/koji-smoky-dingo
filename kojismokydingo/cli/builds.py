@@ -488,13 +488,15 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
+        tags = resplit(options.tags)
+
         bf = self.get_filter(options)
         bs = self.get_sifter(options)
         sorting = options.sorting
         outputs = self.get_outputs(options)
 
         return cli_list_components(self.session, nvrs,
-                                   tags=options.tags,
+                                   tags=tags,
                                    inherit=options.inherit,
                                    latest=options.latest,
                                    build_filter=bf,
@@ -624,13 +626,15 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
+        tags = resplit(options.tags)
+
         bf = self.get_filter(options)
         bs = self.get_sifter(options)
         sorting = options.sorting
         outputs = self.get_outputs(options)
 
         return cli_filter_builds(self.session, nvrs,
-                                 tags=options.tags,
+                                 tags=tags,
                                  inherit=options.inherit,
                                  latest=options.latest,
                                  build_filter=bf,
