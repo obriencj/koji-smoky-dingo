@@ -360,7 +360,7 @@ class BuildFiltering(BuildSifting):
 
 
 def cli_list_components(session, nvr_list,
-                        tag=None, inherit=False, latest=False,
+                        tags=(), inherit=False, latest=False,
                         build_filter=None, build_sifter=None,
                         sorting=None, outputs=None,
                         strict=False):
@@ -379,7 +379,7 @@ def cli_list_components(session, nvr_list,
     else:
         loaded = {}
 
-    if tag:
+    for tag in tags:
         # mix in any tagged builds
         tag = as_taginfo(session, tag)
         found = session.listTagged(tag["id"], inherit=inherit, latest=latest)
@@ -449,7 +449,8 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
         group = parser.add_argument_group("Components of tagged builds")
         addarg = group.add_argument
 
-        addarg("--tag", action="store", default=None,
+        addarg("--tag", action="append", default=[],
+               metavar="TAG", dest="tags",
                help="Look for components of builds in this tag")
 
         addarg("--inherit", action="store_true", default=False,
@@ -493,7 +494,7 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
         outputs = self.get_outputs(options)
 
         return cli_list_components(self.session, nvrs,
-                                   tag=options.tag,
+                                   tags=options.tags,
                                    inherit=options.inherit,
                                    latest=options.latest,
                                    build_filter=bf,
@@ -504,7 +505,7 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
 
 
 def cli_filter_builds(session, nvr_list,
-                      tag=None, inherit=False, latest=False,
+                      tags=(), inherit=False, latest=False,
                       build_filter=None, build_sifter=None,
                       sorting=None, outputs=None,
                       strict=False):
@@ -521,7 +522,7 @@ def cli_filter_builds(session, nvr_list,
     else:
         builds = ()
 
-    if tag:
+    for tag in tags:
         taginfo = as_taginfo(session, tag)
         listTagged = partial(session.listTagged, taginfo["id"],
                              inherit=inherit, latest=latest)
@@ -584,7 +585,8 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
         group = parser.add_argument_group("Working from tagged builds")
         addarg = group.add_argument
 
-        addarg("--tag", action="store", default=None,
+        addarg("--tag", action="append", default=[],
+               metavar="TAG", dest="tags",
                help="Filter using the builds in this tag")
 
         addarg("--inherit", action="store_true", default=False,
@@ -628,7 +630,7 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
         outputs = self.get_outputs(options)
 
         return cli_filter_builds(self.session, nvrs,
-                                 tag=options.tag,
+                                 tags=options.tags,
                                  inherit=options.inherit,
                                  latest=options.latest,
                                  build_filter=bf,
