@@ -1038,7 +1038,7 @@ class BuildFilter(object):
         if self._cg_list or self._imported is not None:
             negate = not (self._imported or self._imported is None)
 
-            build_infos = decorate_builds_cg_list(build_infos)
+            build_infos = decorate_builds_cg_list(self._session, build_infos)
             return filter_imported(build_infos, self._cg_list, negate)
 
         else:
