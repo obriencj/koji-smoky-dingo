@@ -1,0 +1,45 @@
+Koji Smoky Dingo preview 0.9.5 Release Notes
+============================================
+
+*December 18, 2020*
+
+0.9.5 is a quick release to fix issues with RPM installations. The
+koji RPM doesn't declare itself as a valid python package, and thus
+some entry_points hooks (like ksd-filter-builds) cannot function.
+
+Here's the 0.9.4 Release Notes again, since this is really just 0.9.4
+with that fix on top.
+
+Introducing a new mini language, Sifty Dingo
+
+- you can now write filtering expressions for the list-components and
+  filter-builds commands
+- filter into multiple buckets at a time with a single set of rules
+- implemented under the `kojismokydingo.sift` package
+
+Chugging along and collecting feedback
+
+- list-build-archives now accepts multiple NVRs
+- list-build-archives and latest-archives now accept an '--arch'
+  option which allows filtering by architecture
+- rename the '--build-type' option for list-build-archives and
+  latest-archives to simply '--type'
+- add the build type option aliases to relevant build filtering
+  commands
+- move as_userinfo into the base package
+- add int_or_str function to cli package, for use as the type argument
+  to parser arguments. Will safely convert str to int if applicable.
+  This allows a number of commands to accept the ID of their relevant
+  data type in place of its name
+- unique now accepts a 'key=' parameter to allow deduplication of
+  otherwise unhashable values
+- parse_datetime now accepts a 'strict=' parameter to let it return
+  None instead of raising an Exception when parsing fails
+- new package for adapting SmokyDingo commands into standalone scripts
+  or console_scripts entry points, kojismokydingo.standalone
+- filter-builds and list-component-builds both allow multiple '--tag'
+  arguments now, to provide an even larger list of builds upon which
+  to operate
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/4?closed=1>

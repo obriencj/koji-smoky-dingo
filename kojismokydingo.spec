@@ -1,6 +1,6 @@
 
 %global srcname kojismokydingo
-%global srcver 0.9.4
+%global srcver 0.9.5
 %global srcrel 1
 
 
@@ -224,6 +224,11 @@ Koji Smoky Dingo
 
 
 %changelog
+* Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-1
+- remove install_requires for koji, because koji doesn't think it's a
+  python package and in many cases this breaks things.
+- fix issue with tags option in filter-builds
+
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.4-1
 - list-build-archives now accepts multiple NVRs
 - list-build-archives and latest-archives now accept '--arch=ARCH'
