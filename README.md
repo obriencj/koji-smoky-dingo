@@ -83,13 +83,17 @@ available by default system-wide, then the package needs to be
 installed into the default site-packages for the python
 installation.
 
+### Using RPM
+
 If using an RPM-based distribution, this is easily achieved using the
 included spec to produce an RPM and install that.
 
 ```bash
 make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-0.9.4-1.fc32.noarch.rpm
+dnf install dist/noarch/python3-kojismokydingo-0.9.5-1.fc32.noarch.rpm
 ```
+
+### System-wide Using Python
 
 Using traditional setuptools or pip installation methods can also
 achieve this by specifying the specific root or prefix parameter
@@ -100,12 +104,14 @@ sudo python setup.py clean build install --root=/
 
 # Python 2.7 global install
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-0.9.4-py2-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-0.9.5-py2-none-any.whl
 
 # Python 3 global install
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-0.9.4-py3-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-0.9.5-py3-none-any.whl
 ```
+
+### User-only Using Python
 
 However, if you only want the plugin available for yourself, you can
 install it anywhere and tell koji to look in that particular
@@ -114,7 +120,7 @@ install it anywhere and tell koji to look in that particular
 ```bash
 # Python 3 user install
 python3 setup.py bdist_wheel
-pip3 install --user -I dist/kojismokydingo-0.9.4-py3-none-any.whl
+pip3 install --user -I dist/kojismokydingo-0.9.5-py3-none-any.whl
 ```
 
 And the following setting in ~/.koji/config assuming Python version
