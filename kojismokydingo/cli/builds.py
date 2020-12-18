@@ -480,15 +480,14 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
 
     def handle(self, options):
         nvrs = list(options.nvr)
+        tags = resplit(options.tags)
 
-        if not nvrs and not sys.stdin.isatty():
+        if not (nvrs or sys.stdin.isatty()):
             if not options.nvr_file:
                 options.nvr_file = "-"
 
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
-
-        tags = resplit(options.tags)
 
         bf = self.get_filter(options)
         bs = self.get_sifter(options)
@@ -618,15 +617,14 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
 
     def handle(self, options):
         nvrs = list(options.nvr)
+        tags = resplit(options.tags)
 
-        if not (nvrs or options.tag or sys.stdin.isatty()):
+        if not (nvrs or sys.stdin.isatty()):
             if not options.nvr_file:
                 options.nvr_file = "-"
 
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
-
-        tags = resplit(options.tags)
 
         bf = self.get_filter(options)
         bs = self.get_sifter(options)
