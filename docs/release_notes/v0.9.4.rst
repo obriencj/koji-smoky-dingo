@@ -1,7 +1,7 @@
 Koji Smoky Dingo preview 0.9.4 Release Notes
 ============================================
 
-*Unreleased*
+*December 18, 2020*
 
 Introducing a new mini language, Sifty Dingo
 
@@ -28,6 +28,11 @@ Chugging along and collecting feedback
   otherwise unhashable values
 - parse_datetime now accepts a 'strict=' parameter to let it return
   None instead of raising an Exception when parsing fails
+- new package for adapting SmokyDingo commands into standalone scripts
+  or console_scripts entry points, kojismokydingo.standalone
+- filter-builds and list-component-builds both allow multiple '--tag'
+  arguments now, to provide an even larger list of builds upon which
+  to operate
 
 Closed Issues:
 <https://github.com/obriencj/koji-smoky-dingo/milestone/4?closed=1>
