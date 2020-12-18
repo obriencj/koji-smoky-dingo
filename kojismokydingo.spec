@@ -1,7 +1,7 @@
 
 %global srcname kojismokydingo
 %global srcver 0.9.4
-%global srcrel 0
+%global srcrel 1
 
 
 Summary: Koji Smoky Dingo
@@ -224,7 +224,7 @@ Koji Smoky Dingo
 
 
 %changelog
-* Fri Oct 09 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.4-0
+* Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.4-1
 - list-build-archives now accepts multiple NVRs
 - list-build-archives and latest-archives now accept '--arch=ARCH'
 - moved as_userinfo to kojismokydingo package
@@ -233,10 +233,12 @@ Koji Smoky Dingo
   otherwise unhashable values
 - parse_datetime now accepts a 'strict=' parameter to let it return
   None instead of raising an Exception when parsing fails
-- filtering expressions support added to list-build-components and
+- filtering expressions support added to list-component-builds and
   filter-builds commands
 - ksd-filter-builds stand-alone command added to act as a shbang for
   reusable filtering scripts
+- filter-builds and list-component-builds now accept multiple '--tag'
+  options
 
 * Fri Oct 02 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-1
 - add iter_bulk_load generator function
