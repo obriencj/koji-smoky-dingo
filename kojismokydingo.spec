@@ -1,7 +1,7 @@
 
 %global srcname kojismokydingo
-%global srcver 0.9.5
-%global srcrel 1
+%global srcver 0.9.6
+%global srcrel 0
 
 
 Summary: Koji Smoky Dingo
@@ -11,10 +11,11 @@ Release: %{srcrel}%{?dist}
 License: GPLv3
 Group: Devel
 URL: https://github.com/obriencj/koji-smoky-dingo
-Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-
 BuildArch: noarch
+
+Source0: %{name}-%{version}.tar.gz
+Patch0: no-koji.patch
 
 
 # we don't generate binaries, let's turn that part off
@@ -66,6 +67,7 @@ Koji Smoky Dingo
 
 %prep
 %setup -q
+%patch0 -p1
 
 
 %build
@@ -224,6 +226,9 @@ Koji Smoky Dingo
 
 
 %changelog
+* Fri Dec 19 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-0
+- use a patch to disable koji as a setuptools requirement
+
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-1
 - remove install_requires for koji, because koji doesn't think it's a
   python package and in many cases this breaks things.

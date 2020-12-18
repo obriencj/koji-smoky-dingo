@@ -1,0 +1,13 @@
+diff --git a/setup.py b/setup.py
+index d5608ac..6cc6db9 100755
+--- a/setup.py
++++ b/setup.py
+@@ -98,7 +98,7 @@ def config():
+         ],
+ 
+         "install_requires": [
+-            "koji",
++            # "koji",
+             "six",
+         ],
+ 
