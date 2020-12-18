@@ -3,8 +3,15 @@ FROM centos:6
 
 WORKDIR /src
 
+# all the non-vault repos for CentOS 6 have been removed, so we'll
+# need to remove their configuration and inject our own 6.10 vault
+# repos
+RUN rm -rf /etc/yum.repos.d/*
+COPY tools/centos-6.10-vault.repo /etc/yum.repos.d/
+
 RUN \
-    yum install -q -y epel-release && \
+    yum install -q -y \
+        epel-release && \
     yum install -q -y \
         make rpm-build which yum-utils \
         python-docutils python-pip python2-mock koji && \
