@@ -26,7 +26,7 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
-VERSION = "0.9.5"
+VERSION = "0.9.6"
 
 
 CLASSIFIERS = [
@@ -98,12 +98,7 @@ def config():
         ],
 
         "install_requires": [
-
-            # we don't say we require koji, because in so many cases,
-            # koji isn't actually installed in a manner that pip
-            # considers to be valid.
-
-            # "koji",
+            "koji",
             "six",
         ],
 
