@@ -484,12 +484,30 @@ class Sifter(object):
         bfl[self.key(data)] = True
 
 
-    def get_cache(self, cachename, data):
-        cachekey = (cachename, self.key(data))
+    def get_cache(self, cachename, key):
+        """
+        Flexible storage for caching data in a sifter. Sieves can use this
+        to record data about individual info dicts, or to cache results
+        from arbitrary koji session calls.
+
+        This data is cleared when the `reset` method is invoked.
+        """
+
+        cachekey = (cachename, key)
         cch = self._cache.get(cachekey)
         if cch is None:
             cch = self._cache[cachekey] = OrderedDict()
         return cch
+
+
+    def get_info_cache(self, cachename, data):
+        """
+        Cache associated with a particular info dict.
+
+        This data is cleared when the `reset` method is invoked
+        """
+
+        return self.get_cache(cachename, self.key(data))
 
 
 @add_metaclass(ABCMeta)
@@ -590,8 +608,29 @@ class Sieve(object):
         return filter(partial(self.check, session), info_dicts)
 
 
-    def get_cache(self, info):
-        return self.sifter.get_cache(self.name, info)
+    def get_cache(self, key):
+        """
+        Gets a cache dict from the sifter using the name of this sieve
+        and the given key (which must be hashable)
+
+        The same cache dict will be returned for this key until the
+        sifter has its `reset` method invoked.
+        """
+
+        return self.sifter.get_cache(self.name, key)
+
+
+    def get_info_cache(self, info):
+        """
+        Gets a cache dict from the sifter using the name of this sieve and
+        the sifter's designated key for the given info dict. The default
+        sifter key will get the "id" value from the info dict.
+
+        The same cache dict will be returned for this info dict until
+        the sifter has its `reset` method invoked.
+        """
+
+        return self.sifter.get_info_cache(self.name, info)
 
 
 @add_metaclass(ABCMeta)

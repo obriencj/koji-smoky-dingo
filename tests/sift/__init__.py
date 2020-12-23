@@ -66,7 +66,7 @@ class Poke(Sieve):
 
 
     def check(self, _session, data):
-        cache = self.get_cache(data)
+        cache = self.get_info_cache(data)
         seen = cache.get("count", 0)
         cache["count"] = seen + 1
 
@@ -816,16 +816,16 @@ class SifterTest(TestCase):
         self.assertEqual(res["keep"], [TACOS, PIZZA, BEER])
         self.assertEqual(res["default"], [DRAINO])
 
-        che = sifter.get_cache("poke", TACOS)
+        che = sifter.get_info_cache("poke", TACOS)
         self.assertEqual(che["count"], 3)
 
-        che = sifter.get_cache("poke", PIZZA)
+        che = sifter.get_info_cache("poke", PIZZA)
         self.assertEqual(che["count"], 3)
 
-        che = sifter.get_cache("poke", BEER)
+        che = sifter.get_info_cache("poke", BEER)
         self.assertEqual(che["count"], 3)
 
-        che = sifter.get_cache("poke", DRAINO)
+        che = sifter.get_info_cache("poke", DRAINO)
         self.assertEqual(che["count"], 4)
 
 

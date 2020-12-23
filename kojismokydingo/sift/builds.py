@@ -25,23 +25,25 @@ dicts.
 
 import operator
 
+from abc import abstractmethod
 from koji import BUILD_STATES
 from operator import itemgetter
 from six import iteritems, itervalues
-from six.moves import filter, map
+from six.moves import filter
 
 from . import (
     DEFAULT_SIEVES,
     ItemSieve, Sieve, Sifter, SifterError, VariadicSieve,
     ensure_all_matcher, ensure_all_int_or_str,
-    ensure_int_or_str, ensure_str, )
+    ensure_int_or_str, ensure_str, ensure_symbol, )
+from .common import CacheMixin
 from .. import (
     as_taginfo, bulk_load_builds, bulk_load_tags, bulk_load_users,
     iter_bulk_load, )
 from ..builds import (
+    BuildNEVRCompare,
     build_dedup, decorate_builds_btypes, decorate_builds_cg_list,
-    decorate_builds_maven, gather_rpm_sigkeys, gavgetter,
-    iter_latest_maven_builds, )
+    decorate_builds_maven, gather_rpm_sigkeys, gavgetter, )
 from ..common import rpm_evr_compare, unique
 from ..tags import gather_tag_ids
 
@@ -50,6 +52,9 @@ __all__ = (
     "DEFAULT_BUILD_INFO_SIEVES",
 
     "CGImportedSieve",
+    "CompareLatestSieve",
+    "CompareLatestIDSieve",
+    "CompareLatestNVRSieve",
     "EpochSieve",
     "EVRCompareEQ",
     "EVRCompareNE",
@@ -66,6 +71,7 @@ __all__ = (
     "OwnerSieve",
     "PkgAllowedSieve",
     "PkgBlockedSieve",
+    "PkgListSieve",
     "ReleaseSieve",
     "SignedSieve",
     "StateSieve",
@@ -78,6 +84,27 @@ __all__ = (
     "sift_builds",
     "sift_nvrs",
 )
+
+
+_OPMAP = {
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">": operator.gt,
+    ">=": operator.ge,
+    "<": operator.lt,
+    "<=": operator.le,
+}
+
+
+def ensure_comparison(value):
+    value = ensure_symbol(value)
+
+    if value in _OPMAP:
+        return _OPMAP[value]
+
+    else:
+        msg = "Invalid comparison operator: %r" % value
+        raise SifterError(msg)
 
 
 class NVRSieve(ItemSieve):
@@ -140,8 +167,8 @@ class StateSieve(ItemSieve):
     Usage: ``(state BUILD_STATE [BUILD_STATE...])``
 
     filters for dict infos whose `state` key matches any of the given
-    koji build states. Build states may be specified as either an integer
-    or one of the following strings or symbols
+    koji build states. Build states may be specified as either an
+    integer or one of the following strings or symbols
 
     * ``BUILDING``
     * ``COMPLETE``
@@ -213,16 +240,6 @@ class ImportedSieve(Sieve):
         return not binfo.get("task_id")
 
 
-OPMAP = {
-    "==": operator.eq,
-    "!=": operator.ne,
-    ">": operator.gt,
-    ">=": operator.ge,
-    "<": operator.lt,
-    "<=": operator.le,
-}
-
-
 class EVRCompare(Sieve):
     """
     Valid comparison values are
@@ -254,7 +271,7 @@ class EVRCompare(Sieve):
         self.version = version
         self.release = release
 
-        self.op = OPMAP[self.name]
+        self.op = _OPMAP[self.name]
 
 
     def check(self, session, binfo):
@@ -416,7 +433,7 @@ class TaggedSieve(Sieve):
 
         needed = {}
         for binfo in binfos:
-            cache = self.get_cache(binfo)
+            cache = self.get_info_cache(binfo)
             if "tag_names" not in cache:
                 needed[binfo["id"]] = cache
 
@@ -429,7 +446,7 @@ class TaggedSieve(Sieve):
 
 
     def check(self, session, binfo):
-        cache = self.get_cache(binfo)
+        cache = self.get_info_cache(binfo)
 
         tag_names = cache.get("tag_names", ())
         tag_ids = cache.get("tag_ids", ())
@@ -469,9 +486,9 @@ class InheritedSieve(Sieve):
         self.tag_ids = None
 
 
-    def get_cache(self, binfo):
+    def get_info_cache(self, binfo):
         # let's use the same caches that the Tagged sieve uses
-        return self.sifter.get_cache("tagged", binfo)
+        return self.sifter.get_info_cache("tagged", binfo)
 
 
     def prep(self, session, binfos):
@@ -480,7 +497,7 @@ class InheritedSieve(Sieve):
 
         needed = {}
         for binfo in binfos:
-            cache = self.get_cache(binfo)
+            cache = self.get_info_cache(binfo)
             if "tag_names" not in cache:
                 needed[binfo["id"]] = cache
 
@@ -494,7 +511,7 @@ class InheritedSieve(Sieve):
 
     def check(self, session, binfo):
         inheritance = self.tag_ids
-        cache = self.get_cache(binfo)
+        cache = self.get_info_cache(binfo)
 
         for tid in cache.get("tag_ids", ()):
             if tid in inheritance:
@@ -503,28 +520,16 @@ class InheritedSieve(Sieve):
         return False
 
 
-class PkgSieve(Sieve):
+class PkgListSieve(CacheMixin):
 
     def __init__(self, sifter, tagname, *tagnames):
         tags = [tagname]
         tags.extend(tagnames)
         tags = ensure_all_int_or_str(tags)
 
-        super(PkgSieve, self).__init__(sifter, *tags)
+        super(PkgListSieve, self).__init__(sifter, *tags)
 
         self.tag_ids = None
-
-
-    @staticmethod
-    def tag_pkglist(cache={}):
-        """
-        ``{tag_id: {"allowed": set(...), "blocked": set(...)}, ...}``
-
-        Shared across all PkgSieve instances. Populated during
-        instance prep from the package listing of their tags
-        """
-
-        return cache
 
 
     def prep(self, session, binfos):
@@ -534,78 +539,56 @@ class PkgSieve(Sieve):
             loaded = bulk_load_tags(session, self.tokens, err=True)
             self.tag_ids = tids = set(t["id"] for t in itervalues(loaded))
 
-        # see if we are missing a package listing for any of our tags. It
-        # may have been loaded by another instance of a PkgSieve
-        cache = self.tag_pkglist()
-        needed = [tid for tid in tids if tid not in cache]
-
-        if not needed:
-            return
-
-        fn = lambda t: session.listPackages(t, inherited=True)
-        for tid, pkgs in iter_bulk_load(session, fn, needed):
-            allowed = set()
-            blocked = set()
-
-            for pkg in pkgs:
-                if pkg["blocked"]:
-                    blocked.add(pkg["package_name"])
-                else:
-                    allowed.add(pkg["package_name"])
-
-            cache[tid] = {
-                "allowed": allowed,
-                "blocked": blocked
-            }
+        # pre-load our package lists cache
+        for tid in tids:
+            self.list_packages(session, tid, True)
 
 
-class PkgAllowedSieve(PkgSieve):
+class PkgAllowedSieve(PkgListSieve):
     """
-    usage: (pkg-allowed TAG [TAG...])
+    usage: ``(pkg-allowed TAG [TAG...])``
 
     Matches builds which are have their package listing present and
-    not blocked in and of the given tags or their parents.
+    not blocked in any of the given tags or their parents.
     """
 
     name = "pkg-allowed"
 
 
     def check(self, session, binfo):
-        cache = self.tag_pkglist()
         pkg = binfo["name"]
 
         for tid in self.tag_ids:
-            if pkg in cache[tid]["allowed"]:
+            if pkg in self.allowed_packages(session, tid, True):
                 return True
+        else:
+            return False
 
-        return False
 
-
-class PkgBlockedSieve(PkgSieve):
+class PkgBlockedSieve(PkgListSieve):
     """
-    usage: (pkg-blocked TAG [TAG...])
+    usage: ``(pkg-blocked TAG [TAG...])``
 
-    Matches builds which are have their package name blocked in and of the
-    given tags or their parents.
+    Matches builds which are have their package name blocked in any of
+    the given tags or their parents.
     """
 
     name = "pkg-blocked"
 
 
     def check(self, session, binfo):
-        cache = self.tag_pkglist()
         pkg = binfo["name"]
 
         for tid in self.tag_ids:
-            if pkg in cache[tid]["blocked"]:
+            if pkg in self.blocked_packages(session, tid, True):
                 return True
-
-        return False
+        else:
+            return False
 
 
 class TypeSieve(Sieve):
     """
-    usage: (type BTYPE [BTYPE...])
+    usage: ``(type BTYPE [BTYPE...])``
 
     Passes build infos that have archives of the given btype. Normal
     btypes are rpm, maven, image, and win.
@@ -638,7 +621,7 @@ class TypeSieve(Sieve):
 
 class CGImportedSieve(Sieve):
     """
-    usage: (cg-imported [CGNAME...])
+    usage: ``(cg-imported [CGNAME...])``
 
     Passes build infos that have been produced via a cg-import by any
     of the named content generators. If no CGs are named, then passes
@@ -672,26 +655,15 @@ class CGImportedSieve(Sieve):
             return bool(cg_names)
 
 
-class LatestSieve(Sieve):
+class LatestSieve(CacheMixin):
     """
-    usage: (latest TAG [TAG...])
+    usage: ``(latest TAG [TAG...])``
 
-    Passes build infos that are the latest build of their package name in
-    any of the tags.
+    Passes build infos that are the latest build of their package name
+    in any of the tags.
     """
 
     name = "latest"
-
-
-    @staticmethod
-    def latest_ids(cache={}):
-        """
-        This is a cache mapping a tag ID to latest build IDs in that
-        tag. It's populated by all the LatestSieve instances when they
-        run their prep.
-        """
-
-        return cache
 
 
     def __init__(self, sifter, tagname, *tagnames):
@@ -709,77 +681,79 @@ class LatestSieve(Sieve):
         tids = self.tag_ids
         if tids is None:
             tags = bulk_load_tags(session, self.tokens, err=True)
-            self.tag_ids = tids = unique(t["id"] for t in itervalues(tags))
+            tids = self.tag_ids = unique(t["id"] for t in itervalues(tags))
 
-        # for each tag ID, we look through the cache to see if we've
-        # already loaded the latest build IDs
-        cache = self.latest_ids()
         for tid in tids:
-            if tid not in cache:
-                # if not already loaded, find the latest builds in the tag
-                # and store their IDs
-                cache[tid] = self.load_latest_ids(session, tid)
-
-
-    def load_latest_ids(self, session, tagid):
-        sought = session.getLatestBuilds(tagid)
-        return set(map(itemgetter("id"), sought))
+            # pre-fill the caches of build IDs
+            self.latest_build_ids(session, tid, inherit=True)
 
 
     def check(self, session, binfo):
-        cache = self.latest_ids()
+        bid = binfo["id"]
         for tid in self.tag_ids:
-            if binfo["id"] in cache[tid]:
+            latest = self.latest_build_ids(session, tid, inherit=True)
+            if bid in latest:
                 return True
         return False
 
 
-class LatestMavenSieve(VariadicSieve):
+class LatestMavenSieve(CacheMixin):
     """
-    usage: (latest-maven TAG [TAG...])
+    usage: ``(latest-maven TAG [TAG...])``
 
-    Passes build infos that have btype maven and are the build of their
-    GAV in any of the tags.
+    Passes build infos that have btype maven and are the build of
+    their GAV in any of the tags.
     """
 
     name = "latest-maven"
 
 
-    def __init__(self, sifter, tag):
-        super(LatestMavenSieve, self).__init__(sifter, tag)
-        self.tag = ensure_str(tag)
+    def __init__(self, sifter, tagname, *tagnames):
+        tags = [tagname]
+        tags.extend(tagnames)
+        tags = ensure_all_int_or_str(tags)
 
-        # mapping (G,A,V):ID for the latest GAV builds
-        # in tag
-        self.cache = None
+        super(LatestMavenSieve, self).__init__(sifter, *tags)
+        self.tag_ids = None
 
 
     def prep(self, session, binfos):
 
-        tag = self.tag = as_taginfo(session, self.tag)
+        # first we need to convert our tokens into tag IDs
+        tids = self.tag_ids
+        if tids is None:
+            tags = bulk_load_tags(session, self.tokens, err=True)
+            tids = self.tag_ids = unique(t["id"] for t in itervalues(tags))
 
         # in order to perform the GAV comparisons, we need to have
         # loaded the various binfos with their maven fields. This
         # corrects any which were not loaded this way.
         decorate_builds_maven(session, binfos)
 
-        if self.cache is None:
-            sought = iter_latest_maven_builds(session, tag, inherit=True)
-            self.cache = dict((gav, bld["id"]) for gav, bld in sought)
+        for tid in tids:
+            # pre-fill the caches of build IDs
+            self.latest_maven_build_ids(session, tid, inherit=True)
 
 
     def check(self, session, binfo):
-        return ("maven_group_id" in binfo and
-                self.cache.get(gavgetter(binfo)) == binfo["id"])
+        if "maven_group_info" not in binfo:
+            return False
+
+        bid = binfo["id"]
+        for tid in self.tag_ids:
+            latest = self.latest_maven_build_ids(session, tid, inherit=True)
+            if bid in latest:
+                return True
+        return False
 
 
 class SignedSieve(Sieve):
     """
     usage: ``(signed [KEY...])``
 
-    Passes builds which have RPMs signed with any of the given
-    keys. If no keys are specified then passes builds which have RPMs
-    signed with any key at all.
+    Passes builds which have RPMs signed with any of the given keys.
+    If no keys are specified then passes builds which have RPMs signed
+    with any key at all.
     """
 
     name = "signed"
@@ -794,7 +768,7 @@ class SignedSieve(Sieve):
     def prep(self, session, binfos):
         needed = {}
         for binfo in binfos:
-            cache = self.get_cache(binfo)
+            cache = self.get_info_cache(binfo)
             if "rpmsigs" not in cache:
                 needed[binfo["id"]] = cache
 
@@ -810,7 +784,7 @@ class SignedSieve(Sieve):
 
     def check(self, session, binfo):
         want_keys = self.keys
-        build_keys = self.get_cache(binfo).get("rpmsigs")
+        build_keys = self.get_info_cache(binfo).get("rpmsigs")
 
         if want_keys is None:
             return bool(build_keys)
@@ -823,8 +797,131 @@ class SignedSieve(Sieve):
             return False
 
 
+class CompareLatestSieve(CacheMixin):
+    """
+    Abstract base for performing sieving comparisons against the
+    latest builds in a tag using an operand.
+
+    Valid comparison operands are:
+
+    * ``==``
+    * ``!=``
+    * ``>``
+    * ``>=``
+    * ``<``
+    * ``<=``
+
+    The data being compared is the result of the abastract
+    `comparison_key` method.
+    """
+
+    def __init__(self, sifter, comparison, tag):
+        op = ensure_comparison(comparison)
+
+        super(CompareLatestSieve, self).__init__(sifter, comparison, tag)
+        self.op = op
+        self.tag_id = None
+
+
+    @abstractmethod
+    def comparison_key(binfo):
+        pass
+
+
+    def prep(self, session, binfos):
+        if self.tag_id is None:
+            self.tag_id = as_taginfo(session, self.tokens[1])["id"]
+
+
+    def comparison(self, binfo, latest):
+        keyfn = self.compare_key
+        return self.op(keyfn(binfo), keyfn(latest))
+
+
+class CompareLatestIDSieve(CompareLatestSieve):
+    """
+    usage: ```(compare-latest-id OP TAG)```
+
+    Filters for builds which have an ID which compares against the
+    latest build of the same package from TAG.
+
+    Valid comparison ops are:
+
+    * ``==``
+    * ``!=``
+    * ``>``
+    * ``>=``
+    * ``<``
+    * ``<=``
+
+    example: ```(compare-latest-id >= foo-1.0-released)``` will filter
+    for builds which have an ID that is greater-than-or-equal-to the
+    ID of the latest build of the same package name in the
+    foo-1.0-released tag.
+    """
+
+    name = "compare-latest-id"
+
+
+    comparison_key = itemgetter("id")
+
+
+    def check(self, session, binfo):
+        blds = self.latest_builds_by_name(session, self.tag_id, inherit=True)
+        latest = blds.get(binfo["name"])
+
+        if latest is None:
+            return False
+        else:
+            return self.comparison(binfo, latest)
+
+
+class CompareLatestNVRSieve(CompareLatestSieve):
+    """
+    usage: ```(compare-latest-nvr OP TAG)```
+
+    Filters for builds which have an NVR which compares against the
+    latest build of the same package from TAG.
+
+    Valid comparison ops are:
+
+    * ``==``
+    * ``!=``
+    * ``>``
+    * ``>=``
+    * ``<``
+    * ``<=``
+
+    example: ```(compare-latest-nvr >= foo-1.0-released)``` will filter
+    for builds which have an NVR that is greater-than-or-equal-to the
+    NVR of the latest build of the same package name in the
+    foo-1.0-released tag.
+    """
+
+    name = "compare-latest-nvr"
+
+    comparison_key = BuildNEVRCompare
+
+
+    def check(self, session, binfo):
+        blds = self.latest_builds_by_name(session, self.tag_id, inherit=True)
+        latest = blds.get(binfo["name"])
+
+        if latest is None:
+            return False
+        else:
+            return self.comparison(binfo, latest)
+
+
+# class CompareLatestMavenSieve(CompareLatest):
+#
+#     name = "compare-latest-maven"
+
+
 DEFAULT_BUILD_INFO_SIEVES = [
     CGImportedSieve,
+    CompareLatestIDSieve,
+    CompareLatestNVRSieve,
     EpochSieve,
     EVRCompareEQ,
     EVRCompareNE,
