@@ -14,7 +14,7 @@
 
 """
 Koji Smoky Dingo - Koji-specific utilities for working with Sifty
-sieves
+Sieves
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
@@ -43,6 +43,12 @@ class CacheMixin(Sieve):
 
 
     def latest_builds(self, session, tag_id, inherit=True):
+        """
+        a caching wrapper for session.getLatestBuilds
+
+        :rtype: list[dict]
+        """
+
         cache = self._mixin_cache("latest_builds")
 
         key = (tag_id, inherit)
@@ -56,6 +62,13 @@ class CacheMixin(Sieve):
 
 
     def latest_build_ids(self, session, tag_id, inherit=True):
+        """
+        a caching wrapper for session.getLatestBuilds which returns a set
+        containing only the build IDs
+
+        :rtype: set[int]
+        """
+
         cache = self._mixin_cache("latest_build_ids")
 
         key = (tag_id, inherit)
@@ -69,6 +82,13 @@ class CacheMixin(Sieve):
 
 
     def latest_builds_by_name(self, session, tag_id, inherit=True):
+        """
+        a caching wrapper for session.getLatestBuilds which returns a dict
+        mapping the build names to the build info
+
+        :rtype: dict[str, dict]
+        """
+
         cache = self._mixin_cache("latest_builds_by_name")
 
         key = (tag_id, inherit)
@@ -82,6 +102,12 @@ class CacheMixin(Sieve):
 
 
     def latest_maven_builds(self, session, tag_id, inherit=True):
+        """
+        a caching wrapper for `kojismokydingo.builds.latest_maven_builds`
+
+        :rtype: dict[tuple[str], dict]
+        """
+
         cache = self._mixin_cache("latest_maven_builds")
 
         key = (tag_id, inherit)
@@ -95,6 +121,13 @@ class CacheMixin(Sieve):
 
 
     def latest_maven_build_ids(self, session, tag_id, inherit=True):
+        """
+        a caching wrapper for `kojismokydingo.builds.latest_maven_builds`
+        which returns a set containing only the build IDs
+
+        :rtype: set[int]
+        """
+
         cache = self._mixin_cache("latest_maven_build_ids")
 
         key = (tag_id, inherit)
@@ -108,6 +141,12 @@ class CacheMixin(Sieve):
 
 
     def list_packages(self, session, tag_id, inherited=True):
+        """
+        a caching wrapper for session.listPackages
+
+        :rtype: list[dict]
+        """
+
         cache = self._mixin_cache("list_packages")
 
         key = (tag_id, inherited)
@@ -120,6 +159,13 @@ class CacheMixin(Sieve):
 
 
     def allowed_packages(self, session, tag_id, inherited=True):
+        """
+        a caching wrapper for session.listPackages which returns a set
+        containing only the package names which are not blocked.
+
+        :rtype: set[str]
+        """
+
         cache = self._mixin_cache("allowed_packages")
 
         key = (tag_id, inherited)
@@ -136,6 +182,13 @@ class CacheMixin(Sieve):
 
 
     def blocked_packages(self, session, tag_id, inherited=True):
+        """
+        a caching wrapper for session.listPackages which returns a set
+        containing only the package names which are blocked.
+
+        :rtype: set[str]
+        """
+
         cache = self._mixin_cache("blocked_packages")
 
         key = (tag_id, inherited)

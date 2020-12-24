@@ -14,4 +14,5 @@ Sift Modules
    :maxdepth: 1
 
    sift/builds
+   sift/common
    sift/parse
