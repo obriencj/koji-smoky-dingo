@@ -783,6 +783,15 @@ class SifterTest(TestCase):
         res = sifter(None, DATA)
         self.assertEqual(res["default"], DATA)
 
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+
+        self.assertEqual(sieves[0].get_info_cache(DATA[0]),
+                         sifter.get_info_cache("poke", DATA[0]))
+
+        self.assertEqual(sieves[0].get_cache(DATA[0]["id"]),
+                         sifter.get_cache("poke", DATA[0]["id"]))
+
         res = sifter(None, DATA)
         self.assertEqual(res["default"], DATA)
 
