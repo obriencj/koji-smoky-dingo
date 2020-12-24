@@ -1,0 +1,26 @@
+#! /usr/bin/env ksd-filter-builds
+
+;; declare that this filter needs a RELEASE_TAG parameter
+#param RELEASE_TAG
+
+;; unless otherwise set via the command-line --profile option, use the
+;; "koji-internal" koji profile. This profile must be present in the
+;; system or user koji configuration.
+#option --profile=koji-internal
+
+;; unless otherwise set via the command-line, the output option will
+;; be used to write out one file for each flag, containing the NVRs
+;; which have that flag set.
+#option --output=*:%.txt
+
+;; set the "obsoletes" flag on any filtered build which has an NVR
+;; less-than or equal-to the latest build of the same package in the
+;; given $RELEASE_TAG tag.
+(flag obsoletes (compare-latest-nvr <= $RELEASE_TAG))
+
+;; set the "upgrades" flag on any filtered build which has an NVR
+;; greater-than the latest build of the same package in the given
+;; $RELEASE_TAG tag.
+(flag upgrades (compare-latest-nvr > $RELEASE_TAG))
+
+;; The end.

@@ -41,6 +41,18 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
     Adapter to make the FilterBuilds command into a LonelyDingo.
     """
 
+
+    def __init__(self, name):
+        super(LonelyFilterBuilds, self).__init__(name)
+
+        # some trickery to un-require the --profile option, though we
+        # will mimic the behavior later. We need to do this because
+        # this standalone may pull a profile out of the filter file
+        # itself. We'll make sure to fail empty profile values later
+        # in validation.
+        self.default_profile = ""
+
+
     def arguments(self, parser):
         addarg = parser.add_argument
         addarg("filter_file", metavar="FILTER_FILE",
@@ -101,6 +113,10 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
                 # override a define back to its default
                 # value. Something to fix later.
                 act(parser, options, val)
+
+        if not options.profile:
+            parser.error("the following arguments are required:"
+                         " --profile/-p")
 
         self.default_params().update(params)
 
