@@ -817,6 +817,7 @@ class CompareLatestSieve(CacheMixin):
 
     def __init__(self, sifter, comparison, tag):
         op = ensure_comparison(comparison)
+        tag = ensure_str(tag)
 
         super(CompareLatestSieve, self).__init__(sifter, comparison, tag)
         self.op = op
@@ -834,7 +835,7 @@ class CompareLatestSieve(CacheMixin):
 
 
     def comparison(self, binfo, latest):
-        keyfn = self.compare_key
+        keyfn = self.comparison_key
         return self.op(keyfn(binfo), keyfn(latest))
 
 
