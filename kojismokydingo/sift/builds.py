@@ -52,7 +52,6 @@ __all__ = (
     "DEFAULT_BUILD_INFO_SIEVES",
 
     "CGImportedSieve",
-    "CompareLatestSieve",
     "CompareLatestIDSieve",
     "CompareLatestNVRSieve",
     "EpochSieve",
@@ -817,7 +816,7 @@ class CompareLatestSieve(CacheMixin):
 
     def __init__(self, sifter, comparison, tag):
         op = ensure_comparison(comparison)
-        tag = ensure_str(tag)
+        tag = ensure_int_or_str(tag)
 
         super(CompareLatestSieve, self).__init__(sifter, comparison, tag)
         self.op = op
