@@ -95,7 +95,7 @@ Koji Smoky Dingo
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
+%__rm -rf $RPM_BUILD_ROOT
 
 %if %{with old_python}
   %{__python} setup.py install --skip-build --root %{buildroot}
@@ -125,7 +125,7 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+%__rm -rf $RPM_BUILD_ROOT
 
 
 %if %{with docs}
@@ -226,8 +226,10 @@ Koji Smoky Dingo
 
 
 %changelog
-* Fri Dec 19 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-0
+* Fri Dec 19 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.6-0
 - use a patch to disable koji as a setuptools requirement
+- added build sieves 'compare-latest-nvr' and 'compare-latest-id'
+- refactored sieve caching
 
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-1
 - remove install_requires for koji, because koji doesn't think it's a

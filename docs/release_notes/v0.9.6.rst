@@ -1,0 +1,29 @@
+Koji Smoky Dingo preview 0.9.6 Release Notes
+============================================
+
+*Unreleased*
+
+General user-base is still very limited at this point in time, so we
+get very few bug reports or new ideas. If you're a koji-smoky-dingo
+user and you have feedback, please do let me know via the
+[tracker]. We need as many users as possible to try things out so that
+we can identify problems before a 1.0.0 release!
+
+[tracker]: https://github.com/obriencj/koji-smoky-dingo/issues
+
+Otherwise, still chugging along!
+
+- Refactored the sifty sieve caching mechanism so that it is easier to
+  associate cached calls with the sifter rather than the sieve
+  instance.
+- Added a ChacheMixin to kojismokydingo.sift.common with methods that
+  will cache the results of large tag queries. Sieve classes can
+  inherit this to make use of the cache.
+- Added two new build sieves: compare-latest-nvr and
+  compare-latest-id. These allow for filtering builds using comparison
+  operators against the latest build of the same package in a given
+  tag.
+- Fixed an issue where the ksd-filter-builds standalone would still
+  require the '--profile' option to be specified on the command-line
+  even when the '#option --profile' directive was present in the
+  filter.
