@@ -336,6 +336,42 @@ If any optional ``CGNAME`` matchers are supplied, then filters for
 builds which are produced by matching content generators only.
 
 
+Predicate ``compare-latest-id``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (compare-latest-id OP TAG)
+
+Filters for builds which have an ID that compares to the latest build
+of the same package name in the given tag. If there is no matching
+build in the tag, then the filtered build will not be included.
+
+``OP`` can be any of the following comparison operators: ``==``,
+``!=``, ``>``, ``>=``, ``<``, ``<=``
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
+Predicate ``compare-latest-nvr``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (compare-latest-nvr OP TAG)
+
+Filters for builds which have an NVR that compares to the latest build
+of the same package name in the given tag. If there is no matching
+build in the tag, then the filtered build will not be included.
+
+``OP`` can be any of the following comparison operators: ``==``,
+``!=``, ``>``, ``>=``, ``<``, ``<=``
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
 Predicate ``epoch``
 ^^^^^^^^^^^^^^^^^^^^
 ::
