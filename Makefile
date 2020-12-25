@@ -67,7 +67,7 @@ build: clean-built report-python flake8	## Produces a wheel using the default sy
 	@$(PYTHON) setup.py $(BDIST)
 
 
-install: build	## Installs using the default python for the current user
+install: quick-test	## Installs using the default python for the current user
 	@$(PYTHON) -B -m pip.__main__ \
 		install --no-deps --user -I $(BDIST_FILE)
 
@@ -79,6 +79,7 @@ tidy:	## Removes stray eggs and .pyc files
 		\( -iname '.tox' -o -iname '.eggs' -prune \) -o \
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
 		\( -type f -iname '*.pyc' -exec rm -f {} + \)
+
 
 clean-built:
 	@rm -rf build/* dist/*
