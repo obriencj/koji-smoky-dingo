@@ -151,24 +151,20 @@ docs/overview.rst: README.md
 
 
 pull-docs:	## Refreshes the gh-pages submodule
-	@git submodule init ; \
-	pushd gh-pages >/dev/null ; \
-	git reset --hard origin/gh-pages ; \
-	git pull ; \
-	git clean -fd >/dev/null ; \
-	popd >/dev/null
+	@git submodule init
+	@git submodule update --remote gh-pages
 
 
 stage-docs: docs pull-docs	## Builds docs and stages them in gh-pages
-	@pushd gh-pages >/dev/null ; \
-	rm -rf * ; \
+	@pushd gh-pages >/dev/null && \
+	rm -rf * && \
 	touch .nojekyll ; \
 	popd >/dev/null ; \
 	cp -vr build/sphinx/dirhtml/* gh-pages/
 
 
 deploy-docs: stage-docs	## Builds, stages, and deploys docs to gh-pages
-	@pushd gh-pages >/dev/null ; \
+	@pushd gh-pages >/dev/null && \
 	git remote set-url --push origin $(ORIGIN_PUSH) ; \
 	git add -A && git commit -m "deploying sphinx update" && git push ; \
 	popd >/dev/null ; \
