@@ -38,6 +38,16 @@ from ..tags import (
 __all__ = (
     "DEFAULT_TAG_INFO_SIEVES",
 
+    "ArchSieve",
+    "BuildTagSieve",
+    "DestTagSieve",
+    "ExactArchSieve",
+    "InheritsSieve",
+    "LockedSieve",
+    "NameSieve",
+    "ParentSieve",
+    "PermissionSieve",
+
     "tag_info_sieves",
     "tag_info_sifter",
     "sift_tags",
@@ -170,6 +180,11 @@ class PermissionSieve(MatcherSieve):
 
 
 class TargetSieve(MatcherSieve):
+    """
+    Base class for BuildTagSieve and DestTagSieve. Both operate on the
+    same principal, but use slightly different queries.
+    """
+
 
     @abstractmethod
     def getTargets(self, session, tagids):
@@ -245,13 +260,90 @@ class DestTagSieve(TargetSieve):
         return iter_bulk_load(session, fn, tagids)
 
 
+class InheritanceSieve(MatcherSieve):
+    """
+    Base class for ParentSieve and InheritsSieve. Both operate on the
+    same principal, but with slightly different queries.
+    """
+
+    @abstractmethod
+    def getParents(self, session, tagids):
+        pass
+
+
+    def prep(self, session, taginfos):
+        needed = {}
+
+        for tag in taginfos:
+            cache = self.get_info_cache(tag)
+            if "parents" not in cache:
+                needed[tag["id"]] = cache
+
+        for tid, parents in self.getParents(session, needed):
+            cache = needed[tid]
+            cache["tag_names"] = [t["name"] for t in parents]
+            cache["tag_ids"] = [t["parent_id"] for t in parents]
+
+
+    def check(self, session, taginfo):
+        cache = self.get_info_cache(taginfo)
+        tag_names = cache.get("tag_names", ())
+
+        if not (self.tokens and tag_names):
+            return bool(tag_names)
+
+        tag_ids = cache.get("tag_ids", ())
+
+        for match in self.tokens:
+            if match in tag_names or match in tag_ids:
+                return True
+
+        return False
+
+
+class ParentSieve(InheritanceSieve):
+    """
+    usage: ``(parent [TAG...])``
+
+    If no TAG patterns are specified, matches tags which have any parents.
+
+    If TAG patterns are specified, matchs tags which have any direct
+    parent matching any of the given patterns.
+    """
+
+    name = "parent"
+
+
+    def getParents(self, session, tagids):
+        return iter_bulk_load(session, session.getInheritanceData, tagids)
+
+
+class InheritsSieve(InheritanceSieve):
+    """
+    usage: ``(inherits [TAG...])``
+
+    If no TAG patterns are specified, matches tags which have any parents.
+
+    If TAG patterns are specified, matches tags which have a parent at
+    any depth matching any of the given patterns.
+    """
+
+    name = "inherits"
+
+
+    def getParents(self, session, tagids):
+        return iter_bulk_load(session, session.getFullInheritance, tagids)
+
+
 DEFAULT_TAG_INFO_SIEVES = [
     ArchSieve,
     BuildTagSieve,
     DestTagSieve,
     ExactArchSieve,
+    InheritsSieve,
     LockedSieve,
     NameSieve,
+    ParentSieve,
     PermissionSieve,
 ]
 

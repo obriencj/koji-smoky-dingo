@@ -644,6 +644,19 @@ symbols. Only matches tags which have the exact same set of
 architectures.
 
 
+Tag Predicate ``inherits``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (inherits [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which have any
+parents.
+
+If ``TAG`` patterns are specified, matches tags which have a parent at
+any depth matching any of the given patterns.
+
+
 Tag Predicate ``locked``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 ::
@@ -661,6 +674,19 @@ Tag Predicate ``name``
 
 Matches tags which have a name that matches any of the given ``NAME``
 patterns.
+
+
+Tag Predicate ``parent``
+^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (parent [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which have any
+parents.
+
+If ``TAG`` patterns are specified, matchs tags which have any direct
+parent matching any of the given patterns.
 
 
 Tag Predicate ``permission``
