@@ -297,6 +297,11 @@ class AllItems(Item):
 
 class ItemPath(object):
 
+    @staticmethod
+    def from_str(src):
+        return parse_itempath(src)
+
+
     def __init__(self, *paths):
         self.paths = list(paths)
 
