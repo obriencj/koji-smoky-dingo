@@ -89,6 +89,9 @@ permissions in koji.
 | ``filter-builds``          | Filter a list of NVRs by various        |
 |                            | criteria                                |
 +----------------------------+-----------------------------------------+
+| ``filter-tags``            | Filter a list of tags by various        |
+|                            | criteria                                |
++----------------------------+-----------------------------------------+
 | ``latest-archives``        | Show selected latest archives from a    |
 |                            | tag                                     |
 +----------------------------+-----------------------------------------+

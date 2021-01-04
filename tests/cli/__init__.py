@@ -31,6 +31,7 @@ ENTRY_POINTS = {
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
     "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",
+    "filter-tags": "kojismokydingo.cli.tags:FilterTags",
     "latest-archives": "kojismokydingo.cli.archives:LatestArchives",
     "list-btypes": "kojismokydingo.cli.builds:ListBTypes",
     "list-build-archives": "kojismokydingo.cli.archives:ListBuildArchives",
