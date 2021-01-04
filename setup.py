@@ -74,7 +74,7 @@ COMMANDS = {
 
 CLI = {
     "ksd-filter-builds": "kojismokydingo.standalone.builds:ksd_filter_builds",
-    # "ksd-filter-tags": "kojismokydingo.standalone.tags:ksd_filter_tags",
+    "ksd-filter-tags": "kojismokydingo.standalone.tags:ksd_filter_tags",
 }
 
 
