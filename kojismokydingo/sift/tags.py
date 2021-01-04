@@ -27,8 +27,7 @@ from six import iteritems, itervalues
 
 from . import (
     DEFAULT_SIEVES,
-    ItemSieve, MatcherSieve, Sieve, Sifter, SymbolSieve,
-    ensure_all_matcher, ensure_all_symbol, )
+    ItemSieve, MatcherSieve, Sieve, Sifter, SymbolSieve, )
 from .. import (
     bulk_load_tags, )
 from ..tags import (

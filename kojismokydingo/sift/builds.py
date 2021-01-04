@@ -35,7 +35,6 @@ from . import (
     DEFAULT_SIEVES,
     IntStrSieve, ItemSieve, MatcherSieve, Sieve,
     Sifter, SifterError, VariadicSieve,
-    ensure_all_matcher, ensure_all_int_or_str,
     ensure_int_or_str, ensure_str, ensure_symbol, )
 from .common import CacheMixin
 from .. import (
