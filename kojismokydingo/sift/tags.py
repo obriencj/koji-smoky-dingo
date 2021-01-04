@@ -23,13 +23,14 @@ dicts.
 """
 
 
+from abc import abstractmethod
 from six import iteritems, itervalues
 
 from . import (
     DEFAULT_SIEVES,
     ItemSieve, MatcherSieve, Sieve, Sifter, SymbolSieve, )
 from .. import (
-    bulk_load_tags, )
+    bulk_load_tags, iter_bulk_load, )
 from ..tags import (
     gather_tag_ids, tag_dedup, )
 
@@ -168,7 +169,43 @@ class PermissionSieve(MatcherSieve):
                 taginfo["perm_id"] in self.tokens)
 
 
-class BuildTagSieve(MatcherSieve):
+class TargetSieve(MatcherSieve):
+
+    @abstractmethod
+    def getTargets(self, session, tagids):
+        pass
+
+
+    def prep(self, session, taginfos):
+        needed = {}
+        for tag in taginfos:
+            cache = self.get_info_cache(tag)
+            if "target_names" not in cache:
+                needed[tag["id"]] = cache
+
+        for tid, targs in self.getTargets(session, needed):
+            cache = needed[tid]
+            cache["target_names"] = [t["name"] for t in targs]
+            cache["target_ids"] = [t["id"] for t in targs]
+
+
+    def check(self, session, taginfo):
+        cache = self.get_info_cache(taginfo)
+        target_names = cache.get("target_names", ())
+
+        if not (self.tokens and target_names):
+            return bool(target_names)
+
+        target_ids = cache.get("target_ids", ())
+
+        for match in self.tokens:
+            if match in target_names or match in target_ids:
+                return True
+
+        return False
+
+
+class BuildTagSieve(TargetSieve):
     """
     usage: ``(build-tag [TARGET...])``
 
@@ -183,15 +220,12 @@ class BuildTagSieve(MatcherSieve):
     name = "build-tag"
 
 
-    def prep(self, session, taginfos):
-        pass
+    def getTargets(self, session, tagids):
+        fn = lambda i: session.getBuildTargets(buildTagID=i)
+        return iter_bulk_load(session, fn, tagids)
 
 
-    def check(self, session, taginfo):
-        pass
-
-
-class DestTagSieve(MatcherSieve):
+class DestTagSieve(TargetSieve):
     """
     usage: ``(dest-tag [TARGET...])``
 
@@ -206,16 +240,15 @@ class DestTagSieve(MatcherSieve):
     name = "dest-tag"
 
 
-    def prep(self, session, taginfos):
-        pass
-
-
-    def check(self, session, taginfo):
-        pass
+    def getTargets(self, session, tagids):
+        fn = lambda i: session.getBuildTargets(destTagID=i)
+        return iter_bulk_load(session, fn, tagids)
 
 
 DEFAULT_TAG_INFO_SIEVES = [
     ArchSieve,
+    BuildTagSieve,
+    DestTagSieve,
     ExactArchSieve,
     LockedSieve,
     NameSieve,
