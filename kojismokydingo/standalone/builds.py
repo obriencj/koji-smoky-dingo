@@ -13,10 +13,7 @@
 
 
 """
-Koji Smoky Dingo - Standalone
-
-This package contains adaptive mechanisms for converting a SmokyDingo command
-into a stand-alone console_script entry point.
+Koji Smoky Dingo - Standalone build commands
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :licence: GPL v3
@@ -41,8 +38,7 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
     Adapter to make the FilterBuilds command into a LonelyDingo.
     """
 
-
-    def __init__(self, name):
+    def __init__(self, name=None):
         super(LonelyFilterBuilds, self).__init__(name)
 
         # some trickery to un-require the --profile option, though we
