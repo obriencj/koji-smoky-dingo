@@ -28,15 +28,23 @@ from json import dumps
 from koji_cli.lib import arg_filter
 from operator import itemgetter
 from six import iteritems, itervalues
-from six.moves import zip
+from six.moves import map, zip
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
-    printerr, pretty_json, tabulate)
-from .. import BadDingo, FeatureUnavailable, NoSuchTag, version_require
+    int_or_str, printerr, pretty_json, read_clean_lines, tabulate, )
+from .sift import TagSifting, output_sifted
+from .. import (
+    BadDingo, FeatureUnavailable, NoSuchTag,
+    bulk_load_tags, version_require, )
+from ..common import unique
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
-    renum_inheritance, resolve_tag)
+    renum_inheritance, resolve_tag, tag_dedup, )
+
+
+SORT_BY_ID = "sort-by-id"
+SORT_BY_NAME = "sort-by-name"
 
 
 class BadSwap(BadDingo):
@@ -833,6 +841,107 @@ class ListTagExtras(AnonSmokyDingo):
                                    blocked=options.blocked,
                                    quiet=options.quiet,
                                    json=options.json)
+
+
+def cli_filter_tags(session, tag_list,
+                    search=None, regex=None,
+                    tag_sifter=None,
+                    sorting=None, outputs=None,
+                    strict=False):
+
+    if search:
+        tag_list.extend(t["id"] for t in
+                        session.search(search, "tag", "glob") if t)
+
+    if regex:
+        tag_list.extend(t["id"] for t in
+                        session.search(regex, "tag", "regex") if t)
+
+    tag_list = unique(map(int_or_str, tag_list))
+    loaded = bulk_load_tags(session, tag_list, err=strict)
+    tags = tag_dedup(itervalues(loaded))
+
+    if tag_sifter:
+        results = tag_sifter(session, tags)
+    else:
+        results = {"default": tags}
+
+    if sorting == SORT_BY_NAME:
+        sortkey = "name"
+    elif sorting == SORT_BY_ID:
+        sortkey = "id"
+    else:
+        sortkey = None
+
+    output_sifted(results, "name", outputs, sort=sortkey)
+
+
+class FilterTags(AnonSmokyDingo, TagSifting):
+
+    description = "Filter a list of tags"
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("tags", nargs="*", type=int_or_str, metavar="TAGNNAME",
+               help="Tag names to filter through")
+
+        addarg("-f", "--file", action="store", default=None,
+               dest="tag_file", metavar="TAG_FILE",
+               help="Read list of tags from file, one name per line."
+               " Specify - to read from stdin.")
+
+        addarg("--strict", action="store_true", default=False,
+               help="Erorr if any of the tag names to not resolve into a"
+               " real tag. Otherwise, missing tags are ignored.")
+
+        grp = parser.add_argument_group("Searching for tags")
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--search", action="store", default=None, metavar="GLOB",
+               help="Filter the results of a search for tags with"
+               " the given name pattern")
+
+        addarg("--regex", action="store", default=None, metavar="REGEX",
+               help="Filter the results of a search for tags with"
+               " the given regex name pattern")
+
+        grp = parser.add_argument_group("Sorting of tags")
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--nvr-sort", action="store_const",
+               dest="sorting", const=SORT_BY_NAME, default=None,
+               help="Sort output by Name in ascending order")
+
+        addarg("--id-sort", action="store_const",
+               dest="sorting", const=SORT_BY_ID, default=None,
+               help="Sort output by Tag ID in ascending order")
+
+        return self.sifter_arguments(parser)
+
+
+    def handle(self, options):
+        tags = list(options.tags)
+
+        if not (tags or sys.stdin.isatty()):
+            if not options.tag_file:
+                options.tag_file = "-"
+
+        if options.tag_file:
+            tags.extend(read_clean_lines(options.tag_file))
+
+        ts = self.get_sifter(options)
+        outputs = self.get_outputs(options)
+
+        return cli_filter_tags(self.session, tags,
+                               search=options.search,
+                               regex=options.regex,
+                               tag_sifter=ts,
+                               sorting=options.sorting,
+                               outputs=outputs,
+                               strict=options.strict)
 
 
 #
