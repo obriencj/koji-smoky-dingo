@@ -427,12 +427,11 @@ class TaggedSieve(MatcherSieve):
             if "tag_names" not in cache:
                 needed[binfo["id"]] = cache
 
-        if needed:
-            fn = lambda i: session.listTags(build=i)
-            for bid, tags in iter_bulk_load(session, fn, needed):
-                cache = needed[bid]
-                cache["tag_names"] = [t["name"] for t in tags]
-                cache["tag_ids"] = [t["id"] for t in tags]
+        fn = lambda i: session.listTags(build=i)
+        for bid, tags in iter_bulk_load(session, fn, needed):
+            cache = needed[bid]
+            cache["tag_names"] = [t["name"] for t in tags]
+            cache["tag_ids"] = [t["id"] for t in tags]
 
 
     def check(self, session, binfo):
