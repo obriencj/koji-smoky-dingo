@@ -33,7 +33,8 @@ from six.moves import filter
 
 from . import (
     DEFAULT_SIEVES,
-    ItemSieve, Sieve, Sifter, SifterError, VariadicSieve,
+    IntStrSieve, ItemSieve, MatcherSieve, Sieve,
+    Sifter, SifterError, VariadicSieve,
     ensure_all_matcher, ensure_all_int_or_str,
     ensure_int_or_str, ensure_str, ensure_symbol, )
 from .common import CacheMixin
@@ -192,7 +193,7 @@ class StateSieve(ItemSieve):
         super(ItemSieve, self).__init__(sifter, state)
 
 
-class OwnerSieve(Sieve):
+class OwnerSieve(IntStrSieve):
     """
     Usage: ``(owner USER [USER...])```
 
@@ -207,11 +208,7 @@ class OwnerSieve(Sieve):
 
 
     def __init__(self, sifter, user, *users):
-        usernames = [user]
-        usernames.extend(users)
-        usernames = ensure_all_int_or_str(usernames)
-
-        super(OwnerSieve, self).__init__(sifter, *usernames)
+        super(OwnerSieve, self).__init__(sifter, user, *users)
         self._user_ids = None
 
 
@@ -409,7 +406,7 @@ class EVRCompareLE(EVRCompare):
     name = "<="
 
 
-class TaggedSieve(Sieve):
+class TaggedSieve(MatcherSieve):
     """
     usage: (tagged [TAG...])
 
@@ -421,11 +418,6 @@ class TaggedSieve(Sieve):
     """
 
     name = "tagged"
-
-
-    def __init__(self, sifter, *tagnames):
-        tagnames = ensure_all_matcher(tagnames)
-        super(TaggedSieve, self).__init__(sifter, *tagnames)
 
 
     def prep(self, session, binfos):
@@ -464,7 +456,7 @@ class TaggedSieve(Sieve):
         return False
 
 
-class InheritedSieve(Sieve):
+class InheritedSieve(IntStrSieve):
     """
     usage: (inherited TAG [TAG...])
 
@@ -477,11 +469,7 @@ class InheritedSieve(Sieve):
 
 
     def __init__(self, sifter, tagname, *tagnames):
-        tags = [tagname]
-        tags.extend(tagnames)
-        tags = ensure_all_int_or_str(tags)
-
-        super(InheritedSieve, self).__init__(sifter, *tags)
+        super(InheritedSieve, self).__init__(sifter, tagname, *tagnames)
         self.tag_ids = None
 
 
@@ -519,15 +507,10 @@ class InheritedSieve(Sieve):
         return False
 
 
-class PkgListSieve(CacheMixin):
+class PkgListSieve(IntStrSieve, CacheMixin):
 
     def __init__(self, sifter, tagname, *tagnames):
-        tags = [tagname]
-        tags.extend(tagnames)
-        tags = ensure_all_int_or_str(tags)
-
-        super(PkgListSieve, self).__init__(sifter, *tags)
-
+        super(PkgListSieve, self).__init__(sifter, tagname, *tagnames)
         self.tag_ids = None
 
 
@@ -585,7 +568,7 @@ class PkgBlockedSieve(PkgListSieve):
             return False
 
 
-class TypeSieve(Sieve):
+class TypeSieve(MatcherSieve):
     """
     usage: ``(type BTYPE [BTYPE...])``
 
@@ -597,11 +580,7 @@ class TypeSieve(Sieve):
 
 
     def __init__(self, sifter, btype, *btypes):
-        bts = [btype]
-        bts.extend(btypes)
-        bts = ensure_all_matcher(bts)
-
-        super(TypeSieve, self).__init__(sifter, *bts)
+        super(TypeSieve, self).__init__(sifter, btype, *btypes)
 
 
     def prep(self, session, binfos):
@@ -618,7 +597,7 @@ class TypeSieve(Sieve):
         return False
 
 
-class CGImportedSieve(Sieve):
+class CGImportedSieve(MatcherSieve):
     """
     usage: ``(cg-imported [CGNAME...])``
 
@@ -628,11 +607,6 @@ class CGImportedSieve(Sieve):
     """
 
     name = "cg-imported"
-
-
-    def __init__(self, sifter, *cgnames):
-        cgnames = ensure_all_matcher(cgnames)
-        super(CGImportedSieve, self).__init__(sifter, *cgnames)
 
 
     def prep(self, session, binfos):
@@ -654,7 +628,7 @@ class CGImportedSieve(Sieve):
             return bool(cg_names)
 
 
-class LatestSieve(CacheMixin):
+class LatestSieve(IntStrSieve, CacheMixin):
     """
     usage: ``(latest TAG [TAG...])``
 
@@ -666,11 +640,7 @@ class LatestSieve(CacheMixin):
 
 
     def __init__(self, sifter, tagname, *tagnames):
-        tags = [tagname]
-        tags.extend(tagnames)
-        tags = ensure_all_int_or_str(tags)
-
-        super(LatestSieve, self).__init__(sifter, *tags)
+        super(LatestSieve, self).__init__(sifter, tagname, *tagnames)
         self.tag_ids = None
 
 
@@ -696,7 +666,7 @@ class LatestSieve(CacheMixin):
         return False
 
 
-class LatestMavenSieve(CacheMixin):
+class LatestMavenSieve(IntStrSieve, CacheMixin):
     """
     usage: ``(latest-maven TAG [TAG...])``
 
@@ -708,11 +678,7 @@ class LatestMavenSieve(CacheMixin):
 
 
     def __init__(self, sifter, tagname, *tagnames):
-        tags = [tagname]
-        tags.extend(tagnames)
-        tags = ensure_all_int_or_str(tags)
-
-        super(LatestMavenSieve, self).__init__(sifter, *tags)
+        super(LatestMavenSieve, self).__init__(sifter, tagname, *tagnames)
         self.tag_ids = None
 
 
@@ -746,7 +712,7 @@ class LatestMavenSieve(CacheMixin):
         return False
 
 
-class SignedSieve(Sieve):
+class SignedSieve(MatcherSieve):
     """
     usage: ``(signed [KEY...])``
 
@@ -756,12 +722,6 @@ class SignedSieve(Sieve):
     """
 
     name = "signed"
-
-
-    def __init__(self, sifter, *keys):
-        keys = ensure_all_matcher(keys)
-        super(SignedSieve, self).__init__(sifter, *keys)
-        self.keys = keys or None
 
 
     def prep(self, session, binfos):
@@ -782,13 +742,15 @@ class SignedSieve(Sieve):
 
 
     def check(self, session, binfo):
-        want_keys = self.keys
+        want_keys = self.tokens
         build_keys = self.get_info_cache(binfo).get("rpmsigs")
 
-        if want_keys is None:
+        if not want_keys:
             return bool(build_keys)
+
         elif build_keys is None:
             return False
+
         else:
             for wanted in want_keys:
                 if wanted in build_keys:

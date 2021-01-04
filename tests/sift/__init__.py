@@ -19,8 +19,9 @@ from unittest import TestCase
 
 from kojismokydingo.sift import (
     DEFAULT_SIEVES,
-    Flagged, ItemPathSieve, ItemSieve, LogicAnd, LogicNot, LogicOr,
-    Sieve, Sifter, SifterError,
+    Flagged, IntStrSieve, ItemPathSieve, ItemSieve,
+    LogicAnd, LogicNot, LogicOr, MatcherSieve,
+    Sieve, Sifter, SifterError, SymbolSieve,
     ensure_all_int_or_str, ensure_all_matcher, ensure_all_symbol,
     ensure_int, ensure_int_or_str, ensure_matcher,
     ensure_str, ensure_symbol,
@@ -29,6 +30,27 @@ from kojismokydingo.sift.parse import (
     AllItems, Glob, Item, ItemMatch, ItemPath,
     Null, Number, ParserError, Regex, Symbol, SymbolGroup,
 )
+
+
+class ExIntStrSieve(IntStrSieve):
+    name = "ex-int-str"
+
+    def check(self, session, data):
+        return True
+
+
+class ExMatcherSieve(MatcherSieve):
+    name = "ex-matcher"
+
+    def check(self, session, data):
+        return True
+
+
+class ExSymbolSieve(SymbolSieve):
+    name = "ex-symbol"
+
+    def check(self, session, data):
+        return True
 
 
 class NameSieve(ItemSieve):
@@ -120,6 +142,16 @@ class SifterTest(TestCase):
         sieves.extend(DEFAULT_SIEVES)
 
         return Sifter(sieves, src, params=params)
+
+
+    def test_empty(self):
+        sifter = self.compile_sifter("")
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 0)
+
+        sifter = self.compile_sifter("  \n  ")
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 0)
 
 
     def test_int_item(self):
@@ -941,6 +973,44 @@ class EnsureTypeTest(TestCase):
 
         self.assertEqual(good_values, ensure_all_symbol(good_values))
         self.assertRaises(SifterError, ensure_all_symbol, bad_values)
+
+
+class EnsureTypeSieveTest(TestCase):
+
+
+    def test_int_or_str_sieve(self):
+        good_values = (1, Number(5), "hello", Symbol("hello"))
+
+        vals = ExIntStrSieve(Sifter((), ""), *good_values).tokens
+        self.assertEqual(good_values, vals)
+
+        bad_values = (None, Null(), Glob("*"), Regex(".*"), [], ())
+
+        self.assertRaises(SifterError, ExIntStrSieve, None, *bad_values)
+
+
+    def test_matcher_sieve(self):
+        good_values = ("hello", Null(), Number(5), Symbol("hello"),
+                       Glob("*"), Regex(".*"))
+
+        vals = ExMatcherSieve(Sifter((), ""), *good_values).tokens
+        self.assertEqual(good_values, vals)
+
+        bad_values = (None, [], (), 123)
+
+        self.assertRaises(SifterError, ExMatcherSieve, None, *bad_values)
+
+
+    def test_symbol_sieve(self):
+        good_values = (Symbol("Hello"), Symbol("World"))
+
+        vals = ExSymbolSieve(Sifter((), ""), *good_values).tokens
+        self.assertEqual(good_values, vals)
+
+        bad_values = (None, Null(), 123, Number(5), "wut",
+                      Glob("*"), Regex(".*"), [], ())
+
+        self.assertRaises(SifterError, ExSymbolSieve, None, *bad_values)
 
 
 #

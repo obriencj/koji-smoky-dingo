@@ -50,15 +50,18 @@ __all__ = (
 
     "Flagged",
     "Flagger",
+    "IntStrSieve",
     "ItemPathSieve",
     "ItemSieve",
     "Logic",
     "LogicAnd",
     "LogicNot",
     "LogicOr",
+    "MatcherSieve",
     "Sieve",
     "Sifter",
     "SifterError",
+    "SymbolSieve",
     "VariadicSieve",
 
     "ensure_all_int_or_str",
@@ -631,6 +634,39 @@ class Sieve(object):
         """
 
         return self.sifter.get_info_cache(self.name, info)
+
+
+class MatcherSieve(Sieve):
+    """
+    A Sieve that requires all of its arguments to be matchers. Calls
+    `ensure_all_matcher` on `tokens`
+    """
+
+    def __init__(self, sifter, *tokens):
+        tokens = ensure_all_matcher(tokens)
+        super(MatcherSieve, self).__init__(sifter, *tokens)
+
+
+class SymbolSieve(Sieve):
+    """
+    A Sieve that requires all of its arguments to be matchers. Calls
+    `ensure_all_symbol` on `tokens`
+    """
+
+    def __init__(self, sifter, *tokens):
+        tokens = ensure_all_symbol(tokens)
+        super(SymbolSieve, self).__init__(sifter, *tokens)
+
+
+class IntStrSieve(Sieve):
+    """
+    A Sieve that requires all of its arguments to be matchers. Calls
+    `ensure_all_int_or_str` on `tokens`
+    """
+
+    def __init__(self, sifter, *tokens):
+        tokens = ensure_all_int_or_str(tokens)
+        super(IntStrSieve, self).__init__(sifter, *tokens)
 
 
 @add_metaclass(ABCMeta)

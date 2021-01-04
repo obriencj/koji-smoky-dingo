@@ -27,7 +27,7 @@ from six import iteritems, itervalues
 
 from . import (
     DEFAULT_SIEVES,
-    ItemSieve, Sieve, Sifter,
+    ItemSieve, MatcherSieve, Sieve, Sifter, SymbolSieve,
     ensure_all_matcher, ensure_all_symbol, )
 from .. import (
     bulk_load_tags, )
@@ -56,7 +56,7 @@ class NameSieve(ItemSieve):
     name = field = "name"
 
 
-class ArchSieve(Sieve):
+class ArchSieve(MatcherSieve):
     """
     usage: ``(arch [ARCH...])``
 
@@ -68,11 +68,6 @@ class ArchSieve(Sieve):
     """
 
     name = "arch"
-
-
-    def __init__(self, sifter, *arches):
-        arches = ensure_all_matcher(arches)
-        super(ArchSieve, self).__init__(sifter, *arches)
 
 
     def prep(self, session, taginfos):
@@ -92,14 +87,14 @@ class ArchSieve(Sieve):
         cache = self.get_info_cache(taginfo)
         arches = cache.get("arches", ())
 
-        for tok in wanted:
-            if tok in arches:
+        for arch in arches:
+            if arch in wanted:
                 return True
 
         return False
 
 
-class ExactArchSieve(ArchSieve):
+class ExactArchSieve(SymbolSieve):
     """
     usage: ``(exact-arch [ARCH...])``
 
@@ -111,11 +106,6 @@ class ExactArchSieve(ArchSieve):
     """
 
     name = "exact-arch"
-
-
-    def __init__(self, sifter, *arches):
-        arches = ensure_all_symbol(arches)
-        super(ExactArchSieve, self).__init__(sifter, *arches)
 
 
     def get_info_cache(self, tinfo):
@@ -142,10 +132,95 @@ class ExactArchSieve(ArchSieve):
         return True
 
 
+class LockedSieve(Sieve):
+    """
+    usage: ``(locked)``
+
+    Matches tags which have been locked
+    """
+
+    name = "locked"
+
+
+    def __init__(self, sifter):
+        super(LockedSieve, self).__init__(sifter)
+
+
+    def check(self, session, taginfo):
+        return taginfo["locked"]
+
+
+class PermissionSieve(MatcherSieve):
+    """
+    usage: ``(permission [PERM...])```
+
+    If no PERM is specified, then matches tags which have any non-None
+    permission set.
+
+    If any PERM patters are specified, then matches tags which have
+    any of the listed permissions set.
+    """
+
+    name = "permission"
+
+
+    def check(self, session, taginfo):
+        return (taginfo["perm"] in self.tokens or
+                taginfo["perm_id"] in self.tokens)
+
+
+class BuildTagSieve(MatcherSieve):
+    """
+    usage: ``(build-tag [TARGET...])``
+
+    If no TARGET is specified, then matches tags which are used as the build
+    tag for any target.
+
+    If any TARGET patterns are specified, then matches tags which are
+    used as the build tag for a target with a name matching any of the
+    patterns.
+    """
+
+    name = "build-tag"
+
+
+    def prep(self, session, taginfos):
+        pass
+
+
+    def check(self, session, taginfo):
+        pass
+
+
+class DestTagSieve(MatcherSieve):
+    """
+    usage: ``(dest-tag [TARGET...])``
+
+    If no TARGET is specified, then matches tags which are used as the
+    destination tag for any target.
+
+    If any TARGET patterns are specified, then matches tags which are
+    used as the destination tag for a target with a name matching any
+    of the patterns.
+    """
+
+    name = "dest-tag"
+
+
+    def prep(self, session, taginfos):
+        pass
+
+
+    def check(self, session, taginfo):
+        pass
+
+
 DEFAULT_TAG_INFO_SIEVES = [
     ArchSieve,
     ExactArchSieve,
+    LockedSieve,
     NameSieve,
+    PermissionSieve,
 ]
 
 
