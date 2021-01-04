@@ -16,3 +16,4 @@ Sift Modules
    sift/builds
    sift/common
    sift/parse
+   sift/tags
