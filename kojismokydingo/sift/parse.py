@@ -296,11 +296,10 @@ class AllItems(Item):
 
 
 class ItemPath(object):
-
-    @staticmethod
-    def from_str(src):
-        return parse_itempath(src)
-
+    """
+    Represents a collection of elements inside a nested tree of lists
+    and dicts
+    """
 
     def __init__(self, *paths):
         self.paths = list(paths)
@@ -589,7 +588,7 @@ def convert_token(val):
                 # in cases where there's only one choice in all the
                 # groups, then we can simply create a single Symbol
                 # from those merged choices.
-                val = "".join(g[0] for g in grps)
+                val = "".join(str(g[0]) for g in grps)
                 return Symbol(val)
             else:
                 return SymbolGroup(val, grps)
