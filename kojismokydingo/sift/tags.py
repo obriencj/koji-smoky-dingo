@@ -321,7 +321,7 @@ class HasParentSieve(InheritanceSieve):
     aliases = ["child-of", ]
 
 
-    def getParents(self, session, tagids):
+    def getInheritance(self, session, tagids):
         return iter_bulk_load(session, session.getInheritanceData, tagids)
 
 
@@ -342,7 +342,7 @@ class HasAncestorSieve(InheritanceSieve):
     aliases = ["inherits-from", ]
 
 
-    def getParents(self, session, tagids):
+    def getInheritance(self, session, tagids):
         return iter_bulk_load(session, session.getFullInheritance, tagids)
 
 
@@ -363,7 +363,7 @@ class HasChildSieve(InheritanceSieve):
     aliases = ["parent-of", ]
 
 
-    def getParents(self, session, tagids):
+    def getInheritance(self, session, tagids):
         fn = lambda i: session.getFullInheritance(i, reverse=True)
         for tid, inher in iter_bulk_load(session, fn, tagids):
             yield tid, [p for p in inher if p["currdepth"] == 1]
@@ -386,7 +386,7 @@ class HasDescendantSieve(InheritanceSieve):
     aliases = ["inherited-by", ]
 
 
-    def getParents(self, session, tagids):
+    def getInheritance(self, session, tagids):
         fn = lambda i: session.getFullInheritance(i, reverse=True)
         return iter_bulk_load(session, fn, tagids)
 
