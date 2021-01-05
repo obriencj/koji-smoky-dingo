@@ -809,6 +809,21 @@ class SifterTest(TestCase):
         self.assertEqual(res["default"], [DRAINO])
 
 
+    def test_alias(self):
+        src = """
+        (poke) (incr)
+        """
+        sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 2)
+
+        poke = sieves[0]
+        incr = sieves[1]
+
+        self.assertTrue(type(poke) is Poke)
+        self.assertTrue(type(poke) is type(incr))
+
+
     def test_cache(self):
 
         src = """
