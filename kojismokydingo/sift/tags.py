@@ -42,10 +42,12 @@ __all__ = (
     "BuildTagSieve",
     "DestTagSieve",
     "ExactArchSieve",
-    "InheritsSieve",
+    "HasAncestorSieve",
+    "HasChildSieve",
+    "HasDescendantSieve",
+    "HasParentSieve",
     "LockedSieve",
     "NameSieve",
-    "ParentSieve",
     "PermissionSieve",
 
     "tag_info_sieves",
@@ -59,8 +61,8 @@ class NameSieve(ItemSieve):
     """
     Usage: ``(name NAME [NAME...])``
 
-    filters for dict infos whose `name` key matches any of the given
-    NAME matchers.
+    filters for dict infos whose name matches any of the given
+    ``NAME`` matchers.
     """
 
     name = field = "name"
@@ -70,11 +72,11 @@ class ArchSieve(MatcherSieve):
     """
     usage: ``(arch [ARCH...])``
 
-    If no ARCH patterns are specified, matches tags which have any
+    If no ``ARCH`` patterns are specified, matches tags which have any
     architectures at all.
 
-    If ARCH patterns are specified, then only matches tags which have
-    an architecture that matches any of the given patterns.
+    If ``ARCH`` patterns are specified, then only matches tags which
+    have an architecture that matches any of the given patterns.
     """
 
     name = "arch"
@@ -108,11 +110,12 @@ class ExactArchSieve(SymbolSieve):
     """
     usage: ``(exact-arch [ARCH...])``
 
-    If no ARCH names are specified, matches only tags which have no
-    architectures.
+    If no ``ARCH`` names are specified, matches only tags which have
+    no architectures.
 
-    If ARCH names are specified, they must be specified as symbols.
-    Only matches tags which have the exact same set of architectures.
+    If ``ARCH`` names are specified, they must be specified as
+    symbols.  Only matches tags which have the exact same set of
+    architectures.
     """
 
     name = "exact-arch"
@@ -164,11 +167,11 @@ class PermissionSieve(MatcherSieve):
     """
     usage: ``(permission [PERM...])```
 
-    If no PERM is specified, then matches tags which have any non-None
-    permission set.
+    If no ``PERM`` is specified, then matches tags which have any
+    non-None permission set.
 
-    If any PERM patters are specified, then matches tags which have
-    any of the listed permissions set.
+    If any ``PERM`` patters are specified, then matches tags which
+    have any of the listed permissions set.
     """
 
     name = "permission"
@@ -184,7 +187,6 @@ class TargetSieve(MatcherSieve):
     Base class for BuildTagSieve and DestTagSieve. Both operate on the
     same principal, but use slightly different queries.
     """
-
 
     @abstractmethod
     def getTargets(self, session, tagids):
@@ -224,12 +226,12 @@ class BuildTagSieve(TargetSieve):
     """
     usage: ``(build-tag [TARGET...])``
 
-    If no TARGET is specified, then matches tags which are used as the build
-    tag for any target.
+    If no ``TARGET`` is specified, then matches tags which are used as
+    the build tag for any target.
 
-    If any TARGET patterns are specified, then matches tags which are
-    used as the build tag for a target with a name matching any of the
-    patterns.
+    If any ``TARGET`` patterns are specified, then matches tags which
+    are used as the build tag for a target with a name matching any of
+    the patterns.
     """
 
     name = "build-tag"
@@ -244,12 +246,12 @@ class DestTagSieve(TargetSieve):
     """
     usage: ``(dest-tag [TARGET...])``
 
-    If no TARGET is specified, then matches tags which are used as the
-    destination tag for any target.
+    If no ``TARGET`` is specified, then matches tags which are used as
+    the destination tag for any target.
 
-    If any TARGET patterns are specified, then matches tags which are
-    used as the destination tag for a target with a name matching any
-    of the patterns.
+    If any ``TARGET`` patterns are specified, then matches tags which
+    are used as the destination tag for a target with a name matching
+    any of the patterns.
     """
 
     name = "dest-tag"
@@ -262,12 +264,13 @@ class DestTagSieve(TargetSieve):
 
 class InheritanceSieve(MatcherSieve):
     """
-    Base class for ParentSieve and InheritsSieve. Both operate on the
-    same principal, but with slightly different queries.
+    Base class for inheritance-checking sieves. The ``getInheritance``
+    method must be implemented to load the relevant inheritance links
+    for the given predicate.
     """
 
     @abstractmethod
-    def getParents(self, session, tagids):
+    def getInheritance(self, session, tagids):
         pass
 
 
@@ -279,7 +282,7 @@ class InheritanceSieve(MatcherSieve):
             if "parents" not in cache:
                 needed[tag["id"]] = cache
 
-        for tid, parents in self.getParents(session, needed):
+        for tid, parents in self.getInheritance(session, needed):
             cache = needed[tid]
             cache["tag_names"] = [t["name"] for t in parents]
             cache["tag_ids"] = [t["parent_id"] for t in parents]
@@ -301,38 +304,91 @@ class InheritanceSieve(MatcherSieve):
         return False
 
 
-class ParentSieve(InheritanceSieve):
+class HasParentSieve(InheritanceSieve):
     """
-    usage: ``(parent [TAG...])``
+    usage: ``(has-parent [TAG...])``
+    alias: ``(child-of [TAG...])``
 
-    If no TAG patterns are specified, matches tags which have any parents.
+    If no ``TAG`` patterns are specified, matches tags which have any
+    parents.
 
-    If TAG patterns are specified, matchs tags which have any direct
-    parent matching any of the given patterns.
+    If ``TAG`` patterns are specified, matchs tags which have any
+    direct parent matching any of the given patterns.
     """
 
-    name = "parent"
+    name = "has-parent"
+
+    aliases = ["child-of", ]
 
 
     def getParents(self, session, tagids):
         return iter_bulk_load(session, session.getInheritanceData, tagids)
 
 
-class InheritsSieve(InheritanceSieve):
+class HasAncestorSieve(InheritanceSieve):
     """
-    usage: ``(inherits [TAG...])``
+    usage: ``(has-ancestor [TAG...])``
+    alias: ``(inherits-from [TAG...])``
 
-    If no TAG patterns are specified, matches tags which have any parents.
+    If no ``TAG`` patterns are specified, matches tags which have any
+    parents.
 
-    If TAG patterns are specified, matches tags which have a parent at
-    any depth matching any of the given patterns.
+    If ``TAG`` patterns are specified, matches tags which have a
+    parent at any depth matching any of the given patterns.
     """
 
-    name = "inherits"
+    name = "has-ancestor"
+
+    aliases = ["inherits-from", ]
 
 
     def getParents(self, session, tagids):
         return iter_bulk_load(session, session.getFullInheritance, tagids)
+
+
+class HasChildSieve(InheritanceSieve):
+    """
+    usage: ``(has-child [TAG...])``
+    alias: ``(parent-of [TAG...])``
+
+    If no ``TAG`` patterns are specified, matches tags which are the direct
+    parent to any other tag.
+
+    If ``TAG`` patterns are specified, matches tags which are the
+    direct parent to any tag matching any of the given patterns.
+    """
+
+    name = "has-child"
+
+    aliases = ["parent-of", ]
+
+
+    def getParents(self, session, tagids):
+        fn = lambda i: session.getFullInheritance(i, reverse=True)
+        for tid, inher in iter_bulk_load(session, fn, tagids):
+            yield tid, [p for p in inher if p["currdepth"] == 1]
+
+
+class HasDescendantSieve(InheritanceSieve):
+    """
+    usage: ``(has-descendant [TAG...])``
+    alias: ``(inherited-by [TAG...])``
+
+    If no ``TAG`` patterns are specified, matches tags which are inherited
+    by any other tag.
+
+    If ``TAG`` patterns are specified, matches tags which are inherited by
+    any tag matching any of the patterns, at any depth.
+    """
+
+    name = "has-descendant"
+
+    aliases = ["inherited-by", ]
+
+
+    def getParents(self, session, tagids):
+        fn = lambda i: session.getFullInheritance(i, reverse=True)
+        return iter_bulk_load(session, fn, tagids)
 
 
 DEFAULT_TAG_INFO_SIEVES = [
@@ -340,10 +396,12 @@ DEFAULT_TAG_INFO_SIEVES = [
     BuildTagSieve,
     DestTagSieve,
     ExactArchSieve,
-    InheritsSieve,
+    HasAncestorSieve,
+    HasChildSieve,
+    HasDescendantSieve,
+    HasParentSieve,
     LockedSieve,
     NameSieve,
-    ParentSieve,
     PermissionSieve,
 ]
 

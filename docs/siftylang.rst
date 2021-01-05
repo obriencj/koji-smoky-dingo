@@ -644,17 +644,60 @@ symbols. Only matches tags which have the exact same set of
 architectures.
 
 
-Tag Predicate ``inherits``
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Tag Predicate ``has-ancestor``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
-   (inherits [TAG...])
+   (has-ancestor [TAG...])
+   (inherits-from [TAG...])
 
 If no ``TAG`` patterns are specified, matches tags which have any
 parents.
 
 If ``TAG`` patterns are specified, matches tags which have a parent at
 any depth matching any of the given patterns.
+
+
+Tag Predicate ``has-child``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (has-child [TAG...])
+   (parent-of [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which are the
+direct parent to any other tag.
+
+If ``TAG`` patterns are specified, matches tags which are the direct
+parent to any tag matching any of the given patterns.
+
+
+Tag Predicate ``has-descendant``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (has-descendant [TAG...])
+   (inherited-by [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which are inherited
+by any other tag.
+
+If ``TAG`` patterns are specified, matches tags which are inherited by
+any tag matching any of the patterns, at any depth.
+
+
+Tag Predicate ``has-parent``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (has-parent [TAG...])
+   (child-of [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which have any
+parents.
+
+If ``TAG`` patterns are specified, matchs tags which have any direct
+parent matching any of the given patterns.
 
 
 Tag Predicate ``locked``
@@ -674,19 +717,6 @@ Tag Predicate ``name``
 
 Matches tags which have a name that matches any of the given ``NAME``
 patterns.
-
-
-Tag Predicate ``parent``
-^^^^^^^^^^^^^^^^^^^^^^^^
-::
-
-   (parent [TAG...])
-
-If no ``TAG`` patterns are specified, matches tags which have any
-parents.
-
-If ``TAG`` patterns are specified, matchs tags which have any direct
-parent matching any of the given patterns.
 
 
 Tag Predicate ``permission``

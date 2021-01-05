@@ -293,7 +293,14 @@ class Sifter(object):
         self._cache = {}
 
         if not isinstance(sieves, dict):
-            sieves = dict((sieve.name, sieve) for sieve in sieves)
+            # convert a list of sieves into a dict mapping the sieve
+            # names and their aliases to the classes
+            sieves = tuple(sieves)
+            sievedict = dict((sieve.name, sieve) for sieve in sieves)
+            for sieve in sieves:
+                for alias in sieve.aliases:
+                    sievedict[alias] = sieve
+            sieves = sievedict
 
         self._sieve_classes = sieves
 
@@ -544,6 +551,9 @@ class Sieve(object):
     @abstractproperty
     def name(self):
         pass
+
+
+    aliases = ()
 
 
     def __init__(self, sifter, *tokens):

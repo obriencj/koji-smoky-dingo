@@ -82,6 +82,9 @@ class Poke(Sieve):
 
     name = "poke"
 
+    aliases = ["incr", ]
+
+
     def __init__(self, sifter, count=-1):
         super(Poke, self).__init__(sifter)
         self._max = ensure_int(count)
@@ -846,7 +849,7 @@ class SifterTest(TestCase):
         (flag 2nd (name Draino) (poke))
         (flag 3rd (type drink) (poke 0))
         (flag keep (poke 1))
-        (!poke 2)
+        (!incr 2)
         """
         sifter = self.compile_sifter(src)
         res = sifter(None, DATA)
