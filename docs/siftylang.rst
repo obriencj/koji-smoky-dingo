@@ -687,7 +687,7 @@ any tag matching any of the patterns, at any depth.
 
 
 Tag Predicate ``has-parent``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (has-parent [TAG...])
