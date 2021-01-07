@@ -37,10 +37,12 @@ __all__ = (
     "BadDingo",
     "FeatureUnavailable",
     "ManagedClientSession",
+    "NoSuchArchive",
     "NoSuchBuild",
     "NoSuchChannel",
     "NoSuchContentGenerator",
     "NoSuchPermission",
+    "NoSuchRPM",
     "NoSuchTag",
     "NoSuchTarget",
     "NoSuchTask",
@@ -48,11 +50,13 @@ __all__ = (
     "NotPermitted",
     "ProfileClientSession",
 
+    "as_archiveinfo",
     "as_buildinfo",
+    "as_hostinfo",
+    "as_rpminfo",
     "as_taginfo",
     "as_targetinfo",
     "as_taskinfo",
-    "as_hostinfo",
     "as_userinfo",
     "bulk_load",
     "bulk_load_build_archives",
@@ -209,6 +213,22 @@ class NoSuchPermission(BadDingo):
     """
 
     complaint = "No such permission"
+
+
+class NoSuchArchive(BadDingo):
+    """
+    An archive was not found
+    """
+
+    complaint = "No such archive"
+
+
+class NoSuchRPM(BadDingo):
+    """
+    An RPM was not found
+    """
+
+    complaint = "No such RPM"
 
 
 class NotPermitted(BadDingo):
@@ -719,6 +739,76 @@ def as_hostinfo(session, host):
 
     if not info:
         raise NoSuchHost(host)
+
+    return info
+
+
+def as_archiveinfo(session, archive):
+    """
+    Coerces an archive value into an archive info dict.
+
+    If archive is an:
+     * int, will attempt to load as an archive ID
+     * str, will attempt to load as an archive filename
+     * dict, will presume already an archive info
+
+    :param archive: value to lookup
+
+    :type archive: int or str or dict
+
+    :raises NoSuchArchive: if the archive value could not be resolved
+      into an archive info dict
+
+    :rtype dict:
+    """
+
+    if isinstance(archive, int):
+        info = session.getArchive(archive)
+
+    elif isinstance(archive, str):
+        found = session.listArchives(filename=archive)
+        info = found[0] if found else None
+
+    elif isinstance(archive, dict):
+        info = archive
+
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchArchive(archive)
+
+    return info
+
+
+def as_rpminfo(session, rpm):
+    """
+    Coerces a host value into a RPM info dict.
+
+    If rpm is an:
+     * int, will attempt to load as a RPM ID
+     * str, will attempt to load as a RPM NVR
+     * dict, will presume already an RPM info
+
+    :param rpm: value to lookup
+
+    :type rpm: int or str or dict
+
+    :raises NoSuchRPM: if the rpm value could not be resolved
+      into a RPM info dict
+
+    :rtype: dict
+    """
+
+    if isinstance(rpm, (str, int)):
+        info = session.getRPM(rpm)
+    elif isinstance(rpm, dict):
+        info = rpm
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchRPM(rpm)
 
     return info
 

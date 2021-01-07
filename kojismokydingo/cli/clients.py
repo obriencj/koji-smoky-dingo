@@ -30,8 +30,8 @@ from six.moves.configparser import ConfigParser
 
 from . import AnonSmokyDingo, BadDingo, int_or_str, pretty_json
 from .. import (
-    as_buildinfo, as_taginfo, as_targetinfo, as_hostinfo,
-    as_taskinfo, as_userinfo, )
+    as_archiveinfo, as_buildinfo, as_hostinfo, as_rpminfo,
+    as_taginfo, as_targetinfo, as_taskinfo, as_userinfo, )
 from ..clients import rebuild_client_config
 
 
@@ -112,29 +112,33 @@ class ClientConfig(AnonSmokyDingo):
 
 
 OPEN_LOADFN = {
+    "archive": as_archiveinfo,
     "build": as_buildinfo,
+    "host": as_hostinfo,
+    "rpm": as_rpminfo,
     "tag": as_taginfo,
     "target": as_targetinfo,
-    "user": as_userinfo,
-    "host": as_hostinfo,
     "task": as_taskinfo,
+    "user": as_userinfo,
 }
 
 
 OPEN_CMD = {
-    "linux": "xdg-open",
     "darwin": "open",
+    "linux": "xdg-open",
     "win32": "start",
 }
 
 
 OPEN_URL = {
+    "archive": "archiveinfo?archiveID={id}",
     "build": "buildinfo?buildID={id}",
+    "host": "hostinfo?hostID={id}",
+    "rpm": "rpminfo?rpmID={id}",
     "tag": "taginfo?tagID={id}",
     "target": "buildtargetinfo?targetID={id}",
-    "user": "userinfo?userID={id}",
-    "host": "hostinfo?hostID={id}",
     "task": "taskinfo?taskID={id}",
+    "user": "userinfo?userID={id}",
 }
 
 
