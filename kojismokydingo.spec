@@ -193,6 +193,7 @@ Koji Smoky Dingo
 %{python2_sitelib}/kojismokydingo/
 %{python2_sitelib}/kojismokydingo-%{version}.dist-info/
 %{_bindir}/ksd-filter-builds
+%{_bindir}/ksd-filter-tags
 
 %doc README.md
 %license LICENSE
@@ -219,6 +220,7 @@ Koji Smoky Dingo
 %{python3_sitelib}/kojismokydingo/
 %{python3_sitelib}/kojismokydingo-%{version}.dist-info/
 %{_bindir}/ksd-filter-builds
+%{_bindir}/ksd-filter-tags
 
 %doc README.md
 %license LICENSE
