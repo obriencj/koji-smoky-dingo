@@ -29,6 +29,7 @@ from kojismokydingo.sift import (
 from kojismokydingo.sift.parse import (
     AllItems, Glob, Item, ItemMatch, ItemPath,
     Null, Number, ParserError, Regex, Symbol, SymbolGroup,
+    convert_token,
 )
 
 
@@ -993,6 +994,19 @@ class EnsureTypeTest(TestCase):
         self.assertRaises(SifterError, ensure_all_symbol, bad_values)
 
 
+    def test_ensure_symbol_expand(self):
+
+        values = [Symbol("Hi"), convert_token("{Hello,Goodbye}World")]
+        expect = [Symbol("Hi"), Symbol("HelloWorld"), Symbol("GoodbyeWorld")]
+
+        res = ensure_all_symbol(values)
+        self.assertEqual(len(res), 3)
+        self.assertEqual(res, expect)
+
+        self.assertRaises(SifterError, ensure_all_symbol, values,
+                          expand=False)
+
+
 class EnsureTypeSieveTest(TestCase):
 
 
@@ -1029,6 +1043,14 @@ class EnsureTypeSieveTest(TestCase):
                       Glob("*"), Regex(".*"), [], ())
 
         self.assertRaises(SifterError, ExSymbolSieve, None, *bad_values)
+
+
+    def test_symbol_sieve_expand(self):
+        good_values = (convert_token("{Hello,Goodbye}"), Symbol("World"))
+        expect = (Symbol("Hello"), Symbol("Goodbye"), Symbol("World"))
+
+        vals = ExSymbolSieve(Sifter((), ""), *good_values).tokens
+        self.assertEqual(expect, vals)
 
 
 #
