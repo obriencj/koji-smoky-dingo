@@ -32,7 +32,7 @@ from . import (
     IntStrSieve, ItemSieve, MatcherSieve, Sieve, Sifter,
     SymbolSieve, VariadicSieve,
     ensure_int_or_str, ensure_str, )
-from .common import ensure_comparison
+from .common import CacheMixin, ensure_comparison
 from .. import (
     as_buildinfo, bulk_load_builds, bulk_load_tags, iter_bulk_load, )
 from ..builds import build_dedup
@@ -56,6 +56,9 @@ __all__ = (
     "LockedSieve",
     "NameSieve",
     "PermissionSieve",
+    "PkgAllowedSieve",
+    "PkgBlockedSieve",
+    "PkgUnlistedSieve",
 
     "tag_info_sieves",
     "tag_info_sifter",
@@ -329,7 +332,7 @@ class HasParentSieve(InheritanceSieve):
 
 
     def prep_inheritance(self, session, tagids):
-        return iter_bulk_load(session, session.prep_inheritanceData, tagids)
+        return iter_bulk_load(session, session.getInheritanceData, tagids)
 
 
 class HasAncestorSieve(InheritanceSieve):
@@ -435,11 +438,15 @@ class NVRSieve(VariadicSieve):
                 needed[tag["id"]] = cache
 
         if pkg is None:
+            # we're not checking for any specific builds, just need a
+            # count.
             for tid, found in self.prep_count(session, needed):
                 cache = needed[tid]
                 cache[pkg] = found, ()
 
         else:
+            # need specific build IDs. count is unused but we may as
+            # well gather it too, to be consistent
             for tid, found in self.prep_tagged(session, pkg, needed):
                 cache = needed[tid]
                 cache[pkg] = len(found), found
@@ -588,6 +595,83 @@ class CompareLatestSieve(Sieve):
         return self.op(relative, 0)
 
 
+class PkgListSieve(SymbolSieve, CacheMixin):
+
+    def __init__(self, sifter, pkgname, *pkgnames):
+        super(PkgListSieve, self).__init__(sifter, pkgname, *pkgnames)
+
+
+    def prep(self, session, taginfos):
+        for tag in taginfos:
+            self.list_packages(session, tag["id"], True)
+
+
+class PkgAllowedSieve(PkgListSieve):
+    """
+    usage: ``(pkg-allowed PKG [PKG...])``
+
+    Matches tags which have a package listing with any of the given
+    ``PKG`` contained therein and not blocked, honoring inheritance.
+    """
+
+    name = "pkg-allowed"
+
+
+    def check(self, session, taginfo):
+        pkgs = self.allowed_packages(session, taginfo["id"], True)
+        for tok in self.tokens:
+            if tok in pkgs:
+                return True
+        else:
+            return False
+
+
+class PkgBlockedSieve(PkgListSieve):
+    """
+    usage: ``(pkg-blocked PKG [PKG...])``
+
+    Matches tags which have a package listing with any of the given
+    ``PKG`` contained therein and blocked, honoring inheritance.
+    """
+
+    name = "pkg-blocked"
+
+
+    def check(self, session, taginfo):
+        pkgs = self.blocked_packages(session, taginfo["id"], True)
+        for tok in self.tokens:
+            if tok in pkgs:
+                return True
+        else:
+            return False
+
+
+class PkgUnlistedSieve(PkgListSieve):
+    """
+    usage: ``(pkg-unlisted PKG [PKG...])``
+
+    Matches tags which have no package listing (neither allowed nor
+    blocked) for any of the given ``PKG`` names. Honors inheritance.
+    """
+
+    name = "pkg-unlisted"
+
+
+    def check(self, session, taginfo):
+        allowed = self.allowed_packages(session, taginfo["id"], True)
+        blocked = self.blocked_packages(session, taginfo["id"], True)
+
+        for tok in self.tokens:
+            if tok in allowed:
+                continue
+            elif tok in blocked:
+                continue
+            else:
+                return True
+        else:
+            return False
+
+
 DEFAULT_TAG_INFO_SIEVES = [
     ArchSieve,
     BuildTagSieve,
@@ -602,6 +686,9 @@ DEFAULT_TAG_INFO_SIEVES = [
     LockedSieve,
     NameSieve,
     PermissionSieve,
+    PkgAllowedSieve,
+    PkgBlockedSieve,
+    PkgUnlistedSieve,
     TaggedSieve,
 ]
 

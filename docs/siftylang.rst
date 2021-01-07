@@ -771,3 +771,33 @@ permission set.
 
 If any ``PERM`` patters are specified, then matches tags which have
 any of the listed permissions set.
+
+
+Tag Predicate ``pkg-allowed``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-allowed PKG [PKG...])
+
+Matches tags which have a package listing with any of the given
+``PKG`` contained therein and not blocked, honoring inheritance.
+
+
+Tag Predicate ``pkg-blocked``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-blocked PKG [PKG...])
+
+Matches tags which have a package listing with any of the given
+``PKG`` contained therein and blocked, honoring inheritance.
+
+
+Tag Predicate ``pkg-unlisted``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-unlisted PKG [PKG...])
+
+Matches tags which have no package listing (neither allowed nor
+blocked) for any of the given ``PKG`` names. Honors inheritance.
