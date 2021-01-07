@@ -51,6 +51,8 @@ __all__ = (
     "as_buildinfo",
     "as_taginfo",
     "as_targetinfo",
+    "as_taskinfo",
+    "as_hostinfo",
     "as_userinfo",
     "bulk_load",
     "bulk_load_build_archives",
@@ -143,6 +145,14 @@ class NoSuchBuild(BadDingo):
     """
 
     complaint = "No such build"
+
+
+class NoSuchHost(BadDingo):
+    """
+    A host was not found
+    """
+
+    complaint = "No such host"
 
 
 class NoSuchChannel(BadDingo):
@@ -635,6 +645,20 @@ def as_taginfo(session, tag):
     return info
 
 
+def as_taskinfo(session, task):
+    if isinstance(task, int):
+        info = session.getTaskInfo(task, True)
+    elif isinstance(task, dict):
+        info = task
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchTask(task)
+
+    return info
+
+
 def as_targetinfo(session, target):
     """
     Coerces a target value into a koji target info dict.
@@ -663,6 +687,38 @@ def as_targetinfo(session, target):
 
     if not info:
         raise NoSuchTarget(target)
+
+    return info
+
+
+def as_hostinfo(session, host):
+    """
+    Coerces a host value into a host info dict.
+
+    If target is an:
+     * int, will attempt to load as a host ID
+     * str, will attempt to load as a host name
+     * dict, will presume already a host info
+
+    :param host: value to lookup
+
+    :type host: int or str or dict
+
+    :raises NoSuchHost: if the host value could not be resolved
+      into a host info dict
+
+    :rtype: dict
+    """
+
+    if isinstance(host, (str, int)):
+        info = session.getHost(host)
+    elif isinstance(host, dict):
+        info = host
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchHost(host)
 
     return info
 
