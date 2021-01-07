@@ -230,6 +230,8 @@ Koji Smoky Dingo
 - use a patch to disable koji as a setuptools requirement
 - added build sieves 'compare-latest-nvr' and 'compare-latest-id'
 - refactored sieve caching
+- Added 'koji open' command which will launch a browser to the info
+  page for the relevant koji data type.
 
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-1
 - remove install_requires for koji, because koji doesn't think it's a

@@ -70,6 +70,7 @@ permissions in koji.
 |`list-env-vars` |Show all inherited mock environment variables for a tag |
 |`list-rpm-macros` |Show all inherited mock RPM macros for a tag |
 |`list-tag-extras` |Show all inherited extra fields for a tag |
+|`open` |Opens a brower to the info page for koji data types |
 |`perminfo` |Show information about a permission |
 |`userinfo` |Show information about a user account |
 

@@ -27,3 +27,5 @@ Otherwise, still chugging along!
   require the '--profile' option to be specified on the command-line
   even when the '#option --profile' directive was present in the
   filter.
+- Added 'koji open' command which will launch a browser to the info
+  page for the relevant koji data type.
