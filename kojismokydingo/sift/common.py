@@ -21,14 +21,46 @@ Sieves
 """
 
 
+import operator
+
 from operator import itemgetter
 from six.moves import map
 
-from . import Sieve
+from . import SifterError, Sieve
 from ..builds import latest_maven_builds
 
 
-__all__ = ("CacheMixin", )
+__all__ = ("CacheMixin", "ensure_comparison", )
+
+
+_OPMAP = {
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">": operator.gt,
+    ">=": operator.ge,
+    "<": operator.lt,
+    "<=": operator.le,
+}
+
+
+def ensure_comparison(value):
+    """
+    Converts a comparison operator symbol into a comparison function.
+
+    :param value: The symbol or string to convert. Should be one of
+      '==', '!=', '>', '>=', '<', '<='
+
+    :type value: str
+
+    :rtype: callable
+    """
+
+    if value in _OPMAP:
+        return _OPMAP[value]
+
+    else:
+        msg = "Invalid comparison operator: %r" % value
+        raise SifterError(msg)
 
 
 class CacheMixin(Sieve):

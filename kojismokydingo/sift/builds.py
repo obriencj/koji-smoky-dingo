@@ -36,7 +36,7 @@ from . import (
     IntStrSieve, ItemSieve, MatcherSieve, Sieve,
     Sifter, SifterError, VariadicSieve,
     ensure_int_or_str, ensure_str, ensure_symbol, )
-from .common import CacheMixin
+from .common import ensure_comparison, CacheMixin
 from .. import (
     as_taginfo, bulk_load_builds, bulk_load_tags, bulk_load_users,
     iter_bulk_load, )
@@ -83,27 +83,6 @@ __all__ = (
     "sift_builds",
     "sift_nvrs",
 )
-
-
-_OPMAP = {
-    "==": operator.eq,
-    "!=": operator.ne,
-    ">": operator.gt,
-    ">=": operator.ge,
-    "<": operator.lt,
-    "<=": operator.le,
-}
-
-
-def ensure_comparison(value):
-    value = ensure_symbol(value)
-
-    if value in _OPMAP:
-        return _OPMAP[value]
-
-    else:
-        msg = "Invalid comparison operator: %r" % value
-        raise SifterError(msg)
 
 
 class NVRSieve(ItemSieve):
@@ -266,7 +245,7 @@ class EVRCompare(Sieve):
         self.version = version
         self.release = release
 
-        self.op = _OPMAP[self.name]
+        self.op = ensure_comparison(self.name)
 
 
     def check(self, session, binfo):

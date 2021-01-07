@@ -616,6 +616,33 @@ used as the build tag for a target with a name matching any of the
 patterns.
 
 
+Tag Predicate ``compare-latest``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (compare-latest PACKAGE [OP VERSION])
+
+If ``OP`` and ``VERSION`` are not specified, matches tags which have
+any build of the given ``PACKAGE`` name as latest.
+
+If ``OP`` and ``VERSION`` are specified, matches tags which have the a
+latest build of the given ``PACKAGE`` name which compare correctly. If
+tag doesn't have any build of the given package, it will not match.
+
+``OP`` can be any of the following comparison operators: ``==``,
+``!=``, ``>``, ``>=``, ``<``, ``<=``
+
+``VERSION`` can be in any of the following forms:
+
+  * ``EPOCH:VERSION``
+  * ``EPOCH:VERSION-RELEASE``
+  * ``VERSION``
+  * ``VERSION-RELEASE``
+
+If ``EPOCH`` is omitted, it is presumed to be ``0``.
+If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+
 Tag Predicate ``dest-tag``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::

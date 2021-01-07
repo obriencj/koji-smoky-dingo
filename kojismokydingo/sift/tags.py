@@ -24,13 +24,19 @@ dicts.
 
 
 from abc import abstractmethod
+from operator import itemgetter
 from six import iteritems, itervalues
 
 from . import (
     DEFAULT_SIEVES,
-    ItemSieve, MatcherSieve, Sieve, Sifter, SymbolSieve, )
+    IntStrSieve, ItemSieve, MatcherSieve, Sieve, Sifter,
+    SymbolSieve, VariadicSieve,
+    ensure_int_or_str, ensure_str, )
+from .common import ensure_comparison
 from .. import (
-    bulk_load_tags, iter_bulk_load, )
+    as_buildinfo, bulk_load_builds, bulk_load_tags, iter_bulk_load, )
+from ..builds import build_dedup
+from ..common import rpm_evr_compare
 from ..tags import (
     gather_tag_ids, tag_dedup, )
 
@@ -40,6 +46,7 @@ __all__ = (
 
     "ArchSieve",
     "BuildTagSieve",
+    "CompareLatestSieve",
     "DestTagSieve",
     "ExactArchSieve",
     "HasAncestorSieve",
@@ -189,7 +196,7 @@ class TargetSieve(MatcherSieve):
     """
 
     @abstractmethod
-    def getTargets(self, session, tagids):
+    def prep_targets(self, session, tagids):
         pass
 
 
@@ -200,7 +207,7 @@ class TargetSieve(MatcherSieve):
             if "target_names" not in cache:
                 needed[tag["id"]] = cache
 
-        for tid, targs in self.getTargets(session, needed):
+        for tid, targs in self.prep_targets(session, needed):
             cache = needed[tid]
             cache["target_names"] = [t["name"] for t in targs]
             cache["target_ids"] = [t["id"] for t in targs]
@@ -237,7 +244,7 @@ class BuildTagSieve(TargetSieve):
     name = "build-tag"
 
 
-    def getTargets(self, session, tagids):
+    def prep_targets(self, session, tagids):
         fn = lambda i: session.getBuildTargets(buildTagID=i)
         return iter_bulk_load(session, fn, tagids)
 
@@ -257,20 +264,20 @@ class DestTagSieve(TargetSieve):
     name = "dest-tag"
 
 
-    def getTargets(self, session, tagids):
+    def prep_targets(self, session, tagids):
         fn = lambda i: session.getBuildTargets(destTagID=i)
         return iter_bulk_load(session, fn, tagids)
 
 
 class InheritanceSieve(MatcherSieve):
     """
-    Base class for inheritance-checking sieves. The ``getInheritance``
+    Base class for inheritance-checking sieves. The ``prep_inheritance``
     method must be implemented to load the relevant inheritance links
     for the given predicate.
     """
 
     @abstractmethod
-    def getInheritance(self, session, tagids):
+    def prep_inheritance(self, session, tagids):
         pass
 
 
@@ -282,7 +289,7 @@ class InheritanceSieve(MatcherSieve):
             if "parents" not in cache:
                 needed[tag["id"]] = cache
 
-        for tid, parents in self.getInheritance(session, needed):
+        for tid, parents in self.prep_inheritance(session, needed):
             cache = needed[tid]
             cache["tag_names"] = [t["name"] for t in parents]
             cache["tag_ids"] = [t["parent_id"] for t in parents]
@@ -321,8 +328,8 @@ class HasParentSieve(InheritanceSieve):
     aliases = ["child-of", ]
 
 
-    def getInheritance(self, session, tagids):
-        return iter_bulk_load(session, session.getInheritanceData, tagids)
+    def prep_inheritance(self, session, tagids):
+        return iter_bulk_load(session, session.prep_inheritanceData, tagids)
 
 
 class HasAncestorSieve(InheritanceSieve):
@@ -342,7 +349,7 @@ class HasAncestorSieve(InheritanceSieve):
     aliases = ["inherits-from", ]
 
 
-    def getInheritance(self, session, tagids):
+    def prep_inheritance(self, session, tagids):
         return iter_bulk_load(session, session.getFullInheritance, tagids)
 
 
@@ -363,7 +370,7 @@ class HasChildSieve(InheritanceSieve):
     aliases = ["parent-of", ]
 
 
-    def getInheritance(self, session, tagids):
+    def prep_inheritance(self, session, tagids):
         fn = lambda i: session.getFullInheritance(i, reverse=True)
         for tid, inher in iter_bulk_load(session, fn, tagids):
             yield tid, [p for p in inher if p["currdepth"] == 1]
@@ -386,23 +393,216 @@ class HasDescendantSieve(InheritanceSieve):
     aliases = ["inherited-by", ]
 
 
-    def getInheritance(self, session, tagids):
+    def prep_inheritance(self, session, tagids):
         fn = lambda i: session.getFullInheritance(i, reverse=True)
         return iter_bulk_load(session, fn, tagids)
+
+
+class NVRSieve(VariadicSieve):
+
+    def __init__(self, sifter, nvr=None):
+        if nvr is not None:
+            nvr = ensure_int_or_str(nvr)
+
+        super(NVRSieve, self).__init__(sifter, nvr)
+
+        self.build_id = None
+        self.pkg_name = None
+
+
+    @abstractmethod
+    def prep_tagged(self, session, pkgname, tagids):
+        pass
+
+
+    @abstractmethod
+    def prep_count(self, session, tagids):
+        pass
+
+
+    def prep(self, session, taginfos):
+        pkg = self.pkg_name
+
+        if pkg is None and self.tokens:
+            bld = as_buildinfo(session, self.tokens[0])
+            self.build_id = bld["id"]
+            self.pkg_name = pkg = bld["name"]
+
+        needed = {}
+        for tag in taginfos:
+            cache = self.get_info_cache(tag)
+            if pkg not in cache:
+                needed[tag["id"]] = cache
+
+        if pkg is None:
+            for tid, found in self.prep_count(session, needed):
+                cache = needed[tid]
+                cache[pkg] = found, ()
+
+        else:
+            for tid, found in self.prep_tagged(session, pkg, needed):
+                cache = needed[tid]
+                cache[pkg] = len(found), found
+
+
+    def check(self, session, taginfo):
+        pkg = self.pkg_name
+
+        cache = self.get_info_cache(taginfo)
+        count, found = cache[pkg]
+
+        if pkg is None:
+            return count > 0
+        else:
+            return self.build_id in found
+
+
+class TaggedSieve(NVRSieve):
+    """
+    usage: ``(tagged [NVR...])``
+
+    If no ``NVR`` is specified, matches tags which have any builds tagged
+    in them.
+
+    If ``NVR`` is specified, matches tags which have any of the given
+    builds tagged in them. Each ``NVR`` must be a valid reference to a
+    build in this koji instance, or a NoSuchBuild exception will be
+    raised.
+    """
+
+    name = "tagged"
+
+
+    def prep_tagged(self, session, pkgname, tagids):
+        fn = lambda i: session.listTagged(i, package=pkgname,
+                                          inherit=False, latest=False)
+        for tid, blds in iter_bulk_load(session, fn, tagids):
+            yield tid, [bld["id"] for bld in blds]
+
+
+    def prep_count(self, session, tagids):
+        fn = lambda i: session.count("listTagged", i,
+                                     inherit=False, latest=False)
+        return iter_bulk_load(session, fn, tagids)
+
+
+class LatestSieve(NVRSieve):
+    """
+    usage: ``(latest [NVR...])``
+
+    If no ``NVR`` is specified, matches tags which have any builds
+    tagged in them or inherited from parent tags.
+
+    If ``NVR`` is specified, matches tags which have any of the given
+    builds as the latest inherited build of the relevant package name.
+    Each ``NVR`` must be valid a reference to a build in this koji
+    instance, or a NoSuchBuild exception will be raised.
+    """
+
+    name = "latest"
+
+
+    def prep_tagged(self, session, pkgname, tagids):
+        fn = lambda i: session.listTagged(i, package=pkgname,
+                                          inherit=True, latest=True)
+        for tid, blds in iter_bulk_load(session, fn, tagids):
+            yield tid, [bld["id"] for bld in blds]
+
+
+    def prep_count(self, session, tagids):
+        fn = lambda i: session.count("listTagged", i,
+                                     inherit=True, latest=True)
+        return iter_bulk_load(session, fn, tagids)
+
+
+class CompareLatestSieve(Sieve):
+    """
+    usage: ``(compare-latest PKG [OP VER])``
+
+    If OP and VER are not specified, matches tags which have any build
+    of the given package name as latest.
+
+    If OP and VER are specified, matches tags which have the a latest
+    build of the given package name which compare correctly. If tag
+    doesn't have any build of the given package name, it will not
+    match.
+    """
+
+    name = "compare-latest"
+
+
+    def __init__(self, sifter, pkgname, op='>=', ver='0'):
+        pkgname = ensure_str(pkgname)
+        opfn = ensure_comparison(op)
+        version = ensure_str(ver)
+
+        super(CompareLatestSieve, self).__init__(sifter, pkgname, op, ver)
+
+        if ":" in version:
+            epoch, version = version.split(":", 1)
+        else:
+            epoch = "0"
+
+        if "-" in version:
+            version, release = version.split("-", 1)
+        else:
+            release = None
+
+        self.pkgname = pkgname
+        self.op = opfn
+        self.epoch = epoch
+        self.version = version
+        self.release = release
+
+
+    def prep(self, session, taginfos):
+        pkgname = self.pkgname
+
+        needed = {}
+        for tag in taginfos:
+            cache = self.get_info_cache(tag)
+            if pkgname not in cache:
+                needed[tag["id"]] = cache
+
+        evr_getter = itemgetter("epoch", "version", "release")
+
+        fn = lambda i: session.getLatestBuilds(i, package=pkgname)
+        for tid, latest in iter_bulk_load(session, fn, needed):
+            if latest:
+                latest = evr_getter(latest[0])
+                latest = tuple((str(x) if x else "0") for x in latest)
+
+            cache = needed[tid]
+            cache[pkgname] = latest or None
+
+
+    def check(self, session, taginfo):
+        other = self.get_info_cache(taginfo).get(self.pkgname)
+
+        if other is None:
+            return False
+
+        ours = (self.epoch, self.version, self.release or other[2])
+
+        relative = rpm_evr_compare(other, ours)
+        return self.op(relative, 0)
 
 
 DEFAULT_TAG_INFO_SIEVES = [
     ArchSieve,
     BuildTagSieve,
+    CompareLatestSieve,
     DestTagSieve,
     ExactArchSieve,
     HasAncestorSieve,
     HasChildSieve,
     HasDescendantSieve,
     HasParentSieve,
+    LatestSieve,
     LockedSieve,
     NameSieve,
     PermissionSieve,
+    TaggedSieve,
 ]
 
 
