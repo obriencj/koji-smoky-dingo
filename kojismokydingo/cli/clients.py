@@ -24,10 +24,14 @@ from __future__ import print_function
 
 import sys
 
+from os import system
 from six import iterkeys
 from six.moves.configparser import ConfigParser
 
-from . import AnonSmokyDingo, pretty_json
+from . import AnonSmokyDingo, BadDingo, int_or_str, pretty_json
+from .. import (
+    as_buildinfo, as_taginfo, as_targetinfo, as_hostinfo,
+    as_taskinfo, as_userinfo, )
 from ..clients import rebuild_client_config
 
 
@@ -105,6 +109,90 @@ class ClientConfig(AnonSmokyDingo):
                                  quiet=options.quiet,
                                  config=options.cfg,
                                  json=options.json)
+
+
+OPEN_LOADFN = {
+    "build": as_buildinfo,
+    "tag": as_taginfo,
+    "target": as_targetinfo,
+    "user": as_userinfo,
+    "host": as_hostinfo,
+    "task": as_taskinfo,
+}
+
+
+OPEN_CMD = {
+    "linux": "xdg-open",
+    "darwin": "open",
+    "win32": "start",
+}
+
+
+OPEN_URL = {
+    "build": "buildinfo?buildID={id}",
+    "tag": "taginfo?tagID={id}",
+    "target": "buildtargetinfo?targetID={id}",
+    "user": "userinfo?userID={id}",
+    "host": "hostinfo?hostID={id}",
+    "task": "taskinfo?taskID={id}",
+}
+
+
+def cli_open(session, goptions, datatype, element,
+             command=None):
+
+    datatype = datatype.lower()
+
+    loadfn = OPEN_LOADFN.get(datatype)
+    if loadfn is None:
+        raise BadDingo("Unsupported type for open %s" % datatype)
+
+    if command is None:
+        command = OPEN_CMD.get(sys.platform)
+
+    if command is None:
+        raise BadDingo("Unable to determine command for launching browser")
+
+    weburl = goptions.weburl
+    if not weburl:
+        raise BadDingo("Client has no weburl configured")
+
+    loaded = loadfn(session, element)
+
+    weburl = weburl.rstrip("/")
+    typeurl = OPEN_URL.get(datatype).format(**loaded)
+
+    cmd = "".join((command, ' "', weburl, "/", typeurl, '"'))
+    system(cmd)
+
+
+class ClientOpen(AnonSmokyDingo):
+
+    group = "info"
+    description = "Launch web UI for koji data elements"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("datatype", type=str, metavar="TYPE",
+               help="The koji data element type. build, tag, target, user,"
+               " host, rpm, archive, task")
+
+        addarg("element", type=int_or_str, metavar="KEY",
+               help="The key for the given element type.")
+
+        addarg("--command", "-c", default=None, metavar="COMMAND",
+               help="Command to exec with the discovered koji web URL")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_open(self.session, self.goptions,
+                        datatype=options.datatype,
+                        element=options.element,
+                        command=options.command)
 
 
 #
