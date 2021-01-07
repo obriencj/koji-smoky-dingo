@@ -27,6 +27,7 @@ do not require any special permissions to run.
    commands/list-env-vars
    commands/list-rpm-macros
    commands/list-tag-extras
+   commands/open
    commands/perminfo
    commands/userinfo
 
