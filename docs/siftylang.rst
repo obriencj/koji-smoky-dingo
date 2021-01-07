@@ -501,6 +501,20 @@ the given tags, honoring inheritance.
 result in a `kojismokydingo.NoSuchTag` exception being raised.
 
 
+Build Predicate ``pkg-unlisted``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-unlisted TAG [TAG...])
+
+Filters for builds which have their package name unlisted (neither
+allowed nor blocked) in any of the given tags, honoring inheritance.
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
 Build Predicate ``release``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::

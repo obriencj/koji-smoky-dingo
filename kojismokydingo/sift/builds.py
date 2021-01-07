@@ -70,7 +70,7 @@ __all__ = (
     "OwnerSieve",
     "PkgAllowedSieve",
     "PkgBlockedSieve",
-    "PkgListSieve",
+    "PkgUnlistedSieve",
     "ReleaseSieve",
     "SignedSieve",
     "StateSieve",
@@ -545,6 +545,30 @@ class PkgBlockedSieve(PkgListSieve):
             return False
 
 
+class PkgUnlistedSieve(PkgListSieve):
+    """
+    usage: ``(pkg-unlisted TAG [TAG...])``
+
+    Matches builds which have their package name unlisted (neither
+    allowed nor blocked) in any of the given tags or their parents.
+    """
+
+    name = "pkg-unlisted"
+
+    def check(self, session, binfo):
+        pkg = binfo["name"]
+
+        for tid in self.tag_ids:
+            if pkg in self.allowed_packages(session, tid, True):
+                continue
+            elif pkg in self.blocked_packages(session, tid, True):
+                continue
+            else:
+                return True
+        else:
+            return False
+
+
 class TypeSieve(MatcherSieve):
     """
     usage: ``(type BTYPE [BTYPE...])``
@@ -877,6 +901,7 @@ DEFAULT_BUILD_INFO_SIEVES = [
     OwnerSieve,
     PkgAllowedSieve,
     PkgBlockedSieve,
+    PkgUnlistedSieve,
     ReleaseSieve,
     SignedSieve,
     StateSieve,
