@@ -15,7 +15,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
 Source0: %{name}-%{version}.tar.gz
-Patch0: no-koji.patch
 
 
 # we don't generate binaries, let's turn that part off
@@ -67,7 +66,7 @@ Koji Smoky Dingo
 
 %prep
 %setup -q
-%patch0 -p1
+patch -p1 < no-koji.patch
 
 
 %build

@@ -21,8 +21,8 @@ function expected_entry_points() {
     local PYTHON=$(whichever python3 python python2)
     read -r -d'\0' SCRIPT <<EOF
 from __future__ import print_function
-import tests.cli
-for name in sorted(tests.cli.ENTRY_POINTS):
+from tests.cli import ENTRY_POINTS
+for name in sorted(ENTRY_POINTS):
     print(name)
 EOF
     "$PYTHON" -B -c "$SCRIPT"
