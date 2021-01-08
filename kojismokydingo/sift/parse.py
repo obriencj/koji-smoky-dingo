@@ -402,7 +402,7 @@ def convert_group(grp):
 
     work = []
     for brk in grp.split(","):
-        if work and _trailing_esc(work[-1][-1]) & 1:
+        if work and work[-1] and _trailing_esc(work[-1][-1]) & 1:
             work[-1] = ",".join((work[-1][:-1], brk))
         else:
             work.append(brk)
