@@ -49,6 +49,7 @@ function verify_koji_cli() {
         check-hosts
         client-config
         filter-builds
+        filter-tags
         latest-archives
         list-btypes
         list-build-archives
@@ -57,6 +58,7 @@ function verify_koji_cli() {
         list-env-vars
         list-rpm-macros
         list-tag-extras
+        open
         perminfo
         remove-env-var
         remove-rpm-macro
