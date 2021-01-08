@@ -13,7 +13,7 @@
 
 
 """
-Koji Smoky Dingo - Standalone build commands
+Koji Smoky Dingo - Standalone tag commands
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :licence: GPL v3
@@ -24,22 +24,22 @@ from six import iteritems
 
 from . import AnonLonelyDingo
 from ..cli import find_action, printerr, remove_action, resplit
-from ..cli.builds import FilterBuilds
+from ..cli.tags import FilterTags
 
 
 __all__ = (
-    "LonelyFilterBuilds",
-    "ksd_filter_builds",
+    "LonelyFilterTags",
+    "ksd_filter_tags",
 )
 
 
-class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
+class LonelyFilterTags(AnonLonelyDingo, FilterTags):
     """
-    Adapter to make the FilterBuilds command into a LonelyDingo.
+    Adapter to make the FilterTags command into a LonelyDingo.
     """
 
     def __init__(self, name=None):
-        super(LonelyFilterBuilds, self).__init__(name)
+        super(LonelyFilterTags, self).__init__(name)
 
         # some trickery to un-require the --profile option, though we
         # will mimic the behavior later. We need to do this because
@@ -54,11 +54,11 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
         addarg("filter_file", metavar="FILTER_FILE",
                help="File of sifty filter predicates")
 
-        return super(LonelyFilterBuilds, self).arguments(parser)
+        return super(LonelyFilterTags, self).arguments(parser)
 
 
     def sifter_arguments(self, parser):
-        parser = super(LonelyFilterBuilds, self).sifter_arguments(parser)
+        parser = super(LonelyFilterTags, self).sifter_arguments(parser)
         remove_action(parser, "--filter")
         remove_action(parser, "--filter-file")
         return parser
@@ -116,12 +116,11 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
 
         self.default_params().update(params)
 
-        return super(LonelyFilterBuilds, self).validate(parser, options)
+        return super(LonelyFilterTags, self).validate(parser, options)
 
 
-# The console_scripts entry point is an instance of the class, not the
-# class itself.
-ksd_filter_builds = LonelyFilterBuilds("ksd-filter-builds")
+ksd_filter_tags = LonelyFilterTags("ksd-filter-tags")
 
 
+#
 # The end.

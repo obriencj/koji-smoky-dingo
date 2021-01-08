@@ -17,6 +17,18 @@ function whichever() {
 }
 
 
+function expected_entry_points() {
+    local PYTHON=$(whichever python3 python python2)
+    read -r -d'\0' SCRIPT <<EOF
+from __future__ import print_function
+from tests.cli import ENTRY_POINTS
+for name in sorted(ENTRY_POINTS):
+    print(name)
+EOF
+    "$PYTHON" -B -c "$SCRIPT"
+}
+
+
 function run_nose() {
     echo "Running unit tests:"
     local NOSE=$(whichever nosetests-3 nosetests nosetests-2)
@@ -40,36 +52,9 @@ function verify_koji_cli() {
     echo 'Checking output of koji help:'
 
     local HELP=$(koji help)
-    local EXPECTED=(
-        affected-targets
-        block-env-var
-        block-rpm-macro
-        bulk-tag-builds
-        cginfo
-        check-hosts
-        client-config
-        filter-builds
-        latest-archives
-        list-btypes
-        list-build-archives
-        list-cgs
-        list-component-builds
-        list-env-vars
-        list-rpm-macros
-        list-tag-extras
-        perminfo
-        remove-env-var
-        remove-rpm-macro
-        renum-tag-inheritance
-        set-env-var
-        set-rpm-macro
-        swap-tag-inheritance
-        userinfo
-    )
-
     local RESULT=0
 
-    for E in "${EXPECTED[@]}" ; do
+    for E in $(expected_entry_points) ; do
         if ! grep -F "$E" 2>/dev/null <<< "$HELP" ; then
             echo "Subcommand "$E" not present"
             RESULT=1
@@ -102,11 +87,11 @@ function ksd_rpm_tests() {
 
     {
         echo "==== BEGIN RESULTS FOR $PLATFORM ===="
-        verify_installed 2>&1
-        verify_koji_cli 2>&1
-        run_nose 2>&1
+        verify_installed
+        verify_koji_cli
+        run_nose
         echo "==== END RESULTS FOR $PLATFORM ===="
-    } | tee -a "$LOGFILE"
+    } 2>&1 | tee -a "$LOGFILE"
 
     popd >/dev/null
 }

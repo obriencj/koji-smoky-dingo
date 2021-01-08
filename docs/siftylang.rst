@@ -293,8 +293,8 @@ A sifter instance with these and the core sieves available by default can be
 created via :py:func:`kojismokydingo.sift.builds.build_info_sifter`
 
 
-EVR Comparison Predicates
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Build EVR Comparison Predicates
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (OP VER)
@@ -322,8 +322,8 @@ These predicates filter by using RPM EVR comparison rules against the
 epoch, version, and release values of the builds.
 
 
-Predicate ``cg-imported``
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``cg-imported``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (cg-imported [CGNAME...])
@@ -336,8 +336,8 @@ If any optional ``CGNAME`` matchers are supplied, then filters for
 builds which are produced by matching content generators only.
 
 
-Predicate ``compare-latest-id``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``compare-latest-id``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (compare-latest-id OP TAG)
@@ -354,8 +354,8 @@ build in the tag, then the filtered build will not be included.
 result in a `kojismokydingo.NoSuchTag` exception being raised.
 
 
-Predicate ``compare-latest-nvr``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``compare-latest-nvr``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (compare-latest-nvr OP TAG)
@@ -372,8 +372,8 @@ build in the tag, then the filtered build will not be included.
 result in a `kojismokydingo.NoSuchTag` exception being raised.
 
 
-Predicate ``epoch``
-^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``epoch``
+^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (epoch EPOCH [EPOCH...])
@@ -382,8 +382,8 @@ Filters for builds whose epoch value matches any of the given ``EPOCH``
 patterns.
 
 
-Predicate ``imported``
-^^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``imported``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (imported)
@@ -392,8 +392,8 @@ Filters for builds which have no task ID. These builds could be either raw
 imports or from a content generator.
 
 
-Predicate ``inherited``
-^^^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``inherited``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (inherited TAG [TAG...])
@@ -406,8 +406,8 @@ their parents.
 result in a `kojismokydingo.NoSuchTag` exception being raised.
 
 
-Predicate ``latest``
-^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``latest``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (latest TAG [TAG...])
@@ -421,8 +421,8 @@ listings and blocks.
 result in a `kojismokydingo.NoSuchTag` exception being raised.
 
 
-Predicate ``latest-maven``
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``latest-maven``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (latest-maven TAG [TAG...])
@@ -440,8 +440,8 @@ uniqueness is by the GAV rather than the package name.
 result in a `kojismokydingo.NoSuchTag` exception being raised.
 
 
-Predicate ``name``
-^^^^^^^^^^^^^^^^^^
+Build Predicate ``name``
+^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (name NAME [NAME...])
@@ -450,8 +450,8 @@ Filters for builds which have a name matching any of the given
 ``NAME`` patterns.
 
 
-Predicate ``nvr``
-^^^^^^^^^^^^^^^^^
+Build Predicate ``nvr``
+^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (nvr NVR [NVR...])
@@ -460,8 +460,8 @@ Filters for builds which have an NVR matching any of the given ``NVR``
 (name-version-release) patterns.
 
 
-Predicate ``owner``
-^^^^^^^^^^^^^^^^^^^
+Build Predicate ``owner``
+^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (owner USER [USER...])
@@ -473,8 +473,8 @@ this may result in a `kojismokydingo.NoSuchUser` exception being
 raised.
 
 
-Predicate ``pkg-allowed``
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``pkg-allowed``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (pkg-allowed TAG [TAG...])
@@ -487,8 +487,8 @@ tags, honoring inheritance.
 result in a `kojismokydingo.NoSuchTag` exception being raised.
 
 
-Predicate ``pkg-blocked``
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``pkg-blocked``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (pkg-blocked TAG [TAG...])
@@ -501,8 +501,22 @@ the given tags, honoring inheritance.
 result in a `kojismokydingo.NoSuchTag` exception being raised.
 
 
-Predicate ``release``
-^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``pkg-unlisted``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-unlisted TAG [TAG...])
+
+Filters for builds which have their package name unlisted (neither
+allowed nor blocked) in any of the given tags, honoring inheritance.
+
+``TAG`` may be specified by either name or ID, but not by pattern.
+``TAG`` will be validated when the sieve is first run -- this may
+result in a `kojismokydingo.NoSuchTag` exception being raised.
+
+
+Build Predicate ``release``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (release REL [REL...])
@@ -511,8 +525,8 @@ Filters for builds which have a release matching any of the given
 ``REL`` patterns.
 
 
-Predicate ``signed``
-^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``signed``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (signed [SIGKEY...])
@@ -524,8 +538,8 @@ If no ``SIGKEY`` patterns are supplied, then filters for builds which
 have an RPM archive that has been signed with any key.
 
 
-Predicate ``state``
-^^^^^^^^^^^^^^^^^^^
+Build Predicate ``state``
+^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (state STATE [STATE...])
@@ -543,8 +557,8 @@ Valid states are:
   * ``5`` ``CANCELED``
 
 
-Predicate ``tagged``
-^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``tagged``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (tagged [TAG...])
@@ -556,8 +570,8 @@ If no ``TAG`` patterns are specified, then filters for builds which
 have any tags at all.
 
 
-Predicate ``type``
-^^^^^^^^^^^^^^^^^^
+Build Predicate ``type``
+^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (type BTYPE [BTYPE...])
@@ -567,11 +581,250 @@ build types are rpm, maven, image, and win. Koji instances may support
 plugins which extend the available build types beyond these.
 
 
-Predicate ``version``
-^^^^^^^^^^^^^^^^^^^^^
+Build Predicate ``version``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (version VER [VER...])
 
 Filters for builds which have a version matching any of the given
 ``VER`` patterns.
+
+
+Tag Sieves
+----------
+
+To facilitate filtering sequences of koji tag info dicts, there are
+a number of available sieves provided in the
+`kojismokydingo.sift.tags` module.
+
+A sifter instance with these and the core sieves available by default can be
+created via :py:func:`kojismokydingo.sift.tags.tag_info_sifter`
+
+
+Tag Predicate ``all-group-pkg``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (all-group-pkg GROUP PKG [PKG...])
+
+Matches tags which have the given install group, which must also
+contain all of the given ``PKG`` names
+
+
+Tag Predicate ``arch``
+^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (arch [ARCH...])
+
+If no ``ARCH`` patterns are specified, matches tags which have any
+architectures at all.
+
+If ``ARCH`` patterns are specified, then only matches tags which have
+an architecture that matches any of the given patterns.
+
+
+Tag Predicate ``build-tag``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (build-tag [TARGET...])
+
+If no ``TARGET`` is specified, then matches tags which are used as the
+build tag for any target.
+
+If any ``TARGET`` patterns are specified, then matches tags which are
+used as the build tag for a target with a name matching any of the
+patterns.
+
+
+Tag Predicate ``compare-latest``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (compare-latest PACKAGE [OP VERSION])
+
+If ``OP`` and ``VERSION`` are not specified, matches tags which have
+any build of the given ``PACKAGE`` name as latest.
+
+If ``OP`` and ``VERSION`` are specified, matches tags which have the a
+latest build of the given ``PACKAGE`` name which compare correctly. If
+tag doesn't have any build of the given package, it will not match.
+
+``OP`` can be any of the following comparison operators: ``==``,
+``!=``, ``>``, ``>=``, ``<``, ``<=``
+
+``VERSION`` can be in any of the following forms:
+
+  * ``EPOCH:VERSION``
+  * ``EPOCH:VERSION-RELEASE``
+  * ``VERSION``
+  * ``VERSION-RELEASE``
+
+If ``EPOCH`` is omitted, it is presumed to be ``0``.
+If ``RELEASE`` is omitted, it is presumed to be equivalent.
+
+
+Tag Predicate ``dest-tag``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (dest-tag [TARGET...])
+
+If no ``TARGET`` is specified, then matches tags which are used as the
+destination tag for any target.
+
+If any ``TARGET`` patterns are specified, then matches tags which are
+used as the destination tag for a target with a name matching any of
+the patterns.
+
+
+Tag Predicate ``exact-arch``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (exact-arch [ARCH...])
+
+If no ``ARCH`` names are specified, matches only tags which have no
+architectures.
+
+If ``ARCH`` names are specified, they must be specified as
+symbols. Only matches tags which have the exact same set of
+architectures.
+
+
+Tag Predicate ``group``
+^^^^^^^^^^^^^^^^^^^^^^^
+::
+   (group GROUP [GROUP...])
+
+Matches tags which have any of the given install groups configured.
+Honors inheritance.
+
+
+Tag Predicate ``group-pkg``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+   (group-pkg GROUP PKG [PKG...])
+
+Matches tags which have the given install group, which also contains
+any of the given ``PKG`` names
+
+
+Tag Predicate ``has-ancestor``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (has-ancestor [TAG...])
+   (inherits-from [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which have any
+parents.
+
+If ``TAG`` patterns are specified, matches tags which have a parent at
+any depth matching any of the given patterns.
+
+
+Tag Predicate ``has-child``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (has-child [TAG...])
+   (parent-of [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which are the
+direct parent to any other tag.
+
+If ``TAG`` patterns are specified, matches tags which are the direct
+parent to any tag matching any of the given patterns.
+
+
+Tag Predicate ``has-descendant``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (has-descendant [TAG...])
+   (inherited-by [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which are inherited
+by any other tag.
+
+If ``TAG`` patterns are specified, matches tags which are inherited by
+any tag matching any of the patterns, at any depth.
+
+
+Tag Predicate ``has-parent``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (has-parent [TAG...])
+   (child-of [TAG...])
+
+If no ``TAG`` patterns are specified, matches tags which have any
+parents.
+
+If ``TAG`` patterns are specified, matchs tags which have any direct
+parent matching any of the given patterns.
+
+
+Tag Predicate ``locked``
+^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (locked)
+
+Matches tags which have been locked.
+
+
+Tag Predicate ``name``
+^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (name NAME [NAME...])
+
+Matches tags which have a name that matches any of the given ``NAME``
+patterns.
+
+
+Tag Predicate ``permission``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (permission [PERM...])
+
+If no ``PERM`` is specified, then matches tags which have any
+permission set.
+
+If any ``PERM`` patters are specified, then matches tags which have
+any of the listed permissions set.
+
+
+Tag Predicate ``pkg-allowed``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-allowed PKG [PKG...])
+
+Matches tags which have a package listing with any of the given
+``PKG`` contained therein and not blocked, honoring inheritance.
+
+
+Tag Predicate ``pkg-blocked``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-blocked PKG [PKG...])
+
+Matches tags which have a package listing with any of the given
+``PKG`` contained therein and blocked, honoring inheritance.
+
+
+Tag Predicate ``pkg-unlisted``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (pkg-unlisted PKG [PKG...])
+
+Matches tags which have no package listing (neither allowed nor
+blocked) for any of the given ``PKG`` names. Honors inheritance.

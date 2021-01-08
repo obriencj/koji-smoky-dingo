@@ -296,6 +296,10 @@ class AllItems(Item):
 
 
 class ItemPath(object):
+    """
+    Represents a collection of elements inside a nested tree of lists
+    and dicts
+    """
 
     def __init__(self, *paths):
         self.paths = list(paths)
@@ -398,7 +402,7 @@ def convert_group(grp):
 
     work = []
     for brk in grp.split(","):
-        if work and _trailing_esc(work[-1][-1]) & 1:
+        if work and work[-1] and _trailing_esc(work[-1][-1]) & 1:
             work[-1] = ",".join((work[-1][:-1], brk))
         else:
             work.append(brk)
@@ -584,7 +588,7 @@ def convert_token(val):
                 # in cases where there's only one choice in all the
                 # groups, then we can simply create a single Symbol
                 # from those merged choices.
-                val = "".join(g[0] for g in grps)
+                val = "".join(str(g[0]) for g in grps)
                 return Symbol(val)
             else:
                 return SymbolGroup(val, grps)

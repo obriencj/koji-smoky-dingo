@@ -21,14 +21,47 @@ Sieves
 """
 
 
+import operator
+
 from operator import itemgetter
 from six.moves import map
 
-from . import Sieve
+from . import SifterError, Sieve
+from .. import iter_bulk_load
 from ..builds import latest_maven_builds
 
 
-__all__ = ("CacheMixin", )
+__all__ = ("CacheMixin", "ensure_comparison", )
+
+
+_OPMAP = {
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">": operator.gt,
+    ">=": operator.ge,
+    "<": operator.lt,
+    "<=": operator.le,
+}
+
+
+def ensure_comparison(value):
+    """
+    Converts a comparison operator symbol into a comparison function.
+
+    :param value: The symbol or string to convert. Should be one of
+      '==', '!=', '>', '>=', '<', '<='
+
+    :type value: str
+
+    :rtype: callable
+    """
+
+    if value in _OPMAP:
+        return _OPMAP[value]
+
+    else:
+        msg = "Invalid comparison operator: %r" % value
+        raise SifterError(msg)
 
 
 class CacheMixin(Sieve):
@@ -140,6 +173,34 @@ class CacheMixin(Sieve):
         return found
 
 
+    def bulk_list_packages(self, session, tag_ids, inherited=True):
+        """
+        a multicall caching wrapper for session.listPackages
+
+        shares the same cache as `list_packages` (and therefore
+        `allowed_packages` and `blocked_packages`)
+
+        :rtype: dict[int,list[dict]]
+        """
+
+        cache = self._mixing_cache("list_packages")
+
+        result = {}
+        needed = []
+
+        for tid in tag_ids:
+            if (tid, inherited) not in cache:
+                needed.append(tid)
+            else:
+                result[tid] = cache
+
+        fn = lambda i: session.listPackages(i, inherited=inherited)
+        for tid, pkgs in iter_bulk_load(session, fn, needed):
+            result[tid] = cache[(tid, inherited)] = pkgs
+
+        return result
+
+
     def list_packages(self, session, tag_id, inherited=True):
         """
         a caching wrapper for session.listPackages
@@ -153,7 +214,8 @@ class CacheMixin(Sieve):
         found = cache.get(key)
 
         if found is None:
-            found = cache[key] = session.listPackages(tag_id, inherited=True)
+            found = cache[key] = session.listPackages(tag_id,
+                                                      inherited=inherited)
 
         return found
 
@@ -202,6 +264,48 @@ class CacheMixin(Sieve):
                     found.add(pkg["package_name"])
 
         return found
+
+
+    def get_tag_groups(self, session, tag_id):
+        """
+        a caching wrapper for session.getTagGroups
+
+        :rtype: list[dict]
+        """
+
+        cache = self._mixin_cache("groups")
+
+        found = cache.get(tag_id)
+        if found is None:
+            found = cache[tag_id] = session.getTagGroups(tag_id)
+
+        return found
+
+
+    def bulk_get_tag_groups(self, session, tag_ids):
+        """
+        a multicall caching wrapper for session.getTagGroups. Shares a
+        cache with `get_tag_groups`
+
+        :rtype: dict[int, list[dict]]
+        """
+
+        cache = self._mixin_cache("groups")
+
+        result = {}
+        needed = []
+
+        for tid in tag_ids:
+            if tid in cache:
+                result[tid] = cache[tid]
+            else:
+                needed.append(tid)
+
+        fn = session.getTagGroups
+        for tid, found in iter_bulk_load(session, fn, needed):
+            result[tid] = cache[tid] = found
+
+        return result
 
 
 # The end.

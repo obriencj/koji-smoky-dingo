@@ -61,6 +61,7 @@ permissions in koji.
 |`check—hosts` |Show builder hosts which haven't been checking in lately |
 |`client-config` |Show settings for client profiles |
 |`filter-builds` |Filter a list of NVRs by various criteria |
+|`filter-tags` |Filter a list of tags by various criteria |
 |`latest-archives` |Show selected latest archives from a tag |
 |`list-btypes` |Show build types |
 |`list-build-archives` |Show selected archives attached to a build |

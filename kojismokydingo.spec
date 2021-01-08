@@ -15,7 +15,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
 Source0: %{name}-%{version}.tar.gz
-Patch0: no-koji.patch
 
 
 # we don't generate binaries, let's turn that part off
@@ -67,7 +66,7 @@ Koji Smoky Dingo
 
 %prep
 %setup -q
-%patch0 -p1
+patch -p1 < no-koji.patch
 
 
 %build
@@ -169,6 +168,7 @@ Koji Smoky Dingo
 %{python_sitelib}/kojismokydingo/
 %{python_sitelib}/kojismokydingo-%{version}-py2.?.egg-info/
 %{_bindir}/ksd-filter-builds
+%{_bindir}/ksd-filter-tags
 
 %endif
 
@@ -192,6 +192,7 @@ Koji Smoky Dingo
 %{python2_sitelib}/kojismokydingo/
 %{python2_sitelib}/kojismokydingo-%{version}.dist-info/
 %{_bindir}/ksd-filter-builds
+%{_bindir}/ksd-filter-tags
 
 %doc README.md
 %license LICENSE
@@ -218,6 +219,7 @@ Koji Smoky Dingo
 %{python3_sitelib}/kojismokydingo/
 %{python3_sitelib}/kojismokydingo-%{version}.dist-info/
 %{_bindir}/ksd-filter-builds
+%{_bindir}/ksd-filter-tags
 
 %doc README.md
 %license LICENSE
@@ -232,6 +234,8 @@ Koji Smoky Dingo
 - refactored sieve caching
 - Added 'koji open' command which will launch a browser to the info
   page for the relevant koji data type.
+- Added 'koji filter-tags' command and 'ksd-filter-tags' standalone
+  command for applying sifty predicates to filter a list of tags
 
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-1
 - remove install_requires for koji, because koji doesn't think it's a

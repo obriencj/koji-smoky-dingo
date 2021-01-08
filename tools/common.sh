@@ -12,7 +12,7 @@ function whichever() {
 
 
 function ksd_version() {
-    local PYTHON=$(whichever python python2 python3)
+    local PYTHON=$(whichever python3 python python2)
     read -r -d'\0' SCRIPT <<EOF
 from __future__ import print_function
 import setup

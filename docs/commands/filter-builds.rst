@@ -89,7 +89,7 @@ koji filter-builds
 Given a list of NVRs, output only those which match a set of filtering
 parameters.
 
-The set of NVRs to tag can be fed to this command in multiple
+The set of NVRs to filter can be fed to this command in multiple
 ways. They can be specified as arguments, or they can be specified
 using the ``--file`` option to reference either a file containing a
 list of NVRs (one per line) or ``-`` to indicate stdin. The NVR list
@@ -125,3 +125,4 @@ References
 * :py:obj:`kojismokydingo.cli.builds.FilterBuilds`
 * :py:func:`kojismokydingo.cli.builds.cli_filter_builds`
 * :py:obj:`kojismokydingo.builds.BuildFilter`
+* :py:obj:`kojismokydingo.sift.builds`

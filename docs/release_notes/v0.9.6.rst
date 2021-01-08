@@ -19,13 +19,16 @@ Otherwise, still chugging along!
 - Added a ChacheMixin to kojismokydingo.sift.common with methods that
   will cache the results of large tag queries. Sieve classes can
   inherit this to make use of the cache.
-- Added two new build sieves: compare-latest-nvr and
-  compare-latest-id. These allow for filtering builds using comparison
-  operators against the latest build of the same package in a given
-  tag.
+- Added build sieves compare-latest-nvr and compare-latest-id. These
+  allow for filtering builds using comparison operators against the
+  latest build of the same package in a given tag.
+- Added build sieve pkg-unlisted to filter builds which do not have a
+  package listing in a particular tag (neither allowed nor blocked)
 - Fixed an issue where the ksd-filter-builds standalone would still
   require the '--profile' option to be specified on the command-line
   even when the '#option --profile' directive was present in the
   filter.
 - Added 'koji open' command which will launch a browser to the info
   page for the relevant koji data type.
+- Added 'koji filter-tags' command and 'ksd-filter-tags' standalone
+  command for applying sifty predicates to filter a list of tags

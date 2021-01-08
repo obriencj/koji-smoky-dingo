@@ -41,7 +41,7 @@ from six.moves import map
 
 from .. import BadDingo
 from .parse import (
-    Glob, Regex, Symbol, Matcher, ItemPath, Number,
+    Glob, ItemPath, Matcher, Number, Regex, Symbol, SymbolGroup,
     convert_token, parse_exprs, )
 
 
@@ -50,15 +50,18 @@ __all__ = (
 
     "Flagged",
     "Flagger",
+    "IntStrSieve",
     "ItemPathSieve",
     "ItemSieve",
     "Logic",
     "LogicAnd",
     "LogicNot",
     "LogicOr",
+    "MatcherSieve",
     "Sieve",
     "Sifter",
     "SifterError",
+    "SymbolSieve",
     "VariadicSieve",
 
     "ensure_all_int_or_str",
@@ -96,17 +99,36 @@ def ensure_symbol(value, msg=None):
                       (msg, value, type(value).__name__))
 
 
-def ensure_all_symbol(values, msg=None):
+def ensure_all_symbol(values, expand=True, msg=None):
     """
     Checks that all of the elements in values are Symbols, and returns
     them as a new list.  If not, raises a SifterError.
+
+    If expand is True then any SymbolGroup instances will be expanded
+    to their full combination of Symbols and inlined. Otherwise, the
+    inclusion of a SymbolGroup is an error.
 
     :type values: list
 
     :rtype: list[Symbol]
     """
 
-    return [ensure_symbol(val, msg) for val in values]
+    result = []
+
+    for val in values:
+        if isinstance(val, Symbol):
+            result.append(val)
+
+        elif expand and isinstance(val, SymbolGroup):
+            result.extend(val)
+
+        else:
+            if not msg:
+                msg = "Value must be a symbol"
+            raise SifterError("%s: %r (type %s)" %
+                              (msg, val, type(val).__name__))
+
+    return result
 
 
 def ensure_str(value, msg=None):
@@ -290,7 +312,14 @@ class Sifter(object):
         self._cache = {}
 
         if not isinstance(sieves, dict):
-            sieves = dict((sieve.name, sieve) for sieve in sieves)
+            # convert a list of sieves into a dict mapping the sieve
+            # names and their aliases to the classes
+            sieves = tuple(sieves)
+            sievedict = dict((sieve.name, sieve) for sieve in sieves)
+            for sieve in sieves:
+                for alias in sieve.aliases:
+                    sievedict[alias] = sieve
+            sieves = sievedict
 
         self._sieve_classes = sieves
 
@@ -543,6 +572,9 @@ class Sieve(object):
         pass
 
 
+    aliases = ()
+
+
     def __init__(self, sifter, *tokens):
         self.sifter = sifter
         self.key = sifter.key
@@ -631,6 +663,39 @@ class Sieve(object):
         """
 
         return self.sifter.get_info_cache(self.name, info)
+
+
+class MatcherSieve(Sieve):
+    """
+    A Sieve that requires all of its arguments to be matchers. Calls
+    `ensure_all_matcher` on `tokens`
+    """
+
+    def __init__(self, sifter, *tokens):
+        tokens = ensure_all_matcher(tokens)
+        super(MatcherSieve, self).__init__(sifter, *tokens)
+
+
+class SymbolSieve(Sieve):
+    """
+    A Sieve that requires all of its arguments to be matchers. Calls
+    `ensure_all_symbol` on `tokens`
+    """
+
+    def __init__(self, sifter, *tokens):
+        tokens = ensure_all_symbol(tokens)
+        super(SymbolSieve, self).__init__(sifter, *tokens)
+
+
+class IntStrSieve(Sieve):
+    """
+    A Sieve that requires all of its arguments to be matchers. Calls
+    `ensure_all_int_or_str` on `tokens`
+    """
+
+    def __init__(self, sifter, *tokens):
+        tokens = ensure_all_int_or_str(tokens)
+        super(IntStrSieve, self).__init__(sifter, *tokens)
 
 
 @add_metaclass(ABCMeta)

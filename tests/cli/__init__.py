@@ -12,6 +12,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+from __future__ import print_function
+
 from pkg_resources import EntryPoint
 from six import iteritems
 from six.moves import StringIO
@@ -31,6 +33,7 @@ ENTRY_POINTS = {
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
     "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",
+    "filter-tags": "kojismokydingo.cli.tags:FilterTags",
     "latest-archives": "kojismokydingo.cli.archives:LatestArchives",
     "list-btypes": "kojismokydingo.cli.builds:ListBTypes",
     "list-build-archives": "kojismokydingo.cli.archives:ListBuildArchives",

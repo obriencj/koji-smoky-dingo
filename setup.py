@@ -53,6 +53,7 @@ COMMANDS = {
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
     "cginfo": "kojismokydingo.cli.users:CGInfo",
     "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",
+    "filter-tags": "kojismokydingo.cli.tags:FilterTags",
     "latest-archives": "kojismokydingo.cli.archives:LatestArchives",
     "list-btypes": "kojismokydingo.cli.builds:ListBTypes",
     "list-build-archives": "kojismokydingo.cli.archives:ListBuildArchives",
@@ -74,6 +75,7 @@ COMMANDS = {
 
 CLI = {
     "ksd-filter-builds": "kojismokydingo.standalone.builds:ksd_filter_builds",
+    "ksd-filter-tags": "kojismokydingo.standalone.tags:ksd_filter_tags",
 }
 
 

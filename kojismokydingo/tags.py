@@ -24,11 +24,13 @@ from collections import OrderedDict
 from functools import partial
 from itertools import chain
 from six import iteritems, itervalues
+from six.moves import filter
 
 from . import (
     NoSuchTag,
     as_taginfo, as_targetinfo,
-    bulk_load, bulk_load_tags)
+    bulk_load, bulk_load_tags, )
+from .common import unique
 
 
 __all__ = (
@@ -40,7 +42,24 @@ __all__ = (
     "gather_tag_ids",
     "renum_inheritance",
     "resolve_tag",
+    "tag_dedup",
 )
+
+
+def tag_dedup(tag_infos):
+    """
+    Given a sequence of tag info dictionaries, return a de-duplicated
+    list of same, with order preserved.
+
+    All None infos will be dropped.
+
+    :param tag_infos: tag infos to be de-duplicated.
+    :type tag_infos: list[dict]
+
+    :rtype: list[dict]
+    """
+
+    return unique(filter(None, tag_infos), key="id")
 
 
 def ensure_tag(session, name):

@@ -33,11 +33,13 @@ from . import open_output, resplit
 from ..common import escapable_replace
 from ..sift import DEFAULT_SIEVES, Sifter, SifterError
 from ..sift.builds import build_info_sieves
+from ..sift.tags import tag_info_sieves
 
 
 __all__ = (
     "BuildSifting",
     "Sifting",
+    "TagSifting",
 
     "output_sifted",
 )
@@ -190,6 +192,12 @@ class BuildSifting(Sifting):
 
     def get_sieves(self):
         return build_info_sieves()
+
+
+class TagSifting(Sifting):
+
+    def get_sieves(self):
+        return tag_info_sieves()
 
 
 def output_sifted(results, key="id", outputs=None, sort=None):
