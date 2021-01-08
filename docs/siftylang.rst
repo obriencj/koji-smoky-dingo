@@ -602,12 +602,21 @@ A sifter instance with these and the core sieves available by default can be
 created via :py:func:`kojismokydingo.sift.tags.tag_info_sifter`
 
 
+Tag Predicate ``all-group-pkg``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   (all-group-pkg GROUP PKG [PKG...])
+
+Matches tags which have the given install group, which must also
+contain all of the given ``PKG`` names
+
+
 Tag Predicate ``arch``
 ^^^^^^^^^^^^^^^^^^^^^^
 ::
 
    (arch [ARCH...])
-
 
 If no ``ARCH`` patterns are specified, matches tags which have any
 architectures at all.
@@ -683,6 +692,24 @@ architectures.
 If ``ARCH`` names are specified, they must be specified as
 symbols. Only matches tags which have the exact same set of
 architectures.
+
+
+Tag Predicate ``group``
+^^^^^^^^^^^^^^^^^^^^^^^
+::
+   (group GROUP [GROUP...])
+
+Matches tags which have any of the given install groups configured.
+Honors inheritance.
+
+
+Tag Predicate ``group-pkg``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+   (group-pkg GROUP PKG [PKG...])
+
+Matches tags which have the given install group, which also contains
+any of the given ``PKG`` names
 
 
 Tag Predicate ``has-ancestor``
