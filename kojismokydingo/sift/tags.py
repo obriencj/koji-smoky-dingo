@@ -31,7 +31,7 @@ from . import (
     DEFAULT_SIEVES,
     IntStrSieve, ItemSieve, MatcherSieve, Sieve, Sifter,
     SymbolSieve, VariadicSieve,
-    ensure_int_or_str, ensure_str, )
+    ensure_int_or_str, ensure_str, ensure_symbol, )
 from .common import CacheMixin, ensure_comparison
 from .. import (
     as_buildinfo, bulk_load_builds, bulk_load_tags, iter_bulk_load, )
@@ -44,6 +44,7 @@ from ..tags import (
 __all__ = (
     "DEFAULT_TAG_INFO_SIEVES",
 
+    "AllGroupPkgSieve",
     "ArchSieve",
     "BuildTagSieve",
     "CompareLatestSieve",
@@ -53,12 +54,16 @@ __all__ = (
     "HasChildSieve",
     "HasDescendantSieve",
     "HasParentSieve",
+    "GroupSieve",
+    "GroupPkgSieve",
+    "LatestSieve",
     "LockedSieve",
     "NameSieve",
     "PermissionSieve",
     "PkgAllowedSieve",
     "PkgBlockedSieve",
     "PkgUnlistedSieve",
+    "TaggedSieve",
 
     "tag_info_sieves",
     "tag_info_sifter",
@@ -602,8 +607,7 @@ class PkgListSieve(SymbolSieve, CacheMixin):
 
 
     def prep(self, session, taginfos):
-        for tag in taginfos:
-            self.list_packages(session, tag["id"], True)
+        self.bulk_list_packages(session, taginfos, True)
 
 
 class PkgAllowedSieve(PkgListSieve):
@@ -672,7 +676,128 @@ class PkgUnlistedSieve(PkgListSieve):
             return False
 
 
+class GroupSieve(SymbolSieve, CacheMixin):
+    """
+    usage: ``(group GROUP [GROUP...])``
+
+    Matches tags which have any of the given install groups
+    configured.  Honors inheritance.
+    """
+
+    name = "group"
+
+
+    def __init__(self, sifter, group, *groups):
+        super(GroupSieve, self).__init__(sifter, group, *groups)
+
+
+    def prep(self, session, taginfos):
+
+        needed = {}
+        for tag in taginfos:
+            cache = self.get_info_cache(tag)
+            if "group_names" not in cache:
+                needed[tag["id"]] = cache
+
+        loaded = self.bulk_get_tag_groups(session, needed)
+        for tid, groups in iteritems(loaded):
+            cache = needed[tid]
+            cache["group_names"] = [grp["name"] for grp in groups]
+
+
+    def check(self, session, taginfo):
+        cache = self.get_info_cache(taginfo)
+        groups = cache.get("group_names", ())
+
+        for tok in self.tokens:
+            if tok in groups:
+                return True
+        else:
+            return False
+
+
+class GroupPkgSieve(SymbolSieve, CacheMixin):
+    """
+    usage: ``(group-pkg GROUP PKG [PKG...])``
+
+    Matches tags which have the given install group, which also
+    contains any of the given ``PKG`` names
+    """
+
+    name = "group-pkg"
+
+
+    def __init__(self, sifter, group, pkg, *pkgs):
+        super(GroupPkgSieve, self).__init__(sifter, pkg, *pkgs)
+        self.group = ensure_symbol(group)
+
+
+    def prep(self, session, taginfos):
+
+        needed = {}
+        for tag in taginfos:
+            cache = self.get_info_cache(tag)
+            if "group_pkgs" not in cache:
+                needed[tag["id"]] = cache
+
+        loaded = self.bulk_get_tag_groups(session, needed)
+        for tid, groups in iteritems(loaded):
+            cache = needed[tid]
+            cache["group_pkgs"] = simple_groups = {}
+            for grp in groups:
+                name = grp["name"]
+                pkglist = grp.get("packagelist", ())
+                simple_groups[name] = [p["package"] for p in pkglist]
+
+
+    def check(self, session, taginfo):
+        cache = self.get_info_cache(taginfo)
+        groups = cache.get("group_pkgs")
+
+        pkgs = groups.get(self.group)
+        if not pkgs:
+            return False
+
+        for tok in self.tokens:
+            if tok in pkgs:
+                return True
+        else:
+            return False
+
+
+class AllGroupPkgSieve(GroupPkgSieve):
+    """
+    usage: ``(all-group-pkg GROUP PKG [PKG...])``
+
+    Matches tags which have the given install group, which must also
+    contain all of the given ``PKG`` names
+    """
+
+    name = "all-group-pkg"
+
+
+    def get_info_cache(self, info):
+        # borrow the same cache from group-pkg
+        return self.sifter.get_info_cache("group-pkg", info)
+
+
+    def check(self, session, taginfo):
+        cache = self.get_info_cache(taginfo)
+        groups = cache.get("group_pkgs")
+
+        pkgs = groups.get(self.group)
+        if not pkgs:
+            return False
+
+        for tok in self.tokens:
+            if tok not in pkgs:
+                return False
+        else:
+            return True
+
+
 DEFAULT_TAG_INFO_SIEVES = [
+    AllGroupPkgSieve,
     ArchSieve,
     BuildTagSieve,
     CompareLatestSieve,
@@ -682,6 +807,8 @@ DEFAULT_TAG_INFO_SIEVES = [
     HasChildSieve,
     HasDescendantSieve,
     HasParentSieve,
+    GroupPkgSieve,
+    GroupSieve,
     LatestSieve,
     LockedSieve,
     NameSieve,
