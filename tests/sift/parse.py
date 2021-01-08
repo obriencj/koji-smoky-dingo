@@ -468,6 +468,19 @@ class ParserTest(TestCase):
         self.assertNotEqual(res[0], "hig")
         self.assertNotEqual(res[0], "hgh")
 
+        src="""
+        hi{,,gh,}
+        """
+        res = self.parse(src)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(type(res[0]), SymbolGroup)
+        self.assertEqual(repr(res[0]), "SymbolGroup('hi{,,gh,}')")
+        self.assertEqual(res[0], "hi")
+        self.assertEqual(res[0], "high")
+        self.assertNotEqual(res[0], "hi gh")
+        self.assertNotEqual(res[0], "hig")
+        self.assertNotEqual(res[0], "hgh")
+
         src = """
         hi{foo,bar}
         """
