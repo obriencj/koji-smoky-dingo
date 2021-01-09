@@ -44,7 +44,6 @@ from ..tags import (
 __all__ = (
     "DEFAULT_TAG_INFO_SIEVES",
 
-    "AllGroupPkgSieve",
     "ArchSieve",
     "BuildTagSieve",
     "CompareLatestSieve",
@@ -732,6 +731,11 @@ class GroupPkgSieve(SymbolSieve, CacheMixin):
         self.group = ensure_symbol(group)
 
 
+    def set_options(self, require_all=False):
+        super(GroupPkgSieve, self).set_options(require_all=require_all)
+        self.require_all = bool(require_all)
+
+
     def prep(self, session, taginfos):
 
         needed = {}
@@ -758,11 +762,23 @@ class GroupPkgSieve(SymbolSieve, CacheMixin):
         if not pkgs:
             return False
 
-        for tok in self.tokens:
-            if tok in pkgs:
+        if self.require_all:
+            # require all tokens to be present
+            for tok in self.tokens:
+                if tok not in pkgs:
+                    return False
+            else:
                 return True
+
         else:
-            return False
+            # if any token is present, we match
+            for tok in self.tokens:
+                if tok in pkgs:
+                    return True
+            else:
+                return False
+
+
 
 
 class AllGroupPkgSieve(GroupPkgSieve):
@@ -788,12 +804,6 @@ class AllGroupPkgSieve(GroupPkgSieve):
         pkgs = groups.get(self.group)
         if not pkgs:
             return False
-
-        for tok in self.tokens:
-            if tok not in pkgs:
-                return False
-        else:
-            return True
 
 
 DEFAULT_TAG_INFO_SIEVES = [

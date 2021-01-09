@@ -78,17 +78,23 @@ class Poke(Sieve):
     # for testing cache. Increments a poke counter each time it sees a
     # data item. If a maximum value is provided, then filters for only
     # those items which have been poked up-to that many times
-    # previously. Thus (poke 0) will poke and then filter for only
-    # those items never previously poked.
+    # previously. Thus (poke count: 0) will poke and then filter for
+    # only those items never previously poked.
 
     name = "poke"
 
     aliases = ["incr", ]
 
 
-    def __init__(self, sifter, count=-1):
+    def __init__(self, sifter):
+        # limit ourselves to no positional args
         super(Poke, self).__init__(sifter)
-        self._max = ensure_int(count)
+
+
+    def set_options(self, count=-1):
+        # accept one option
+        self._max = count = ensure_int(count)
+        super(Poke, self).set_options(count=count)
 
 
     def check(self, _session, data):
@@ -849,6 +855,38 @@ class SifterTest(TestCase):
         self.assertEqual(poke._max, 1)
 
 
+    def test_repr(self):
+        src = """
+        (poke)
+        """
+        sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+
+        poke = sieves[0]
+        self.assertEqual(repr(poke), "(poke count: -1)")
+
+        src = """
+        (poke count: -2)
+        """
+        sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+
+        poke = sieves[0]
+        self.assertEqual(repr(poke), "(poke count: -2)")
+
+        src = """
+        (poke count: -3)
+        """
+        sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+
+        poke = sieves[0]
+        self.assertEqual(repr(poke), "(poke count: -3)")
+
+
     def test_cache(self):
 
         src = """
@@ -871,7 +909,7 @@ class SifterTest(TestCase):
         self.assertEqual(res["default"], DATA)
 
         src = """
-        (poke 0)
+        (poke count: 0)
         """
         sifter = self.compile_sifter(src)
         res = sifter(None, DATA)
@@ -887,9 +925,9 @@ class SifterTest(TestCase):
         src = """
         (flag 1st (type food) (poke))
         (flag 2nd (name Draino) (poke))
-        (flag 3rd (type drink) (poke 0))
-        (flag keep (poke 1))
-        (!incr 2)
+        (flag 3rd (type drink) (poke count: 0))
+        (flag keep (poke count: 1))
+        (!poke count: 2)
         """
         sifter = self.compile_sifter(src)
         res = sifter(None, DATA)

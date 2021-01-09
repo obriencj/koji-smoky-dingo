@@ -53,6 +53,8 @@ Sieve Predicate
 
   (foo)
   (foo 1 two "three" /four/ |five|)
+  (bar x y)
+  (bar x y optional: True)
   (and (foo 1) (bar 2))
   (or (baz 3) (and (qux) (quux 4)))
 
@@ -83,6 +85,10 @@ numeric -- it would instead be interpreted as a Number in that case.
 Symbols with a leading dollar-sign are interpreted as variables, and
 their value will be substituted from a sifter parameter at compile
 time.
+
+When used as arguments to a sieve predicate, symbols with a trailing
+``':`` character are treated as keyword markers. The value following a
+keyword marker is used as the keywords argument.
 
 
 Number
@@ -602,16 +608,6 @@ A sifter instance with these and the core sieves available by default can be
 created via :py:func:`kojismokydingo.sift.tags.tag_info_sifter`
 
 
-Tag Predicate ``all-group-pkg``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-::
-
-   (all-group-pkg GROUP PKG [PKG...])
-
-Matches tags which have the given install group, which must also
-contain all of the given ``PKG`` names
-
-
 Tag Predicate ``arch``
 ^^^^^^^^^^^^^^^^^^^^^^
 ::
@@ -706,10 +702,13 @@ Honors inheritance.
 Tag Predicate ``group-pkg``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
-   (group-pkg GROUP PKG [PKG...])
+   (group-pkg GROUP PKG [PKG...] [requireAll: False])
 
 Matches tags which have the given install group, which also contains
-any of the given ``PKG`` names
+any of the given ``PKG`` names.
+
+If ``requireAll`` is set to ``True`` then all of the given ``PKG``
+names must be present in order for a tag to match.
 
 
 Tag Predicate ``has-ancestor``
