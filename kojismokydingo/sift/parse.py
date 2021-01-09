@@ -564,6 +564,8 @@ def convert_token(val):
 
     * An all-digit value will become Number
     * None, null, nil become a Null
+    * True becomes the boolean True
+    * False becomes the boolean False
     * Use of {} may become a SymbolGroup or Symbol
     * Everything else becomes a Symbol.
 
@@ -575,6 +577,14 @@ def convert_token(val):
 
     if val in (None, "None", "null", "nil"):
         return Null()
+
+    elif val is True or val == "True":
+        # note, we do not use 'in' because 1 would match as True
+        return True
+
+    elif val is False or val == "False":
+        # note, we do not use 'in' because 0 would match as False
+        return False
 
     elif NUMBER_RE == val:
         return Number(val)
@@ -592,7 +602,6 @@ def convert_token(val):
                 return Symbol(val)
             else:
                 return SymbolGroup(val, grps)
-
         else:
             return Symbol(val)
 

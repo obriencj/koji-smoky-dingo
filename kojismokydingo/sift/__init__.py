@@ -266,6 +266,34 @@ def ensure_all_sieve(values, msg=None):
     return [ensure_sieve(v, msg) for v in values]
 
 
+def gather_args(values):
+    """
+    Converts list of values into an *args and **kwds pair for use in
+    creating a Sieve instance.
+
+    :rtype: tuple
+    """
+
+    missing = object()
+    args = []
+    kwds = {}
+
+    ivals = iter(values)
+    for val in ivals:
+        if isinstance(val, Symbol) and val.endswith(":"):
+            key = val.rstrip(":")
+            val = next(ivals, missing)
+            if val is missing:
+                msg = "Missing value for keyword argument %s" % key
+                raise SifterError(msg)
+            else:
+                kwds[key] = val
+        else:
+            args.append(val)
+
+    return args, kwds
+
+
 class Sifter(object):
 
     def __init__(self, sieves, source, key="id", params=None):
@@ -415,8 +443,25 @@ class Sifter(object):
             if cls is None:
                 raise SifterError("No such sieve: %s" % name)
 
+            args, kwds = gather_args(map(self._convert, args))
+
             try:
-                result = cls(self, *map(self._convert, args))
+                # Note that we need to convolute it this way in order
+                # to support cases where some of the positional
+                # arguments have defaults but we also want
+                # keyword-only options to be available. subclasses of
+                # Sieve can define the positionals in their __init__
+                # method, and keyword-only via the set_options method.
+
+                # Very recent versions of Python introduced the
+                # concepts of positional-only and keyword-only
+                # parameters, but we need to work with much older
+                # versions that do not have these syntactic features
+                # available.
+
+                result = cls(self, *args)
+                result.set_options(**kwds)
+
             except TypeError as te:
                 msg = "Error creating Sieve %s: %s" % (name, te)
                 raise SifterError(msg)
@@ -579,6 +624,17 @@ class Sieve(object):
         self.sifter = sifter
         self.key = sifter.key
         self.tokens = tokens
+        self.options = {}
+
+        # assign the default option values
+        self.set_options()
+
+
+    def set_options(self, **options):
+        """
+        assign keyword arguments
+        """
+        self.options.update(options)
 
 
     def __call__(self, session, info_dicts):
@@ -587,8 +643,13 @@ class Sieve(object):
 
 
     def __repr__(self):
-        if self.tokens:
-            e = " ".join(map(repr, self.tokens))
+        params = list(map(repr, self.tokens))
+        for key, val in iteritems(self.options):
+            params.append(key + ":")
+            params.append(repr(val))
+
+        if params:
+            e = " ".join(params)
             return "".join(("(", self.name, " ", e, ")"))
         else:
             return "".join(("(", self.name, ")"))

@@ -242,31 +242,25 @@ class ParserTest(TestCase):
         self.assertEqual(res, [Symbol("foo"), Symbol("bar")])
 
 
-    def check_null(self, src):
-        res = self.parse(src)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(type(res[0]), Null)
-        self.assertEqual(str(res[0]), "null")
-        self.assertEqual(repr(res[0]), "Null()")
-
-
     def test_null(self):
-        sources = [
-            """
-            None
-            """,
+        for src in ("None", "null", "nil"):
+            res = self.parse(src)
+            self.assertEqual(len(res), 1)
+            self.assertEqual(type(res[0]), Null)
+            self.assertEqual(str(res[0]), "null")
+            self.assertEqual(repr(res[0]), "Null()")
 
-            """
-            null
-            """,
 
-            """
-            nil
-            """,
-        ]
+    def test_bool(self):
+        src = "True False"
+        res = self.parse(src)
 
-        for src in sources:
-            self.check_null(src)
+        self.assertEqual(len(res), 2)
+        self.assertEqual(type(res[0]), bool)
+        self.assertEqual(type(res[1]), bool)
+
+        self.assertTrue(res[0] is True)
+        self.assertTrue(res[1] is False)
 
 
     def test_quoted(self):
