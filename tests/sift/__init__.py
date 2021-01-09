@@ -24,7 +24,7 @@ from kojismokydingo.sift import (
     Sieve, Sifter, SifterError, SymbolSieve,
     ensure_all_int_or_str, ensure_all_matcher, ensure_all_symbol,
     ensure_int, ensure_int_or_str, ensure_matcher,
-    ensure_str, ensure_symbol,
+    ensure_str, ensure_symbol, gather_args,
 )
 from kojismokydingo.sift.parse import (
     AllItems, Glob, Item, ItemMatch, ItemPath,
@@ -825,6 +825,30 @@ class SifterTest(TestCase):
         self.assertTrue(type(poke) is type(incr))
 
 
+    def test_keyword(self):
+        src = """
+        (poke count: -2)
+        """
+        sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+
+        poke = sieves[0]
+        self.assertEqual(type(poke), Poke)
+        self.assertEqual(poke._max, -2)
+
+        src = """
+        (poke count: 1)
+        """
+        sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+
+        poke = sieves[0]
+        self.assertEqual(type(poke), Poke)
+        self.assertEqual(poke._max, 1)
+
+
     def test_cache(self):
 
         src = """
@@ -1005,6 +1029,45 @@ class EnsureTypeTest(TestCase):
 
         self.assertRaises(SifterError, ensure_all_symbol, values,
                           expand=False)
+
+
+class GatherArgsTest(TestCase):
+
+    def test_args(self):
+        vals = []
+        args, kwds = gather_args(vals)
+
+        self.assertEqual(args, vals)
+        self.assertEqual(kwds, {})
+
+        vals = [Symbol("Hello"), Number(5), None]
+        args, kwds = gather_args(vals)
+
+        self.assertEqual(args, vals)
+        self.assertEqual(kwds, {})
+
+
+    def test_kwds(self):
+        vals = [Symbol("msg:"), Symbol("Hello"), Number(5), None]
+        args, kwds = gather_args(vals)
+
+        self.assertEqual(args, [Number(5), None])
+        self.assertEqual(kwds, {"msg": Symbol("Hello")})
+
+        vals = [Symbol("msg:"), Symbol("Hello"), Symbol("val:"), Number(5)]
+        args, kwds = gather_args(vals)
+
+        self.assertEqual(args, [])
+        self.assertEqual(kwds, {"msg": Symbol("Hello"),
+                                "val": Number(5)})
+
+
+    def test_bad_kwds(self):
+        vals = [Symbol("msg:"), ]
+        self.assertRaises(SifterError, gather_args, vals)
+
+        vals = [Symbol("foo"), Number(1), Symbol("msg:"), ]
+        self.assertRaises(SifterError, gather_args, vals)
 
 
 class EnsureTypeSieveTest(TestCase):

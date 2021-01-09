@@ -266,6 +266,34 @@ def ensure_all_sieve(values, msg=None):
     return [ensure_sieve(v, msg) for v in values]
 
 
+def gather_args(values):
+    """
+    Converts list of values into an *args and **kwds pair for use in
+    creating a Sieve instance.
+
+    :rtype: tuple
+    """
+
+    missing = object()
+    args = []
+    kwds = {}
+
+    ivals = iter(values)
+    for val in ivals:
+        if isinstance(val, Symbol) and val.endswith(":"):
+            key = val.rstrip(":")
+            val = next(ivals, missing)
+            if val is missing:
+                msg = "Missing value for keyword argument %s" % key
+                raise SifterError(msg)
+            else:
+                kwds[key] = val
+        else:
+            args.append(val)
+
+    return args, kwds
+
+
 class Sifter(object):
 
     def __init__(self, sieves, source, key="id", params=None):
@@ -415,8 +443,11 @@ class Sifter(object):
             if cls is None:
                 raise SifterError("No such sieve: %s" % name)
 
+            args = list(map(self._convert, args))
+            args, kwds = gather_args(args)
+
             try:
-                result = cls(self, *map(self._convert, args))
+                result = cls(self, *args, **kwds)
             except TypeError as te:
                 msg = "Error creating Sieve %s: %s" % (name, te)
                 raise SifterError(msg)
