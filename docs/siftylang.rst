@@ -87,8 +87,10 @@ their value will be substituted from a sifter parameter at compile
 time.
 
 When used as arguments to a sieve predicate, symbols with a trailing
-``':`` character are treated as keyword markers. The value following a
-keyword marker is used as the keywords argument.
+``:`` character are treated as keyword markers. The value following a
+keyword marker is used as the keyword's argument. They keyword and its
+value form an option pair, which is fed into the sieve via its
+`set_options` method.
 
 
 Number
