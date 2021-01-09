@@ -32,3 +32,5 @@ Otherwise, still chugging along!
   page for the relevant koji data type.
 - Added 'koji filter-tags' command and 'ksd-filter-tags' standalone
   command for applying sifty predicates to filter a list of tags
+- Sieve predicats may now accept options via a keyword-like syntax if
+  they supply a 'set_options' method.
