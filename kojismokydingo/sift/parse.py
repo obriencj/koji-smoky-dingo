@@ -133,6 +133,25 @@ class SymbolGroup(Matcher):
         return "SymbolGroup(%r)" % self.src
 
 
+class SymbolRange(object):
+    """
+    A portion of a SymbolGroup representing a text-formatted numeric
+    range.
+    """
+
+    def __init__(self, start, stop, step, fmt):
+        self._fmt = fmt
+        self._range = range(start, stop, step)
+
+
+    def __iter__(self):
+        return map(self._fmt.format, self._range)
+
+
+    def __len__(self):
+        return len(self._range)
+
+
 class Number(int, Matcher):
     """
     A number is a literal made entirely of digits. It can compare with
@@ -396,7 +415,7 @@ def _trailing_esc(val):
 def convert_group(grp):
     if "," not in grp:
         if ".." in grp:
-            return list(convert_range(grp))
+            return convert_range(grp)
         else:
             return ["".join(("{", grp, "}"))]
 
@@ -414,6 +433,17 @@ def convert_group(grp):
 
 
 def convert_range(rng):
+    """
+    A helper function for `convert_group` to work with the group range
+    notation.
+
+    range notation can be specified as ``START..STOP`` or as
+    ``START..STOP..STEP``. note that any zero-prefix padding is honored,
+    and padding will be applied to values that
+
+    :rtype: SymbolRange
+    """
+
     broken = rng.split("..")
     blen = len(broken)
 
@@ -439,7 +469,8 @@ def convert_range(rng):
     else:
         fmt = "{0:d}"
 
-    return map(fmt.format, range(istart, istop, istep))
+    # return map(fmt.format, range(istart, istop, istep))
+    return SymbolRange(istart, istop, istep, fmt)
 
 
 def parse_exprs(reader, start=None, stop=None):
