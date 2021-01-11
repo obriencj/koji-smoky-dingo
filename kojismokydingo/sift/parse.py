@@ -30,7 +30,7 @@ from fnmatch import translate
 from functools import partial
 from itertools import chain, product
 from six import add_metaclass, iteritems, itervalues
-from six.moves import StringIO, map
+from six.moves import StringIO, map, range
 
 from .. import BadDingo
 
@@ -133,23 +133,32 @@ class SymbolGroup(Matcher):
         return "SymbolGroup(%r)" % self.src
 
 
-class SymbolRange(object):
+class FormattedSeries(object):
     """
-    A portion of a SymbolGroup representing a text-formatted numeric
-    range.
+    A portion of a SymbolGroup representing a repeatable formatted
+    sequence.
     """
 
-    def __init__(self, start, stop, step, fmt):
+    def __init__(self, fmt, seq):
+        """
+        :param fmt: formatting to apply
+        :type fmt: str
+
+        :param seq: sequence which can safely have `iter` called on it
+          multiple times
+        :type seq: iterable
+        """
+
         self._fmt = fmt
-        self._range = range(start, stop, step)
+        self._seq = seq
 
 
     def __iter__(self):
-        return map(self._fmt.format, self._range)
+        return map(self._fmt.format, self._seq)
 
 
     def __len__(self):
-        return len(self._range)
+        return len(self._seq)
 
 
 class Number(int, Matcher):
@@ -364,8 +373,10 @@ class Reader(StringIO):
 
 def split_symbol_groups(reader):
     """
-    Invoked to by convert_token to split up a symbol into a series of
-    groups which can then be combined to form a SymbolGroup.
+    Invoked to by `convert_token` to split up a symbol into a series
+    of groups which can then be combined to form a SymbolGroup.
+
+    :rtype: generator[list[str]]
     """
 
     if isinstance(reader, str):
@@ -413,6 +424,12 @@ def _trailing_esc(val):
 
 
 def convert_group(grp):
+    """
+    A helper function for `split_symbol_groups`
+
+    :rtype: list[str] or FormattedSeries
+    """
+
     if "," not in grp:
         if ".." in grp:
             return convert_range(grp)
@@ -441,7 +458,9 @@ def convert_range(rng):
     ``START..STOP..STEP``. note that any zero-prefix padding is honored,
     and padding will be applied to values that
 
-    :rtype: SymbolRange
+    produces a FormattedSeries built on a range instance
+
+    :rtype: FormattedSeries
     """
 
     broken = rng.split("..")
@@ -469,8 +488,7 @@ def convert_range(rng):
     else:
         fmt = "{0:d}"
 
-    # return map(fmt.format, range(istart, istop, istep))
-    return SymbolRange(istart, istop, istep, fmt)
+    return FormattedSeries(fmt, range(istart, istop, istep))
 
 
 def parse_exprs(reader, start=None, stop=None):
@@ -768,13 +786,13 @@ def parse_index(reader, start=None):
 
 def parse_quoted(reader, quotec=None, advanced_escapes=True):
     """
-    Helper function for parse_exprs, will parse quoted values and
+    Helper function for `parse_exprs`, will parse quoted values and
     return the appropriate wrapper type depending on the quoting
     character.
 
-    * ``"foo"`` is a str
-    * ``/foo/`` is a Regex
-    * ``|foo|`` is a Glob
+    * ``"foo"`` is a `str`
+    * ``/foo/`` is a `Regex`
+    * ``|foo|`` is a `Glob`
 
     Symbols are generated in the parse_exprs function directly, as
     they are not quoted.

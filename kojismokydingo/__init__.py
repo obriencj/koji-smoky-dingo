@@ -952,7 +952,6 @@ def version_require(session, minimum=(1, 23), message=None):
     :rtype: bool
     """
 
-
     if version_check(session, minimum=minimum):
         return True
 
