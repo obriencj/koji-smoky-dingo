@@ -27,9 +27,10 @@ from collections import defaultdict
 from functools import partial
 from operator import itemgetter
 from os.path import basename
+from pkg_resources import iter_entry_points
 from six import iteritems
 
-from . import open_output, resplit
+from . import open_output, printerr, resplit
 from ..common import escapable_replace
 from ..sift import DEFAULT_SIEVES, Sifter, SifterError
 from ..sift.builds import build_info_sieves
@@ -43,6 +44,35 @@ __all__ = (
 
     "output_sifted",
 )
+
+
+def _entry_point_sieves(key, on_err=None):
+
+    points = sorted(iter_entry_points(key),
+                    key=lambda e: (e.module_name, e.name))
+
+    collected = []
+
+    for entry_point in points:
+        try:
+            entry_fn = entry_point.load()
+            sieves = entry_fn() if entry_fn else None
+            if sieves:
+                collected.extend(sieves)
+
+        except Exception as ex:
+            if on_err and not on_err(entry_point, ex):
+                break
+
+    return collected
+
+
+def entry_point_tag_info_sieves(on_err=None):
+    return _entry_point_sieves("koji_smoky_dingo_tag_sieves", on_err)
+
+
+def entry_point_build_info_sieves(on_err=None):
+    return _entry_point_sieves("koji_smoky_dingo_build_sieves", on_err)
 
 
 class Sifting(object):
@@ -79,6 +109,11 @@ class Sifting(object):
                " FILENAME. If FILENAME is '-', output to stdout."
                " The 'default' flag is output to stdout by default,"
                " and other flags are discarded")
+
+        addarg("--no-entry-points", "-n", action="store_false", default=True,
+               dest="entry_points",
+               help="Disable loading of additional sieves from"
+               " entry_points")
 
         grp = grp.add_mutually_exclusive_group()
         addarg = grp.add_argument
@@ -162,7 +197,7 @@ class Sifting(object):
         return result
 
 
-    def get_sieves(self):
+    def get_sieves(self, entry_points=True):
         return DEFAULT_SIEVES
 
 
@@ -184,20 +219,39 @@ class Sifting(object):
             return None
 
         params = self.get_params(options)
+        sieves = self.get_sieves(options.entry_points)
+        return Sifter(sieves, filter_src, params=params)
 
-        return Sifter(self.get_sieves(), filter_src, params=params)
+
+def _report_problem(msg, entry_point, exc):
+    printerr(msg % (entry_point, exc))
+    return True
 
 
 class BuildSifting(Sifting):
 
-    def get_sieves(self):
-        return build_info_sieves()
+    def get_sieves(self, entry_points=True):
+        sieves = build_info_sieves()
+
+        if entry_points:
+            msg = "Error loading build sieve from entry_point %r : %r"
+            err = partial(_report_problem, msg)
+            sieves.extend(entry_point_tag_info_sieves(on_err=err))
+
+        return sieves
 
 
 class TagSifting(Sifting):
 
-    def get_sieves(self):
-        return tag_info_sieves()
+    def get_sieves(self, entry_points=True):
+        sieves = tag_info_sieves()
+
+        if entry_points:
+            msg = "Error loading tag sieve from entry_point %r : %r"
+            err = partial(_report_problem, msg)
+            sieves.extend(entry_point_tag_info_sieves(on_err=err))
+
+        return sieves
 
 
 def output_sifted(results, key="id", outputs=None, sort=None):
