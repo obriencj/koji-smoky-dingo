@@ -23,8 +23,6 @@ dicts.
 """
 
 
-import operator
-
 from abc import abstractmethod
 from koji import BUILD_STATES
 from operator import itemgetter

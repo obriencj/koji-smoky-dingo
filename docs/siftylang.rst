@@ -599,6 +599,21 @@ Filters for builds which have a version matching any of the given
 ``VER`` patterns.
 
 
+Add-On Build Predicates
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The koji plugin commands ``filter-builds`` and
+``list-component-builds``, and the standalone command
+``ksd-filter-tags`` will attempt to load additional user-defined build
+sieves utilizing Python entry_points. This behavior may be disabled by
+with the ``--no-entry-points`` option.
+
+In order to provide additional tag sieves, a Python package must
+supply an entry_point to a nullary function which will return a list
+of Sieve classes, under the group named
+``koji_smoky_dingo_build_sieves``
+
+
 Tag Sieves
 ----------
 
@@ -829,3 +844,17 @@ Tag Predicate ``pkg-unlisted``
 
 Matches tags which have no package listing (neither allowed nor
 blocked) for any of the given ``PKG`` names. Honors inheritance.
+
+
+Add-On Tag Predicates
+^^^^^^^^^^^^^^^^^^^^^
+
+The koji plugin command ``filter-tags`` and the standalone command
+``ksd-filter-tags`` will attempt to load additional user-defined tag
+sieves utilizing Python entry_points. This behavior may be disabled by
+with the ``--no-entry-points`` option.
+
+In order to provide additional tag sieves, a Python package must
+supply an entry_point to a nullary function which will return a list
+of Sieve classes, under the group named
+``koji_smoky_dingo_tag_sieves``
