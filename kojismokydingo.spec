@@ -236,6 +236,10 @@ Koji Smoky Dingo
   page for the relevant koji data type.
 - Added 'koji filter-tags' command and 'ksd-filter-tags' standalone
   command for applying sifty predicates to filter a list of tags
+- Enable loading of additional sieves via entry_points for the
+  'filter-tags', 'filter-builds', and 'list-component-builds' koji
+  commands and the 'ksd-filter-tags' and 'ksd-filter-builds'
+  standalone commands.
 
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-1
 - remove install_requires for koji, because koji doesn't think it's a

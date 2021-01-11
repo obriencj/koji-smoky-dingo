@@ -17,7 +17,7 @@ koji list-component-builds
                                    [--imports | --no-imports]
                                    [--completed | --deleted]
                                    [--param KEY=VALUE] [--env-params]
-                                   [--output FLAG:FILENAME]
+                                   [--output FLAG:FILENAME] [--no-entry-points]
                                    [--filter FILTER | --filter-file FILTER_FILE]
                                    [NVR [NVR ...]]
 
@@ -84,6 +84,8 @@ koji list-component-builds
                          If FILENAME is '-', output to stdout. The 'default'
                          flag is output to stdout by default, and other flags
                          are discarded
+   --no-entry-points, -n
+                         Disable loading of additional sieves from entry_points
    --filter FILTER       Use the given sifty filter predicates
    --filter-file FILTER_FILE
                          Load sifty filter predictes from file

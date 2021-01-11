@@ -34,3 +34,7 @@ Otherwise, still chugging along!
   command for applying sifty predicates to filter a list of tags
 - Sieve predicats may now accept options via a keyword-like syntax if
   they supply a 'set_options' method.
+- Enable loading of additional sieves via entry_points for the
+  'filter-tags', 'filter-builds', and 'list-component-builds' koji
+  commands and the 'ksd-filter-tags' and 'ksd-filter-builds'
+  standalone commands.
