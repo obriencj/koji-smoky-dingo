@@ -507,7 +507,8 @@ def decorate_builds_btypes(session, build_infos, with_fields=True):
             else:
                 # everything else gets prefixed with its type name and
                 # an underscore
-                del data["build_id"]
+                if "build_id" in data:
+                    del data["build_id"]
                 for key, val in iteritems(data):
                     bld["_".join((btn, key))] = val
 
