@@ -137,6 +137,9 @@ function ksd_test_platform() {
 	echo "Using $PODMAN"
     fi
 
+    # ensure the logdir exists
+    mkdir -p "$PWD/logs"
+
     echo "Running tests for $NAME"
     $PODMAN run --rm \
             --volume "$PWD"/docs:/ksd/docs \
