@@ -32,7 +32,7 @@ from six import iteritems
 
 from . import open_output, printerr, resplit
 from ..common import escapable_replace
-from ..sift import DEFAULT_SIEVES, Sifter, SifterError
+from ..sift import DEFAULT_SIEVES, Sieve, Sifter, SifterError
 from ..sift.builds import build_info_sieves
 from ..sift.tags import tag_info_sieves
 
@@ -55,10 +55,11 @@ def _entry_point_sieves(key, on_err=None):
 
     for entry_point in points:
         try:
-            entry_fn = entry_point.load()
-            sieves = entry_fn() if entry_fn else None
-            if sieves:
-                collected.extend(sieves)
+            sieve_cls = entry_point.load()
+            if isinstance(sieve_cls, (list, tuple)):
+                collected.extend(sieve_cls)
+            elif issubclass(sieve_cls, Sieve):
+                collected.append(sieve_cls)
 
         except Exception as ex:
             if on_err and not on_err(entry_point, ex):
