@@ -55,11 +55,27 @@ def _entry_point_sieves(key, on_err=None):
 
     for entry_point in points:
         try:
-            sieve_cls = entry_point.load()
-            if isinstance(sieve_cls, (list, tuple)):
-                collected.extend(sieve_cls)
-            elif issubclass(sieve_cls, Sieve):
-                collected.append(sieve_cls)
+            ep_ref = entry_point.load()
+
+            # is this TOO flexible? The entry point can load as
+            # any of:
+            #  * Sieve subclass
+            #  * list/tuple of Sieve subclasses
+            #  * null arityy callable which returns the above
+
+            if issubclass(ep_ref, Sieve):
+                collected.append(ep_ref)
+                continue
+
+            if callable(ep_ref):
+                ep_ref = ep_ref()
+
+            if isinstance(ep_ref, (list, tuple)):
+                collected.extend(ep_ref)
+            elif issubclass(ep_ref, Sieve):
+                collected.append(ep_ref)
+            else:
+                pass
 
         except Exception as ex:
             if on_err and not on_err(entry_point, ex):
