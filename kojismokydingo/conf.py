@@ -92,7 +92,7 @@ def load_full_config(config_files=None):
     return conf
 
 
-def get_pugin_config(conf, plugin, profile=None):
+def get_plugin_config(conf, plugin, profile=None):
     """
     Given a loaded configuration, return the section specific to the
     given plugin, and optionally profile
