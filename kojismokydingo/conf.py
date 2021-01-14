@@ -28,20 +28,32 @@ from os.path import expanduser, isdir, join
 from six.moves.configparser import ConfigParser
 
 
+try:
+    import appdirs
+except ImportError:
+    appdirs = None
+
+
+__all__ = (
+    "find_config_dirs",
+    "find_config_files",
+    "get_plugin_config",
+    "load_full_config",
+    "load_plugin_config",
+)
+
+
 def find_config_dirs():
     """
-    The site and user configuration dirs, as a tuple
+    The site and user configuration dirs, as a tuple. Attempts to use
+    the ``appdirs`` package if it is available.
 
     :rtype: tuple[str]
     """
 
-    try:
-        import appdirs
-
-    except ImportError:
+    if appdirs is None:
         site_conf_dir = "/etc/ksd/"
         user_conf_dir = expanduser("~/.config/ksd/")
-
     else:
         site_conf_dir = appdirs.site_config_dir("ksd")
         user_conf_dir = appdirs.user_config_dir("ksd")
@@ -54,7 +66,11 @@ def find_config_files(dirs=None):
     The ordered list of configuration files to be loaded.
 
     If `dirs` is specified, it must be a sequence of directory names,
-    from which conf files will be loaded in order.
+    from which conf files will be loaded in order. If unspecified,
+    defaults to the result of `find_config_dirs`
+
+    :param dirs: list of directories to look for config files within
+    :type dirs: list[str], optional
 
     :rtype: list[str]
     """
@@ -115,14 +131,14 @@ def get_plugin_config(conf, plugin, profile=None):
         plugin_conf.update(conf.items(plugin))
 
     if profile is not None:
-        profile = ":".join(plugin, profile)
+        profile = ":".join((plugin, profile))
         if conf.has_section(profile):
             plugin_conf.update(conf.items(profile))
 
     return plugin_conf
 
 
-def load_config(plugin, profile=None):
+def load_plugin_config(plugin, profile=None):
     """
     Configuration specific to a given plugin, and optionally profile
 
