@@ -101,11 +101,13 @@ def config():
         ],
 
         "install_requires": [
+            "appdirs",
             "koji",
             "six",
         ],
 
         "tests_require": [
+            "appdirs",
             "docutils",
             "koji",
             "mock",
