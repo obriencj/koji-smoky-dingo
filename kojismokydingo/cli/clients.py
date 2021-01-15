@@ -196,7 +196,11 @@ def cli_open(session, goptions, datatype, element,
     weburl = weburl.rstrip("/")
     typeurl = OPEN_URL.get(datatype).format(**loaded)
 
-    cmd = "".join((command, ' "', weburl, "/", typeurl, '"'))
+    if "{url}" in command:
+        cmd = command.format(url="/".join((weburl, typeurl)))
+    else:
+        cmd = "".join((command, ' "', weburl, "/", typeurl, '"'))
+
     system(cmd)
 
 
@@ -222,11 +226,34 @@ class ClientOpen(AnonSmokyDingo):
         return parser
 
 
+    def validate(self, parser, options):
+        # we made it so cli_open will attempt to discover a command if
+        # one isn't specified, but we want to do it this way to
+        # generate an error unique to this particular command. The
+        # `get_open_command` method can be used as a fallback for
+        # cases where other commands or plugins want to trigger a URL
+        # opening command
+
+        command = options.command
+
+        if not command:
+            default_command = OPEN_CMD.get(sys.platform)
+            command = self.get_plugin_config("command", default_command)
+            options.command = command
+
+        if not command:
+            parser.error("Unable to determine a default COMMAND for"
+                         " opening URLs.\n"
+                         "Please specify via the '--command' option.")
+
+
     def handle(self, options):
+        command = options.command or self.get_plugin_config("command")
+
         return cli_open(self.session, self.goptions,
                         datatype=options.datatype,
                         element=options.element,
-                        command=options.command)
+                        command=command)
 
 
 #
