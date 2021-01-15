@@ -66,7 +66,10 @@ Koji Smoky Dingo
 
 %prep
 %setup -q
-patch -p1 < no-koji.patch
+
+%if %{with old_python}
+  patch -p1 < tools/missing_deps.patch
+%endif
 
 
 %build
@@ -84,12 +87,12 @@ patch -p1 < no-koji.patch
 %endif
 
 %if %{with docs}
-   %if %{with python3}
-     %{python3} setup.py docs --builder html,man
-   %else
-     %{__python} setup.py docs --builder html,man
-   %endif
-   %__rm -f build/sphinx/html/.buildinfo
+  %if %{with python3}
+    %{python3} setup.py docs --builder html,man
+  %else
+    %{__python} setup.py docs --builder html,man
+  %endif
+  %__rm -f build/sphinx/html/.buildinfo
 %endif
 
 
@@ -178,7 +181,7 @@ Koji Smoky Dingo
 %package -n python2-%{srcname}
 Summary:        %{summary}
 BuildRequires:  python2-devel python2-pip python2-setuptools python2-wheel
-Requires:	python2 python2-setuptools python2-six
+Requires:	python2 python2-appdirs python2-setuptools python2-six
 Requires:       python2-koji
 Obsoletes:	python2-%{srcname}-meta <= 0.9.0
 %{?python_provide:%python_provide python2-%{srcname}}
@@ -205,7 +208,7 @@ Koji Smoky Dingo
 %package -n python3-%{srcname}
 Summary:        %{summary}
 BuildRequires:  python3-devel python3-pip python3-setuptools python3-wheel
-Requires:	python3 python3-setuptools python3-six
+Requires:	python3 python3-appdirs python3-setuptools python3-six
 Requires:       python3-koji
 Obsoletes:	python3-%{srcname}-meta <= 0.9.0
 %{?python_provide:%python_provide python3-%{srcname}}
