@@ -12,8 +12,6 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from __future__ import print_function
-
 from pkg_resources import EntryPoint
 from six import iteritems
 from six.moves import StringIO
