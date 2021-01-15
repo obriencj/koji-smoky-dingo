@@ -41,6 +41,7 @@ from six import add_metaclass
 from six.moves import StringIO, filter, map, zip_longest
 
 from .. import BadDingo, NotPermitted
+from ..conf import load_plugin_config
 
 
 __all__ = (
@@ -463,10 +464,21 @@ class SmokyDingo(object):
                 desc = "[%s] %s" % (self.group, desc)
             self.__doc__ = desc
 
+        # populated by the get_plugin_config method
+        self.config = None
+
         # these will be populated once the command instance is
         # actually called
         self.goptions = None
         self.session = None
+
+
+    def get_plugin_config(self, key, default=None):
+        if self.config is None:
+            profile = self.goptions.profile if self.goptions else None
+            self.config = load_plugin_config(self.name, profile)
+
+        return self.config.get(key, default)
 
 
     def parser(self):
