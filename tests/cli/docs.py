@@ -48,7 +48,7 @@ class UsageFinder(GenericNodeVisitor):
 
     def visit_literal_block(self, node):
         txt = node.astext()
-        if txt.startswith("usage: koji "):
+        if txt.startswith("usage: "):
             self.found_usage.append(txt)
 
     def default_visit(self, node):
