@@ -29,6 +29,18 @@ EOF
 }
 
 
+function expected_standalone() {
+    local PYTHON=$(whichever python3 python python2)
+    read -r -d'\0' SCRIPT <<EOF
+from __future__ import print_function
+from tests.standalone import ENTRY_POINTS
+for name in sorted(ENTRY_POINTS):
+    print(name)
+EOF
+    "$PYTHON" -B -c "$SCRIPT"
+}
+
+
 function run_nose() {
     echo "Running unit tests:"
     local NOSE=$(whichever nosetests-3 nosetests nosetests-2)
@@ -66,6 +78,23 @@ function verify_koji_cli() {
 }
 
 
+function verify_standalone() {
+    echo 'Checking for standalone scripts:'
+
+    local RESULT=0
+
+    for E in $(expected_standalone) ; do
+        if ! "$E" --help | grep "^usage: $E" ; then
+            echo "Standalone command "$E" not present"
+            RESULT=1
+        fi
+    done
+
+    echo
+    return $RESULT
+}
+
+
 function verify_installed() {
     echo "Checking to see what is installed:"
     rpm -qa | grep koji | sort
@@ -89,6 +118,7 @@ function ksd_rpm_tests() {
         echo "==== BEGIN RESULTS FOR $PLATFORM ===="
         verify_installed
         verify_koji_cli
+        verify_standalone
         run_nose
         echo "==== END RESULTS FOR $PLATFORM ===="
     } 2>&1 | tee -a "$LOGFILE"
