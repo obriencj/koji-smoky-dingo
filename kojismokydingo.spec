@@ -228,7 +228,7 @@ Koji Smoky Dingo
 
 
 %changelog
-* Fri Dec 19 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.6-0
+* Fri Jan 15 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.6-0
 - use a patch to disable koji as a setuptools requirement
 - added build sieves 'compare-latest-nvr' and 'compare-latest-id'
 - refactored sieve caching
@@ -240,6 +240,7 @@ Koji Smoky Dingo
   'filter-tags', 'filter-builds', and 'list-component-builds' koji
   commands and the 'ksd-filter-tags' and 'ksd-filter-builds'
   standalone commands.
+- add config API functions to kojismokydingo.common
 
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-1
 - remove install_requires for koji, because koji doesn't think it's a

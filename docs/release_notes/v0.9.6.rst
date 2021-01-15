@@ -38,3 +38,5 @@ Otherwise, still chugging along!
   'filter-tags', 'filter-builds', and 'list-component-builds' koji
   commands and the 'ksd-filter-tags' and 'ksd-filter-builds'
   standalone commands.
+- Adds functions to kojismokydingo.common for working with
+  plugin-oriented configuration, with optional per-profile settings.
