@@ -12,7 +12,7 @@ RUN \
 
 ARG VERSION
 
-COPY kojismokydingo-${VERSION}.tar.gz *.patch tools/*.sh /src/
+COPY kojismokydingo-${VERSION}.tar.gz tools/*.patch tools/*.sh /src/
 
 RUN /src/rpmbuild.sh \
         /src /src/kojismokydingo-${VERSION}.tar.gz
