@@ -121,7 +121,7 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
 
 # The console_scripts entry point is an instance of the class, not the
 # class itself.
-ksd_filter_builds = LonelyFilterBuilds("ksd-filter-builds")
+ksd_filter_builds = LonelyFilterBuilds.main
 
 
 # The end.

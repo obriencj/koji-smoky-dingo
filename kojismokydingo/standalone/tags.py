@@ -119,7 +119,7 @@ class LonelyFilterTags(AnonLonelyDingo, FilterTags):
         return super(LonelyFilterTags, self).validate(parser, options)
 
 
-ksd_filter_tags = LonelyFilterTags("ksd-filter-tags")
+ksd_filter_tags = LonelyFilterTags.main
 
 
 #

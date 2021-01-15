@@ -16,8 +16,6 @@ from pkg_resources import EntryPoint
 from six import iteritems
 from unittest import TestCase
 
-from kojismokydingo.standalone import LonelyDingo
-
 
 ENTRY_POINTS = {
     "ksd-filter-builds": "kojismokydingo.standalone.builds:ksd_filter_builds",
@@ -41,7 +39,7 @@ class TestExpectedStandalone(TestCase):
                 # old environments
                 cmd_inst = ep.load(require=False)
 
-            self.assertTrue(isinstance(cmd_inst, LonelyDingo))
+            self.assertTrue(callable(cmd_inst))
 
 
 #
