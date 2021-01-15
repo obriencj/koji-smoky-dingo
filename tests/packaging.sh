@@ -51,7 +51,9 @@ function run_nose() {
 
     if [ $(rpm --eval '%dist') == ".el6" ] ; then
         # the argparse in Centos6/RHEL6 has slightly weird help output
-        "$NOSE" -v --all-modules -e 'test_command_help'
+        "$NOSE" -v --all-modules \
+                -e 'test_command_help' \
+                -e 'test_standalone_help'
     else
         "$NOSE" -v --all-modules
     fi
