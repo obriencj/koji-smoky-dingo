@@ -33,6 +33,7 @@ from .. import (
     as_archiveinfo, as_buildinfo, as_hostinfo, as_rpminfo,
     as_taginfo, as_targetinfo, as_taskinfo, as_userinfo, )
 from ..clients import rebuild_client_config
+from ..conf import load_plugin_config
 
 
 def cli_client_config(session, goptions,
@@ -142,6 +143,38 @@ OPEN_URL = {
 }
 
 
+def get_open_command(profile=None, err=True):
+    """
+    Determine the command used to open URLs. Attempts to load
+    profile-specific plugin configuration under the heading 'open' and
+    the key 'command' first. If that doesn't find a command, then fall
+    back to the per-platform mappings in the `OPEN_CMD` dict.
+
+    :param profile: name of koji profile
+
+    :type profile: str, optional
+
+    :param err: raise an exception if no command is discovered. If False
+      then will return None instead
+
+    :type err: bool, optional
+
+    :rtype: str
+
+    :raises BadDingo: when `err` is True and no command could be found
+    """
+
+    default_command = OPEN_CMD.get(sys.platform)
+
+    conf = load_plugin_config("open", profile)
+    command = conf.get("command", default_command)
+
+    if err and command is None:
+        raise BadDingo("Unable to determine command for launching browser")
+
+    return command
+
+
 def cli_open(session, goptions, datatype, element,
              command=None):
 
@@ -152,10 +185,7 @@ def cli_open(session, goptions, datatype, element,
         raise BadDingo("Unsupported type for open %s" % datatype)
 
     if command is None:
-        command = OPEN_CMD.get(sys.platform)
-
-    if command is None:
-        raise BadDingo("Unable to determine command for launching browser")
+        command = get_open_command(goptions.profile)
 
     weburl = goptions.weburl
     if not weburl:
