@@ -1,7 +1,7 @@
 Koji Smoky Dingo preview 0.9.6 Release Notes
 ============================================
 
-*Unreleased*
+*January 15, 2021*
 
 General user-base is still very limited at this point in time, so we
 get very few bug reports or new ideas. If you're a koji-smoky-dingo
@@ -40,3 +40,6 @@ Otherwise, still chugging along!
   standalone commands.
 - Adds functions to kojismokydingo.common for working with
   plugin-oriented configuration, with optional per-profile settings.
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/5?closed=1>
