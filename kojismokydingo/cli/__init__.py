@@ -41,7 +41,7 @@ from six import add_metaclass
 from six.moves import StringIO, filter, map, zip_longest
 
 from .. import BadDingo, NotPermitted
-from ..conf import load_plugin_config
+from ..common import load_plugin_config
 
 
 __all__ = (

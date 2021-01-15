@@ -33,7 +33,7 @@ from .. import (
     as_archiveinfo, as_buildinfo, as_hostinfo, as_rpminfo,
     as_taginfo, as_targetinfo, as_taskinfo, as_userinfo, )
 from ..clients import rebuild_client_config
-from ..conf import load_plugin_config
+from ..common import load_plugin_config
 
 
 def cli_client_config(session, goptions,

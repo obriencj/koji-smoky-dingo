@@ -32,19 +32,39 @@ import re
 from collections import OrderedDict
 from datetime import datetime
 from fnmatch import fnmatchcase
+from glob import glob
 from operator import itemgetter
+from os.path import expanduser, isdir, join
 from six import iteritems, itervalues
 from six.moves import filter, filterfalse, range, zip_longest
+from six.moves.configparser import ConfigParser
+
 
 try:
     from datetime import timezone
 except ImportError:
     timezone = None
 
+try:
+    import appdirs
+except ImportError:
+    appdirs = None
+
 
 __all__ = (
-    "chunkseq", "fnmatches", "globfilter", "merge_extend",
-    "parse_datetime", "rpm_evr_compare", "unique", "update_extend",
+    "chunkseq",
+    "fnmatches",
+    "find_config_dirs",
+    "find_config_files",
+    "get_plugin_config",
+    "globfilter",
+    "load_full_config",
+    "load_plugin_config",
+    "merge_extend",
+    "parse_datetime",
+    "rpm_evr_compare",
+    "unique",
+    "update_extend",
 )
 
 
@@ -502,6 +522,118 @@ def parse_datetime(src, strict=True):
             raise Exception("Invalid date-time format, %r" % src)
         else:
             return None
+
+
+def find_config_dirs():
+    """
+    The site and user configuration dirs, as a tuple. Attempts to use
+    the ``appdirs`` package if it is available.
+
+    :rtype: tuple[str]
+    """
+
+    if appdirs is None:
+        site_conf_dir = "/etc/xdg/ksd/"
+        user_conf_dir = expanduser("~/.config/ksd/")
+    else:
+        site_conf_dir = appdirs.site_config_dir("ksd")
+        user_conf_dir = appdirs.user_config_dir("ksd")
+
+    return (site_conf_dir, user_conf_dir)
+
+
+def find_config_files(dirs=None):
+    """
+    The ordered list of configuration files to be loaded.
+
+    If `dirs` is specified, it must be a sequence of directory names,
+    from which conf files will be loaded in order. If unspecified,
+    defaults to the result of `find_config_dirs`
+
+    :param dirs: list of directories to look for config files within
+    :type dirs: list[str], optional
+
+    :rtype: list[str]
+    """
+
+    if dirs is None:
+        dirs = find_config_dirs()
+
+    found = []
+
+    for confdir in dirs:
+        if isdir(confdir):
+            wanted = join(confdir, "*.conf")
+            found.extend(sorted(glob(wanted)))
+
+    return found
+
+
+def load_full_config(config_files=None):
+    """
+    Configuration object representing the full merged view of config
+    files.
+
+    If `config_files` is None, use the results of `find_config_files`.
+    Otherwise, `config_files` must be a sequence of filenames.
+
+    :rtype: ConfigParser
+    """
+
+    if config_files is None:
+        config_files = find_config_files()
+
+    conf = ConfigParser()
+    conf.read(config_files)
+
+    return conf
+
+
+def get_plugin_config(conf, plugin, profile=None):
+    """
+    Given a loaded configuration, return the section specific to the
+    given plugin, and optionally profile
+
+    :param conf: Full configuration
+    :type conf: ConfigParser
+
+    :param plugin: Plugin name
+    :type plugin: str
+
+    :param profile: Profile name
+    :type profile: str, optional
+
+    :rtype: dict[str,object]
+    """
+
+    plugin_conf = {}
+
+    if conf.has_section(plugin):
+        plugin_conf.update(conf.items(plugin))
+
+    if profile is not None:
+        profile = ":".join((plugin, profile))
+        if conf.has_section(profile):
+            plugin_conf.update(conf.items(profile))
+
+    return plugin_conf
+
+
+def load_plugin_config(plugin, profile=None):
+    """
+    Configuration specific to a given plugin, and optionally profile
+
+    :param plugin: Plugin name
+    :type plugin: str
+
+    :param profile: Profile name
+    :type profile: str, optional
+
+    :rtype: dict[str,object]
+    """
+
+    conf = load_full_config()
+    return get_plugin_config(conf, plugin, profile)
 
 
 #

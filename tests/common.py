@@ -12,13 +12,19 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+from contextlib import contextmanager
 from datetime import datetime
+from mock import MagicMock, patch
 from operator import itemgetter
+from pkg_resources import resource_filename
 from six import iteritems
+from six.moves.configparser import ConfigParser
 from unittest import TestCase
 
 from kojismokydingo.common import (
-    chunkseq, escapable_replace, fnmatches, globfilter, merge_extend,
+    chunkseq, escapable_replace, fnmatches,
+    find_config_dirs, find_config_files, get_plugin_config,
+    globfilter, load_full_config, load_plugin_config, merge_extend,
     parse_datetime, rpm_evr_compare, unique, update_extend,
     _rpm_str_compare)
 
@@ -399,6 +405,132 @@ class TestDates(TestCase):
         bad = "joey ramone"
         self.assertRaises(Exception, parse_datetime, bad)
         self.assertEqual(parse_datetime(bad, strict=False), None)
+
+
+class TestConfig(TestCase):
+
+    def data_dirs(self):
+        return (resource_filename(__name__, "data/system"),
+                resource_filename(__name__, "data/user"))
+
+
+    def faux_appdir(self):
+        fakes = self.data_dirs()
+
+        obj = MagicMock()
+
+        site_config_dir = obj.site_config_dir
+        site_config_dir.side_effect = [fakes[0]]
+
+        user_config_dir = obj.user_config_dir
+        user_config_dir.side_effect = [fakes[1]]
+
+        return obj
+
+
+    @contextmanager
+    def patch_appdirs(self):
+        fake = self.faux_appdir()
+        with patch('kojismokydingo.common.appdirs', new=fake) as meh:
+            yield meh
+
+
+    def test_find_dirs(self):
+        with patch('kojismokydingo.common.appdirs', new=None):
+            dirs = find_config_dirs()
+
+            self.assertEqual(len(dirs), 2)
+            self.assertEqual(dirs[0], "/etc/xdg/ksd/")
+            self.assertTrue(dirs[1].endswith(".config/ksd/"))
+
+        with self.patch_appdirs() as meh:
+            dirs = find_config_dirs()
+
+            self.assertEqual(len(dirs), 2)
+            self.assertEqual(dirs, self.data_dirs())
+            self.assertEqual(meh.site_config_dir.call_count, 1)
+            self.assertEqual(meh.user_config_dir.call_count, 1)
+
+
+    def test_find_files(self):
+
+        with self.patch_appdirs() as meh:
+            found = find_config_files()
+
+            self.assertEqual(len(found), 3)
+            self.assertEqual(meh.site_config_dir.call_count, 1)
+            self.assertEqual(meh.user_config_dir.call_count, 1)
+
+
+    def test_load_full_config(self):
+        with self.patch_appdirs():
+            conf = load_full_config()
+
+        self.assertTrue(isinstance(conf, ConfigParser))
+        self.assertTrue(conf.has_section("example_1"))
+        self.assertTrue(conf.has_section("example_2"))
+        self.assertTrue(conf.has_section("example_2:test"))
+        self.assertTrue(conf.has_section("example_3"))
+        self.assertTrue(conf.has_section("example_3:test"))
+        self.assertTrue(conf.has_section("example_3:foo"))
+
+
+    def test_load_plugin_config(self):
+        with self.patch_appdirs():
+            conf = load_plugin_config("example_1")
+            self.assertTrue(conf)
+            self.assertEqual(type(conf), dict)
+            self.assertEqual(conf["data"], '111')
+            self.assertEqual(conf["flavor"], 'tasty')
+
+        with self.patch_appdirs():
+            conf = load_plugin_config("example_2")
+            self.assertTrue(conf)
+            self.assertEqual(type(conf), dict)
+            self.assertEqual(conf["data"], '244')
+            self.assertEqual(conf["flavor"], 'meh')
+
+        with self.patch_appdirs():
+            conf = load_plugin_config("example_2", "test")
+            self.assertTrue(conf)
+            self.assertEqual(type(conf), dict)
+            self.assertEqual(conf["data"], '220')
+            self.assertEqual(conf["flavor"], 'meh')
+
+        with self.patch_appdirs():
+            conf = load_plugin_config("example_3")
+            self.assertTrue(conf)
+            self.assertEqual(type(conf), dict)
+            self.assertEqual(conf["data"], '300')
+
+
+    def test_merge(self):
+        dirs = self.data_dirs()
+        files = find_config_files(dirs)
+        full_conf = load_full_config(files)
+
+        conf = get_plugin_config(full_conf, "example_1")
+        self.assertTrue(conf)
+        self.assertEqual(type(conf), dict)
+        self.assertEqual(conf["data"], '111')
+        self.assertEqual(conf["flavor"], 'tasty')
+
+        conf = get_plugin_config(full_conf, "example_2")
+        self.assertTrue(conf)
+        self.assertEqual(type(conf), dict)
+        self.assertEqual(conf["data"], '244')
+        self.assertEqual(conf["flavor"], 'meh')
+
+        conf = get_plugin_config(full_conf, "example_2", "test")
+        self.assertTrue(conf)
+        self.assertEqual(type(conf), dict)
+        self.assertEqual(conf["data"], '220')
+        self.assertEqual(conf["flavor"], 'meh')
+
+        conf = get_plugin_config(full_conf, "example_3")
+        self.assertTrue(conf)
+        self.assertEqual(type(conf), dict)
+        self.assertEqual(conf["data"], '300')
 
 
 #
