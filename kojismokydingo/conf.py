@@ -52,7 +52,7 @@ def find_config_dirs():
     """
 
     if appdirs is None:
-        site_conf_dir = "/etc/ksd/"
+        site_conf_dir = "/etc/xdg/ksd/"
         user_conf_dir = expanduser("~/.config/ksd/")
     else:
         site_conf_dir = appdirs.site_config_dir("ksd")

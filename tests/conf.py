@@ -53,7 +53,7 @@ class TestConfig(TestCase):
             dirs = find_config_dirs()
 
         self.assertEqual(len(dirs), 2)
-        self.assertEqual(dirs[0], "/etc/ksd/")
+        self.assertEqual(dirs[0], "/etc/xdg/ksd/")
         self.assertTrue(dirs[1].endswith(".config/ksd/"))
 
         meh = faux_appdir()
