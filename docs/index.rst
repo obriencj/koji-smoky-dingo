@@ -8,8 +8,10 @@ Documentation Index Table of Contents
 
    overview
    commands
+   standalone
    siftylang
    kojismokydingo
    kojismokydingo/sift
+   kojismokydingo/standalone
    kojismokydingo/cli
    release_notes
