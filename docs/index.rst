@@ -15,3 +15,4 @@ Documentation Index Table of Contents
    kojismokydingo/standalone
    kojismokydingo/cli
    release_notes
+   faq
