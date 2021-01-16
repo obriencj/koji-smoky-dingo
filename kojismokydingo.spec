@@ -1,7 +1,7 @@
 
 %global srcname kojismokydingo
-%global srcver 0.9.6
-%global srcrel 1
+%global srcver 0.9.7
+%global srcrel 0
 
 
 Summary: Koji Smoky Dingo
@@ -231,7 +231,11 @@ Koji Smoky Dingo
 
 
 %changelog
-* Fri Jan 15 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.6-0
+* Sat Jan 16 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.7-0
+- removed AllGroupPkgs tag sieve in favor of the GroupPkgs sieve with
+  a requireAll option
+
+* Fri Jan 15 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.6-1
 - use a patch to disable koji as a setuptools requirement
 - added build sieves 'compare-latest-nvr' and 'compare-latest-id'
 - refactored sieve caching
