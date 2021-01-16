@@ -710,6 +710,7 @@ architectures.
 Tag Predicate ``group``
 ^^^^^^^^^^^^^^^^^^^^^^^
 ::
+
    (group GROUP [GROUP...])
 
 Matches tags which have any of the given install groups configured.
@@ -719,6 +720,7 @@ Honors inheritance.
 Tag Predicate ``group-pkg``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
+
    (group-pkg GROUP PKG [PKG...] [requireAll: False])
 
 Matches tags which have the given install group, which also contains
