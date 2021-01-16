@@ -717,7 +717,7 @@ class GroupSieve(SymbolSieve, CacheMixin):
 
 class GroupPkgSieve(SymbolSieve, CacheMixin):
     """
-    usage: ``(group-pkg GROUP PKG [PKG...])``
+    usage: ``(group-pkg GROUP PKG [PKG...] [require_all: False])``
 
     Matches tags which have the given install group, which also
     contains any of the given ``PKG`` names
