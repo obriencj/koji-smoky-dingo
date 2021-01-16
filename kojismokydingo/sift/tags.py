@@ -732,7 +732,6 @@ class GroupPkgSieve(SymbolSieve, CacheMixin):
 
 
     def set_options(self, require_all=False):
-        super(GroupPkgSieve, self).set_options(require_all=require_all)
         self.require_all = bool(require_all)
 
 
@@ -779,35 +778,7 @@ class GroupPkgSieve(SymbolSieve, CacheMixin):
                 return False
 
 
-
-
-class AllGroupPkgSieve(GroupPkgSieve):
-    """
-    usage: ``(all-group-pkg GROUP PKG [PKG...])``
-
-    Matches tags which have the given install group, which must also
-    contain all of the given ``PKG`` names
-    """
-
-    name = "all-group-pkg"
-
-
-    def get_info_cache(self, info):
-        # borrow the same cache from group-pkg
-        return self.sifter.get_info_cache("group-pkg", info)
-
-
-    def check(self, session, taginfo):
-        cache = self.get_info_cache(taginfo)
-        groups = cache.get("group_pkgs")
-
-        pkgs = groups.get(self.group)
-        if not pkgs:
-            return False
-
-
 DEFAULT_TAG_INFO_SIEVES = [
-    AllGroupPkgSieve,
     ArchSieve,
     BuildTagSieve,
     CompareLatestSieve,

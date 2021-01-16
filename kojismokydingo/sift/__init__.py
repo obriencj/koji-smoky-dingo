@@ -460,7 +460,7 @@ class Sifter(object):
                 # available.
 
                 result = cls(self, *args)
-                result.set_options(**kwds)
+                result.receive_options(**kwds)
 
             except TypeError as te:
                 msg = "Error creating Sieve %s: %s" % (name, te)
@@ -630,11 +630,17 @@ class Sieve(object):
         self.set_options()
 
 
-    def set_options(self, **options):
+    def receive_options(self, **kwds):
+        self.set_options(**kwds)
+        self.options.update(kwds)
+
+
+    def set_options(self):
         """
-        assign keyword arguments
+        override to accept keyword arguments relevant to the sieve
         """
-        self.options.update(options)
+
+        pass
 
 
     def __call__(self, session, info_dicts):

@@ -94,7 +94,6 @@ class Poke(Sieve):
     def set_options(self, count=-1):
         # accept one option
         self._max = count = ensure_int(count)
-        super(Poke, self).set_options(count=count)
 
 
     def check(self, _session, data):
@@ -864,7 +863,7 @@ class SifterTest(TestCase):
         self.assertEqual(len(sieves), 1)
 
         poke = sieves[0]
-        self.assertEqual(repr(poke), "(poke count: -1)")
+        self.assertEqual(repr(poke), "(poke)")
 
         src = """
         (poke count: -2)
@@ -874,7 +873,7 @@ class SifterTest(TestCase):
         self.assertEqual(len(sieves), 1)
 
         poke = sieves[0]
-        self.assertEqual(repr(poke), "(poke count: -2)")
+        self.assertEqual(repr(poke), "(poke count: Number(-2))")
 
         src = """
         (poke count: -3)
@@ -884,7 +883,7 @@ class SifterTest(TestCase):
         self.assertEqual(len(sieves), 1)
 
         poke = sieves[0]
-        self.assertEqual(repr(poke), "(poke count: -3)")
+        self.assertEqual(repr(poke), "(poke count: Number(-3))")
 
 
     def test_cache(self):
