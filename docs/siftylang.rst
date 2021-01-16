@@ -721,12 +721,12 @@ Tag Predicate ``group-pkg``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
-   (group-pkg GROUP PKG [PKG...] [requireAll: False])
+   (group-pkg GROUP PKG [PKG...] [require_all: False])
 
 Matches tags which have the given install group, which also contains
 any of the given ``PKG`` names.
 
-If ``requireAll`` is set to ``True`` then all of the given ``PKG``
+If ``require_all`` is set to ``True`` then all of the given ``PKG``
 names must be present in order for a tag to match.
 
 
