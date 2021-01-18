@@ -90,7 +90,6 @@ def chunkseq(seq, chunksize):
             offset in range(0, seqlen, chunksize))
 
 
-
 def escapable_replace(orig, character, replacement):
     """
     Single-character string substitutions. Doubled sentinel characters

@@ -366,8 +366,7 @@ def space_normalize(txt):
     :rtype: str
     """
 
-    lines = map(str.strip, txt.split())
-    return " ".join(filter(None, lines))
+    return " ".join(txt.split())
 
 
 def int_or_str(value):
@@ -421,6 +420,9 @@ class SmokyDingo(object):
 
       * the `SmokyDingo.activate` method authenticates with the hub
 
+      * the `SmokyDingo.pre_handle` method verifies that any required
+        permissions are present for the user
+
       * the `SmokyDingo.handle` method invokes the actual work of the
         sub-command
     """
@@ -428,8 +430,9 @@ class SmokyDingo(object):
     group = "misc"
     description = "A CLI Plugin"
 
-    # set of permission names that can grant use of this command. None
-    # or empty for anonymous access. Checked in pre_handle
+    # permission name required for use of this command. A value of
+    # None indicates anonymous access. Checked in the pre_handle
+    # method.
     permission = None
 
 
@@ -607,8 +610,8 @@ class AnonSmokyDingo(SmokyDingo):
     """
     A SmokyDingo which upon activation will connect to koji hub, but
     will not authenticate. This means only hub RPC endpoints which do
-    not enforce require some permission will work. This is normal for
-    many information-only endpoints.
+    not require some permission will work. This is normal for most
+    read-only informational endpoints.
     """
 
     group = "info"

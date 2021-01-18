@@ -666,6 +666,23 @@ def as_taginfo(session, tag):
 
 
 def as_taskinfo(session, task):
+    """
+    Coerces a task value into a koji task info dict.
+
+    If task is an
+     * int, will attempt to load as a task ID
+     * dict, will presume already a task info
+
+    :param task: value to lookup
+
+    :type task: int or dict
+
+    :raises NoSuchTask: if the task value could not be resolved
+      into a task info dict
+
+    :rtype: dict
+    """
+
     if isinstance(task, int):
         info = session.getTaskInfo(task, True)
     elif isinstance(task, dict):
