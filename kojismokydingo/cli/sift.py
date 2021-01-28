@@ -19,6 +19,7 @@ Some CLI adapters for working with Sifty Dingo filtering
 :license: GPL v3
 """
 
+
 from __future__ import print_function
 
 import os
@@ -47,6 +48,38 @@ __all__ = (
 
 
 def _entry_point_sieves(key, on_err=None):
+    """
+    Load all Sieve instances from entry points using the given
+    key. Returns a list of Sieve subclasses that can be used to
+    augment the predicates in a Sifter.
+
+    The individual endpoints can resolve to any of the following:
+     * a Sieve subclass
+     * a list or tuple of Sieve subclasses
+     * a callable which returns a Sieve subclass
+     * a callable which returns a list or tuple of Sieve subclasses
+
+    The entry points are sorted by their module name and name, and
+    the results are combined into a list.
+
+    If on_err is None, then any exceptions raised during the
+    resolution of entry points into Sieves will simply be skipped.
+
+    If on_err is not None, then is must be a callable that accepts two
+    arguments: an entry point and an exception. This callable will be
+    invoked if there is an exception raised during the resolution of
+    the entry point into Sieves. If the callable returns True, loading
+    of any additional entry points will continue. Otherwise no further
+    entry points will be loaded.
+
+    :param key: entry point key to load
+    :type key: str
+
+    :param on_err: error handling function
+    :type on_err: callable, optional
+
+    :rtype: list[type]
+    """
 
     points = sorted(iter_entry_points(key),
                     key=lambda e: (e.module_name, e.name))
@@ -61,7 +94,7 @@ def _entry_point_sieves(key, on_err=None):
             # any of:
             #  * Sieve subclass
             #  * list/tuple of Sieve subclasses
-            #  * null arityy callable which returns the above
+            #  * null arity callable which returns the above
 
             if issubclass(ep_ref, Sieve):
                 collected.append(ep_ref)

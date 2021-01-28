@@ -485,6 +485,13 @@ class SmokyDingo(object):
 
 
     def parser(self):
+        """
+        Creates a new ArgumentParser instance and decorates it with
+        arguments from the `arguments` method.
+
+        :rtype: `argparse.ArgumentParser`
+        """
+
         invoke = " ".join((basename(sys.argv[0]), self.name))
         argp = ArgumentParser(prog=invoke, description=self.description)
         return self.arguments(argp) or argp
@@ -502,7 +509,7 @@ class SmokyDingo(object):
     def validate(self, parser, options):
         """
         Override to perform validation on options values. Return value is
-        ignored, use parser.error if needed.
+        ignored, use `parser.error` if needed.
         """
 
         pass
