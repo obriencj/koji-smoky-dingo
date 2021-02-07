@@ -78,6 +78,10 @@ __all__ = (
 
 
 class SifterError(BadDingo):
+    # Indicates an problem during the compilation of a Sifter, either
+    # due to a syntactic problem or in the initialization of a Sieve
+    # instance with incompatible parameter types.
+
     complaint = "Error compiling Sifter"
 
 
@@ -371,18 +375,6 @@ class Sifter(object):
         return [self._convert(p) for p in parse_exprs(source)]
 
 
-    def _convert_sym_aliases(self, sym):
-        if sym == "!":
-            # treat ! as an alias for not
-            sym = Symbol("not")
-
-        elif sym == "?":
-            # tread ? as an alias for flagged
-            sym = Symbol("flagged")
-
-        return sym
-
-
     def _convert_sieve_aliases(self, sym, args):
         """
         When there is no sieve with a matchin name for sym, we check if it
@@ -426,23 +418,31 @@ class Sifter(object):
                 raise SifterError("Empty expression: ()")
 
             if isinstance(parsed[0], ItemPath):
+                # a shortcut to the built-in 'item' sieve is to start the
+                # sieve with an ItemPath
                 name = Symbol("item")
                 args = parsed
 
             else:
                 name = ensure_symbol(parsed[0], "Sieve names must be symbols")
-                name = self._convert_sym_aliases(name)
                 args = parsed[1:]
 
             cls = self._sieve_classes.get(name)
 
             if cls is None:
+                # no direct matches, so we'll look up syntactic
+                # aliases.  This is where conversion of the ! prefix
+                # and the ?  suffix would happen.
                 newname, args = self._convert_sieve_aliases(name, args)
                 cls = self._sieve_classes.get(newname)
 
             if cls is None:
+                # even after converting for aliases we have no match, so
+                # we cannot compile the sieve.
                 raise SifterError("No such sieve: %s" % name)
 
+            # looks for positional and option parameters from the tail
+            # of the list.
             args, kwds = gather_args(map(self._convert, args))
 
             try:
@@ -453,11 +453,10 @@ class Sifter(object):
                 # Sieve can define the positionals in their __init__
                 # method, and keyword-only via the set_options method.
 
-                # Very recent versions of Python introduced the
-                # concepts of positional-only and keyword-only
-                # parameters, but we need to work with much older
-                # versions that do not have these syntactic features
-                # available.
+                # Newer versions of Python introduced the concepts of
+                # positional-only and keyword-only parameters, but we
+                # need to work with much older versions that do not
+                # have these syntactic features available.
 
                 result = cls(self, *args)
                 result.receive_options(**kwds)
@@ -468,6 +467,8 @@ class Sifter(object):
 
         elif isinstance(parsed, Symbol):
             if parsed.startswith("$") and parsed[1:] in self.params:
+                # this is a parameter reference, and should be
+                # converted to the value of the parameter.
                 result = convert_token(self.params[parsed[1:]])
                 result = self._convert(result)
             else:
@@ -475,6 +476,8 @@ class Sifter(object):
 
         elif isinstance(parsed, str):
             if "{" in parsed:
+                # strings can have {param_name} entries in them which
+                # will allow for substitutions with parameters
                 result = parsed.format(**self.params)
             else:
                 result = parsed
@@ -612,6 +615,7 @@ class Sieve(object):
     Sieve class available with a name of `"check-enabled"`
     """
 
+
     @abstractproperty
     def name(self):
         pass
@@ -625,9 +629,6 @@ class Sieve(object):
         self.key = sifter.key
         self.tokens = tokens
         self.options = {}
-
-        # assign the default option values
-        self.set_options()
 
 
     def receive_options(self, **kwds):
@@ -661,7 +662,6 @@ class Sieve(object):
             return "".join(("(", self.name, ")"))
 
 
-    @abstractmethod
     def check(self, session, info):
         """
         Override to return True if the predicate matches the given
@@ -677,15 +677,17 @@ class Sieve(object):
         :rtype: bool
         """
 
-        pass
+        return False
 
 
     def prep(self, session, info_dicts):
         """
-        Override if some decoration of info_dicts is necessary. This
-        allows bulk operations to be performed over the entire set of
-        info dicts to be filtered, rather than one at a time in the
-        `check` method
+        Override if some bulk pre-loading operations are necessary.
+
+        This is used by the default `run` implementation to allow bulk
+        operations to be performed over the entire set of info dicts
+        to be filtered, rather than one at a time in the `check`
+        method
 
         :type info_dicts: list[dict]
         :rtype: None
@@ -831,6 +833,7 @@ class LogicNot(Logic):
     """
 
     name = "not"
+    aliases = ("!", )
 
 
     def run(self, session, info_dicts):
@@ -911,6 +914,7 @@ class Flagged(VariadicSieve):
     """
 
     name = "flagged"
+    aliases = ("?", )
 
 
     def __init__(self, sifter, name):
