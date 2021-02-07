@@ -1,0 +1,18 @@
+Koji Smoky Dingo preview 0.9.7 Release Notes
+============================================
+
+*unreleased*
+
+Still chugging along!
+
+- removed AllGroupPkgs tag sieve in favor of the GroupPkgs sieve with a
+  new ``require_all:`` option
+- removed `Sifter._convert_sym_aliases` in favor of using the aliases field
+  on the `LogicNot` and `Flagged` sieves
+- the `Sieve.check` method is no longer abstract, and by default returns
+  `False` (ie. no results are included). This allows Sieve subclasses to
+  opt to override the `run` method without having to still include an
+  otherwise useless `check` implementation as well.
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/6?closed=1>
