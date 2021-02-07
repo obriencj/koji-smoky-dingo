@@ -234,6 +234,8 @@ Koji Smoky Dingo
 * Sat Jan 16 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.7-0
 - removed AllGroupPkgs tag sieve in favor of the GroupPkgs sieve with
   a require_all option
+- removed Sifter._convert_sym_aliases and made Sieve.check
+  non-abstract
 
 * Fri Jan 15 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.6-1
 - use a patch to disable koji as a setuptools requirement
