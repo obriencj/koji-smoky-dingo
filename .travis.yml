@@ -12,7 +12,6 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
-  - "3.9"
 
 
 # Tell pip and others to shut up about Python 2.7 deprecation
