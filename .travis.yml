@@ -19,6 +19,7 @@ python:
 
 env:
   - PYTHONWARNINGS=ignore
+  - CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
 
 # How we'll be setting up the environment for use
@@ -26,7 +27,8 @@ env:
 cache: pip
 
 install:
-  - pip install -I openssl
+  - pip install -I -U pip
+  - pip install -I cryptography
   - pip install -I coveralls docutils flake8 koji nose six
 
 
