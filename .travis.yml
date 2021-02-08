@@ -26,7 +26,7 @@ env:
 cache: pip
 
 install:
-  - apt install rust
+  - pip install -I openssl
   - pip install -I coveralls docutils flake8 koji nose six
 
 
