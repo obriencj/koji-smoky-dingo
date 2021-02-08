@@ -22,6 +22,8 @@ from pkg_resources import EntryPoint
 from six import iteritems
 from six.moves import StringIO
 
+from kojismokydingo.cli import space_normalize
+
 from . import ENTRY_POINTS, GOptions
 
 
@@ -104,8 +106,9 @@ def check_command_help(cmdname):
 
     # Then we can compare what we got from the command with what was
     # in the docs
-    expected = usage.strip()
-    found = outhelp.strip()
+    expected = space_normalize(usage)
+    found = space_normalize(outhelp)
+
     assert_equal(expected, found)
 
 
@@ -118,4 +121,5 @@ def test_command_help():
         yield check_command_help, name
 
 
+#
 # The end.

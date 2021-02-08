@@ -22,6 +22,8 @@ from pkg_resources import EntryPoint
 from six import iteritems
 from six.moves import StringIO
 
+from kojismokydingo.cli import space_normalize
+
 from . import ENTRY_POINTS
 
 
@@ -98,8 +100,8 @@ def check_standalone_help(cmdname):
 
     # Then we can compare what we got from the command with what was
     # in the docs
-    expected = usage.strip()
-    found = outhelp.strip()
+    expected = space_normalize(usage)
+    found = space_normalize(outhelp)
     assert_equal(expected, found)
 
 
@@ -112,4 +114,5 @@ def test_standalone_help():
         yield check_standalone_help, name
 
 
+#
 # The end.

@@ -132,4 +132,5 @@ function ksd_rpm_tests() {
 ksd_rpm_tests "$@"
 
 
+#
 # The end.
