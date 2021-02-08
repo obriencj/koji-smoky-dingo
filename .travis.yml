@@ -18,8 +18,7 @@ python:
 # Tell pip and others to shut up about Python 2.7 deprecation
 
 env:
-  - PYTHONWARNINGS=ignore
-  - CRYPTOGRAPHY_DONT_BUILD_RUST=1
+  - PYTHONWARNINGS=ignore CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
 
 # How we'll be setting up the environment for use
