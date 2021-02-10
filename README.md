@@ -105,8 +105,8 @@ achieve this by specifying the specific root or prefix parameter
 sudo python setup.py clean build install --root=/
 
 # Python 2.7 global install
-python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-0.9.7-py2-none-any.whl
+python2 setup.py bdist_wheel
+pip2 install --prefix /usr -I dist/kojismokydingo-0.9.7-py2-none-any.whl
 
 # Python 3 global install
 python3 setup.py bdist_wheel

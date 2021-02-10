@@ -23,8 +23,9 @@ Why Is It Called Koji Smoky Dingo?
 ----------------------------------
 
 Because project naming is a right pain in the butt. I ran through a
-few 2-slugs from coolname until the words "Smoky Dingo" popped up, and
-that tickled my fancy so I went with it.
+few 2-slugs from `coolname<https://pypi.org/project/coolname/>`_ until
+the words "Smoky Dingo" popped up, and that tickled my fancy so I went
+with it.
 
 You'll note a somewhat ridiculous adherence to that naming scheme in
 the API. The base class for plugin commands is a `SmokyDingo`. The
@@ -33,7 +34,7 @@ base exception class is a `BadDingo`. A standalone command is a
 me happy.
 
 Since the name "Koji Smoky Dingo" is fairly long, I frequently refer
-to it as simply KSD.
+to it as simply "KSD".
 
 
 Why Not Contribute Directly to Koji?
@@ -51,13 +52,13 @@ compatability, etc. As a totally separate entity, KSD can iterate very
 fast to try and match my ever-changing vision of what an ideal
 "helper" layer should look like.
 
-When Koji Smoky Dingo finally reaches version 1.0.0, I will at that
-point have to begin worrying about API stability. However even then I
-will still have more flexibility than a project that has to worry
-about being a critical component in the build infrastructure for so
-many organizations. Therefore it's extremely likely that KSD will
-always remain separate... but hopefully popular enough one day that
-any advanced Koji user will also be a Koji Smoky Dingo user.
+When KSD finally reaches version 1.0.0, I will at that point have to
+begin worrying about API stability. However even then I will still
+have more flexibility than a project that has to worry about being a
+critical component in the build infrastructure for so many
+organizations. Therefore it's extremely likely that KSD will always
+remain separate... but hopefully popular enough one day that any
+advanced Koji user will also be a Koji Smoky Dingo user.
 
 
 Why Is There An Entire Mini Language In Here?
@@ -70,10 +71,10 @@ through them. I'd custom craft these scripts to try and be as polite
 to our Koji instance as possible -- using multicalls, only
 authenticating if I was using an API that needed it, de-duplicating
 and caching as much data as possible, etc. As I began to port these
-scripts into Koji Smoky Dingo I began trying to imagine a better way
-to do work with this sort of tooling. I wanted an easier way to write
-the sorts of questions I was asking Koji, while simultaneously not
-making them act rudely.
+scripts into KSD I began trying to imagine a better way to do work
+with this sort of tooling. I wanted an easier way to write the sorts
+of questions I was asking Koji, while simultaneously not making them
+act rudely.
 
 The idea came to me that I could produce a filtering and flagging
 pipeline where individual predicates could be used in stages -- first
@@ -115,6 +116,11 @@ dropping Python 2 support just for that.
 Honestly, the biggest struggle has been in working with multiple
 versions of Koji. Or working with multiple versions of libraries under
 Python 3 to dodge the deprecation churn.
+
+Once KSD achieves a version 1.0.0 I will begin work on 2.0.0 which
+will drop Python 2 support. I'm not sure how long I'll provide
+backports to the 1.0 line after that... it likely depends on how long
+I have to use a RHEL 6 machine.
 
 
 Why Version 0.9?
