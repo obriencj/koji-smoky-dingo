@@ -56,6 +56,8 @@ __all__ = (
     "build_nvr_sort",
     "bulk_tag_builds",
     "bulk_tag_nvrs",
+    "bulk_untag_builds",
+    "bulk_untag_nvrs",
     "decorate_builds_btypes",
     "decorate_builds_cg_list",
     "decorate_builds_maven",
@@ -68,6 +70,7 @@ __all__ = (
     "gather_wrapped_builds",
     "gavgetter",
     "iter_bulk_tag_builds",
+    "iter_bulk_untag_builds",
     "iter_latest_maven_builds",
     "latest_maven_builds",
 )
@@ -374,6 +377,178 @@ def bulk_tag_nvrs(session, tag, nvrs,
     return bulk_tag_builds(session, tag, builds,
                            force=force, notify=notify,
                            size=size, strict=strict)
+
+
+def iter_bulk_untag_builds(session, tag, build_infos,
+                           force=False, notify=False,
+                           size=100, strict=False):
+
+    """
+    Untags a large number of builds using multicall invocations of
+    untagBuildBypass. Builds are specified by build info dicts.
+
+    yields lists of tuples containing a build info dict and the result
+    of the untagBuildBypass call for that build. This gives the caller
+    a chance to record the results of each multicall, and to present
+    feedback to a user to indicate that the operations are continuing.
+
+    :param tag: Tag's name or ID
+
+    :type tag: str or int
+
+    :param build_infos: Build infos to be untagged
+
+    :type build_infos: list[dict]
+
+    :param force: Force untagging, bypasses policy. Default, False
+
+    :type force: bool, optional
+
+    :param notify: Send untagging notifications. Default, False
+
+    :type notify: bool, optional
+
+    :param size: Count of untagging operations to perform in a single
+        multicall. Default, 100
+
+    :type size: int, optional
+
+    :param strict: Raise an exception and discontinue execution at the
+        first error. Default, False
+
+    :type strict: bool, optional
+
+    :rtype: Generator[list[tuple]]
+
+    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    """
+
+    tag = as_taginfo(session, tag)
+    tagid = tag["id"]
+
+    for build_chunk in chunkseq(build_infos, size):
+        session.multicall = True
+        for build in build_chunk:
+            session.untagBuildBypass(tagid, build["id"], force, notify)
+        results = session.multiCall(strict=strict)
+        yield list(zip(build_chunk, results))
+
+
+def bulk_untag_builds(session, tag, build_infos,
+                      force=False, notify=False,
+                      size=100, strict=False):
+
+    """
+    :param session: an active koji session
+
+    :type session: koji.ClientSession
+
+    :param tag: Destination tag's name or ID
+
+    :type tag: str or int
+
+    :param build_infos: Build infos to be untagged
+
+    :type build_infos: list[dict]
+
+    :param force: Force untagging. Bypasses policy. Default, False
+
+    :type force: bool, optional
+
+    :param notify: Send untagging notifications. Default, False
+
+    :type notify: bool, optional
+
+    :param size: Count of untagging operations to perform in a single
+      multicall. Default, 100
+
+    :type size: int, optional
+
+    :param strict: Raise an exception and discontinue execution at the
+      first error. Default, False
+
+    :type strict: bool, optional
+
+    :rtype: list[tuple]
+
+    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    """
+
+    results = []
+    for done in iter_bulk_untag_builds(session, tag, build_infos,
+                                       force=force, notify=notify,
+                                       size=size, strict=strict):
+        results.extend(done)
+    return results
+
+
+def bulk_untag_nvrs(session, tag, nvrs,
+                    force=False, notify=False,
+                    size=100, strict=False):
+    """
+    Untags a large number of builds using multicall invocations of
+    untagBuildBypass.
+
+    The entire list of NVRs is validated first, checking that such a
+    build exists. If strict is True then a missing build will cause a
+    NoSuchBuild exception to be raised. If strict is False, then
+    missing builds will be omitted from the untagging operation.
+
+    The list of builds is de-duplicated, preserving order of the first
+    instance found in the list of NVRs.
+
+    Returns a list of tuples, pairing build info dicts with the result
+    of an untagBuildBypass call for that build.
+
+    :param session: an active koji session
+
+    :type session: koji.ClientSession
+
+    :param tag: Tag's name or ID
+
+    :type tag: str or int
+
+    :param nvrs: list of NVRs
+
+    :type nvrs: list[str]
+
+    :param force: Bypass policy checks
+
+    :type force: bool, optional
+
+    :param notify: Start tagNotification tasks to send a notification
+      email for every untagging event. Default, do not send
+      notifications.  Warning, sending hundreds or thousands of
+      tagNotification tasks can be overwhelming for the hub and may
+      impact the system.
+
+    :type notify: bool, optional
+
+    :param size: Count of untagging calls to make per multicall
+      chunk. Default is 100
+
+    :type size: int, optional
+
+    :param strict: Stop at the first failure. Default, continue after
+      any failures. Errors will be available in the return results.
+
+    :type strict: bool, optional
+
+    :raises kojismokydingo.NoSuchBuild: If strict and an NVR does not
+      exist
+
+    :raises kojismokydingo.NoSuchTag: If tag does not exist
+
+    :raises koji.GenericError: If strict and a tag policy prevents
+      untagging
+    """
+
+    builds = bulk_load_builds(session, unique(nvrs), err=strict)
+    builds = build_dedup(itervalues(builds))
+
+    return bulk_untag_builds(session, tag, builds,
+                             force=force, notify=notify,
+                             size=size, strict=strict)
 
 
 gavgetter = itemgetter("maven_group_id", "maven_artifact_id",
