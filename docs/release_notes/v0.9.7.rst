@@ -13,6 +13,7 @@ Still chugging along!
   `False` (ie. no results are included). This allows Sieve subclasses to
   opt to override the `run` method without having to still include an
   otherwise useless `check` implementation as well.
+- added command ``bulk-untag-builds`` and related API
 
 Closed Issues:
 <https://github.com/obriencj/koji-smoky-dingo/milestone/6?closed=1>
