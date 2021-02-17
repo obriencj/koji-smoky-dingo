@@ -339,12 +339,12 @@ class BulkUntagBuilds(TagSmokyDingo):
                " permission")
 
         addarg("--notify", action="store_true", default=False,
-               help="Send tagging notifications. This can be"
+               help="Send untagging notifications. This can be"
                " expensive for koji hub, avoid unless absolutely"
                " necessary.")
 
         addarg("-v", "--verbose", action="store_true", default=False,
-               help="Print tagging status")
+               help="Print untagging status")
 
         return parser
 

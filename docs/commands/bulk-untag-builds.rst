@@ -22,9 +22,9 @@ koji bulk-untag-builds
                          Specify - to read from stdin.
    --strict              Stop processing at the first failure
    --force               Force untagging operations. Requires admin permission
-   --notify              Send tagging notifications. This can be expensive for
+   --notify              Send untagging notifications. This can be expensive for
                          koji hub, avoid unless absolutely necessary.
-   -v, --verbose         Print tagging status
+   -v, --verbose         Print untagging status
 
 
 This command is used to facilitate the untagging of larger amounts of
