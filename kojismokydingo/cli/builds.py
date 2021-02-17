@@ -45,7 +45,7 @@ from ..builds import (
     build_dedup, build_id_sort, build_nvr_sort,
     decorate_builds_btypes, decorate_builds_cg_list, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
-    iter_bulk_tag_builds)
+    iter_bulk_tag_builds, iter_bulk_untag_builds)
 from ..tags import ensure_tag, gather_tag_ids
 from ..common import chunkseq, unique
 
@@ -254,6 +254,116 @@ class BulkTagBuilds(TagSmokyDingo):
                                    create=options.create,
                                    verbose=options.verbose,
                                    strict=options.strict)
+
+
+def cli_bulk_untag_builds(session, tagname, nvrs,
+                          force=False, notify=False,
+                          verbose=False, strict=False):
+
+    """
+    CLI handler for `koji bulk-untag-builds`
+    """
+
+    # set up the verbose debugging output function
+    if verbose:
+        def debug(message, *args):
+            printerr(message % args)
+    else:
+        def debug(message, *args):
+            pass
+
+    taginfo = as_taginfo(session, tagname)
+    tagid = taginfo["id"]
+
+    # load the buildinfo for all of the NVRs
+    debug("Fed with %i builds", len(nvrs))
+
+    # validate our list of NVRs first by attempting to load them
+    loaded = bulk_load_builds(session, unique(nvrs), err=strict)
+    builds = build_dedup(itervalues(loaded))
+
+    if verbose:
+        debug("Trimmed duplicates to %i builds", len(builds))
+        for build in builds:
+            debug(" %s %i", build["nvr"], build["id"])
+
+    if not builds:
+        debug("Nothing to do!")
+        return
+
+    # and finally, untag the builds themselves in chunks of 100
+    debug("Begining build untagging")
+    counter = 0
+    for done in iter_bulk_untag_builds(session, tagid, builds,
+                                       force=force, notify=notify,
+                                       size=100, strict=strict):
+
+        for build, res in done:
+            if "faultCode" in res:
+                printerr("Error untagging build", build["nvr"],
+                         ":", res["faultString"])
+
+        # and of course display the courtesy counter so the user
+        # knows we're actually doing something
+        counter += len(done)
+        debug(" untagged %i/%i", counter, len(builds))
+
+    debug("All done!")
+
+
+class BulkUntagBuilds(TagSmokyDingo):
+
+    group = "bind"
+    description = "Quickly untag a large number of builds"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Tag to unassociate from builds")
+
+        addarg("nvr", nargs="*", metavar="NVR",
+               help="Build NVRs to untag")
+
+        addarg("-f", "--file", action="store", default=None,
+               dest="nvr_file", metavar="NVR_FILE",
+               help="Read list of builds from file, one NVR per line."
+               " Specify - to read from stdin.")
+
+        addarg("--strict", action="store_true", default=False,
+               help="Stop processing at the first failure")
+
+        addarg("--force", action="store_true", default=False,
+               help="Force untagging operations. Requires admin"
+               " permission")
+
+        addarg("--notify", action="store_true", default=False,
+               help="Send tagging notifications. This can be"
+               " expensive for koji hub, avoid unless absolutely"
+               " necessary.")
+
+        addarg("-v", "--verbose", action="store_true", default=False,
+               help="Print tagging status")
+
+        return parser
+
+
+    def handle(self, options):
+        nvrs = list(options.nvr)
+
+        if not nvrs and not sys.stdin.isatty():
+            if not options.nvr_file:
+                options.nvr_file = "-"
+
+        if options.nvr_file:
+            nvrs.extend(read_clean_lines(options.nvr_file))
+
+        return cli_bulk_untag_builds(self.session, options.tag, nvrs,
+                                     force=options.force,
+                                     notify=options.notify,
+                                     verbose=options.verbose,
+                                     strict=options.strict)
 
 
 class BuildFiltering(BuildSifting):

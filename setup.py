@@ -49,6 +49,7 @@ COMMANDS = {
     "block-env-var": "kojismokydingo.cli.tags:BlockEnvVar",
     "block-rpm-macro": "kojismokydingo.cli.tags:BlockRPMMacro",
     "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
+    "bulk-untag-builds": "kojismokydingo.cli.builds:BulkUntagBuilds",
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
     "cginfo": "kojismokydingo.cli.users:CGInfo",
