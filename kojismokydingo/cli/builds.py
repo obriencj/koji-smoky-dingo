@@ -38,7 +38,7 @@ from .sift import BuildSifting, output_sifted
 from .. import (
     NoSuchUser,
     as_buildinfo, as_taginfo,
-    bulk_load, bulk_load_builds, bulk_load_tags)
+    bulk_load, bulk_load_builds, bulk_load_tags, iter_bulk_load)
 from ..builds import (
     BUILD_COMPLETE, BUILD_DELETED,
     BuildFilter,
@@ -62,7 +62,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
                         verbose=False, strict=False):
 
     """
-    CLI handler for `koji bulk-tag-builds`
+    Implements the ``koji bulk-tag-builds`` command
     """
 
     # set up the verbose debugging output function
@@ -134,19 +134,18 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
         # we've got some package listings that need adding
 
         debug("Beginning package additions")
-        session.multicall = True
-        for pkgid, oid in package_todo:
-            session.packageListAdd(tagid, pkgid, owner=oid,
-                                   force=force)
-        done = session.multiCall(strict=strict)
+        fn = lambda pad: session.packageListAdd(tagid, pad[0], owner=pad[1],
+                                                force=force)
 
-        # verify the results of our add-pkg calls. If strict was set
-        # then the multicall would have raised an exception, but we
-        # need to present any issues for the non-strict cases as well
-        for res, pad in zip(done, package_todo):
-            if "faultCode" in res:
+        for pad, res in iter_bulk_load(session, fn, package_todo, err=strict):
+            # verify the results of our add-pkg calls. If strict was
+            # set then the multicall would have raised an exception,
+            # but we need to present any issues for the non-strict
+            # cases as well
+            if res and "faultCode" in res:
                 printerr("Error adding package", pad[0],
                          ":", res["faultString"])
+
         debug("Package additions completed")
 
     # and finally, tag the builds themselves in chunks of 100
@@ -261,7 +260,7 @@ def cli_bulk_untag_builds(session, tagname, nvrs,
                           verbose=False, strict=False):
 
     """
-    CLI handler for `koji bulk-untag-builds`
+    Implements the ``koji bulk-untag-builds`` command
     """
 
     # set up the verbose debugging output function
@@ -476,7 +475,7 @@ def cli_list_components(session, nvr_list,
                         strict=False):
 
     """
-    CLI handler for `koji list-component-builds`
+    Implements the ``koji list-component-builds`` command
     """
 
     nvr_list = unique(map(int_or_str, nvr_list))
@@ -622,7 +621,7 @@ def cli_filter_builds(session, nvr_list,
                       strict=False):
 
     """
-    CLI handler for `koji filter-builds`
+    Implements the ``koji filter-builds`` command
     """
 
     nvr_list = unique(map(int_or_str, nvr_list))
@@ -753,6 +752,9 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
 
 
 def cli_list_btypes(session, nvr=None, json=False, quiet=False):
+    """
+    Implements ``koji list-btypes`` command
+    """
 
     btypes = dict((bt["id"], bt) for bt in session.listBTypes())
 
@@ -813,6 +815,9 @@ class ListBTypes(AnonSmokyDingo):
 
 
 def cli_list_cgs(session, nvr=None, json=False, quiet=False):
+    """
+    Implements the ``koji list-cgs`` command
+    """
 
     cgs = {}
     for name, cg in iteritems(session.listCGs()):
