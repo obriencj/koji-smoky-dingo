@@ -279,11 +279,14 @@ def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
                                           force=force, notify=notify,
                                           size=size, strict=False):
 
-            # gather the failures first
-            results = [(bld, res) for bld, res in chunk if res]
+            results = []
+            good = []
 
-            # identify the successfully tagged builds
-            good = [bld for bld, res in chunk if res is None]
+            for bld, res in chunk:
+                if res and "faultCode" in res:
+                    results.append((bld, res))
+                else:
+                    good.append(bld)
 
             # join the initial tagging failure results with the
             # results of untagging the successfully tagged builds

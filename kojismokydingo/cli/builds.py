@@ -402,6 +402,10 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         else as_taginfo(session, desttag)
     dtagid = desttag["id"]
 
+    if srctag["id"] == dtagid:
+        debug("Source and destination tags are the same, nothing to do!")
+        return
+
     # figure out how we're going to be dealing with builds that don't
     # have a matching pkg entry already. Someone needs to own them...
     ownerid = None
@@ -481,7 +485,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
             # same as with the add-pkg -- if strict was True then any
             # issues would raise an exception, but for non-strict
             # invocations we need to present the error messages
-            if "faultCode" in res:
+            if res and "faultCode" in res:
                 printerr("Error moving build", build["nvr"],
                          ":", res["faultString"])
 
