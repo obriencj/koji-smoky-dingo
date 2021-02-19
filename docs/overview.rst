@@ -40,7 +40,14 @@ or the admin permission.
 +----------------------------+-----------------------------------------+
 | ``block-rpm-macro``        | Blocks a mock RPM macro from a tag.     |
 +----------------------------+-----------------------------------------+
-| ``bulk—tag-builds``        | Quickly tag a large amount of builds,   |
+| ``bulk—move-builds``       | Move a large amount of builds,          |
+|                            | bypassing the creation of individual    |
+|                            | tasks.                                  |
++----------------------------+-----------------------------------------+
+| ``bulk—tag-builds``        | Tag a large amount of builds, bypassing |
+|                            | the creation of individual tasks.       |
++----------------------------+-----------------------------------------+
+| ``bulk—untag-builds``      | Untag a large amount of builds,         |
 |                            | bypassing the creation of individual    |
 |                            | tasks.                                  |
 +----------------------------+-----------------------------------------+
