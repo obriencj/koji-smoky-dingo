@@ -9,7 +9,7 @@ koji bulk-untag-builds
                                [--notify] [-v]
                                TAGNAME [NVR [NVR ...]]
 
- Quickly untag a large number of builds
+ Untag a large number of builds
 
  positional arguments:
    TAGNAME               Tag to unassociate from builds

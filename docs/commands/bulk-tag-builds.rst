@@ -10,7 +10,7 @@ koji bulk-tag-builds
                              [--notify] [-v] [--nvr-sort | --id-sort]
                              TAGNAME [NVR [NVR ...]]
 
- Quickly tag a large number of builds
+ Tag a large number of builds
 
  positional arguments:
    TAGNAME               Tag to associate builds with
