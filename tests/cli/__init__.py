@@ -26,6 +26,7 @@ ENTRY_POINTS = {
     "affected-targets": "kojismokydingo.cli.tags:AffectedTargets",
     "block-env-var": "kojismokydingo.cli.tags:BlockEnvVar",
     "block-rpm-macro": "kojismokydingo.cli.tags:BlockRPMMacro",
+    "bulk-move-builds": "kojismokydingo.cli.builds:BulkMoveBuilds",
     "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
     "bulk-untag-builds": "kojismokydingo.cli.builds:BulkUntagBuilds",
     "cginfo": "kojismokydingo.cli.users:CGInfo",

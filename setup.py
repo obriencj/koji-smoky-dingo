@@ -40,6 +40,7 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: Software Development :: Build Tools",
 ]
 
@@ -48,6 +49,7 @@ COMMANDS = {
     "affected-targets": "kojismokydingo.cli.tags:AffectedTargets",
     "block-env-var": "kojismokydingo.cli.tags:BlockEnvVar",
     "block-rpm-macro": "kojismokydingo.cli.tags:BlockRPMMacro",
+    "bulk-move-builds": "kojismokydingo.cli.builds:BulkMoveBuilds",
     "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
     "bulk-untag-builds": "kojismokydingo.cli.builds:BulkUntagBuilds",
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
@@ -73,6 +75,7 @@ COMMANDS = {
     "swap-tag-inheritance": "kojismokydingo.cli.tags:SwapTagInheritance",
     "userinfo": "kojismokydingo.cli.users:UserInfo",
 }
+
 
 STANDALONE = {
     "ksd-filter-builds": "kojismokydingo.standalone.builds:ksd_filter_builds",
