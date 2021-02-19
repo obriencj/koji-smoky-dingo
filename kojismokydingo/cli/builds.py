@@ -45,9 +45,19 @@ from ..builds import (
     build_dedup, build_id_sort, build_nvr_sort,
     decorate_builds_btypes, decorate_builds_cg_list, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
-    iter_bulk_tag_builds, iter_bulk_untag_builds)
+    iter_bulk_move_builds, iter_bulk_tag_builds, iter_bulk_untag_builds)
 from ..tags import ensure_tag, gather_tag_ids
 from ..common import chunkseq, unique
+
+
+__all__ = (
+    "cli_bulk_move_builds",
+    "cli_bulk_tag_builds",
+    "cli_bulk_untag_builds",
+    "cli_list_btypes",
+    "cli_list_cgs",
+    "cli_list_components",
+)
 
 
 SORT_BY_ID = "sort-by-id"
@@ -151,7 +161,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
     # and finally, tag the builds themselves in chunks of 100
     debug("Begining build tagging")
     counter = 0
-    for done in iter_bulk_tag_builds(session, tagid, builds,
+    for done in iter_bulk_tag_builds(session, taginfo, builds,
                                      force=force, notify=notify,
                                      size=100, strict=strict):
 
@@ -174,7 +184,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
 class BulkTagBuilds(TagSmokyDingo):
 
     group = "bind"
-    description = "Quickly tag a large number of builds"
+    description = "Tag a large number of builds"
 
 
     def arguments(self, parser):
@@ -272,7 +282,6 @@ def cli_bulk_untag_builds(session, tagname, nvrs,
             pass
 
     taginfo = as_taginfo(session, tagname)
-    tagid = taginfo["id"]
 
     # load the buildinfo for all of the NVRs
     debug("Fed with %i builds", len(nvrs))
@@ -293,7 +302,7 @@ def cli_bulk_untag_builds(session, tagname, nvrs,
     # and finally, untag the builds themselves in chunks of 100
     debug("Begining build untagging")
     counter = 0
-    for done in iter_bulk_untag_builds(session, tagid, builds,
+    for done in iter_bulk_untag_builds(session, taginfo, builds,
                                        force=force, notify=notify,
                                        size=100, strict=strict):
 
@@ -313,7 +322,7 @@ def cli_bulk_untag_builds(session, tagname, nvrs,
 class BulkUntagBuilds(TagSmokyDingo):
 
     group = "bind"
-    description = "Quickly untag a large number of builds"
+    description = "Untag a large number of builds"
 
 
     def arguments(self, parser):
@@ -363,6 +372,214 @@ class BulkUntagBuilds(TagSmokyDingo):
                                      notify=options.notify,
                                      verbose=options.verbose,
                                      strict=options.strict)
+
+
+def cli_bulk_move_builds(session, srctag, desttag, nvrs,
+                         sorting=None,
+                         owner=None, inherit=False,
+                         force=False, notify=False,
+                         create=False,
+                         verbose=False, strict=False):
+
+    """
+    Implements the ``koji bulk-move-builds`` command
+    """
+
+    # set up the verbose debugging output function
+    if verbose:
+        def debug(message, *args):
+            printerr(message % args)
+    else:
+        def debug(message, *args):
+            pass
+
+    # fetch the source tag info
+    srctag = as_taginfo(session, srctag)
+
+    # fetch the destination tag info (and make sure it actually
+    # exists)
+    desttag = ensure_tag(session, desttag) if create \
+        else as_taginfo(session, desttag)
+    dtagid = desttag["id"]
+
+    # figure out how we're going to be dealing with builds that don't
+    # have a matching pkg entry already. Someone needs to own them...
+    ownerid = None
+    if owner:
+        ownerinfo = session.getUser(owner)
+        if not ownerinfo:
+            raise NoSuchUser(owner)
+        ownerid = ownerinfo["id"]
+
+    # load the buildinfo for all of the NVRs
+    debug("Fed with %i builds", len(nvrs))
+
+    # validate our list of NVRs first by attempting to load them
+    loaded = bulk_load_builds(session, unique(nvrs), err=strict)
+    builds = itervalues(loaded)
+
+    # sort/dedup as requested
+    if sorting == SORT_BY_NVR:
+        debug("NVR sorting specified")
+        builds = build_nvr_sort(builds)
+    elif sorting == SORT_BY_ID:
+        debug("ID sorting specified")
+        builds = build_id_sort(builds)
+    else:
+        debug("No sorting specified, preserving feed order")
+        builds = build_dedup(builds)
+
+    # at this point builds is a list of build info dicts
+    if verbose:
+        debug("Sorted and trimmed duplicates to %i builds", len(builds))
+        for build in builds:
+            debug(" %s %i", build["nvr"], build["id"])
+
+    if not builds:
+        debug("Nothing to do!")
+        return
+
+    # check for missing package listings, and add as necessary
+    packages = session.listPackages(tagID=dtagid,
+                                    inherited=inherit)
+    packages = set(pkg["package_id"] for pkg in packages)
+
+    package_todo = []
+
+    for build in builds:
+        pkgid = build["package_id"]
+        if pkgid not in packages:
+            packages.add(pkgid)
+            package_todo.append((pkgid, ownerid or build["owner_id"]))
+
+    if package_todo:
+        # we've got some package listings that need adding
+
+        debug("Beginning package additions")
+        fn = lambda pad: session.packageListAdd(dtagid, pad[0], owner=pad[1],
+                                                force=force)
+
+        for pad, res in iter_bulk_load(session, fn, package_todo, err=strict):
+            # verify the results of our add-pkg calls. If strict was
+            # set then the multicall would have raised an exception,
+            # but we need to present any issues for the non-strict
+            # cases as well
+            if res and "faultCode" in res:
+                printerr("Error adding package", pad[0],
+                         ":", res["faultString"])
+
+        debug("Package additions completed")
+
+    # and finally, move the builds themselves in chunks of 100
+    debug("Begining build moving")
+    counter = 0
+    for done in iter_bulk_move_builds(session, srctag, desttag, builds,
+                                      force=force, notify=notify,
+                                      size=100, strict=strict):
+
+        for build, res in done:
+            # same as with the add-pkg -- if strict was True then any
+            # issues would raise an exception, but for non-strict
+            # invocations we need to present the error messages
+            if "faultCode" in res:
+                printerr("Error moving build", build["nvr"],
+                         ":", res["faultString"])
+
+        # and of course display the courtesy counter so the user
+        # knows we're actually doing something
+        counter += len(done)
+        debug(" tagged %i/%i", counter, len(builds))
+
+    debug("All done!")
+
+
+class BulkMoveBuilds(TagSmokyDingo):
+
+    group = "bind"
+    description = "Move a large number of builds between tags"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("srctag", action="store", metavar="SRCTAG",
+               help="Tag to unassociate from builds")
+
+        addarg("desttag", action="store", metavar="DESTTAG",
+               help="Tag to associate with builds")
+
+        addarg("nvr", nargs="*", metavar="NVR",
+               help="Build NVRs to move")
+
+        addarg("-f", "--file", action="store", default=None,
+               dest="nvr_file", metavar="NVR_FILE",
+               help="Read list of builds from file, one NVR per line."
+               " Specify - to read from stdin.")
+
+        addarg("--create", action="store_true", default=False,
+               help="Create the tag if it doesn't exist already")
+
+        addarg("--strict", action="store_true", default=False,
+               help="Stop processing at the first failure")
+
+        addarg("--owner", action="store", default=None,
+               help="Force missing package listings to be created"
+               " with the specified owner")
+
+        addarg("--no-inherit", action="store_false", default=True,
+               dest="inherit", help="Do not use parent tags to"
+               " determine existing package listing.")
+
+        addarg("--force", action="store_true", default=False,
+               help="Force tagging operations. Requires admin"
+               " permission")
+
+        addarg("--notify", action="store_true", default=False,
+               help="Send tagging notifications. This can be"
+               " expensive for koji hub, avoid unless absolutely"
+               " necessary.")
+
+        addarg("-v", "--verbose", action="store_true", default=False,
+               help="Print tagging status")
+
+        group = parser.add_argument_group("Tagging order of builds")
+        group = group.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--nvr-sort", action="store_const",
+               dest="sorting", const=SORT_BY_NVR, default=None,
+               help="pre-sort build list by NVR, so highest NVR is"
+               " tagged last")
+
+        addarg("--id-sort", action="store_const",
+               dest="sorting", const=SORT_BY_ID, default=None,
+               help="pre-sort build list by build ID, so most recently"
+               " completed build is tagged last")
+
+        return parser
+
+
+    def handle(self, options):
+
+        nvrs = list(options.nvr)
+
+        if not nvrs and not sys.stdin.isatty():
+            if not options.nvr_file:
+                options.nvr_file = "-"
+
+        if options.nvr_file:
+            nvrs.extend(read_clean_lines(options.nvr_file))
+
+        return cli_bulk_move_builds(self.session,
+                                    options.srctag, options.desttag, nvrs,
+                                    sorting=options.sorting,
+                                    owner=options.owner,
+                                    inherit=options.inherit,
+                                    force=options.force,
+                                    notify=options.notify,
+                                    create=options.create,
+                                    verbose=options.verbose,
+                                    strict=options.strict)
 
 
 class BuildFiltering(BuildSifting):
@@ -481,7 +698,8 @@ def cli_list_components(session, nvr_list,
     nvr_list = unique(map(int_or_str, nvr_list))
 
     if nvr_list:
-        # load the initial set of builds, this also verifies our input
+        # load the initial set of builds.  If strict is not True, then
+        # we will skip over bad NVRs.
         found = bulk_load_builds(session, nvr_list, err=strict)
         loaded = dict((b["id"], b) for b in itervalues(found) if b)
 
