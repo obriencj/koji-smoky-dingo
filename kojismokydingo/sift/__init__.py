@@ -32,7 +32,7 @@ Sifter and Sieve were good names for something that filters stuff.
 
 import re
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractproperty
 from collections import OrderedDict
 from functools import partial
 from operator import itemgetter
@@ -677,7 +677,7 @@ class Sieve(object):
         :rtype: bool
         """
 
-        return False
+        pass
 
 
     def prep(self, session, info_dicts):
