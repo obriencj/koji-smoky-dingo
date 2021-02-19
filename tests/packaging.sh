@@ -49,8 +49,12 @@ function run_nose() {
         return 1
     fi
 
-    if [ $(rpm --eval '%dist') == ".el6" ] ; then
+    local DIST=$(rpm --eval '%dist')
+    if [[ "$DIST" == ".el6" || "$DIST" > ".fc32" ]] ; then
         # the argparse in Centos6/RHEL6 has slightly weird help output
+        # around mutually exclusive options. The argparse in Fedora
+        # 33+ has slightly weird help output around nargs=*
+        # positionals.
         "$NOSE" -v --all-modules \
                 -e 'test_command_help' \
                 -e 'test_standalone_help'

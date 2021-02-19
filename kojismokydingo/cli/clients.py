@@ -36,6 +36,16 @@ from ..clients import rebuild_client_config
 from ..common import load_plugin_config
 
 
+__all__ = (
+    "ClientConfig",
+    "ClientOpen",
+
+    "cli_client_config",
+    "cli_open",
+    "get_open_command",
+)
+
+
 def cli_client_config(session, goptions,
                       only=(), quiet=False, config=False, json=False):
 

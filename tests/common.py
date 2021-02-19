@@ -33,7 +33,24 @@ try:
     from rpm import labelCompare
 
     def compareVer(v1, v2):
-        return labelCompare(('', v1, ''), ('', v2, ''))
+        try:
+            return labelCompare(('0', v1, '0'), ('0', v2, '0'))
+        except:
+            # this is only used to validate our expectations. Some
+            # newer versions of RPM (Fedora 34) will actually error on
+            # empty comparison values, but older versions will not. If
+            # we're in a situation testing empties, don't consider
+            # that a failure.
+            if v1 and v2:
+                raise
+            elif v1 == v2:
+                return 0
+            elif v1 > v2:
+                return 1
+            elif v1 < v2:
+                return -1
+            else:
+                raise
 
 except ImportError:
     labelCompare = None

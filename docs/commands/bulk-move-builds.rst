@@ -1,20 +1,21 @@
-koji bulk-tag-builds
-====================
+koji bulk-move-builds
+=====================
 
 .. highlight:: none
 
 ::
 
- usage: koji bulk-tag-builds [-h] [-f NVR_FILE] [--create] [--strict]
-                             [--owner OWNER] [--no-inherit] [--force]
-                             [--notify] [-v] [--nvr-sort | --id-sort]
-                             TAGNAME [NVR [NVR ...]]
+ usage: koji bulk-move-builds [-h] [-f NVR_FILE] [--create] [--strict]
+                              [--owner OWNER] [--no-inherit] [--force]
+                              [--notify] [-v] [--nvr-sort | --id-sort]
+                              SRCTAG DESTTAG [NVR [NVR ...]]
 
- Tag a large number of builds
+ Move a large number of builds between tags
 
  positional arguments:
-   TAGNAME               Tag to associate builds with
-   NVR                   Build NVRs to tag
+   SRCTAG                Tag to unassociate from builds
+   DESTTAG               Tag to associate with builds
+   NVR                   Build NVRs to move
 
  optional arguments:
    -h, --help            show this help message and exit
@@ -39,8 +40,9 @@ koji bulk-tag-builds
                          completed build is tagged last
 
 
-This command is used to facilitate the tagging of larger amounts of
-builds, without the overhead of creating a tagBuild task for each NVR.
+This command is used to facilitate the moving of larger amounts of
+builds between tags, without the overhead of creating a task for each
+NVR.
 
 This will also intelligently add package listings to the destination
 tag in the event that a build's package isn't listed already. The
@@ -76,8 +78,8 @@ rules.
 References
 ----------
 
-* :py:obj:`kojismokydingo.cli.builds.BulkTagBuilds`
-* :py:func:`kojismokydingo.cli.builds.cli_bulk_tag_builds`
-* :py:func:`kojismokydingo.builds.bulk_tag_builds`
-* :py:func:`kojismokydingo.builds.iter_bulk_tag_builds`
-* :py:func:`kojismokydingo.builds.bulk_tag_nvrs`
+* :py:obj:`kojismokydingo.cli.builds.BulkMoveBuilds`
+* :py:func:`kojismokydingo.cli.builds.cli_bulk_move_builds`
+* :py:func:`kojismokydingo.builds.bulk_move_builds`
+* :py:func:`kojismokydingo.builds.iter_bulk_move_builds`
+* :py:func:`kojismokydingo.builds.bulk_move_nvrs`

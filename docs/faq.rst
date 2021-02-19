@@ -23,9 +23,11 @@ Why Is It Called Koji Smoky Dingo?
 ----------------------------------
 
 Because project naming is a right pain in the butt. I ran through a
-few 2-slugs from `coolname<https://pypi.org/project/coolname/>`_ until
+few 2-slugs from coolname_ until
 the words "Smoky Dingo" popped up, and that tickled my fancy so I went
 with it.
+
+.. _coolname: https://pypi.org/project/coolname/
 
 You'll note a somewhat ridiculous adherence to that naming scheme in
 the API. The base class for plugin commands is a `SmokyDingo`. The

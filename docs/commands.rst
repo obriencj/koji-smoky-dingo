@@ -46,7 +46,9 @@ See `Koji's Permission System - Administration <https://docs.pagure.org/koji/per
 
    commands/block-env-var
    commands/block-rpm-macro
+   commands/bulk-move-builds
    commands/bulk-tag-builds
+   commands/bulk-untag-builds
    commands/remove-env-var
    commands/remove-rpm-macro
    commands/renum-tag-inheritance
