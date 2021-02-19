@@ -492,7 +492,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         # and of course display the courtesy counter so the user
         # knows we're actually doing something
         counter += len(done)
-        debug(" tagged %i/%i", counter, len(builds))
+        debug(" moved %i/%i", counter, len(builds))
 
     debug("All done!")
 

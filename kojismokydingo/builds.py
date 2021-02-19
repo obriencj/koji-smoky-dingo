@@ -265,7 +265,7 @@ def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
     dtagid = dsttag["id"]
 
     if strict:
-        for build_chunk in chunkseq(build_infos, size // 2):
+        for build_chunk in chunkseq(build_infos, size):
             session.multicall = True
             for build in build_chunk:
                 bid = build["id"]
