@@ -5,9 +5,8 @@ koji list-component-builds
 
 ::
 
- usage: koji list-component-builds [-h] [-f NVR_FILE] [--strict] [--tag TAG]
-                                   [--inherit] [--latest]
-                                   [--nvr-sort | --id-sort]
+ usage: koji list-component-builds [-h] [-f NVR_FILE] [--tag TAG] [--inherit]
+                                   [--latest] [--nvr-sort | --id-sort]
                                    [--lookaside LOOKASIDE]
                                    [--shallow-lookaside SHALLOW_LOOKASIDE]
                                    [--limit LIMIT]
@@ -31,8 +30,6 @@ koji list-component-builds
    -f NVR_FILE, --file NVR_FILE
                          Read list of builds from file, one NVR per line.
                          Specify - to read from stdin.
-   --strict              Error if any of the NVRs do not resolve into a real
-                         build. Otherwise, bad NVRs are ignored.
 
  Components of tagged builds:
    --tag TAG             Look for components of builds in this tag

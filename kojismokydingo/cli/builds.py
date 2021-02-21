@@ -692,8 +692,7 @@ class BuildFiltering(BuildSifting):
 def cli_list_components(session, nvr_list,
                         tags=(), inherit=False, latest=False,
                         build_filter=None, build_sifter=None,
-                        sorting=None, outputs=None,
-                        strict=False):
+                        sorting=None, outputs=None):
 
     """
     Implements the ``koji list-component-builds`` command
@@ -702,10 +701,9 @@ def cli_list_components(session, nvr_list,
     nvr_list = unique(map(int_or_str, nvr_list))
 
     if nvr_list:
-        # load the initial set of builds.  If strict is not True, then
-        # we will skip over bad NVRs.
-        found = bulk_load_builds(session, nvr_list, err=strict)
-        loaded = dict((b["id"], b) for b in itervalues(found) if b)
+        # load the initial set of builds, validating them
+        found = bulk_load_builds(session, nvr_list, err=True)
+        loaded = dict((b["id"], b) for b in itervalues(found))
 
     else:
         loaded = {}
@@ -772,10 +770,6 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
                dest="nvr_file", metavar="NVR_FILE",
                help="Read list of builds from file, one NVR per line."
                " Specify - to read from stdin.")
-
-        addarg("--strict", action="store_true", default=False,
-               help="Error if any of the NVRs do not resolve into a"
-               " real build. Otherwise, bad NVRs are ignored.")
 
         group = parser.add_argument_group("Components of tagged builds")
         addarg = group.add_argument
