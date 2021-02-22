@@ -14,6 +14,9 @@ Still chugging along!
   opt to override the `run` method without having to still include an
   otherwise useless `check` implementation as well.
 - added command ``bulk-untag-builds`` and related API
+- added command ``bulk-move-biulds`` and related API
+- removed the ``--strict`` option from ``list-component-builds``
+  command, checking of input NVRs is mandatory now
 
 Closed Issues:
 <https://github.com/obriencj/koji-smoky-dingo/milestone/6?closed=1>
