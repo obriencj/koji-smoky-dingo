@@ -12,10 +12,15 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+from itertools import repeat
+from mock import MagicMock
 from unittest import TestCase
 
 from kojismokydingo.builds import (
     build_dedup, build_id_sort, build_nvr_sort,
+    bulk_move_builds, bulk_move_nvrs,
+    bulk_tag_builds, bulk_tag_nvrs,
+    bulk_untag_builds, bulk_untag_nvrs,
     filter_by_state, filter_imported)
 
 
@@ -327,4 +332,175 @@ class TestSorting(TestCase):
         self.assertTrue(res is not UNSORTED_BUILDS)
 
 
+class BulkTagging(TestCase):
+
+
+    def session(self, tag_results=(), untag_results=(), builds=()):
+
+        builds = iter(builds)
+        tag_results = iter(tag_results)
+        untag_results = iter(untag_results)
+
+        mc_gather = []
+
+        def convert(v):
+            if isinstance(v, dict) and "faultCode" in v:
+                return v
+            else:
+                return [v]
+
+        def do_getBuild(*args, **kwds):
+            mc_gather.append(convert(next(builds)))
+
+        def do_tagBuildBypass(*args, **kwds):
+            mc_gather.append(convert(next(tag_results)))
+
+        def do_untagBuildBypass(*args, **kwds):
+            mc_gather.append(convert(next(untag_results)))
+
+        def do_mc(strict=None):
+            results = list(mc_gather)
+            mc_gather[:] = ()
+            return results
+
+        sess = MagicMock()
+        sess.getBuild.side_effect = do_getBuild
+        sess.tagBuildBypass.side_effect = do_tagBuildBypass
+        sess.untagBuildBypass.side_effect = do_untagBuildBypass
+        sess.multiCall.side_effect = do_mc
+
+        return sess
+
+
+    def test_bulk_tag_nvrs(self):
+        sess = self.session(builds=BUILD_SAMPLES,
+                            tag_results=repeat(None))
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_tag_nvrs(sess, tag, range(0, 6), size=5)
+
+        self.assertEqual(res, list(zip(BUILD_SAMPLES, repeat([None]))))
+        self.assertEqual(sess.getBuild.call_count, 6)
+        self.assertEqual(sess.tagBuildBypass.call_count, 6)
+        self.assertEqual(sess.untagBuildBypass.call_count, 0)
+        self.assertEqual(sess.multiCall.call_count, 3)
+
+
+    def test_bulk_tag_builds(self):
+        sess = self.session(tag_results=repeat(None))
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_tag_builds(sess, tag, BUILD_SAMPLES, size=5)
+
+        self.assertEqual(res, list(zip(BUILD_SAMPLES, repeat([None]))))
+        self.assertEqual(sess.tagBuildBypass.call_count, 6)
+        self.assertEqual(sess.untagBuildBypass.call_count, 0)
+        self.assertEqual(sess.multiCall.call_count, 2)
+
+
+    def test_bulk_tag_builds_err(self):
+        err = {"faultCode": 1}
+        tres = [None, err, None, None, None, None]
+        sess = self.session(tag_results=tres)
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_tag_builds(sess, tag, BUILD_SAMPLES, size=5)
+
+        self.assertEqual(sess.tagBuildBypass.call_count, 6)
+        self.assertEqual(sess.untagBuildBypass.call_count, 0)
+        self.assertEqual(sess.multiCall.call_count, 2)
+
+
+    def test_bulk_untag_nvrs(self):
+        sess = self.session(builds=BUILD_SAMPLES,
+                            untag_results=repeat(None))
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_untag_nvrs(sess, tag, range(0, 6), size=5)
+
+        self.assertEqual(res, list(zip(BUILD_SAMPLES, repeat([None]))))
+        self.assertEqual(sess.getBuild.call_count, 6)
+        self.assertEqual(sess.tagBuildBypass.call_count, 0)
+        self.assertEqual(sess.untagBuildBypass.call_count, 6)
+        self.assertEqual(sess.multiCall.call_count, 3)
+
+
+    def test_bulk_untag_builds(self):
+        sess = self.session(untag_results=repeat(None))
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_untag_builds(sess, tag, BUILD_SAMPLES, size=5)
+
+        self.assertEqual(res, list(zip(BUILD_SAMPLES, repeat([None]))))
+        self.assertEqual(sess.tagBuildBypass.call_count, 0)
+        self.assertEqual(sess.untagBuildBypass.call_count, 6)
+        self.assertEqual(sess.multiCall.call_count, 2)
+
+
+    def test_bulk_untag_builds_err(self):
+        err = {"faultCode": 1}
+        tres = [None, err, None, None, None, None]
+        sess = self.session(untag_results=tres)
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_untag_builds(sess, tag, BUILD_SAMPLES, size=5)
+
+        self.assertEqual(sess.tagBuildBypass.call_count, 0)
+        self.assertEqual(sess.untagBuildBypass.call_count, 6)
+        self.assertEqual(sess.multiCall.call_count, 2)
+
+
+    def test_bulk_move_nvrs(self):
+        sess = self.session(builds=BUILD_SAMPLES,
+                            tag_results=repeat(None),
+                            untag_results=repeat(None))
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_move_nvrs(sess, tag, tag, range(0, 6), size=5)
+
+        self.assertEqual(res, list(zip(BUILD_SAMPLES, repeat([None]))))
+        self.assertEqual(sess.getBuild.call_count, 6)
+        self.assertEqual(sess.tagBuildBypass.call_count, 6)
+        self.assertEqual(sess.untagBuildBypass.call_count, 6)
+        self.assertEqual(sess.multiCall.call_count, 5)
+
+
+    def test_bulk_move_builds(self):
+        sess = self.session(tag_results=repeat(None),
+                            untag_results=repeat(None))
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_move_builds(sess, tag, tag, BUILD_SAMPLES, size=5)
+
+        self.assertEqual(res, list(zip(BUILD_SAMPLES, repeat([None]))))
+
+        self.assertEqual(sess.tagBuildBypass.call_count, 6)
+        self.assertEqual(sess.untagBuildBypass.call_count, 6)
+        self.assertEqual(sess.multiCall.call_count, 4)
+
+
+    def test_bulk_move_builds_err(self):
+        # one tagging operation fails, thus one less untagging operation
+        err = {"faultCode": 1}
+        tres = [None, err, None, None, None, None]
+        sess = self.session(tag_results=tres, untag_results=repeat(None))
+
+        tag = {"id": 1, "name": "some-tag"}
+        res = bulk_move_builds(sess, tag, tag, BUILD_SAMPLES, size=5)
+
+        self.assertEqual(sess.tagBuildBypass.call_count, 6)
+        self.assertEqual(sess.untagBuildBypass.call_count, 5)
+        self.assertEqual(sess.multiCall.call_count, 4)
+
+        # every tagging operation fails, thus no untagging operations
+        sess = self.session(tag_results=repeat(err))
+
+        res = bulk_move_builds(sess, tag, tag, BUILD_SAMPLES, size=5)
+
+        self.assertEqual(sess.tagBuildBypass.call_count, 6)
+        self.assertEqual(sess.untagBuildBypass.call_count, 0)
+        self.assertEqual(sess.multiCall.call_count, 2)
+
+
+#
 # The end.
