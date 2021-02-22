@@ -587,6 +587,9 @@ class BulkMoveBuilds(TagSmokyDingo):
 
 
 class BuildFiltering(BuildSifting):
+    """
+    Base class for commands which use build filtering options
+    """
 
 
     def filtering_arguments(self, parser):
