@@ -99,14 +99,13 @@ class ArchiveFiltering(object):
 
 
     def archive_arguments(self, parser):
-        goptions = self.goptions
 
         addarg = parser.add_argument
         addarg("--json", action="store_true", default=False,
                help="Output archive information as JSON")
 
-        addarg("--urls", "-U", action="store_const",
-               dest="path", const=goptions.topurl, default=goptions.topdir,
+        addarg("--urls", "-U", action="store_true",
+               dest="as_url",
                help="Present archives as URLs using the configured topurl."
                " Default: use the configured topdir")
 
@@ -180,6 +179,12 @@ class ArchiveFiltering(object):
         if keys and options.unsigned:
             keys.append('')
         options.keys = keys
+
+        goptions = self.goptions
+        if options.as_url:
+            options.path = goptions.topurl
+        else:
+            options.path = goptions.topdir
 
 
 class ListBuildArchives(AnonSmokyDingo, ArchiveFiltering):
