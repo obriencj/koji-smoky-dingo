@@ -24,7 +24,8 @@ from kojismokydingo import (
     BadDingo, FeatureUnavailable,
     NoSuchBuild, NoSuchTag, NoSuchTarget, NoSuchUser,
     as_buildinfo, as_taginfo, as_targetinfo, as_userinfo,
-    bulk_load, iter_bulk_load, version_check, version_require)
+    bulk_load, iter_bulk_load,
+    version_check, version_require, )
 
 
 class TestIterBulkLoad(TestCase):

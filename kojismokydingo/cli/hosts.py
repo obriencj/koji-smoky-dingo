@@ -31,8 +31,18 @@ from . import AnonSmokyDingo
 from ..hosts import gather_hosts_checkins
 
 
+__all__ = (
+    "CheckHosts",
+
+    "cli_check_hosts",
+)
+
+
 def cli_check_hosts(session, timeout=60, arches=(), channel=None,
                     ignore=(), quiet=False, shush=False):
+    """
+    Implements the ``koji check-hosts`` command
+    """
 
     timeout = datetime.utcnow() - timedelta(seconds=(timeout * 60))
 

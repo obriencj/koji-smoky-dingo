@@ -28,15 +28,28 @@ from six import itervalues
 
 from . import AnonSmokyDingo, pretty_json, resplit
 from .. import bulk_load_builds
-from ..archives import \
-    filter_archives, gather_build_archives, gather_latest_archives
+from ..archives import (
+    filter_archives, gather_build_archives, gather_latest_archives, )
 from ..builds import BUILD_COMPLETE, build_dedup
+
+
+__all__ = (
+    "ArchiveFiltering",
+    "LatestArchives",
+    "ListBuildArchives",
+
+    "cli_latest_tag_archives",
+    "cli_list_build_archives",
+)
 
 
 def cli_list_build_archives(session, nvrs, btype,
                             atypes=(), arches=(), rpmkeys=(),
                             deleted=False,
                             path=None, json=False):
+    """
+    Implements the ``koji list-build-archives`` command
+    """
 
     loaded = bulk_load_builds(session, nvrs)
     found = []
@@ -65,6 +78,9 @@ def cli_latest_tag_archives(session, tagname, btype,
                             atypes=(), arches=(), rpmkeys=(),
                             inherit=True, path=None,
                             json=False):
+    """
+    Implements the ``koji latest-archives`` command
+    """
 
     found = gather_latest_archives(session, tagname, btype,
                                    rpmkeys, inherit, path)

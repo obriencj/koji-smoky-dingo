@@ -38,22 +38,33 @@ from .sift import BuildSifting, output_sifted
 from .. import (
     NoSuchUser,
     as_buildinfo, as_taginfo,
-    bulk_load, bulk_load_builds, bulk_load_tags, iter_bulk_load)
+    bulk_load, bulk_load_builds,
+    bulk_load_tags, iter_bulk_load, )
 from ..builds import (
     BUILD_COMPLETE, BUILD_DELETED,
     BuildFilter,
     build_dedup, build_id_sort, build_nvr_sort,
     decorate_builds_btypes, decorate_builds_cg_list, filter_imported,
     gather_component_build_ids, gather_wrapped_builds,
-    iter_bulk_move_builds, iter_bulk_tag_builds, iter_bulk_untag_builds)
+    iter_bulk_move_builds, iter_bulk_tag_builds, iter_bulk_untag_builds, )
 from ..tags import ensure_tag, gather_tag_ids
 from ..common import chunkseq, unique
 
 
 __all__ = (
+    "BuildFiltering",
+    "BulkMoveBuilds",
+    "BulkTagBuilds",
+    "BulkUntagBuilds",
+    "FilterBuilds",
+    "ListBTypes",
+    "ListCGs",
+    "ListComponents",
+
     "cli_bulk_move_builds",
     "cli_bulk_tag_builds",
     "cli_bulk_untag_builds",
+    "cli_filter_builds",
     "cli_list_btypes",
     "cli_list_cgs",
     "cli_list_components",
@@ -1007,6 +1018,9 @@ def cli_list_btypes(session, nvr=None, json=False, quiet=False):
 
 
 class ListBTypes(AnonSmokyDingo):
+    """
+    Koji client command 'list-btypes'
+    """
 
     description = "List BTypes"
 

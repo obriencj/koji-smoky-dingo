@@ -21,7 +21,7 @@ from kojismokydingo.builds import (
     bulk_move_builds, bulk_move_nvrs,
     bulk_tag_builds, bulk_tag_nvrs,
     bulk_untag_builds, bulk_untag_nvrs,
-    filter_by_state, filter_imported)
+    filter_by_state, filter_imported, )
 
 
 # A CG-imported build

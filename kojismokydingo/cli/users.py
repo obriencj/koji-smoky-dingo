@@ -28,10 +28,33 @@ from . import AnonSmokyDingo, int_or_str, pretty_json
 from ..users import (
     USER_NORMAL, USER_HOST, USER_GROUP,
     STATUS_NORMAL, STATUS_BLOCKED,
-    collect_cgs, collect_perminfo, collect_userinfo)
+    collect_cgs, collect_perminfo, collect_userinfo, )
+
+
+__all__ = (
+    "CGInfo",
+    "PermissionInfo",
+    "UserInfo",
+
+    "cli_cginfo",
+    "cli_perminfo",
+    "cli_userinfo",
+    "get_userstatus_str",
+    "get_usertype_str",
+)
 
 
 def get_usertype_str(userinfo):
+    """
+    Provide a human-readable label for the koji user type enum value
+    in a koji user info dict.
+
+    :param userinfo: user info
+    :type userinfo: dict
+
+    :rtype: str
+    """
+
     val = userinfo.get("usertype", USER_NORMAL) or USER_NORMAL
     if val == USER_NORMAL:
         return "NORMAL (user)"
@@ -44,6 +67,16 @@ def get_usertype_str(userinfo):
 
 
 def get_userstatus_str(userinfo):
+    """
+    Provide a human-readable label for the koji user status enum value
+    in a koji user info dict.
+
+    :param userinfo: user info
+    :type userinfo: dict
+
+    :rtype: str
+    """
+
     val = userinfo.get("status", STATUS_NORMAL) or STATUS_NORMAL
     if val == STATUS_NORMAL:
         return "NORMAL (enabled)"
@@ -54,6 +87,9 @@ def get_userstatus_str(userinfo):
 
 
 def cli_userinfo(session, user, json=False):
+    """
+    Implements the ``koji userinfo`` command
+    """
 
     userinfo = collect_userinfo(session, user)
 
@@ -117,6 +153,9 @@ class UserInfo(AnonSmokyDingo):
 def cli_perminfo(session, permission,
                  verbose=False, by_date=False,
                  json=False):
+    """
+    Implements the ``koji perminfo`` command
+    """
 
     perminfo = collect_perminfo(session, permission)
 
@@ -171,6 +210,9 @@ class PermissionInfo(AnonSmokyDingo):
 
 
 def cli_cginfo(session, name=None, json=False):
+    """
+    Implements the ``koji cginfo`` command
+    """
 
     cgs = collect_cgs(session, name=name)
 
