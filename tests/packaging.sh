@@ -105,6 +105,16 @@ function verify_installed() {
     echo "Checking to see what is installed:"
     rpm -qa | grep koji | sort
     echo
+
+    local RPM=$(rpm -qa | grep kojismokydingo)
+
+    echo "Checking Provides"
+    rpm -q --provides "$RPM"
+    echo
+
+    echo "Checking Requires"
+    rpm -q --requires "$RPM"
+    echo
 }
 
 
