@@ -50,15 +50,6 @@ Source0: %{name}-%{version}.tar.gz
   %bcond_without python3
 %endif
 
-# Some older koji fedora packages don't declare their python_provide
-# even though the feature was available in the packaging macros. This
-# means if we trying to rely on it, we'll produce a Requires for a
-# python3.6dist(koji) and no package will ever provide it. Seems to be
-# fixed from fedora 28 onwards.
-%if ( 0%{?fedora} && 0%{?fedora} > 28 )
-  %{?python_enable_dependency_generator}
-%endif
-
 
 %description
 Koji Smoky Dingo
@@ -75,7 +66,7 @@ Koji Smoky Dingo
 %build
 
 %if %{with old_python}
-  %{__python} setup.py build
+  %py_build
 %endif
 
 %if %{with python2}
@@ -100,7 +91,7 @@ Koji Smoky Dingo
 %__rm -rf $RPM_BUILD_ROOT
 
 %if %{with old_python}
-  %{__python} setup.py install --skip-build --root %{buildroot}
+  %py_install
 %endif
 
 %if %{with python2}
@@ -157,10 +148,11 @@ Docs for Koji Smoky Dingo
 
 %package -n python2-%{srcname}
 Summary:        %{summary}
-BuildRequires:  python-setuptools
+BuildRequires:  python-devel python-rpm-macros python-setuptools
 Requires:	python python-argparse python-setuptools python-six
 Requires:       python2-koji
 Obsoletes:	python2-%{srcname}-meta <= 0.9.0
+%{?python_provide:%python_provide python2-%{srcname}}
 
 %description -n python2-%{srcname}
 Koji Smoky Dingo
@@ -169,7 +161,7 @@ Koji Smoky Dingo
 %defattr(-,root,root,-)
 %{python_sitelib}/koji_cli_plugins/
 %{python_sitelib}/kojismokydingo/
-%{python_sitelib}/kojismokydingo-%{version}-py2.?.egg-info/
+%{python_sitelib}/kojismokydingo-%{version}-py2.?.egg-info
 %{_bindir}/ksd-filter-builds
 %{_bindir}/ksd-filter-tags
 
@@ -180,11 +172,13 @@ Koji Smoky Dingo
 
 %package -n python2-%{srcname}
 Summary:        %{summary}
-BuildRequires:  python2-devel python2-pip python2-setuptools python2-wheel
+BuildRequires:  python2-devel
+BuildRequires:  python2-pip python2-setuptools python2-wheel
 Requires:	python2 python2-appdirs python2-setuptools python2-six
 Requires:       python2-koji
 Obsoletes:	python2-%{srcname}-meta <= 0.9.0
 %{?python_provide:%python_provide python2-%{srcname}}
+%{?py_provides:%py_provides python2-%{srcname}}
 
 %description -n python2-%{srcname}
 Koji Smoky Dingo
@@ -193,7 +187,7 @@ Koji Smoky Dingo
 %defattr(-,root,root,-)
 %{python2_sitelib}/koji_cli_plugins/
 %{python2_sitelib}/kojismokydingo/
-%{python2_sitelib}/kojismokydingo-%{version}.dist-info/
+%{python2_sitelib}/kojismokydingo-%{version}.dist-info
 %{_bindir}/ksd-filter-builds
 %{_bindir}/ksd-filter-tags
 
@@ -207,11 +201,13 @@ Koji Smoky Dingo
 
 %package -n python3-%{srcname}
 Summary:        %{summary}
-BuildRequires:  python3-devel python3-pip python3-setuptools python3-wheel
+BuildRequires:  python3-devel
+BuildRequires:  python3-pip python3-setuptools python3-wheel
 Requires:	python3 python3-appdirs python3-setuptools python3-six
 Requires:       python3-koji
 Obsoletes:	python3-%{srcname}-meta <= 0.9.0
 %{?python_provide:%python_provide python3-%{srcname}}
+%{?py_provides:%py_provides python3-%{srcname}}
 
 %description -n python3-%{srcname}
 Koji Smoky Dingo
@@ -220,7 +216,7 @@ Koji Smoky Dingo
 %defattr(-,root,root,-)
 %{python3_sitelib}/koji_cli_plugins/
 %{python3_sitelib}/kojismokydingo/
-%{python3_sitelib}/kojismokydingo-%{version}.dist-info/
+%{python3_sitelib}/kojismokydingo-%{version}.dist-info
 %{_bindir}/ksd-filter-builds
 %{_bindir}/ksd-filter-tags
 
