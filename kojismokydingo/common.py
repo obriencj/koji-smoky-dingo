@@ -114,23 +114,24 @@ def escapable_replace(orig, character, replacement):
 
     assert len(character) == 1, "escapable_replace requires single characters"
 
-    collect = []
+    gather = []
+    collect = gather.append
 
     pieces = iter(orig)
     for p in pieces:
         if p == character:
             n = next(pieces, None)
             if n is None:
-                collect.append(replacement)
+                collect(replacement)
             elif n == character:
-                collect.append(character)
+                collect(character)
             else:
-                collect.append(replacement)
-                collect.append(n)
+                collect(replacement)
+                collect(n)
         else:
-            collect.append(p)
+            collect(p)
 
-    return "".join(collect)
+    return "".join(gather)
 
 
 def fnmatches(value, patterns, ignore_case=False):
