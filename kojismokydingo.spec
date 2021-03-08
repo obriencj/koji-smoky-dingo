@@ -231,91 +231,39 @@ Koji Smoky Dingo
 
 
 %changelog
-* Sat Jan 16 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.7-0
-- removed AllGroupPkgs tag sieve in favor of the GroupPkgs sieve with
-  a require_all option
-- removed Sifter._convert_sym_aliases and made Sieve.check
-  non-abstract
+* Mon Mar 08 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.7-1
+- See the v0.9.7 release notes for a full list of changes
 
 * Fri Jan 15 2021 Christopher O'Brien <obriencj@gmail.com> - 0.9.6-1
+- See the v0.9.6 release notes for a full list of changes
 - use a patch to disable koji as a setuptools requirement
-- added build sieves 'compare-latest-nvr' and 'compare-latest-id'
-- refactored sieve caching
-- Added 'koji open' command which will launch a browser to the info
-  page for the relevant koji data type.
-- Added 'koji filter-tags' command and 'ksd-filter-tags' standalone
-  command for applying sifty predicates to filter a list of tags
-- Enable loading of additional sieves via entry_points for the
-  'filter-tags', 'filter-builds', and 'list-component-builds' koji
-  commands and the 'ksd-filter-tags' and 'ksd-filter-builds'
-  standalone commands.
-- add config API functions to kojismokydingo.common
 
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.5-1
+- See the v0.9.5 release notes for a full list of changes
 - remove install_requires for koji, because koji doesn't think it's a
   python package and in many cases this breaks things.
-- fix issue with tags option in filter-builds
 
 * Fri Dec 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.4-1
-- list-build-archives now accepts multiple NVRs
-- list-build-archives and latest-archives now accept '--arch=ARCH'
-- moved as_userinfo to kojismokydingo package
-- add int_or_str helper function to kojismokydingo.cli
-- unique now accepts a 'key=' parameter to allow deduplication of
-  otherwise unhashable values
-- parse_datetime now accepts a 'strict=' parameter to let it return
-  None instead of raising an Exception when parsing fails
-- filtering expressions support added to list-component-builds and
-  filter-builds commands
-- ksd-filter-builds stand-alone command added to act as a shbang for
-  reusable filtering scripts
-- filter-builds and list-component-builds now accept multiple '--tag'
-  options
+- See the v0.9.4 release notes for a full list of changes
 
 * Fri Oct 02 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.3-1
-- add iter_bulk_load generator function
-- fix exception in kojismokyding.cli.tabulate for None values
-- rename unset-env-var to remove-env-var
-- rename unset-rpm-macro to remove-rpm-macro
-- added block-env-var and block-rpm-macro (requires koji 1.23)
-- added FeatureUnavailable exception type
-- updated list-tag-extras to add a '--blocked' option
-- add ensure_tag function
-- updated bulk-tag-builds to add a '--create' option
-- add version_check and version_require functions
+- See the v0.9.3 release notes for a full list of changes
 
 * Thu Sep 24 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.2-1
-- fix issue with 'set-rpm-macro --help'
-- fix datetime issues in check-hosts
-- add new parse_datetime function in common
-- explicitly deactivate plugin command sessions 'SmokyDingo.deactivate'
-- refactored how plugin commands populate parser arguments
-- augmented the input logic for filter-builds, bulk-tag-builds, and
-  list-component-builds to read from args or stdin as appropriate
-- added state filtering to BuildFilter and to the filter-builds and
-  list-component-builds commands
-- fixed logic bug with bulk_load and related functions over error
-  handling
-- ManagedClientSession no longer loads configuration from a profile
-- added ProfileClientSession
-- refactored list-cgs and added cginfo
+- See the v0.9.2 release notes for a full list of changes
 
 * Fri Sep 18 2020 Christopher O'Brien <obriencj@gmail.com> - 0.9.1-1
+- See the v0.9.1 release notes for a full list of changes
 - Begin bumping micro for PRs as we work towards version 1.0.0
 - All 0.9.z versions are still considered API unstable, this just helps
   to differentiate snapshots
-- Moved to a single distribution containing including the package and
-  the metaplugin
-- added new filter-builds and list-component-builds commands
-- removed list-imported (behavior now available in filter-builds)
-- slightly beefed up docs
-- moved as_buildinfo, as_taginfo, as_targetinfo into the main
-  kojismokydingo package
-- decorate_build_archive_data is now idempotent and slightly less
-  expensive
+- Moved to a single distribution containing both the python package
+  and the koji meta-plugin
 
 * Wed Jan 09 2019 Christopher O'Brien <obriencj@gmail.com> - 0.9.0-1
+- See the v0.9.0 release notes for a list of initial features
 - Initial build.
 
 
+#
 # The end.
