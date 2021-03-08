@@ -300,6 +300,10 @@ def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
 def bulk_move_builds(session, srctag, dsttag, build_infos,
                      force=False, notify=False,
                      size=100, strict=False):
+    """
+    Move a large number of builds using multicalls of tagBuildBypass and
+    untagBuildBypass.
+    """
 
     results = []
     for done in iter_bulk_move_builds(session, srctag, dsttag, build_infos,
@@ -312,6 +316,14 @@ def bulk_move_builds(session, srctag, dsttag, build_infos,
 def bulk_move_nvrs(session, srctag, dsttag, nvrs,
                    force=False, notify=False,
                    size=100, strict=False):
+    """
+    Move a large number of NVRs using multicalls of tagBuildBypass and
+    untagBuildBypass.
+
+    NVRs will be resolved to builds. If strict is True then any
+    missing builds will result in a NoSuchBuild exception being
+    raised. Otherwise missing builds will be ignored.
+    """
 
     builds = bulk_load_builds(session, unique(nvrs), err=strict)
     builds = build_dedup(itervalues(builds))
