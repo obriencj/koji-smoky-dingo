@@ -69,6 +69,7 @@ __all__ = (
     "bulk_load_tags",
     "bulk_load_tasks",
     "bulk_load_users",
+    "hub_version",
     "iter_bulk_load",
     "version_check",
     "version_require",
@@ -393,6 +394,13 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
       100
 
     :type size: int, optional
+
+    :param results: mapping to store the results in. Default, produce
+      a new OrderedDict
+
+    :type results: Mapping, optional
+
+    :rtype: Mapping
     """
 
     results = OrderedDict() if results is None else results
@@ -409,6 +417,13 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
 
 def bulk_load_tasks(session, task_ids, request=False,
                     err=True, size=100, results=None):
+    """
+    Load many taskinfo dicts from a koji client session and a sequence
+    of task IDs.
+
+    Returns an OrderedDict associating the individual IDs with their
+    resulting taskinfo.
+    """
 
     results = OrderedDict() if results is None else results
 
@@ -424,6 +439,17 @@ def bulk_load_tasks(session, task_ids, request=False,
 
 
 def bulk_load_tags(session, tags, err=True, size=100, results=None):
+    """
+    :param err: Raise an exception if a tag fails to load. Default,
+      True.
+
+    :type err: bool, optional
+
+    :param size: Count of tags to load in a single multicall. Default,
+      100
+
+    :type size: int, optional
+    """
 
     results = OrderedDict() if results is None else results
 
@@ -462,6 +488,17 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
 
 def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
                                  size=100, results=None):
+    """
+    Set up a chunking multicall to fetch the archives of buildroots
+    via `session.listArchives` for each buildroot ID in buildrood_ids.
+
+    Returns an OrderedDict associating the individual buildroot IDs with
+    their resulting archive lists.
+
+    If results is non-None, it must support dict-like update method,
+    and will be used in place of a newly allocated OrderedDict to
+    store and return the results.
+    """
 
     results = OrderedDict() if results is None else results
     fn = lambda i: session.listArchives(componentBuildrootID=i, type=btype)
@@ -471,6 +508,17 @@ def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
 
 def bulk_load_buildroot_rpms(session, buildroot_ids,
                              size=100, results=None):
+    """
+    Set up a chunking multicall to fetch the RPMs of buildroots via
+    `session.listRPMs` for each buildroot ID in buildrood_ids.
+
+    Returns an OrderedDict associating the individual buildroot IDs with
+    their resulting RPM lists.
+
+    If results is non-None, it must support dict-like update method,
+    and will be used in place of a newly allocated OrderedDict to
+    store and return the results.
+    """
 
     results = OrderedDict() if results is None else results
     fn = lambda i: session.listRPMs(componentBuildrootID=i)
@@ -481,8 +529,8 @@ def bulk_load_buildroot_rpms(session, buildroot_ids,
 def bulk_load_build_archives(session, build_ids, btype=None,
                              size=100, results=None):
     """
-    Set up a chunking multicall to fetch the the archives of builds
-    via session.listArchives for each build ID in build_ids.
+    Set up a chunking multicall to fetch the archives of builds
+    via `session.listArchives` for each build ID in build_ids.
 
     Returns an OrderedDict associating the individual build IDs with
     their resulting archive lists.
@@ -500,11 +548,11 @@ def bulk_load_build_archives(session, build_ids, btype=None,
 
 def bulk_load_build_rpms(session, build_ids, size=100, results=None):
     """
-    Set up a chunking multicall to fetch the the archives of builds
-    via session.listArchives for each build ID in build_ids.
+    Set up a chunking multicall to fetch the RPMs of builds via
+    `session.listRPMS` for each build ID in build_ids.
 
     Returns an OrderedDict associating the individual build IDs with
-    their resulting archive lists.
+    their resulting RPM lists.
 
     If results is non-None, it must support a dict-like update method,
     and will be used in place of a newly allocated OrderedDict to
@@ -553,17 +601,33 @@ def bulk_load_users(session, users, err=True, size=100, results=None):
     return the results.
     """
 
-    users = list(users)
+    users = tuple(users)
     results = OrderedDict() if results is None else results
 
     if not users:
         return results
 
+    # we need to identify which signature the getUser API will
+    # support.  Unfortunately the change in signatures happened before
+    # there was a way to check the hub version. First we'll check
+    # whether there's already a cached answer as to which API is
+    # available
     session_vars = vars(session)
     new_get_user = session_vars.get("__new_get_user")
 
     if new_get_user is None:
+        # there wasn't already an answer, so we'll have to find out
+        # ourselves. In this case we'll load the first user in the
+        # list of users separately, outside of a multicall, and using
+        # the as_userinfo function. This function will first try the
+        # newer signature. If successful, it will record
+        # __new_get_user as True, and we'll know to use the newer
+        # signature. If not, the function will retry with the older
+        # signature and set __new_get_user to False.
+
         key = users[0]
+        users = users[1:]
+
         try:
             results[key] = as_userinfo(session, key)
         except NoSuchUser:
@@ -572,10 +636,9 @@ def bulk_load_users(session, users, err=True, size=100, results=None):
             else:
                 results[key] = None
 
-        # the use of as_userinfo will have updates the __new_get_user
+        # the use of as_userinfo will have updated the __new_get_user
         # sentinel attribute to either True or False
         new_get_user = session_vars.get("__new_get_user")
-        users = users[1:]
 
     if new_get_user:
         fn = lambda u: session.getUser(u, False, True)
@@ -891,6 +954,42 @@ def _int(val):
     return val
 
 
+def hub_version(session):
+    """
+    Wrapper for ``session.getKojiVersion`` which caches the results on
+    the session and splits the value into a tuple of ints for easy
+    comparison.
+
+    If the getKojiVersion method isn't implemented on the hub, we
+    presume that we're version 1.22 ``(1, 22)`` which is the last
+    version before getKojiVersion was added.
+
+    :rtype: tuple[int]
+    """
+
+    # we need to use this instead of getattr as koji sessions will
+    # automatically create all missing properties as proxies to a
+    # remote hub method.
+    session_vars = vars(session)
+
+    hub_ver = session_vars.get("__hub_version", None)
+    if hub_ver is None:
+        try:
+            hub_ver = session.getKojiVersion()
+        except GenericError:
+            pass
+
+        if hub_ver is None:
+            hub_ver = (1, 22)
+
+        elif isinstance(hub_ver, str):
+            hub_ver = tuple(map(_int, hub_ver.split(".")))
+
+        session_vars["__hub_version"] = hub_ver
+
+    return hub_ver
+
+
 def version_check(session, minimum=(1, 23)):
     """
     Verifies that the requested minimum version is met compared
@@ -914,25 +1013,7 @@ def version_check(session, minimum=(1, 23)):
     if isinstance(minimum, str):
         minimum = tuple(map(_int, minimum.split(".")))
 
-    # we need to use this instead of getattr as koji sessions will
-    # automatically create all missing properties as proxies to a
-    # remote hub method.
-    session_vars = vars(session)
-
-    hub_ver = session_vars.get("__hub_version", None)
-    if hub_ver is None:
-        try:
-            hub_ver = session.getKojiVersion()
-        except GenericError:
-            pass
-
-        if hub_ver is None:
-            hub_ver = (1, 22)
-
-        elif isinstance(hub_ver, str):
-            hub_ver = tuple(map(_int, hub_ver.split(".")))
-
-        session_vars["__hub_version"] = hub_ver
+    hub_ver = hub_version(session)
 
     return bool(hub_ver and hub_ver >= minimum)
 
