@@ -38,12 +38,6 @@ else
 endif
 
 
-# what I really want is for the $(ARCHIVE) target to be able to
-# compare the timestamp of that file vs. the timestamp of the last
-# commit in the repo.
-GITHEAD := $(shell cut -f2 -d' ' .git/HEAD)
-GITHEADREF := .git/$(GITHEAD)
-
 # We use this later in setting up the gh-pages submodule for pushing,
 # so forks will push their docs to their own gh-pages branch.
 ORIGIN_PUSH = $(shell git remote get-url --push origin)
@@ -130,8 +124,8 @@ archive: $(ARCHIVE)	## Extracts an archive from the current git commit
 
 # newer versions support the --format tar.gz but we're intending to work all
 # the way back to RHEL 6 which does not have that.
-$(ARCHIVE): $(GITHEADREF)
-	@git archive $(GITHEAD) \
+$(ARCHIVE):
+	@git archive HEAD \
 		--format tar --prefix "$(PROJECT)-$(VERSION)/" \
 		| gzip > "$(ARCHIVE)"
 
@@ -178,7 +172,7 @@ clean-docs:	## Remove built docs
 	@rm -rf build/sphinx/*
 
 
-.PHONY: archive build clean clean-docs default deploy-docs docs help overview packaging-build packaging-test quick-test rpm srpm stage-docs test tidy
+.PHONY: archive build clean clean-built clean-docs default deploy-docs docs help overview packaging-build packaging-test quick-test rpm srpm stage-docs test tidy
 
 
 # The end.
