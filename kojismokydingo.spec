@@ -59,6 +59,9 @@ Koji Smoky Dingo
 %setup -q
 
 %if %{with old_python}
+  # this removes the deps on koji and appdirs from setup.py, because
+  # on old environments they won't be available to the python dist
+  # requirements generator
   patch -p1 < tools/missing_deps.patch
 %endif
 
@@ -206,8 +209,8 @@ BuildRequires:  python3-pip python3-setuptools python3-wheel
 Requires:	python3 python3-appdirs python3-setuptools python3-six
 Requires:       python3-koji
 Obsoletes:	python3-%{srcname}-meta <= 0.9.0
-%{?python_provide:%python_provide python3-%{srcname}}
-%{?py_provides:%py_provides python3-%{srcname}}
+# %{?python_provide:%python_provide python3-%{srcname}}
+# %{?py_provides:%py_provides python3-%{srcname}}
 
 %description -n python3-%{srcname}
 Koji Smoky Dingo
