@@ -1,0 +1,6 @@
+Koji Smoky Dingo 1.0.0 Release Notes
+====================================
+
+*Unreleased*
+
+First official release!
