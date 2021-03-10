@@ -94,7 +94,7 @@ included spec to produce an RPM and install that.
 
 ```bash
 make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-0.9.7-0.fc32.noarch.rpm
+dnf install dist/noarch/python3-kojismokydingo-0.9.7-1.fc32.noarch.rpm
 ```
 
 ### System-wide Using Python

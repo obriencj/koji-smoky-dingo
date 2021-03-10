@@ -1,7 +1,7 @@
 Koji Smoky Dingo preview 0.9.7 Release Notes
 ============================================
 
-*March 08, 2021*
+*March 10, 2021*
 
 I hope that this will be the final preview release, with the next
 version being the official 1.0.0. There may be some final API
