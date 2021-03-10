@@ -69,7 +69,7 @@ Koji Smoky Dingo
 %build
 
 %if %{with old_python}
-  %py_build
+  %{__python} setup.py build
 %endif
 
 %if %{with python2}
@@ -94,7 +94,7 @@ Koji Smoky Dingo
 %__rm -rf $RPM_BUILD_ROOT
 
 %if %{with old_python}
-  %py_install
+  %{__python} setup.py install --skip-build --root %{buildroot}
 %endif
 
 %if %{with python2}
@@ -151,7 +151,7 @@ Docs for Koji Smoky Dingo
 
 %package -n python2-%{srcname}
 Summary:        %{summary}
-BuildRequires:  python-devel python-rpm-macros python-setuptools
+BuildRequires:  python-devel python-setuptools
 Requires:	python python-argparse python-setuptools python-six
 Requires:       python2-koji
 Obsoletes:	python2-%{srcname}-meta <= 0.9.0
