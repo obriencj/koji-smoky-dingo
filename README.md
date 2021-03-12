@@ -94,7 +94,7 @@ included spec to produce an RPM and install that.
 
 ```bash
 make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-0.9.8-0.fc32.noarch.rpm
+dnf install dist/noarch/python3-kojismokydingo-1.0.0-1.fc32.noarch.rpm
 ```
 
 ### System-wide Using Python
@@ -108,11 +108,11 @@ sudo python setup.py clean build install --root=/
 
 # Python 2.7 global install
 python2 setup.py bdist_wheel
-pip2 install --prefix /usr -I dist/kojismokydingo-0.9.8-py2-none-any.whl
+pip2 install --prefix /usr -I dist/kojismokydingo-1.0.0-py2-none-any.whl
 
 # Python 3 global install
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-0.9.8-py3-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-1.0.0-py3-none-any.whl
 ```
 
 ### User-only Using Python
@@ -124,7 +124,7 @@ install it anywhere and tell koji to look in that particular
 ```bash
 # Python 3 user install
 python3 setup.py bdist_wheel
-pip3 install --user -I dist/kojismokydingo-0.9.8-py3-none-any.whl
+pip3 install --user -I dist/kojismokydingo-1.0.0-py3-none-any.whl
 ```
 
 And the following setting in ~/.koji/config assuming Python version
