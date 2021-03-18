@@ -138,7 +138,7 @@ class EpochSieve(ItemSieve):
     name = field = "epoch"
 
 
-class StateSieve(VariadicSieve):
+class StateSieve(Sieve):
     """
     Usage: ``(state BUILD_STATE [BUILD_STATE...])``
 
@@ -156,23 +156,27 @@ class StateSieve(VariadicSieve):
     name = "state"
 
 
-    def __init__(self, sifter, pattern):
-        state = ensure_int_or_str(pattern)
+    def __init__(self, sifter, name, *names):
+        super(StateSieve, self).__init__(sifter, name, *names)
 
-        found = BUILD_STATES.get(state)
-        if found is None:
-            raise SifterError("Unknown build state: %r" % pattern)
+        states = []
+        for pattern in self.tokens:
+            state = ensure_int_or_str(pattern)
 
-        super(StateSieve, self).__init__(sifter, state)
+            found = BUILD_STATES.get(state)
+            if found is None:
+                raise SifterError("Unknown build state: %r" % pattern)
 
-        if isinstance(state, str):
-            state = found
+            if isinstance(state, str):
+                state = found
 
-        self.state = state
+            states.append(state)
+
+        self.states = tuple(states)
 
 
     def check(self, session, info):
-        return info["state"] == self.state
+        return info["state"] in self.states
 
 
 class OwnerSieve(IntStrSieve):
