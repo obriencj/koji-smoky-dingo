@@ -4,3 +4,10 @@ Koji Smoky Dingo 1.0.0 Release Notes
 *Unreleased*
 
 First official release!
+
+
+
+Minor fixes from the last preview release:
+
+* fixed error with strict option still being looked for from the
+  ``list-component-builds`` command
