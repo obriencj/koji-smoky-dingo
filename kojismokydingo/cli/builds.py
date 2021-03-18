@@ -840,8 +840,7 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
                                    build_filter=bf,
                                    build_sifter=bs,
                                    sorting=sorting,
-                                   outputs=outputs,
-                                   strict=options.strict)
+                                   outputs=outputs)
 
 
 def cli_filter_builds(session, nvr_list,
