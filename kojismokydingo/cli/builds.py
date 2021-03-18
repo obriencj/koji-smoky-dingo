@@ -681,9 +681,7 @@ class BuildFiltering(BuildSifting):
         return parser
 
 
-    def get_filter(self, options):
-        session = self.session
-
+    def get_filter(self, session, options):
         # setup the limit as a set of IDs for each tag named in the
         # options.
         limit_ids = gather_tag_ids(session, deep=options.limit,
@@ -828,7 +826,7 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
-        bf = self.get_filter(options)
+        bf = self.get_filter(self.session, options)
         bs = self.get_sifter(options)
         sorting = options.sorting
         outputs = self.get_outputs(options)
@@ -964,7 +962,7 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
         if options.nvr_file:
             nvrs.extend(read_clean_lines(options.nvr_file))
 
-        bf = self.get_filter(options)
+        bf = self.get_filter(self.session, options)
         bs = self.get_sifter(options)
         sorting = options.sorting
         outputs = self.get_outputs(options)
