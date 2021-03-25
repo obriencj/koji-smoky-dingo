@@ -63,6 +63,52 @@ function ksd_rpmbuild() {
 }
 
 
+function ksd_prune() {
+
+    local PODMAN=$(whichever podman docker)
+    if [ ! "$PODMAN" ] ; then
+        echo "Neither podman nor docker available, exiting"
+        return 1
+    else
+	echo "Using $PODMAN"
+    fi
+
+    echo "Pruning images"
+    $PODMAN image prune -f
+}
+
+
+function ksd_clean_platform() {
+    # Given a platform, remove its container image.
+
+    local PLATFORM="$1"
+    local CFILE=tools/Containerfile."$PLATFORM"
+
+    local PODMAN=$(whichever podman docker)
+    if [ ! "$PODMAN" ] ; then
+        echo "Neither podman nor docker available, exiting"
+        return 1
+    else
+	echo "Using $PODMAN"
+    fi
+
+    if [ ! -f "$CFILE" ] ; then
+        echo "File not found $CFILE"
+        return 1
+    fi
+
+    local NAME=ksd-test:"$PLATFORM"
+    local CURR=$($PODMAN images -a -q "$NAME" 2>/dev/null)
+
+    if [ "$CURR" ] ; then
+        echo "Cleaning up image $NAME $CURR"
+        $PODMAN image rm -f "$CURR"
+    else
+        echo "Image not found $NAME"
+    fi
+}
+
+
 function ksd_build_platform() {
     # Given a platform, build the relevant container image for it, and
     # tag the image for use. This should as a side effect produce
