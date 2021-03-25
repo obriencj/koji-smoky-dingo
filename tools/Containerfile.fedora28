@@ -1,5 +1,6 @@
 
-FROM fedora:28
+# no longer available from the fedora alias
+FROM docker.io/fedora:28
 
 WORKDIR /src
 
