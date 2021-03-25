@@ -10,4 +10,7 @@ for PLATFORM in $(ksd_platforms "$@") ; do
 done
 
 
+ksd_prune
+
+
 # The end.
