@@ -85,6 +85,7 @@ available by default system-wide, then the package needs to be
 installed into the default site-packages for the python
 installation.
 
+
 ### As an RPM via DNF
 
 If using an RPM-based distribution, this is easily achieved using the
@@ -94,6 +95,7 @@ included spec to produce an RPM and install that.
 make clean rpm
 dnf install dist/noarch/python3-kojismokydingo-1.0.0-1.fc32.noarch.rpm
 ```
+
 
 ### As a System-wide Wheel via Pip
 
@@ -109,6 +111,7 @@ pip2 install --prefix /usr -I dist/kojismokydingo-1.0.0-py2-none-any.whl
 python3 setup.py bdist_wheel
 pip3 install --prefix /usr -I dist/kojismokydingo-1.0.0-py3-none-any.whl
 ```
+
 
 ### As a User-only Wheel via Pip
 
@@ -142,6 +145,7 @@ With koji >= [1.18], the meta plugin can also be symlinked into
 mkdir -p ~/.koji/plugins
 ln -s ~/.local/lib/python3.7/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 ```
+
 
 ## Contact
 
