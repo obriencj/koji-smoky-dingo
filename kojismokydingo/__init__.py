@@ -470,7 +470,7 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
 def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     """
     Set up a chunking multicall to fetch the signatures for a list of
-    RPM via session.queryRPMSigs for each ID in rpm_ids.
+    RPM via `session.queryRPMSigs` for each ID in rpm_ids.
 
     Returns an OrderedDict associating the individual RPM IDs with their
     resulting RPM signature lists.
@@ -568,7 +568,7 @@ def bulk_load_build_rpms(session, build_ids, size=100, results=None):
 def bulk_load_buildroots(session, broot_ids, size=100, results=None):
     """
     Set up a chunking multicall to fetch the buildroot data via
-    session.getBuildroot for each ID in broot_ids.
+    `session.getBuildroot` for each ID in broot_ids.
 
     Returns an OrderedDict associating the individual buildroot IDs
     with their resulting buildroot info dicts.
@@ -599,6 +599,28 @@ def bulk_load_users(session, users, err=True, size=100, results=None):
     If results is non-None, it must support dict assignment, and will
     be used in place of a newly allocated OrderedDict to store and
     return the results.
+
+    :param session: active koji session
+
+    :type session: koji.ClientSession
+
+    :param users: user names or IDs to load
+
+    :type users: Iterator[str] or Iterator[int]
+
+    :param err: halt on problems and raise an exception. Default, True
+
+    :type err: bool, optional
+
+    :param size: number of users to load in a single
+      multicall. Default, 100
+
+    :type size: int, optional
+
+    :param results: dict to store results in. Default, allocate a new
+      OrderedDict
+
+    :type results: dict, optional
     """
 
     users = tuple(users)
