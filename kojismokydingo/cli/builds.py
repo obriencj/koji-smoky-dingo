@@ -44,7 +44,7 @@ from ..builds import (
     BUILD_COMPLETE, BUILD_DELETED,
     BuildFilter,
     build_dedup, build_id_sort, build_nvr_sort,
-    decorate_builds_btypes, decorate_builds_cg_list, filter_imported,
+    decorate_builds_btypes, decorate_builds_cg_list,
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_move_builds, iter_bulk_tag_builds, iter_bulk_untag_builds, )
 from ..tags import ensure_tag, gather_tag_ids
