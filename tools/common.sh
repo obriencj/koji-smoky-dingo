@@ -39,14 +39,14 @@ function ksd_rpmbuild() {
             dnf install -qy "$@"
         }
         function _builddep() {
-            dnf builddep -qy "$@"
+            dnf builddep --disablerepo=*source -qy "$@"
         }
     else
         function _install() {
             yum install -q -y "$@"
         }
         function _builddep() {
-            yum-builddep -q -y "$@"
+            yum-builddep --disablerepo=*source -q -y "$@"
         }
     fi
 
