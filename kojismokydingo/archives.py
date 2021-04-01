@@ -138,7 +138,7 @@ def gather_signed_rpms(session, archives, sigkeys):
     rpms = dict((rpm["id"], rpm) for rpm in archives)
 
     # now bulk load all the sigs for each RPM ID
-    rpm_sigs = bulk_load_rpm_sigs(session, rpms.keys())
+    rpm_sigs = bulk_load_rpm_sigs(session, rpms)
 
     for rpm_id, rpm in rpms.items():
         found = set(sig["sigkey"] for sig in rpm_sigs[rpm_id])
