@@ -96,7 +96,7 @@ function ksd_clean_platform() {
         return 1
     fi
 
-    local NAME=ksd-test:"$PLATFORM"
+    local NAME=ksd2-test:"$PLATFORM"
     local CURR=$($PODMAN images -a -q "$NAME" 2>/dev/null)
 
     if [ "$CURR" ] ; then
@@ -132,7 +132,7 @@ function ksd_build_platform() {
         return 1
     fi
 
-    local NAME=ksd-test:"$PLATFORM"
+    local NAME=ksd2-test:"$PLATFORM"
 
     # let's see if there was a previous image with this tag. We won't
     # remove it yet, we want to try and take cache advantage of any
@@ -172,7 +172,7 @@ function ksd_test_platform() {
     # script in it. Results will be written to the logs directory.
 
     local PLATFORM="$1"
-    local NAME=ksd-test:"$PLATFORM"
+    local NAME=ksd2-test:"$PLATFORM"
 
     local PODMAN=$(whichever podman docker)
     if [ ! "$PODMAN" ] ; then
