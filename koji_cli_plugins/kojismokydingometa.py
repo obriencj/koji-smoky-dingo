@@ -32,9 +32,6 @@ object with the attributes that koji expects in a CLI plugin handler.
 """
 
 
-from __future__ import print_function
-
-
 def __plugin__(glbls):
     # because koji will be inspecting the contents of this package, we
     # want to avoid leaving references around that it can see. So all
@@ -56,23 +53,7 @@ def __plugin__(glbls):
             # or a callable appropriate for use as a koji command
             # handler.
 
-            # Note we do not enforce the requirements for the entry
-            # point packages -- those NEED to have been installed
-            # ahead of time. We do this because we have a requirement
-            # on koji, and in some cases koji is installed in a way
-            # that the environment can find it, but pkg_resources is
-            # oblivious to it. Also, since we support back to RHEL6,
-            # we may or may not have a resolve method, and might have
-            # to fall back on the now-deprecated load(require=False)
-            # invocation instead.
-            if hasattr(entry_point, "resolve"):
-                entry_fn = entry_point.resolve()
-            else:
-                # we'd happily just call this in all situations, if it
-                # didn't start spitting out DeprecationWarning
-                # messages.
-                entry_fn = entry_point.load(require=False)
-
+            entry_fn = entry_point.resolve()
             handler = entry_fn(entry_point.name) if entry_fn else None
 
         except Exception as ex:
