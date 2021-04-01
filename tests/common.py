@@ -12,13 +12,12 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+from configparser import ConfigParser
 from contextlib import contextmanager
 from datetime import datetime
 from mock import MagicMock, patch
 from operator import itemgetter
 from pkg_resources import resource_filename
-from six import iteritems
-from six.moves.configparser import ConfigParser
 from unittest import TestCase
 
 from kojismokydingo.common import (
@@ -399,7 +398,7 @@ class TestDates(TestCase):
             dtv = parse_datetime(src)
             self.assertTrue(isinstance(dtv, datetime))
 
-            for key, val in iteritems(checks):
+            for key, val in checks.items():
                 found = getattr(dtv, key, None)
                 if found:
                     self.assertEqual(found, val)

@@ -12,8 +12,6 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-import six
-
 from collections import OrderedDict
 from unittest import TestCase
 
@@ -289,12 +287,9 @@ class SifterTest(TestCase):
         self.assertTrue(isinstance(sieves[0], ItemSieve))
         self.assertEqual(sieves[0].name, "name")
         self.assertEqual(sieves[0].field, "name")
-        self.assertTrue(isinstance(sieves[0].token, six.text_type))
+        self.assertTrue(isinstance(sieves[0].token, str))
 
-        if six.PY3:
-            self.assertEqual(repr(sieves[0]), r"(name 'Pizza\nBeer')")
-        elif six.PY2:
-            self.assertEqual(repr(sieves[0]), r"(name u'Pizza\nBeer')")
+        self.assertEqual(repr(sieves[0]), r"(name 'Pizza\nBeer')")
 
         res = sifter(None, DATA)
         self.assertFalse(res)

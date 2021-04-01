@@ -13,7 +13,6 @@
 
 
 from pkg_resources import EntryPoint
-from six import iteritems
 from unittest import TestCase
 
 
@@ -28,7 +27,7 @@ class TestExpectedStandalone(TestCase):
     def test_entry_points(self):
         # verify the expected entry points resolve and can be
         # initialized
-        for nameref in iteritems(ENTRY_POINTS):
+        for nameref in ENTRY_POINTS.items():
             cmd = "=".join(nameref)
             ep = EntryPoint.parse(cmd)
 
