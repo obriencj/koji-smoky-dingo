@@ -20,11 +20,8 @@ Koji Smoky Dingo - CLI Archive and RPM Commands
 """
 
 
-from __future__ import print_function
-
 from argparse import SUPPRESS
 from collections import OrderedDict
-from six import itervalues
 
 from . import AnonSmokyDingo, pretty_json, resplit
 from .. import bulk_load_builds
@@ -54,7 +51,7 @@ def cli_list_build_archives(session, nvrs, btype,
     loaded = bulk_load_builds(session, nvrs)
     found = []
 
-    for binfo in build_dedup(itervalues(loaded)):
+    for binfo in build_dedup(loaded.values()):
         # the meaning of the --show-deleted/-d setting is a little
         # different than explained. Any non-COMPLETE build will
         # normally show no archives, but with that setting enabled,
@@ -95,7 +92,7 @@ def cli_latest_tag_archives(session, tagname, btype,
         print(f["filepath"])
 
 
-class ArchiveFiltering(object):
+class ArchiveFiltering():
 
 
     def archive_arguments(self, parser):

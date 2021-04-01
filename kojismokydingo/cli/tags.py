@@ -20,15 +20,11 @@ Koji Smoky Dingo - CLI Tag and Target Commands
 """
 
 
-from __future__ import print_function
-
 import sys
 
 from json import dumps
 from koji_cli.lib import arg_filter
 from operator import itemgetter
-from six import iteritems, itervalues
-from six.moves import map, zip
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
@@ -333,7 +329,7 @@ def cli_list_rpm_macros(session, tagname, target=False,
     taginfo = resolve_tag(session, tagname, target)
 
     extras = collect_tag_extras(session, taginfo, prefix="rpm.macro.")
-    for name, extra in iteritems(extras):
+    for name, extra in extras.items():
         extra["macro"] = name[10:]
 
     if json:
@@ -344,12 +340,12 @@ def cli_list_rpm_macros(session, tagname, target=False,
         # macro definition mode
         fmt = "%{macro} {value}"
 
-        for extra in itervalues(extras):
+        for extra in extras.values():
             print(fmt.format(**extra))
 
     else:
         tabulate(("Macro", "Value", "Tag"),
-                 itervalues(extras),
+                 extras.values(),
                  key=itemgetter("macro", "value", "tag_name"),
                  sorting=1,
                  quiet=quiet)
@@ -709,7 +705,7 @@ def cli_list_env_vars(session, tagname, target=False,
     taginfo = resolve_tag(session, tagname, target)
 
     extras = collect_tag_extras(session, taginfo, prefix="rpm.env.")
-    for name, extra in iteritems(extras):
+    for name, extra in extras.items():
         extra["var"] = name[8:]
 
     if json:
@@ -719,19 +715,19 @@ def cli_list_env_vars(session, tagname, target=False,
     else:
         # we're going to want to add some escaping safety nets. Let's
         # have json.dumps do that work for us.
-        for extra in itervalues(extras):
+        for extra in extras.values():
             extra["value"] = dumps(extra["value"])
 
     if defn:
         # macro definition mode
         fmt = "{var!s}={value!s}"
 
-        for extra in itervalues(extras):
+        for extra in extras.values():
             print(fmt.format(**extra))
 
     else:
         tabulate(("Variable", "Value", "Tag"),
-                 itervalues(extras),
+                 extras.values(),
                  key=itemgetter("var", "value", "tag_name"),
                  sorting=1,
                  quiet=quiet)
@@ -800,7 +796,7 @@ def cli_list_tag_extras(session, tagname, target=False,
         fields = itemgetter("name", "value", "tag_name")
 
     tabulate(headings,
-             itervalues(extras),
+             extras.values(),
              key=fields,
              sorting=1,
              quiet=quiet)
@@ -859,7 +855,7 @@ def cli_filter_tags(session, tag_list,
 
     tag_list = unique(map(int_or_str, tag_list))
     loaded = bulk_load_tags(session, tag_list, err=strict)
-    tags = tag_dedup(itervalues(loaded))
+    tags = tag_dedup(loaded.values())
 
     if tag_sifter:
         results = tag_sifter(session, tags)

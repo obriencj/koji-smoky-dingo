@@ -24,7 +24,6 @@ Sieves
 import operator
 
 from operator import itemgetter
-from six.moves import map
 
 from . import SifterError, Sieve
 from .. import iter_bulk_load

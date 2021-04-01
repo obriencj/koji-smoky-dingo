@@ -93,7 +93,7 @@ included spec to produce an RPM and install that.
 
 ```bash
 make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-1.0.0-1.fc32.noarch.rpm
+dnf install dist/noarch/python3-kojismokydingo-2.0.0-0.fc32.noarch.rpm
 ```
 
 
@@ -103,13 +103,8 @@ Using traditional setuptools or pip installation methods can also
 achieve this by specifying the specific root or prefix parameter
 
 ```bash
-# Python 2.7 global install
-python2 setup.py bdist_wheel
-pip2 install --prefix /usr -I dist/kojismokydingo-1.0.0-py2-none-any.whl
-
-# Python 3 global install
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-1.0.0-py3-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-2.0.0-py3-none-any.whl
 ```
 
 
@@ -120,9 +115,8 @@ install it anywhere and tell koji to look in that particular
 `site-package/koji_cli_plugins` instance
 
 ```bash
-# Python 3 user install
 python3 setup.py bdist_wheel
-pip3 install --user -I dist/kojismokydingo-1.0.0-py3-none-any.whl
+pip3 install --user -I dist/kojismokydingo-2.0.0-py3-none-any.whl
 ```
 
 And the following setting in ~/.koji/config assuming Python version
@@ -133,7 +127,7 @@ you'll want to use the meta plugin with.
 
 ```
 [koji]
-plugin_paths = ~/.local/lib/python3.7/site-packages/koji_cli_plugins/
+plugin_paths = ~/.local/lib/python3.8/site-packages/koji_cli_plugins/
 ```
 
 With koji >= [1.18], the meta plugin can also be symlinked into
@@ -143,7 +137,7 @@ With koji >= [1.18], the meta plugin can also be symlinked into
 
 ```bash
 mkdir -p ~/.koji/plugins
-ln -s ~/.local/lib/python3.7/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+ln -s ~/.local/lib/python3.8/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 ```
 
 

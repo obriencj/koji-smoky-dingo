@@ -26,16 +26,13 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 
 
 CLASSIFIERS = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Programming Language :: Python :: 2",
-    "Programming Language :: Python :: 2.6",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
@@ -107,7 +104,6 @@ def config():
         "install_requires": [
             "appdirs",
             "koji",
-            "six",
         ],
 
         "tests_require": [
@@ -115,7 +111,6 @@ def config():
             "docutils",
             "koji",
             "mock",
-            "six",
         ],
 
         # The koji_cli_plugins namespace package needs to be a plain

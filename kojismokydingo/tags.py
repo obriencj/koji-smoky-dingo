@@ -23,8 +23,6 @@ Koji Smoky Dingo - tags and targets
 from collections import OrderedDict
 from functools import partial
 from itertools import chain
-from six import iteritems, itervalues
-from six.moves import filter
 
 from . import (
     NoSuchTag,
@@ -251,7 +249,7 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
     if not extra:
         return found
 
-    for key, val in iteritems(extra):
+    for key, val in extra.items():
 
         # check whether the taginfo was gathered with blocks included.
         # See https://pagure.io/koji/pull-request/2495#_4__40
@@ -315,7 +313,7 @@ def collect_tag_extras(session, taginfo, prefix=None):
     tids = (tag["parent_id"] for tag in inher if not tag["noconfig"])
     parents = bulk_load_tags(session, tids)
 
-    for tag in itervalues(parents):
+    for tag in parents.values():
         # mix the extras into existing found results. note: we're not
         # checking for faults, because we got this list of tag IDs
         # straight from koji itself, but there could be some kind of
@@ -359,11 +357,11 @@ def gather_tag_ids(session, shallow=(), deep=(), results=None):
     # first dig up the IDs for all the tags. If any are invalid, this will
     # raise a NoSuchTag exception
     found = bulk_load_tags(session, seek)
-    results.update(t['id'] for t in itervalues(found))
+    results.update(t['id'] for t in found.values())
 
     if deep:
         inh = bulk_load(session, session.getFullInheritance, deep)
-        for parents in itervalues(inh):
+        for parents in inh.values():
             results.update(t['parent_id'] for t in parents)
 
     return results

@@ -26,8 +26,6 @@ from itertools import chain, repeat
 from koji import BUILD_STATES
 from collections import OrderedDict
 from operator import itemgetter
-from six import iteritems, itervalues
-from six.moves import filter
 
 from . import (
     NoSuchBuild,
@@ -86,7 +84,7 @@ BUILD_FAILED = BUILD_STATES["FAILED"]
 BUILD_CANCELED = BUILD_STATES["CANCELED"]
 
 
-class BuildNEVRCompare(object):
+class BuildNEVRCompare():
     """
     An adapter for Name, Epoch, Version, Release comparisons of a
     build info dictionary. Used by the nevr_sort_builds function.
@@ -101,10 +99,6 @@ class BuildNEVRCompare(object):
 
 
     def __cmp__(self, other):
-        # cmp is a python2-ism, and has no replacement in python3 via
-        # six, so we'll have to create our own simplistic behavior
-        # similarly
-
         if self.n == other.n:
             return rpm_evr_compare(self.evr, other.evr)
 
@@ -326,7 +320,7 @@ def bulk_move_nvrs(session, srctag, dsttag, nvrs,
     """
 
     builds = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = build_dedup(itervalues(builds))
+    builds = build_dedup(builds.values())
 
     return bulk_move_builds(session, srctag, dsttag, builds,
                             force=force, notify=notify,
@@ -502,7 +496,7 @@ def bulk_tag_nvrs(session, tag, nvrs,
     """
 
     builds = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = build_dedup(itervalues(builds))
+    builds = build_dedup(builds.values())
 
     return bulk_tag_builds(session, tag, builds,
                            force=force, notify=notify,
@@ -674,7 +668,7 @@ def bulk_untag_nvrs(session, tag, nvrs,
     """
 
     builds = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = build_dedup(itervalues(builds))
+    builds = build_dedup(builds.values())
 
     return bulk_untag_builds(session, tag, builds,
                              force=force, notify=notify,
@@ -802,7 +796,7 @@ def decorate_builds_btypes(session, build_infos, with_fields=True):
         if not with_fields:
             continue
 
-        for btn, data in iteritems(bts):
+        for btn, data in bts.items():
             if not data:
                 continue
 
@@ -814,7 +808,7 @@ def decorate_builds_btypes(session, build_infos, with_fields=True):
                 # an underscore
                 if "build_id" in data:
                     del data["build_id"]
-                for key, val in iteritems(data):
+                for key, val in data.items():
                     bld["_".join((btn, key))] = val
 
     return build_infos
@@ -872,14 +866,14 @@ def decorate_builds_cg_list(session, build_infos):
     # gather all the buildroot IDs, based on both the archives and
     # RPMs of the build.
     root_ids = set()
-    for archive_list in itervalues(archives):
+    for archive_list in archives.values():
         for archive in archive_list:
             broot_id = archive.get("buildroot_id")
             if broot_id:
                 # do NOT allow None or 0
                 root_ids.add(broot_id)
 
-    for rpm_list in itervalues(rpms):
+    for rpm_list in rpms.values():
         for rpm in rpm_list:
             broot_id = rpm.get("buildroot_id")
             if broot_id:
@@ -889,7 +883,7 @@ def decorate_builds_cg_list(session, build_infos):
     # multicall to fetch all the buildroots
     buildroots = bulk_load_buildroots(session, root_ids)
 
-    for build_id, archive_list in iteritems(archives):
+    for build_id, archive_list in archives.items():
         bld = wanted[build_id]
 
         cg_ids = []
@@ -917,7 +911,7 @@ def decorate_builds_cg_list(session, build_infos):
         bld["archive_cg_ids"] = unique(cg_ids)
         bld["archive_cg_names"] = unique(cg_names)
 
-    for build_id, rpm_list in iteritems(rpms):
+    for build_id, rpm_list in rpms.items():
         if not rpm_list:
             continue
 
@@ -985,7 +979,7 @@ def filter_builds_by_tags(session, build_infos,
     fn = lambda i: session.listTags(build=i)
     build_tags = bulk_load(session, fn, builds)
 
-    for bid, tags in iteritems(build_tags):
+    for bid, tags in build_tags.items():
         # convert the list of tags into a set of tag IDs
         tags = set(t["id"] for t in tags)
 
@@ -998,7 +992,7 @@ def filter_builds_by_tags(session, build_infos,
             # don't want it, it's in the lookaside
             builds.pop(bid)
 
-    return itervalues(builds)
+    return builds.values()
 
 
 def filter_builds_by_state(build_infos, state=BUILD_COMPLETE):
@@ -1136,7 +1130,7 @@ def gather_buildroots(session, build_ids):
 
     # gather all the buildroot IDs
     root_ids = set()
-    for archive_list in itervalues(archives):
+    for archive_list in archives.values():
         for archive in archive_list:
             broot_id = archive["buildroot_id"]
             if broot_id:
@@ -1148,7 +1142,7 @@ def gather_buildroots(session, build_ids):
 
     results = {}
 
-    for build_id, archive_list in iteritems(archives):
+    for build_id, archive_list in archives.items():
         broots = (a["buildroot_id"] for a in archive_list)
         broots = unique(filter(None, broots))
         results[build_id] = [buildroots[b] for b in broots]
@@ -1169,14 +1163,14 @@ def gather_rpm_sigkeys(session, build_ids):
     loaded = bulk_load_build_rpms(session, build_ids)
 
     # now load a mapping of rpm_id: [SIGS]
-    rpmids = (rpm["id"] for rpm in chain(*itervalues(loaded)))
+    rpmids = (rpm["id"] for rpm in chain(*loaded.values()))
     rpm_sigs = bulk_load_rpm_sigs(session, rpmids)
 
     results = {}
 
     # now just correlate the set of sigkeys back to each needed
     # cache entry
-    for bid, rpms in iteritems(loaded):
+    for bid, rpms in loaded.items():
         results[bid] = sigs = set()
         for rpm in rpms:
             rsigs = (sig["sigkey"] for sig in rpm_sigs[rpm["id"]])
@@ -1201,7 +1195,7 @@ def gather_wrapped_builds(session, task_ids, results=None):
 
     tasks = bulk_load_tasks(session, task_ids, request=True)
 
-    for tid, task in iteritems(tasks):
+    for tid, task in tasks.items():
         if task["method"] == "wrapperRPM":
             results[tid] = task["request"][2]
 
@@ -1238,7 +1232,7 @@ def gather_component_build_ids(session, build_ids, btypes=None):
 
     # gather all the buildroot IDs
     root_ids = set()
-    for archive_list in itervalues(archives):
+    for archive_list in archives.values():
         for archive in archive_list:
             broot_id = archive["buildroot_id"]
             if broot_id:
@@ -1264,7 +1258,7 @@ def gather_component_build_ids(session, build_ids, btypes=None):
     # now associate the components back with the original build IDs
     results = {}
 
-    for build_id, archive_list in iteritems(archives):
+    for build_id, archive_list in archives.items():
         cids = set()
         for archive in archive_list:
             broot_id = archive["buildroot_id"]
@@ -1276,7 +1270,7 @@ def gather_component_build_ids(session, build_ids, btypes=None):
     return results
 
 
-class BuildFilter(object):
+class BuildFilter():
 
     def __init__(self, session,
                  limit_tag_ids=None, lookaside_tag_ids=None,

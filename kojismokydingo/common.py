@@ -30,14 +30,13 @@ Some simple functions used by the other modules.
 import re
 
 from collections import OrderedDict
+from configparser import ConfigParser
 from datetime import datetime
 from fnmatch import fnmatchcase
 from glob import glob
+from itertools import filterfalse, zip_longest
 from operator import itemgetter
 from os.path import expanduser, isdir, join
-from six import iteritems, itervalues
-from six.moves import filter, filterfalse, range, zip_longest
-from six.moves.configparser import ConfigParser
 
 
 try:
@@ -194,7 +193,7 @@ def update_extend(dict_orig, *dict_additions):
     """
 
     for additions in dict_additions:
-        for key, val in iteritems(additions):
+        for key, val in additions.items():
             orig = dict_orig.setdefault(key, [])
             orig.extend(val)
 
@@ -425,7 +424,7 @@ def unique(sequence, key=None):
             # undocumented behavior! woo!!
             key = itemgetter(key)
         work = ((key(v), v) for v in sequence)
-        return list(itervalues(OrderedDict(work)))
+        return list(OrderedDict(work).values())
     else:
         return list(OrderedDict.fromkeys(sequence))
 

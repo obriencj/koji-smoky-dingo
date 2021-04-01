@@ -6,7 +6,7 @@ VERSION := $(shell tools/version.sh)
 ARCHIVE := $(PROJECT)-$(VERSION).tar.gz
 
 
-PYTHON ?= $(shell which python3 python2 python 2>/dev/null \
+PYTHON ?= $(shell which python3 python 2>/dev/null \
 	        | head -n1)
 PYTHON := $(PYTHON)
 

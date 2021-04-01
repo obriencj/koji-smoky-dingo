@@ -20,13 +20,10 @@ Koji Smoky Dingo - CLI Client Commands
 """
 
 
-from __future__ import print_function
-
 import sys
 
+from configparser import ConfigParser
 from os import system
-from six import iterkeys
-from six.moves.configparser import ConfigParser
 
 from . import AnonSmokyDingo, BadDingo, int_or_str, pretty_json
 from .. import (
@@ -56,7 +53,7 @@ def cli_client_config(session, goptions,
         # have dict comprehensions.
         opts = dict((k, opts[k]) for k in only if k in opts)
     else:
-        only = sorted(iterkeys(opts))
+        only = sorted(opts)
 
     if json:
         pretty_json(opts)

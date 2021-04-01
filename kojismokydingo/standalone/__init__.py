@@ -28,7 +28,6 @@ import sys
 from argparse import ArgumentParser
 from koji import GenericError
 from os.path import basename
-from six import iteritems
 
 from .. import AnonClientSession, BadDingo, ProfileClientSession
 from ..cli import AnonSmokyDingo, SmokyDingo, printerr

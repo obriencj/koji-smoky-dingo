@@ -22,9 +22,6 @@ Functions for working with Koji hosts
 """
 
 
-from six import itervalues
-from six.moves import filter
-
 from . import NoSuchChannel, iter_bulk_load
 from .common import globfilter, parse_datetime
 
@@ -88,7 +85,7 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
         data = parse_datetime(data, strict=False) if data else None
         bldrs[bldr_id]["last_update"] = data
 
-    return list(itervalues(bldrs))
+    return list(bldrs.values())
 
 
 #

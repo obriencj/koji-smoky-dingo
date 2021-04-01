@@ -27,7 +27,6 @@ from koji import (
     ClientSession, Fault, GenericError, ParameterError,
     convertFault, read_config)
 from koji_cli.lib import activate_session, ensure_connection
-from six.moves import map, zip
 
 from .common import chunkseq
 
@@ -104,7 +103,7 @@ class ProfileClientSession(ManagedClientSession):
     def __init__(self, profile="koji"):
         conf = read_config(profile)
         server = conf["server"]
-        super(ProfileClientSession, self).__init__(server, opts=conf)
+        super().__init__(server, opts=conf)
 
 
 class AnonClientSession(ProfileClientSession):
@@ -140,7 +139,7 @@ class BadDingo(Exception):
     complaint = "Something bad happened"
 
     def __str__(self):
-        orig = super(BadDingo, self).__str__()
+        orig = super().__str__()
         return ": ".join([self.complaint, orig])
 
 
