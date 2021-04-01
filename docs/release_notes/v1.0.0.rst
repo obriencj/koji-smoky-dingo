@@ -1,6 +1,70 @@
 Koji Smoky Dingo 1.0.0 Release Notes
 ====================================
 
-*Unreleased*
+*April 1, 2021*
 
-First official release!
+We've finally made it to the first official full release!
+
+
+Version 1.0.0 provides the following koji client commands
+
+* `koji affected—targets` Show targets which would be impacted by
+  modifications to the given tag
+* `koji block-env-var` Blocks a mock environment variable from a tag.
+* `koji block-rpm-macro` Blocks a mock RPM macro from a tag.
+* `koji bulk—move-builds` Move a large amount of builds, bypassing the
+  creation of individual tasks.
+* `koji bulk—tag-builds` Tag a large amount of builds, bypassing the
+  creation of individual tasks.
+* `koji bulk—untag-builds` Untag a large amount of builds, bypassing
+  the creation of individual tasks.
+* `koji cginfo` Show content generators and their permitted users
+* `koji check—hosts` Show builder hosts which haven't been checking in lately
+* `koji client-config` Show settings for client profiles
+* `koji filter-builds` Filter a list of NVRs by various criteria
+* `koji filter-tags` Filter a list of tags by various criteria
+* `koji latest-archives` Show selected latest archives from a tag
+* `koji list-btypes` Show build types
+* `koji list-build-archives` Show selected archives attached to a build
+* `koji list-cgs` Show content generators
+* `koji list-component-builds` Show builds which were used to produce others
+* `koji list-env-vars` Show all inherited mock environment variables for a tag
+* `koji list-rpm-macros` Show all inherited mock RPM macros for a tag
+* `koji list-tag-extras` Show all inherited extra fields for a tag
+* `koji open` Opens a brower to the info page for data types
+* `koji perminfo` Show information about a permission
+* `koji remove-env-var` Removes a mock environment variable from a tag.
+* `koji remove-rpm-macro` Removes a mock RPM macro from a tag.
+* `koji renum—tag-inheritance` Adjust the priority values of a tag to
+  maintain the same inheritance order, but to create an even amount of
+  space between each entry.
+* `koji set-env-var` Sets, unsets, or blocks the value of a mock
+  environment variable on a tag.
+* `koji set-rpm-macro` Sets, unsets, or blocks the value of a mock RPM
+  macro on a tag.
+* `koji swap—tag-inheritance` Adjust the inheritance of a tag by
+  replacing one entry for another. If both entries are already parents
+  of a tag, then swap the priority of the two.
+* `koji userinfo` Show information about a user account
+
+
+And the following standalone filtering commands
+
+* `ksd-filter-builds` Similar to `koji filter-builds` but usable as a
+  shebang
+* `ksd-filter-tags` Similar to `koji filter-tagss` but usable as a
+  shebang
+
+
+The version 1 stream will continue to support Python 2 while
+maintaining API compatability moving forward. Version 2.0 will drop
+Python 2 support, and may introduce API compatability changes.
+
+
+Changes from the v0.9.7 preview release:
+
+* fixed error with strict option still being looked for from the
+  ``list-component-builds`` command
+* `filter_by_state` renamed to `filter_builds_by_state`
+* `filter_by_tags` ranamed to `filter_builds_by_tags`
+* `filter_imported` renamed to `filter_imported_builds`

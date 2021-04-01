@@ -42,12 +42,12 @@ from six.moves.configparser import ConfigParser
 
 try:
     from datetime import timezone
-except ImportError:
+except ImportError:  # pragma: no cover
     timezone = None
 
 try:
     import appdirs
-except ImportError:
+except ImportError:  # pragma: no cover
     appdirs = None
 
 

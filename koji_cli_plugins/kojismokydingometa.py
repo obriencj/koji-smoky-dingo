@@ -64,7 +64,7 @@ def __plugin__(glbls):
             # oblivious to it. Also, since we support back to RHEL6,
             # we may or may not have a resolve method, and might have
             # to fall back on the now-deprecated load(require=False)
-            # invocation instead. Python packaging kinda sucks, eh?
+            # invocation instead.
             if hasattr(entry_point, "resolve"):
                 entry_fn = entry_point.resolve()
             else:

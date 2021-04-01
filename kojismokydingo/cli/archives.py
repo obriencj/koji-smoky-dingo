@@ -64,13 +64,13 @@ def cli_list_build_archives(session, nvrs, btype,
             found.extend(gather_build_archives(session, binfo, btype,
                                                rpmkeys, path))
 
-    found = filter_archives(session, found, atypes, arches)
+    filtered = filter_archives(session, found, atypes, arches)
 
     if json:
-        pretty_json(found)
+        pretty_json(tuple(filtered))
         return
 
-    for f in found:
+    for f in filtered:
         print(f["filepath"])
 
 
@@ -85,13 +85,13 @@ def cli_latest_tag_archives(session, tagname, btype,
     found = gather_latest_archives(session, tagname, btype,
                                    rpmkeys, inherit, path)
 
-    found = filter_archives(session, found, atypes, arches)
+    filtered = filter_archives(session, found, atypes, arches)
 
     if json:
-        pretty_json(found)
+        pretty_json(tuple(filtered))
         return
 
-    for f in found:
+    for f in filtered:
         print(f["filepath"])
 
 
@@ -180,12 +180,6 @@ class ArchiveFiltering(object):
             keys.append('')
         options.keys = keys
 
-        goptions = self.goptions
-        if options.as_url:
-            options.path = goptions.topurl
-        else:
-            options.path = goptions.topdir
-
 
 class ListBuildArchives(AnonSmokyDingo, ArchiveFiltering):
 
@@ -208,6 +202,13 @@ class ListBuildArchives(AnonSmokyDingo, ArchiveFiltering):
 
 
     def validate(self, parser, options):
+
+        goptions = self.goptions
+        if options.as_url:
+            options.path = goptions.topurl
+        else:
+            options.path = goptions.topdir
+
         return self.validate_archive_options(parser, options)
 
 

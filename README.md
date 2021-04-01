@@ -18,17 +18,15 @@ particular relevance.
 ## Meta Plugin
 
 This project provides a relatively tiny CLI plugin for koji, named
-kojismokydingometa. This plugin acts as an adapter between koji's
-existing CLI framework and Python's entry_points. This adaptive
-behavior is utilized by the rest of the project to add its own
-additional commands to koji.
+kojismokydingometa. The meta plugin acts as an adapter between koji's
+existing CLI plugin loading framework and Python entry_points.
 
-The meta plugin can be used to load commands other than those provided
-as part of this project. Simply register your commands with the
-`"koji_smoky_dingo"` entry point key. See the example command's
-[setup.py] for a direct reference.
+The meta plugin can be used to load additional commands beyond those
+provided as part of this project. Simply register your commands with
+the `"koji_smoky_dingo"` entry point key. See the [example command]
+as a reference.
 
-[setup.py]: https://github.com/obriencj/koji-smoky-dingo/blob/master/examples/command/setup.py
+[example command]: https://github.com/obriencj/koji-smoky-dingo/blob/master/examples/command/
 
 
 ## Tag Commands
@@ -87,35 +85,35 @@ available by default system-wide, then the package needs to be
 installed into the default site-packages for the python
 installation.
 
-### Using RPM
+
+### As an RPM via DNF
 
 If using an RPM-based distribution, this is easily achieved using the
 included spec to produce an RPM and install that.
 
 ```bash
 make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-0.9.8-0.fc32.noarch.rpm
+dnf install dist/noarch/python3-kojismokydingo-1.0.0-1.fc32.noarch.rpm
 ```
 
-### System-wide Using Python
+
+### As a System-wide Wheel via Pip
 
 Using traditional setuptools or pip installation methods can also
 achieve this by specifying the specific root or prefix parameter
 
 ```bash
-# Python 2.6 global install
-sudo python setup.py clean build install --root=/
-
 # Python 2.7 global install
 python2 setup.py bdist_wheel
-pip2 install --prefix /usr -I dist/kojismokydingo-0.9.8-py2-none-any.whl
+pip2 install --prefix /usr -I dist/kojismokydingo-1.0.0-py2-none-any.whl
 
 # Python 3 global install
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-0.9.8-py3-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-1.0.0-py3-none-any.whl
 ```
 
-### User-only Using Python
+
+### As a User-only Wheel via Pip
 
 However, if you only want the plugin available for yourself, you can
 install it anywhere and tell koji to look in that particular
@@ -124,7 +122,7 @@ install it anywhere and tell koji to look in that particular
 ```bash
 # Python 3 user install
 python3 setup.py bdist_wheel
-pip3 install --user -I dist/kojismokydingo-0.9.8-py3-none-any.whl
+pip3 install --user -I dist/kojismokydingo-1.0.0-py3-none-any.whl
 ```
 
 And the following setting in ~/.koji/config assuming Python version
@@ -147,6 +145,7 @@ With koji >= [1.18], the meta plugin can also be symlinked into
 mkdir -p ~/.koji/plugins
 ln -s ~/.local/lib/python3.7/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 ```
+
 
 ## Contact
 

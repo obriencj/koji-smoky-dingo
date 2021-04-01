@@ -31,7 +31,7 @@ from six.moves import filter
 
 from . import (
     DEFAULT_SIEVES,
-    IntStrSieve, ItemSieve, MatcherSieve, Sieve,
+    IntStrSieve, ItemSieve, MatcherSieve, Number, Sieve,
     Sifter, SifterError, VariadicSieve,
     ensure_int_or_str, ensure_str, ensure_symbol, )
 from .common import ensure_comparison, CacheMixin
@@ -138,7 +138,7 @@ class EpochSieve(ItemSieve):
     name = field = "epoch"
 
 
-class StateSieve(ItemSieve):
+class StateSieve(Sieve):
     """
     Usage: ``(state BUILD_STATE [BUILD_STATE...])``
 
@@ -153,20 +153,30 @@ class StateSieve(ItemSieve):
     * ``CANCELED``
     """
 
-    name = field = "state"
+    name = "state"
 
 
-    def __init__(self, sifter, pattern):
-        state = ensure_int_or_str(pattern)
+    def __init__(self, sifter, name, *names):
+        super(StateSieve, self).__init__(sifter, name, *names)
 
-        found = BUILD_STATES.get(state)
-        if found is None:
-            raise SifterError("Unknown build state: %r" % pattern)
+        states = []
+        for pattern in self.tokens:
+            state = ensure_int_or_str(pattern)
 
-        if isinstance(state, str):
-            state = found
+            found = BUILD_STATES.get(state)
+            if found is None:
+                raise SifterError("Unknown build state: %r" % pattern)
 
-        super(ItemSieve, self).__init__(sifter, state)
+            if isinstance(state, str):
+                state = found
+
+            states.append(state)
+
+        self.states = tuple(states)
+
+
+    def check(self, session, info):
+        return info["state"] in self.states
 
 
 class OwnerSieve(IntStrSieve):
@@ -785,7 +795,7 @@ class CompareLatestSieve(CacheMixin):
 
 
     @abstractmethod
-    def comparison_key(binfo):
+    def comparison_key(self, binfo):
         pass
 
 

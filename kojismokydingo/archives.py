@@ -79,7 +79,7 @@ def filter_archives(session, archives, archive_types=(), arches=()):
 
     :type arches: list[str]
 
-    :rtype: list[dict]
+    :rtype: Iterator[dict]
     """
 
     if not (archive_types or arches):
@@ -107,7 +107,7 @@ def filter_archives(session, archives, archive_types=(), arches=()):
         return ((not atypes or a["type_id"] in atypes) and
                 (not arches or a.get("arch", "noarch") in arches))
 
-    return list(filter(filter_fn, archives))
+    return filter(filter_fn, archives)
 
 
 def gather_signed_rpms(session, archives, sigkeys):
@@ -154,6 +154,7 @@ def gather_signed_rpms(session, archives, sigkeys):
 
 def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
 
+    binfo = as_buildinfo(session, binfo)
     bid = binfo["id"]
     path = as_pathinfo(path)
 
@@ -193,6 +194,7 @@ def gather_build_maven_archives(session, binfo, path=None):
     :rtype: list[dict]
     """
 
+    binfo = as_buildinfo(session, binfo)
     bid = binfo["id"]
     path = as_pathinfo(path)
 
@@ -219,6 +221,7 @@ def gather_build_win_archives(session, binfo, path=None):
     :rtype: list[dict]
     """
 
+    binfo = as_buildinfo(session, binfo)
     bid = binfo["id"]
     path = as_pathinfo(path)
 
@@ -247,6 +250,7 @@ def gather_build_image_archives(session, binfo, path=None):
     :rtype: list[dict]
     """
 
+    binfo = as_buildinfo(session, binfo)
     bid = binfo["id"]
     path = as_pathinfo(path)
 

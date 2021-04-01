@@ -15,6 +15,7 @@
 from mock import MagicMock
 from unittest import TestCase
 
+from kojismokydingo.builds import build_id_sort
 from kojismokydingo.sift import Sifter, SifterError
 from kojismokydingo.sift.builds import (
     CGImportedSieve, EVRCompare,
@@ -287,7 +288,7 @@ class SifterTest(TestCase):
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 1)
         self.assertTrue(isinstance(sieves[0], StateSieve))
-        self.assertEqual(repr(sieves[0]), "(state 1)")
+        self.assertEqual(repr(sieves[0]), "(state Number(1))")
 
         res = sifter(None, BUILD_SAMPLES)
         self.assertEqual(res["default"],
@@ -313,6 +314,20 @@ class SifterTest(TestCase):
         res = sift_builds(None, src, BUILD_SAMPLES)
         self.assertEqual(res["default"],
                          [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2])
+
+        src = """
+        (state COMPLETE DELETED)
+        """
+        sifter = build_info_sifter(src)
+
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], StateSieve))
+        self.assertEqual(repr(sieves[0]),
+                         "(state Symbol('COMPLETE') Symbol('DELETED'))")
+
+        res = sifter(None, BUILD_SAMPLES)
+        self.assertEqual(res["default"], BUILD_SAMPLES)
 
         src = """
         (state 999)

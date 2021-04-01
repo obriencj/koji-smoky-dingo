@@ -63,9 +63,9 @@ __all__ = (
     "decorate_builds_btypes",
     "decorate_builds_cg_list",
     "decorate_builds_maven",
-    "filter_by_state",
-    "filter_by_tags",
-    "filter_imported",
+    "filter_builds_by_state",
+    "filter_builds_by_tags",
+    "filter_imported_builds",
     "gather_buildroots",
     "gather_rpm_sigkeys",
     "gather_component_build_ids",
@@ -950,8 +950,8 @@ def decorate_builds_cg_list(session, build_infos):
     return build_infos
 
 
-def filter_by_tags(session, build_infos,
-                   limit_tag_ids=(), lookaside_tag_ids=()):
+def filter_builds_by_tags(session, build_infos,
+                          limit_tag_ids=(), lookaside_tag_ids=()):
 
     """
     :param build_infos: build infos to filter through
@@ -1001,7 +1001,7 @@ def filter_by_tags(session, build_infos,
     return itervalues(builds)
 
 
-def filter_by_state(build_infos, state=BUILD_COMPLETE):
+def filter_builds_by_state(build_infos, state=BUILD_COMPLETE):
     """
     Given a sequence of build info dicts, return a generator of those
     matching the given state.
@@ -1037,7 +1037,7 @@ def filter_by_state(build_infos, state=BUILD_COMPLETE):
         return (b for b in build_infos if (b and b.get("state") == state))
 
 
-def filter_imported(build_infos, by_cg=(), negate=False):
+def filter_imported_builds(build_infos, by_cg=(), negate=False):
     """
     Given a sequence of build info dicts, yield those which are
     imports.
@@ -1332,9 +1332,9 @@ class BuildFilter(object):
         lookaside = self._lookaside_tag_ids
 
         if limit or lookaside:
-            build_infos = filter_by_tags(self._session, build_infos,
-                                         limit_tag_ids=limit,
-                                         lookaside_tag_ids=lookaside)
+            build_infos = filter_builds_by_tags(self._session, build_infos,
+                                                limit_tag_ids=limit,
+                                                lookaside_tag_ids=lookaside)
         return build_infos
 
 
@@ -1357,7 +1357,7 @@ class BuildFilter(object):
             negate = not (self._imported or self._imported is None)
 
             build_infos = decorate_builds_cg_list(self._session, build_infos)
-            return filter_imported(build_infos, self._cg_list, negate)
+            return filter_imported_builds(build_infos, self._cg_list, negate)
 
         else:
             return build_infos
@@ -1365,7 +1365,7 @@ class BuildFilter(object):
 
     def filter_by_state(self, build_infos):
         if self._state is not None:
-            build_infos = filter_by_state(build_infos, self._state)
+            build_infos = filter_builds_by_state(build_infos, self._state)
 
         return build_infos
 

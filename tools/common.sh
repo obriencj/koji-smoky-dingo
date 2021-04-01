@@ -39,14 +39,14 @@ function ksd_rpmbuild() {
             dnf install -qy "$@"
         }
         function _builddep() {
-            dnf builddep -qy "$@"
+            dnf builddep --disablerepo=*source -qy "$@"
         }
     else
         function _install() {
             yum install -q -y "$@"
         }
         function _builddep() {
-            yum-builddep -q -y "$@"
+            yum-builddep --disablerepo=*source -q -y "$@"
         }
     fi
 
@@ -60,6 +60,52 @@ function ksd_rpmbuild() {
     _builddep "$SRPMS"/kojismokydingo-*.src.rpm || return 1
     _rpmbuild --rebuild "$SRPMS"/kojismokydingo-*.src.rpm || return 1
     _install "$RPMS"/noarch/*kojismokydingo-*.rpm || return 1
+}
+
+
+function ksd_prune() {
+
+    local PODMAN=$(whichever podman docker)
+    if [ ! "$PODMAN" ] ; then
+        echo "Neither podman nor docker available, exiting"
+        return 1
+    else
+	echo "Using $PODMAN"
+    fi
+
+    echo "Pruning images"
+    $PODMAN image prune -f
+}
+
+
+function ksd_clean_platform() {
+    # Given a platform, remove its container image.
+
+    local PLATFORM="$1"
+    local CFILE=tools/Containerfile."$PLATFORM"
+
+    local PODMAN=$(whichever podman docker)
+    if [ ! "$PODMAN" ] ; then
+        echo "Neither podman nor docker available, exiting"
+        return 1
+    else
+	echo "Using $PODMAN"
+    fi
+
+    if [ ! -f "$CFILE" ] ; then
+        echo "File not found $CFILE"
+        return 1
+    fi
+
+    local NAME=ksd-test:"$PLATFORM"
+    local CURR=$($PODMAN images -a -q "$NAME" 2>/dev/null)
+
+    if [ "$CURR" ] ; then
+        echo "Cleaning up image $NAME $CURR"
+        $PODMAN image rm -f "$CURR"
+    else
+        echo "Image not found $NAME"
+    fi
 }
 
 
