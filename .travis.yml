@@ -18,11 +18,10 @@ env:
 cache: pip
 
 install:
-  - pip install -I -U pip tox-travis
-  - pip install -I coveralls docutils flake8 nose
-  - pip install -I cryptography koji
+  - pip install tox-travis coveralls
 
 script:
+  - python -m tox --showconfig
   - python -m tox
 
 after_success:
