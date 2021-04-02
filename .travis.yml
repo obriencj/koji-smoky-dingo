@@ -4,7 +4,6 @@ os: linux
 
 dist: xenial
 
-
 language: python
 
 python:
@@ -13,28 +12,18 @@ python:
   - "3.8"
   - "3.9"
 
-
-# Tell pip and others to shut up
-
 env:
   - PYTHONWARNINGS=ignore CRYPTOGRAPHY_DONT_BUILD_RUST=1
-
-
-# How we'll be setting up the environment for use
 
 cache: pip
 
 install:
-  - pip install -I -U pip
-  - pip install -I cryptography
-  - pip install -I coveralls docutils flake8 koji nose
-
-
-# What we'll run to actually do the testing
+  - pip install -I -U pip tox-travis
+  - pip install -I coveralls docutils flake8 nose
+  - pip install -I cryptography koji
 
 script:
-  - flake8 kojismokydingo/ koji_cli_plugins/
-  - coverage run -m nose
+  - tox
 
 after_success:
   - coveralls
