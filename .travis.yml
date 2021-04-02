@@ -19,7 +19,8 @@ env:
 cache: pip
 
 install:
-  - pip install tox-travis coveralls
+  - pip install coveralls tox tox-travis
+  - pip install cryptography docutils flake8 koji mock nose tox
 
 script:
   - tox
