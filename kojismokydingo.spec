@@ -119,7 +119,7 @@ Koji Smoky Dingo
 
 %changelog
 * Fri Apr 2 2021 Christopher O'Brien <obriencj@gmail.com> - 2.0.0-0
-- Dropped RHEL 6 and Python 2 support
+- Dropped RHEL 6, RHEL 7, and Python 2 support
 
 * Thu Apr 1 2021 Christopher O'Brien <obriencj@gmail.com> - 1.0.0-1
 - Finally at version 1.0.0!
