@@ -33,22 +33,9 @@ function ksd_rpmbuild() {
     local SRPMS="$TOPDIR"/SRPMS
     local RPMS="$TOPDIR"/RPMS
 
-    if [ `which dnf 2>/dev/null` ] ; then
-        function _install() {
-            dnf install -qy "$@"
-        }
-        function _builddep() {
-            dnf builddep --disablerepo=*source -qy "$@"
-        }
-    else
-        function _install() {
-            yum install -q -y "$@"
-        }
-        function _builddep() {
-            yum-builddep --disablerepo=*source -q -y "$@"
-        }
-    fi
-
+    function _builddep() {
+        dnf builddep --disablerepo=*source -qy "$@"
+    }
     function _rpmbuild() {
 	rpmbuild --define "_topdir $TOPDIR" "$@"
     }
@@ -58,7 +45,7 @@ function ksd_rpmbuild() {
     _rpmbuild -ts "$TARBALL" || return 1
     _builddep "$SRPMS"/kojismokydingo-*.src.rpm || return 1
     _rpmbuild --rebuild "$SRPMS"/kojismokydingo-*.src.rpm || return 1
-    _install "$RPMS"/noarch/*kojismokydingo-*.rpm || return 1
+    dnf install -qy "$RPMS"/noarch/*kojismokydingo-*.rpm || return 1
 }
 
 

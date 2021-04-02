@@ -18,9 +18,8 @@ function whichever() {
 
 
 function expected_entry_points() {
-    local PYTHON=$(whichever python3 python python2)
+    local PYTHON=$(whichever python3 python)
     read -r -d'\0' SCRIPT <<EOF
-from __future__ import print_function
 from tests.cli import ENTRY_POINTS
 for name in sorted(ENTRY_POINTS):
     print(name)
@@ -30,9 +29,8 @@ EOF
 
 
 function expected_standalone() {
-    local PYTHON=$(whichever python3 python python2)
+    local PYTHON=$(whichever python3 python)
     read -r -d'\0' SCRIPT <<EOF
-from __future__ import print_function
 from tests.standalone import ENTRY_POINTS
 for name in sorted(ENTRY_POINTS):
     print(name)
@@ -43,14 +41,14 @@ EOF
 
 function run_nose() {
     echo "Running unit tests:"
-    local NOSE=$(whichever nosetests-3 nosetests nosetests-2)
+    local NOSE=$(whichever nosetests-3 nosetests)
     if [ ! "$NOSE" ] ; then
         echo "No nosetests available on path"
         return 1
     fi
 
     local DIST=$(rpm --eval '%dist')
-    if [[ "$DIST" == ".el6" || "$DIST" > ".fc32" ]] ; then
+    if [[ "$DIST" > ".fc32" ]] ; then
         # the argparse in Centos6/RHEL6 has slightly weird help output
         # around mutually exclusive options. The argparse in Fedora
         # 33+ has slightly weird help output around nargs=*
