@@ -20,7 +20,6 @@ cache: pip
 
 install:
   - pip install coveralls tox tox-travis
-  - pip install cryptography docutils flake8 koji mock nose tox
 
 script:
   - tox
