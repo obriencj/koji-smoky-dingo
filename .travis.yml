@@ -12,17 +12,13 @@ python:
   - "3.8"
   - "3.9"
 
-env:
-  - PYTHONWARNINGS=ignore CRYPTOGRAPHY_DONT_BUILD_RUST=1
-
 cache: pip
 
 install:
   - pip install tox-travis coveralls
 
 script:
-  - python -m tox --showconfig
-  - python -m tox
+  - tox
 
 after_success:
   - if [ "$TRAVIS_PYTHON_VERSION" = "3.8" ] ; then coveralls ; fi
