@@ -725,12 +725,9 @@ class GroupPkgSieve(SymbolSieve, CacheMixin):
     name = "group-pkg"
 
 
-    def __init__(self, sifter, group, pkg, *pkgs):
-        super().__init__(sifter, pkg, *pkgs)
+    def __init__(self, sifter, group, pkg, *pkgs, require_all=False):
+        super().__init__(sifter, pkg, *pkgs, require_all=require_all)
         self.group = ensure_symbol(group)
-
-
-    def set_options(self, require_all=False):
         self.require_all = bool(require_all)
 
 

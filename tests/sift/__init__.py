@@ -84,14 +84,9 @@ class Poke(Sieve):
     aliases = ["incr", ]
 
 
-    def __init__(self, sifter):
-        # limit ourselves to no positional args
-        super(Poke, self).__init__(sifter)
-
-
-    def set_options(self, count=-1):
-        # accept one option
-        self._max = count = ensure_int(count)
+    def __init__(self, sifter, *, count=-1):
+        super(Poke, self).__init__(sifter, count=count)
+        self._max = count
 
 
     def check(self, _session, data):
@@ -858,7 +853,7 @@ class SifterTest(TestCase):
         self.assertEqual(len(sieves), 1)
 
         poke = sieves[0]
-        self.assertEqual(repr(poke), "(poke)")
+        self.assertEqual(repr(poke), "(poke count: -1)")
 
         src = """
         (poke count: -2)

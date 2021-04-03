@@ -444,20 +444,7 @@ class Sifter():
             args, kwds = gather_args(map(self._convert, args))
 
             try:
-                # Note that we need to convolute it this way in order
-                # to support cases where some of the positional
-                # arguments have defaults but we also want
-                # keyword-only options to be available. subclasses of
-                # Sieve can define the positionals in their __init__
-                # method, and keyword-only via the set_options method.
-
-                # Newer versions of Python introduced the concepts of
-                # positional-only and keyword-only parameters, but we
-                # need to work with much older versions that do not
-                # have these syntactic features available.
-
-                result = cls(self, *args)
-                result.receive_options(**kwds)
+                result = cls(self, *args, **kwds)
 
             except TypeError as te:
                 msg = "Error creating Sieve %s: %s" % (name, te)
@@ -621,24 +608,11 @@ class Sieve(metaclass=ABCMeta):
     aliases = ()
 
 
-    def __init__(self, sifter, *tokens):
+    def __init__(self, sifter, *tokens, **options):
         self.sifter = sifter
         self.key = sifter.key
         self.tokens = tokens
-        self.options = {}
-
-
-    def receive_options(self, **kwds):
-        self.set_options(**kwds)
-        self.options.update(kwds)
-
-
-    def set_options(self):
-        """
-        override to accept keyword arguments relevant to the sieve
-        """
-
-        pass
+        self.options = options
 
 
     def __call__(self, session, info_dicts):
