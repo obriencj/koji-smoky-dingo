@@ -31,18 +31,13 @@ import re
 
 from collections import OrderedDict
 from configparser import ConfigParser
-from datetime import datetime
+from datetime import datetime, timezone
 from fnmatch import fnmatchcase
 from glob import glob
 from itertools import filterfalse, zip_longest
 from operator import itemgetter
 from os.path import expanduser, isdir, join
 
-
-try:
-    from datetime import timezone
-except ImportError:  # pragma: no cover
-    timezone = None
 
 try:
     import appdirs
@@ -505,12 +500,6 @@ def parse_datetime(src, strict=True):
 
     :rtype: `datetime` or `None`
     """
-
-    if timezone is None:
-        # This is gross, but if we are on an older Python with no
-        # timezone support baked in, we need to remove the %z portion
-        # and replace it with a hardcoded UTC for %Z instead.
-        src = re.compile(r"([+-]\d{2}:?\d{2}$)").sub(" UTC", src)
 
     for pattern, parser in DATETIME_FORMATS:
         mtch = pattern.match(src)
