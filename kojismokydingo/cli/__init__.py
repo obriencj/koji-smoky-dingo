@@ -342,9 +342,8 @@ def tabulate(headings, data, key=None, sorting=0,
                   zip_longest(widths, headings)]
 
     # now we create the format string based on the max width of each
-    # column plus some spacing. Note that python 2.6 mandates the
-    # field index be specified, so we MUST use enumerate here.
-    fmt = "  ".join("{%i!s:<%i}" % iw for iw in enumerate(widths))
+    # column plus some spacing.
+    fmt = "  ".join("{!s:<%i}" % w for w in widths)
 
     if headings and not quiet:
         print(fmt.format(*headings), file=out)
