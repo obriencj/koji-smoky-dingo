@@ -16,8 +16,6 @@ import koji
 
 from collections import OrderedDict
 from mock import MagicMock, PropertyMock, patch
-from six import iteritems, iterkeys, itervalues
-from six.moves import zip
 from unittest import TestCase
 
 from kojismokydingo import (
@@ -124,9 +122,9 @@ class TestBulkLoad(TestCase):
         sess = self.session(data)
 
         res = iter_bulk_load(sess, sess.ImpossibleDream,
-                             iterkeys(data), size=5)
+                             data, size=5)
 
-        for (key, val), hope in zip(res, iterkeys(data)):
+        for (key, val), hope in zip(res, data):
             self.assertEqual(key, hope)
             self.assertEqual(expect[key], val)
 
@@ -164,7 +162,7 @@ class TestBulkLoad(TestCase):
         sess = self.session(data)
 
         res = bulk_load(sess, sess.ImpossibleDream,
-                        iterkeys(data), size=5)
+                        data, size=5)
 
         self.assertTrue(isinstance(res, OrderedDict))
         self.assertEqual(res, expect)
@@ -184,7 +182,7 @@ class TestBulkLoad(TestCase):
         res = bulk_load(sess, sess.ImpossibleDream, "1234", err=False)
         self.assertTrue(isinstance(res, OrderedDict))
 
-        res = iteritems(res)
+        res = iter(res.items())
         self.assertEqual(next(res), ("1", "one"))
         self.assertEqual(next(res), ("2", None))
         self.assertEqual(next(res), ("3", "three"))

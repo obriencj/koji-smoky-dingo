@@ -20,8 +20,6 @@ Koji Smoky Dingo - CLI User Commands
 """
 
 
-from __future__ import print_function
-
 from operator import itemgetter
 
 from . import AnonSmokyDingo, int_or_str, pretty_json

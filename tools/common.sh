@@ -12,9 +12,8 @@ function whichever() {
 
 
 function ksd_version() {
-    local PYTHON=$(whichever python3 python python2)
+    local PYTHON=$(whichever python3 python)
     read -r -d'\0' SCRIPT <<EOF
-from __future__ import print_function
 import setup
 print(setup.VERSION)
 EOF
@@ -34,22 +33,9 @@ function ksd_rpmbuild() {
     local SRPMS="$TOPDIR"/SRPMS
     local RPMS="$TOPDIR"/RPMS
 
-    if [ `which dnf 2>/dev/null` ] ; then
-        function _install() {
-            dnf install -qy "$@"
-        }
-        function _builddep() {
-            dnf builddep --disablerepo=*source -qy "$@"
-        }
-    else
-        function _install() {
-            yum install -q -y "$@"
-        }
-        function _builddep() {
-            yum-builddep --disablerepo=*source -q -y "$@"
-        }
-    fi
-
+    function _builddep() {
+        dnf builddep --disablerepo=*source -qy "$@"
+    }
     function _rpmbuild() {
 	rpmbuild --define "_topdir $TOPDIR" "$@"
     }
@@ -59,7 +45,7 @@ function ksd_rpmbuild() {
     _rpmbuild -ts "$TARBALL" || return 1
     _builddep "$SRPMS"/kojismokydingo-*.src.rpm || return 1
     _rpmbuild --rebuild "$SRPMS"/kojismokydingo-*.src.rpm || return 1
-    _install "$RPMS"/noarch/*kojismokydingo-*.rpm || return 1
+    dnf install -qy "$RPMS"/noarch/*kojismokydingo-*.rpm || return 1
 }
 
 
@@ -97,7 +83,7 @@ function ksd_clean_platform() {
         return 1
     fi
 
-    local NAME=ksd-test:"$PLATFORM"
+    local NAME=ksd2-test:"$PLATFORM"
     local CURR=$($PODMAN images -a -q "$NAME" 2>/dev/null)
 
     if [ "$CURR" ] ; then
@@ -133,7 +119,7 @@ function ksd_build_platform() {
         return 1
     fi
 
-    local NAME=ksd-test:"$PLATFORM"
+    local NAME=ksd2-test:"$PLATFORM"
 
     # let's see if there was a previous image with this tag. We won't
     # remove it yet, we want to try and take cache advantage of any
@@ -173,7 +159,7 @@ function ksd_test_platform() {
     # script in it. Results will be written to the logs directory.
 
     local PLATFORM="$1"
-    local NAME=ksd-test:"$PLATFORM"
+    local NAME=ksd2-test:"$PLATFORM"
 
     local PODMAN=$(whichever podman docker)
     if [ ! "$PODMAN" ] ; then

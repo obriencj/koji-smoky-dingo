@@ -20,15 +20,11 @@ Koji Smoky Dingo - CLI Build Commands
 """
 
 
-from __future__ import print_function
-
 import sys
 
 from functools import partial
 from itertools import chain
 from operator import itemgetter
-from six import iteritems, itervalues
-from six.moves import filter, map
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
@@ -115,7 +111,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
 
     # validate our list of NVRs first by attempting to load them
     loaded = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = itervalues(loaded)
+    builds = loaded.values()
 
     # sort/dedup as requested
     if sorting == SORT_BY_NVR:
@@ -299,7 +295,7 @@ def cli_bulk_untag_builds(session, tagname, nvrs,
 
     # validate our list of NVRs first by attempting to load them
     loaded = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = build_dedup(itervalues(loaded))
+    builds = build_dedup(loaded.values())
 
     if verbose:
         debug("Trimmed duplicates to %i builds", len(builds))
@@ -431,7 +427,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
 
     # validate our list of NVRs first by attempting to load them
     loaded = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = itervalues(loaded)
+    builds = loaded.values()
 
     # sort/dedup as requested
     if sorting == SORT_BY_NVR:
@@ -715,7 +711,7 @@ def cli_list_components(session, nvr_list,
     if nvr_list:
         # load the initial set of builds, validating them
         found = bulk_load_builds(session, nvr_list, err=True)
-        loaded = dict((b["id"], b) for b in itervalues(found))
+        loaded = {b["id"]: b for b in found.values()}
 
     else:
         loaded = {}
@@ -735,17 +731,17 @@ def cli_list_components(session, nvr_list,
     components = gather_component_build_ids(session, bids)
 
     # now we need to turn those components build IDs into build_infos
-    component_ids = unique(chain(*itervalues(components)))
+    component_ids = unique(chain(*components.values()))
     found = bulk_load_builds(session, component_ids)
 
     # we'll also want the underlying builds used to produce any
     # standalone wrapperRPM builds, as those are not recorded as
     # normal buildroot components
-    tids = [b["task_id"] for b in itervalues(loaded) if b["task_id"]]
+    tids = [b["task_id"] for b in loaded.values() if b["task_id"]]
     wrapped = gather_wrapped_builds(session, tids)
 
-    builds = list(itervalues(found))
-    builds.extend(itervalues(wrapped))
+    builds = list(found.values())
+    builds.extend(wrapped.values())
 
     if build_filter:
         builds = build_filter(builds)
@@ -855,7 +851,7 @@ def cli_filter_builds(session, nvr_list,
 
     if nvr_list:
         loaded = bulk_load_builds(session, nvr_list, err=strict)
-        builds = filter(None, itervalues(loaded))
+        builds = filter(None, loaded.values())
     else:
         builds = ()
 
@@ -878,7 +874,7 @@ def cli_filter_builds(session, nvr_list,
             tagged_ids = set(b["id"] for b in tagged)
             loaded = bulk_load_builds(session, tagged_ids - known_ids)
             if loaded:
-                builds.extend(itervalues(loaded))
+                builds.extend(loaded.values())
 
     if build_filter:
         builds = build_filter(builds)
@@ -983,7 +979,7 @@ def cli_list_btypes(session, nvr=None, json=False, quiet=False):
     Implements ``koji list-btypes`` command
     """
 
-    btypes = dict((bt["id"], bt) for bt in session.listBTypes())
+    btypes = {bt["id"]: bt for bt in session.listBTypes()}
 
     if nvr:
         build = as_buildinfo(session, nvr)
@@ -994,7 +990,7 @@ def cli_list_btypes(session, nvr=None, json=False, quiet=False):
             if btid not in build_bts:
                 btypes.pop(btid)
 
-    btypes = sorted(itervalues(btypes), key=itemgetter("id"))
+    btypes = sorted(btypes.values(), key=itemgetter("id"))
 
     if json:
         pretty_json(btypes)
@@ -1050,7 +1046,7 @@ def cli_list_cgs(session, nvr=None, json=False, quiet=False):
     """
 
     cgs = {}
-    for name, cg in iteritems(session.listCGs()):
+    for name, cg in session.listCGs().items():
         cg["name"] = name
         cg.pop("users")
         cgs[cg["id"]] = cg
@@ -1064,7 +1060,7 @@ def cli_list_cgs(session, nvr=None, json=False, quiet=False):
             if cgid not in build_cgs:
                 cgs.pop(cgid)
 
-    cgs = sorted(itervalues(cgs), key=itemgetter("id"))
+    cgs = sorted(cgs.values(), key=itemgetter("id"))
 
     if json:
         pretty_json(cgs)

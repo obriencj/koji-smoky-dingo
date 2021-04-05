@@ -36,8 +36,6 @@ from abc import ABCMeta, abstractproperty
 from collections import OrderedDict
 from functools import partial
 from operator import itemgetter
-from six import add_metaclass, iteritems, itervalues, text_type
-from six.moves import map
 
 from .. import BadDingo
 from .parse import (
@@ -181,7 +179,7 @@ def ensure_int_or_str(value, msg=None):
 
     if isinstance(value, int):
         return int(value)
-    elif isinstance(value, (str, text_type)):
+    elif isinstance(value, str):
         # Symbol is a subclass of str, so convert it back
         return str(value)
 
@@ -215,7 +213,7 @@ def ensure_matcher(value, msg=None):
     :rtype: Matcher
     """
 
-    if isinstance(value, (str, Matcher, text_type)):
+    if isinstance(value, (str, Matcher)):
         return value
 
     if not msg:
@@ -298,7 +296,7 @@ def gather_args(values):
     return args, kwds
 
 
-class Sifter(object):
+class Sifter():
 
     def __init__(self, sieves, source, key="id", params=None):
         """
@@ -347,7 +345,7 @@ class Sifter(object):
             # convert a list of sieves into a dict mapping the sieve
             # names and their aliases to the classes
             sieves = tuple(sieves)
-            sievedict = dict((sieve.name, sieve) for sieve in sieves)
+            sievedict = {sieve.name: sieve for sieve in sieves}
             for sieve in sieves:
                 for alias in sieve.aliases:
                     sievedict[alias] = sieve
@@ -446,20 +444,7 @@ class Sifter(object):
             args, kwds = gather_args(map(self._convert, args))
 
             try:
-                # Note that we need to convolute it this way in order
-                # to support cases where some of the positional
-                # arguments have defaults but we also want
-                # keyword-only options to be available. subclasses of
-                # Sieve can define the positionals in their __init__
-                # method, and keyword-only via the set_options method.
-
-                # Newer versions of Python introduced the concepts of
-                # positional-only and keyword-only parameters, but we
-                # need to work with much older versions that do not
-                # have these syntactic features available.
-
-                result = cls(self, *args)
-                result.receive_options(**kwds)
+                result = cls(self, *args, **kwds)
 
             except TypeError as te:
                 msg = "Error creating Sieve %s: %s" % (name, te)
@@ -500,7 +485,7 @@ class Sifter(object):
 
         key = self.key
         data = OrderedDict((key(b), b) for b in info_dicts if b)
-        work = tuple(itervalues(data))
+        work = tuple(data.values())
 
         for expr in self._exprs:
             autoflag = not isinstance(expr, Flagger)
@@ -509,7 +494,7 @@ class Sifter(object):
                     self.set_flag("default", binfo)
 
         results = {}
-        for flag, bids in iteritems(self._flags):
+        for flag, bids in self._flags.items():
             results[flag] = [data[bid] for bid in bids]
 
         return results
@@ -587,8 +572,7 @@ class Sifter(object):
         return self.get_cache(cachename, self.key(data))
 
 
-@add_metaclass(ABCMeta)
-class Sieve(object):
+class Sieve(metaclass=ABCMeta):
     """
     The abstract base type for all Sieve expressions.
 
@@ -624,24 +608,11 @@ class Sieve(object):
     aliases = ()
 
 
-    def __init__(self, sifter, *tokens):
+    def __init__(self, sifter, *tokens, **options):
         self.sifter = sifter
         self.key = sifter.key
         self.tokens = tokens
-        self.options = {}
-
-
-    def receive_options(self, **kwds):
-        self.set_options(**kwds)
-        self.options.update(kwds)
-
-
-    def set_options(self):
-        """
-        override to accept keyword arguments relevant to the sieve
-        """
-
-        pass
+        self.options = options
 
 
     def __call__(self, session, info_dicts):
@@ -651,7 +622,7 @@ class Sieve(object):
 
     def __repr__(self):
         params = list(map(repr, self.tokens))
-        for key, val in iteritems(self.options):
+        for key, val in self.options.items():
             params.append(key + ":")
             params.append(repr(val))
 
@@ -742,7 +713,7 @@ class MatcherSieve(Sieve):
 
     def __init__(self, sifter, *tokens):
         tokens = ensure_all_matcher(tokens)
-        super(MatcherSieve, self).__init__(sifter, *tokens)
+        super().__init__(sifter, *tokens)
 
 
 class SymbolSieve(Sieve):
@@ -753,7 +724,7 @@ class SymbolSieve(Sieve):
 
     def __init__(self, sifter, *tokens):
         tokens = ensure_all_symbol(tokens)
-        super(SymbolSieve, self).__init__(sifter, *tokens)
+        super().__init__(sifter, *tokens)
 
 
 class IntStrSieve(Sieve):
@@ -764,18 +735,17 @@ class IntStrSieve(Sieve):
 
     def __init__(self, sifter, *tokens):
         tokens = ensure_all_int_or_str(tokens)
-        super(IntStrSieve, self).__init__(sifter, *tokens)
+        super().__init__(sifter, *tokens)
 
 
-@add_metaclass(ABCMeta)
-class Logic(Sieve):
+class Logic(Sieve, metaclass=ABCMeta):
 
     check = None
 
 
     def __init__(self, sifter, *exprs):
         exprs = ensure_all_sieve(exprs)
-        super(Logic, self).__init__(sifter, *exprs)
+        super().__init__(sifter, *exprs)
 
 
 class LogicAnd(Logic):
@@ -817,12 +787,12 @@ class LogicOr(Logic):
             if not work:
                 break
 
-            for b in expr(session, itervalues(work)):
+            for b in expr(session, work.values()):
                 bid = self.key(b)
                 del work[bid]
                 results[bid] = b
 
-        return itervalues(results)
+        return results.values()
 
 
 class LogicNot(Logic):
@@ -843,10 +813,10 @@ class LogicNot(Logic):
             if not work:
                 break
 
-            for b in expr(session, itervalues(work)):
+            for b in expr(session, work.values()):
                 del work[self.key(b)]
 
-        return itervalues(work)
+        return work.values()
 
 
 class Flagger(LogicAnd):
@@ -861,12 +831,12 @@ class Flagger(LogicAnd):
 
 
     def __init__(self, sifter, flag, *exprs):
-        super(Flagger, self).__init__(sifter, *exprs)
+        super().__init__(sifter, *exprs)
         self.flag = ensure_symbol(flag)
 
 
     def run(self, session, info_dicts):
-        results = super(Flagger, self).run(session, info_dicts)
+        results = super().run(session, info_dicts)
 
         for info in results:
             self.sifter.set_flag(self.flag, info)
@@ -880,8 +850,7 @@ class Flagger(LogicAnd):
                         " " if e else "", e, ")"))
 
 
-@add_metaclass(ABCMeta)
-class VariadicSieve(Sieve):
+class VariadicSieve(Sieve, metaclass=ABCMeta):
     """
     Utility class which automatically applies an outer ``(or ...)`` when
     presented with more than one argument.
@@ -901,7 +870,7 @@ class VariadicSieve(Sieve):
 
 
     def __init__(self, sifter, token):
-        super(VariadicSieve, self).__init__(sifter, token)
+        super().__init__(sifter, token)
         self.token = token
 
 
@@ -918,15 +887,14 @@ class Flagged(VariadicSieve):
 
 
     def __init__(self, sifter, name):
-        super(Flagged, self).__init__(sifter, ensure_symbol(name))
+        super().__init__(sifter, ensure_symbol(name))
 
 
     def check(self, _session, info):
         return self.sifter.is_flagged(self.token, info)
 
 
-@add_metaclass(ABCMeta)
-class ItemSieve(VariadicSieve):
+class ItemSieve(VariadicSieve, metaclass=ABCMeta):
     """
     A VariadicSieve which performs a comparison by fetching a named
     key from the info dict.
@@ -950,7 +918,7 @@ class ItemSieve(VariadicSieve):
     def __init__(self, sifter, pattern=None):
         if pattern is not None:
             pattern = ensure_matcher(pattern)
-        super(ItemSieve, self).__init__(sifter, pattern)
+        super().__init__(sifter, pattern)
 
 
     def check(self, session, info):
@@ -984,7 +952,7 @@ class ItemPathSieve(Sieve):
             path = ItemPath(path)
 
         values = ensure_all_matcher(values)
-        super(ItemPathSieve, self).__init__(sifter, *values)
+        super().__init__(sifter, *values)
 
         self.path = path
 

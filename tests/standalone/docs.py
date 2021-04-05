@@ -16,11 +16,10 @@ from docutils.frontend import OptionParser
 from docutils.nodes import GenericNodeVisitor
 from docutils.parsers.rst import Parser
 from docutils.utils import new_document
+from io import StringIO
 from mock import patch
 from nose.tools import assert_equal, assert_raises, assert_true
 from pkg_resources import EntryPoint
-from six import iteritems
-from six.moves import StringIO
 
 from kojismokydingo.cli import space_normalize
 

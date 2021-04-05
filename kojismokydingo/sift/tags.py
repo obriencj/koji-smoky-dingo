@@ -25,7 +25,6 @@ dicts.
 
 from abc import abstractmethod
 from operator import itemgetter
-from six import iteritems, itervalues
 
 from . import (
     DEFAULT_SIEVES,
@@ -170,7 +169,7 @@ class LockedSieve(Sieve):
 
 
     def __init__(self, sifter):
-        super(LockedSieve, self).__init__(sifter)
+        super().__init__(sifter)
 
 
     def check(self, session, taginfo):
@@ -411,7 +410,7 @@ class NVRSieve(VariadicSieve):
         if nvr is not None:
             nvr = ensure_int_or_str(nvr)
 
-        super(NVRSieve, self).__init__(sifter, nvr)
+        super().__init__(sifter, nvr)
 
         self.build_id = None
         self.pkg_name = None
@@ -547,7 +546,7 @@ class CompareLatestSieve(Sieve):
         opfn = ensure_comparison(op)
         version = ensure_str(ver)
 
-        super(CompareLatestSieve, self).__init__(sifter, pkgname, op, ver)
+        super().__init__(sifter, pkgname, op, ver)
 
         if ":" in version:
             epoch, version = version.split(":", 1)
@@ -602,7 +601,7 @@ class CompareLatestSieve(Sieve):
 class PkgListSieve(SymbolSieve, CacheMixin):
 
     def __init__(self, sifter, pkgname, *pkgnames):
-        super(PkgListSieve, self).__init__(sifter, pkgname, *pkgnames)
+        super().__init__(sifter, pkgname, *pkgnames)
 
 
     def prep(self, session, taginfos):
@@ -687,7 +686,7 @@ class GroupSieve(SymbolSieve, CacheMixin):
 
 
     def __init__(self, sifter, group, *groups):
-        super(GroupSieve, self).__init__(sifter, group, *groups)
+        super().__init__(sifter, group, *groups)
 
 
     def prep(self, session, taginfos):
@@ -699,7 +698,7 @@ class GroupSieve(SymbolSieve, CacheMixin):
                 needed[tag["id"]] = cache
 
         loaded = self.bulk_get_tag_groups(session, needed)
-        for tid, groups in iteritems(loaded):
+        for tid, groups in loaded.items():
             cache = needed[tid]
             cache["group_names"] = [grp["name"] for grp in groups]
 
@@ -726,12 +725,9 @@ class GroupPkgSieve(SymbolSieve, CacheMixin):
     name = "group-pkg"
 
 
-    def __init__(self, sifter, group, pkg, *pkgs):
-        super(GroupPkgSieve, self).__init__(sifter, pkg, *pkgs)
+    def __init__(self, sifter, group, pkg, *pkgs, require_all=False):
+        super().__init__(sifter, pkg, *pkgs, require_all=require_all)
         self.group = ensure_symbol(group)
-
-
-    def set_options(self, require_all=False):
         self.require_all = bool(require_all)
 
 
@@ -744,7 +740,7 @@ class GroupPkgSieve(SymbolSieve, CacheMixin):
                 needed[tag["id"]] = cache
 
         loaded = self.bulk_get_tag_groups(session, needed)
-        for tid, groups in iteritems(loaded):
+        for tid, groups in loaded.items():
             cache = needed[tid]
             cache["group_pkgs"] = simple_groups = {}
             for grp in groups:
@@ -859,7 +855,7 @@ def sift_tagnames(session, src_str, names, params=None):
     """
 
     loaded = bulk_load_tags(session, names, err=False)
-    tags = tag_dedup(itervalues(loaded))
+    tags = tag_dedup(loaded.values())
     return sift_tags(session, src_str, tags, params)
 
 

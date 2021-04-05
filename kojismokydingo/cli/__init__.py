@@ -24,21 +24,19 @@ kojismokydingometa plugin.
 """
 
 
-from __future__ import print_function
-
 import sys
 
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from functools import partial
+from io import StringIO
+from itertools import zip_longest
 from json import dump
 from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os import devnull
 from os.path import basename
-from six import add_metaclass
-from six.moves import StringIO, filter, map, zip_longest
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
@@ -344,9 +342,8 @@ def tabulate(headings, data, key=None, sorting=0,
                   zip_longest(widths, headings)]
 
     # now we create the format string based on the max width of each
-    # column plus some spacing. Note that python 2.6 mandates the
-    # field index be specified, so we MUST use enumerate here.
-    fmt = "  ".join("{%i!s:<%i}" % iw for iw in enumerate(widths))
+    # column plus some spacing.
+    fmt = "  ".join("{!s:<%i}" % w for w in widths)
 
     if headings and not quiet:
         print(fmt.format(*headings), file=out)
@@ -389,8 +386,7 @@ def int_or_str(value):
     return value
 
 
-@add_metaclass(ABCMeta)
-class SmokyDingo(object):
+class SmokyDingo(metaclass=ABCMeta):
     """
     Base class for new sub-commands in Koji. Subclasses may be
     referenced via an entry point under the koji_smoky_dingo group to
@@ -626,7 +622,7 @@ class AnonSmokyDingo(SmokyDingo):
 
 
     def __init__(self, name=None):
-        super(AnonSmokyDingo, self).__init__(name)
+        super().__init__(name)
 
         # koji won't even bother fully authenticating our session for
         # this command if we tweak the name like this. Since

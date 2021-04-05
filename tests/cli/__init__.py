@@ -12,9 +12,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+from io import StringIO
 from pkg_resources import EntryPoint
-from six import iteritems
-from six.moves import StringIO
 from unittest import TestCase
 
 from kojismokydingo.cli import (
@@ -96,7 +95,7 @@ class TestExpectedEntryPoints(TestCase):
     def test_entry_points(self):
         # verify the expected entry points resolve and can be
         # initialized
-        for nameref in iteritems(ENTRY_POINTS):
+        for nameref in ENTRY_POINTS.items():
             cmd = "=".join(nameref)
             ep = EntryPoint.parse(cmd)
 

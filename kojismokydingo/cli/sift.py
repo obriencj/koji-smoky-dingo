@@ -20,8 +20,6 @@ Some CLI adapters for working with Sifty Dingo filtering
 """
 
 
-from __future__ import print_function
-
 import os
 
 from collections import defaultdict
@@ -29,7 +27,6 @@ from functools import partial
 from operator import itemgetter
 from os.path import basename
 from pkg_resources import iter_entry_points
-from six import iteritems
 
 from . import open_output, printerr, resplit
 from ..common import escapable_replace
@@ -125,7 +122,7 @@ def entry_point_build_info_sieves(on_err=None):
     return _entry_point_sieves("koji_smoky_dingo_build_sieves", on_err)
 
 
-class Sifting(object):
+class Sifting():
     """
     A mixin for SmokyDingo instances that wish to offer a sifter.
     """
@@ -203,7 +200,7 @@ class Sifting(object):
                 val = None
             params[key] = val
 
-        for key, val in iteritems(params):
+        for key, val in params.items():
             if val is None:
                 if key in env_params:
                     params[key] = env_params[key]
@@ -353,7 +350,7 @@ def output_sifted(results, key="id", outputs=None, sort=None):
         for flag in results:
             dest = outputs[flag]
 
-    for flag, dest in iteritems(outputs):
+    for flag, dest in outputs.items():
         if "%" in dest:
             safe_flag = flag.translate(str.maketrans("/\\ ", "___"))
             dest = escapable_replace(dest, "%", safe_flag)

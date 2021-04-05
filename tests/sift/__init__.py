@@ -12,8 +12,6 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-import six
-
 from collections import OrderedDict
 from unittest import TestCase
 
@@ -86,14 +84,9 @@ class Poke(Sieve):
     aliases = ["incr", ]
 
 
-    def __init__(self, sifter):
-        # limit ourselves to no positional args
-        super(Poke, self).__init__(sifter)
-
-
-    def set_options(self, count=-1):
-        # accept one option
-        self._max = count = ensure_int(count)
+    def __init__(self, sifter, *, count=-1):
+        super(Poke, self).__init__(sifter, count=count)
+        self._max = count
 
 
     def check(self, _session, data):
@@ -289,12 +282,9 @@ class SifterTest(TestCase):
         self.assertTrue(isinstance(sieves[0], ItemSieve))
         self.assertEqual(sieves[0].name, "name")
         self.assertEqual(sieves[0].field, "name")
-        self.assertTrue(isinstance(sieves[0].token, six.text_type))
+        self.assertTrue(isinstance(sieves[0].token, str))
 
-        if six.PY3:
-            self.assertEqual(repr(sieves[0]), r"(name 'Pizza\nBeer')")
-        elif six.PY2:
-            self.assertEqual(repr(sieves[0]), r"(name u'Pizza\nBeer')")
+        self.assertEqual(repr(sieves[0]), r"(name 'Pizza\nBeer')")
 
         res = sifter(None, DATA)
         self.assertFalse(res)
@@ -863,7 +853,7 @@ class SifterTest(TestCase):
         self.assertEqual(len(sieves), 1)
 
         poke = sieves[0]
-        self.assertEqual(repr(poke), "(poke)")
+        self.assertEqual(repr(poke), "(poke count: -1)")
 
         src = """
         (poke count: -2)

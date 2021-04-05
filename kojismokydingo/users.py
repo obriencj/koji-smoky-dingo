@@ -22,7 +22,6 @@ Koji Smoki Dingo - users and permissions
 
 from koji import ParameterError, USERTYPES, USER_STATUS
 from operator import itemgetter
-from six import iteritems
 from time import asctime, localtime
 
 from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
@@ -110,7 +109,7 @@ def collect_cg_access(session, user):
     username = userinfo["name"]
 
     found = []
-    for cgname, val in iteritems(session.listCGs()):
+    for cgname, val in session.listCGs().items():
         if username in val.get("users", ()):
             val["name"] = cgname
             found.append(val)
@@ -142,7 +141,7 @@ def collect_cgs(session, name=None):
 
     # convert the cgs dict into a list, augmenting the cg data with
     # its own name
-    for name, cg in iteritems(cgs):
+    for name, cg in cgs.items():
         cg["name"] = name
         result.append(cg)
 

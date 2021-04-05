@@ -23,7 +23,6 @@ representing RPMs and build archives
 
 from koji import PathInfo
 from os.path import join
-from six import iterkeys, iteritems
 
 from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
 
@@ -136,12 +135,12 @@ def gather_signed_rpms(session, archives, sigkeys):
     results = []
 
     # an ID: RPM Archive mapping
-    rpms = dict((rpm["id"], rpm) for rpm in archives)
+    rpms = {rpm["id"]: rpm for rpm in archives}
 
     # now bulk load all the sigs for each RPM ID
-    rpm_sigs = bulk_load_rpm_sigs(session, iterkeys(rpms))
+    rpm_sigs = bulk_load_rpm_sigs(session, rpms)
 
-    for rpm_id, rpm in iteritems(rpms):
+    for rpm_id, rpm in rpms.items():
         found = set(sig["sigkey"] for sig in rpm_sigs[rpm_id])
         for wanted in sigkeys:
             if wanted in found:
@@ -390,7 +389,7 @@ def gather_latest_rpms(session, tagname, rpmkeys=(),
     for bld in builds:
         bld["build_path"] = path.build(bld)
 
-    builds = dict((bld["id"], bld) for bld in builds)
+    builds = {bld["id"]: bld for bld in builds}
 
     if rpmkeys:
         found = gather_signed_rpms(session, found, rpmkeys)
@@ -504,7 +503,7 @@ def gather_latest_win_archives(session, tagname,
         bld["build_path"] = path.winbuild(bld)
 
     # convert builds to an id:binfo mapping
-    builds = dict((bld["id"], bld) for bld in builds)
+    builds = {bld["id"]: bld for bld in builds}
 
     for archive in archives:
         bld = builds[archive["build_id"]]
@@ -626,7 +625,7 @@ def gather_latest_archives(session, tagname, btype=None,
                                                       type=None)
 
         # convert builds to an id:binfo mapping
-        builds = dict((bld["id"], bld) for bld in builds)
+        builds = {bld["id"]: bld for bld in builds}
 
         for archive in archives:
             abtype = archive["btype"]

@@ -26,8 +26,6 @@ dicts.
 from abc import abstractmethod
 from koji import BUILD_STATES
 from operator import itemgetter
-from six import iteritems, itervalues
-from six.moves import filter
 
 from . import (
     DEFAULT_SIEVES,
@@ -157,7 +155,7 @@ class StateSieve(Sieve):
 
 
     def __init__(self, sifter, name, *names):
-        super(StateSieve, self).__init__(sifter, name, *names)
+        super().__init__(sifter, name, *names)
 
         states = []
         for pattern in self.tokens:
@@ -194,14 +192,14 @@ class OwnerSieve(IntStrSieve):
 
 
     def __init__(self, sifter, user, *users):
-        super(OwnerSieve, self).__init__(sifter, user, *users)
+        super().__init__(sifter, user, *users)
         self._user_ids = None
 
 
     def prep(self, session, _build_infos):
         if self._user_ids is None:
             loaded = bulk_load_users(session, self.tokens)
-            self._user_ids = set(u["id"] for u in itervalues(loaded))
+            self._user_ids = set(u["id"] for u in loaded.values())
 
 
     def check(self, session, binfo):
@@ -236,7 +234,7 @@ class EVRCompare(Sieve):
 
     def __init__(self, sifter, version):
         version = ensure_str(version)
-        super(EVRCompare, self).__init__(sifter, version)
+        super().__init__(sifter, version)
         self.token = version
 
         if ":" in version:
@@ -454,7 +452,7 @@ class InheritedSieve(IntStrSieve):
 
 
     def __init__(self, sifter, tagname, *tagnames):
-        super(InheritedSieve, self).__init__(sifter, tagname, *tagnames)
+        super().__init__(sifter, tagname, *tagnames)
         self.tag_ids = None
 
 
@@ -495,7 +493,7 @@ class InheritedSieve(IntStrSieve):
 class PkgListSieve(IntStrSieve, CacheMixin):
 
     def __init__(self, sifter, tagname, *tagnames):
-        super(PkgListSieve, self).__init__(sifter, tagname, *tagnames)
+        super().__init__(sifter, tagname, *tagnames)
         self.tag_ids = None
 
 
@@ -504,7 +502,7 @@ class PkgListSieve(IntStrSieve, CacheMixin):
         tids = self.tag_ids
         if tids is None:
             loaded = bulk_load_tags(session, self.tokens, err=True)
-            self.tag_ids = tids = set(t["id"] for t in itervalues(loaded))
+            self.tag_ids = tids = set(t["id"] for t in loaded.values())
 
         # pre-load our package lists cache
         for tid in tids:
@@ -589,7 +587,7 @@ class TypeSieve(MatcherSieve):
 
 
     def __init__(self, sifter, btype, *btypes):
-        super(TypeSieve, self).__init__(sifter, btype, *btypes)
+        super().__init__(sifter, btype, *btypes)
 
 
     def prep(self, session, binfos):
@@ -649,7 +647,7 @@ class LatestSieve(IntStrSieve, CacheMixin):
 
 
     def __init__(self, sifter, tagname, *tagnames):
-        super(LatestSieve, self).__init__(sifter, tagname, *tagnames)
+        super().__init__(sifter, tagname, *tagnames)
         self.tag_ids = None
 
 
@@ -659,7 +657,7 @@ class LatestSieve(IntStrSieve, CacheMixin):
         tids = self.tag_ids
         if tids is None:
             tags = bulk_load_tags(session, self.tokens, err=True)
-            tids = self.tag_ids = unique(t["id"] for t in itervalues(tags))
+            tids = self.tag_ids = unique(t["id"] for t in tags.values())
 
         for tid in tids:
             # pre-fill the caches of build IDs
@@ -687,7 +685,7 @@ class LatestMavenSieve(IntStrSieve, CacheMixin):
 
 
     def __init__(self, sifter, tagname, *tagnames):
-        super(LatestMavenSieve, self).__init__(sifter, tagname, *tagnames)
+        super().__init__(sifter, tagname, *tagnames)
         self.tag_ids = None
 
 
@@ -697,7 +695,7 @@ class LatestMavenSieve(IntStrSieve, CacheMixin):
         tids = self.tag_ids
         if tids is None:
             tags = bulk_load_tags(session, self.tokens, err=True)
-            tids = self.tag_ids = unique(t["id"] for t in itervalues(tags))
+            tids = self.tag_ids = unique(t["id"] for t in tags.values())
 
         # in order to perform the GAV comparisons, we need to have
         # loaded the various binfos with their maven fields. This
@@ -743,7 +741,7 @@ class SignedSieve(MatcherSieve):
         if not needed:
             return
 
-        for bid, sigs in iteritems(gather_rpm_sigkeys(session, needed)):
+        for bid, sigs in gather_rpm_sigkeys(session, needed).items():
             # we need to drop the unsigned key, which is an empty
             # string
             cache = needed[bid]
@@ -789,7 +787,7 @@ class CompareLatestSieve(CacheMixin):
         op = ensure_comparison(comparison)
         tag = ensure_int_or_str(tag)
 
-        super(CompareLatestSieve, self).__init__(sifter, comparison, tag)
+        super().__init__(sifter, comparison, tag)
         self.op = op
         self.tag_id = None
 
@@ -979,7 +977,7 @@ def sift_nvrs(session, src_str, nvrs, params=None):
     """
 
     loaded = bulk_load_builds(session, nvrs, err=False)
-    builds = build_dedup(itervalues(loaded))
+    builds = build_dedup(loaded.values())
     return sift_builds(session, src_str, builds, params)
 
 

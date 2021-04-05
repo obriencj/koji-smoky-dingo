@@ -20,8 +20,6 @@ Koji Smoky Dingo - Standalone build commands
 """
 
 
-from six import iteritems
-
 from . import AnonLonelyDingo
 from ..cli import find_action, printerr, remove_action, resplit
 from ..cli.builds import FilterBuilds
@@ -39,7 +37,7 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
     """
 
     def __init__(self, name=None):
-        super(LonelyFilterBuilds, self).__init__(name)
+        super().__init__(name)
 
         # some trickery to un-require the --profile option, though we
         # will mimic the behavior later. We need to do this because
@@ -54,11 +52,11 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
         addarg("filter_file", metavar="FILTER_FILE",
                help="File of sifty filter predicates")
 
-        return super(LonelyFilterBuilds, self).arguments(parser)
+        return super().arguments(parser)
 
 
     def sifter_arguments(self, parser):
-        parser = super(LonelyFilterBuilds, self).sifter_arguments(parser)
+        parser = super().sifter_arguments(parser)
         remove_action(parser, "--filter")
         remove_action(parser, "--filter-file")
         return parser
@@ -116,7 +114,7 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
 
         self.default_params().update(params)
 
-        return super(LonelyFilterBuilds, self).validate(parser, options)
+        return super().validate(parser, options)
 
 
 # The console_scripts entry point is an instance of the class, not the

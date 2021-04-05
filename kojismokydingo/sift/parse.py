@@ -28,9 +28,8 @@ from abc import ABCMeta
 from codecs import decode
 from fnmatch import translate
 from functools import partial
+from io import StringIO
 from itertools import chain, product
-from six import add_metaclass, iteritems, itervalues
-from six.moves import StringIO, map, range
 
 from .. import BadDingo
 
@@ -64,8 +63,7 @@ class RegexError(ParserError):
     complaint = "Error compiling Regex"
 
 
-@add_metaclass(ABCMeta)
-class Matcher(object):
+class Matcher(metaclass=ABCMeta):
     """
     Base class for special comparison types
     """
@@ -133,7 +131,7 @@ class SymbolGroup(Matcher):
         return "SymbolGroup(%r)" % self.src
 
 
-class FormattedSeries(object):
+class FormattedSeries():
     """
     A portion of a SymbolGroup representing a repeatable formatted
     sequence.
@@ -253,7 +251,7 @@ class Glob(Matcher):
             return "Glob(%r)" % self._src
 
 
-class Item(object):
+class Item():
     """
     Seeks path members by an int or str key.
     """
@@ -293,7 +291,7 @@ class ItemMatch(Item):
 
     def get(self, d):
         if isinstance(d, dict):
-            data = iteritems(d)
+            data = d.items()
         else:
             data = enumerate(d)
 
@@ -314,7 +312,7 @@ class AllItems(Item):
 
     def get(self, d):
         if isinstance(d, dict):
-            return itervalues(d)
+            return d.values()
         else:
             return iter(d)
 
@@ -323,7 +321,7 @@ class AllItems(Item):
         return "AllItems()"
 
 
-class ItemPath(object):
+class ItemPath():
     """
     Represents a collection of elements inside a nested tree of lists
     and dicts
@@ -358,10 +356,8 @@ class ItemPath(object):
 class Reader(StringIO):
 
     def __init__(self, source):
-        # overridden to mandate a source for read-mode. But we cannot
-        # use super due to our py2 support, where StringIO is an
-        # old-style class.
-        StringIO.__init__(self, source)
+        # force it to be readonly
+        super().__init__(source)
 
 
     def peek(self, count=1):
