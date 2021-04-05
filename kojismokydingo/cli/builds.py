@@ -711,7 +711,7 @@ def cli_list_components(session, nvr_list,
     if nvr_list:
         # load the initial set of builds, validating them
         found = bulk_load_builds(session, nvr_list, err=True)
-        loaded = dict((b["id"], b) for b in found.values())
+        loaded = {b["id"]: b for b in found.values()}
 
     else:
         loaded = {}
@@ -979,7 +979,7 @@ def cli_list_btypes(session, nvr=None, json=False, quiet=False):
     Implements ``koji list-btypes`` command
     """
 
-    btypes = dict((bt["id"], bt) for bt in session.listBTypes())
+    btypes = {bt["id"]: bt for bt in session.listBTypes()}
 
     if nvr:
         build = as_buildinfo(session, nvr)

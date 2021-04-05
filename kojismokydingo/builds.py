@@ -779,13 +779,13 @@ def decorate_builds_btypes(session, build_infos, with_fields=True):
 
     build_infos = tuple(build_infos)
 
-    wanted = dict((bld["id"], bld) for bld in build_infos if
-                  "archive_btype_names" not in bld)
+    wanted = {bld["id"]: bld for bld in build_infos if
+              "archive_btype_names" not in bld}
 
     if not wanted:
         return build_infos
 
-    btypes = dict((bt["name"], bt["id"]) for bt in session.listBTypes())
+    btypes = {bt["name"]: bt["id"] for bt in session.listBTypes()}
 
     for bid, bts in iter_bulk_load(session, session.getBuildType, wanted):
         bld = wanted[bid]
@@ -852,8 +852,8 @@ def decorate_builds_cg_list(session, build_infos):
 
     build_infos = tuple(build_infos)
 
-    wanted = dict((bld["id"], bld) for bld in build_infos if
-                  "archive_cg_names" not in bld)
+    wanted = {bld["id"]: bld for bld in build_infos if
+              "archive_cg_names" not in bld}
 
     if not wanted:
         return build_infos

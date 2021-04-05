@@ -49,9 +49,7 @@ def cli_client_config(session, goptions,
     profile, opts = rebuild_client_config(session, goptions)
 
     if only:
-        # supporting RHEL 6 means supporting python 2.6, which doesn't
-        # have dict comprehensions.
-        opts = dict((k, opts[k]) for k in only if k in opts)
+        opts = {k: opts[k] for k in only if k in opts}
     else:
         only = sorted(opts)
 
@@ -60,9 +58,6 @@ def cli_client_config(session, goptions,
         return
 
     if config:
-        # under python3 we'd just set defaults and the default section
-        # name, but koji still operates under python2 (see RHEL 6), so
-        # we need to be sure to work under both environments.
         cfg = ConfigParser()
         cfg._sections[profile] = opts
         cfg.write(sys.stdout)

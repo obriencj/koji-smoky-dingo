@@ -128,7 +128,7 @@ class CacheMixin(Sieve):
 
         if found is None:
             blds = self.latest_builds(session, tag_id, inherit)
-            found = cache[key] = dict((b["name"], b) for b in blds)
+            found = cache[key] = {b["name"]: b for b in blds}
 
         return found
 

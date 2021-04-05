@@ -345,7 +345,7 @@ class Sifter():
             # convert a list of sieves into a dict mapping the sieve
             # names and their aliases to the classes
             sieves = tuple(sieves)
-            sievedict = dict((sieve.name, sieve) for sieve in sieves)
+            sievedict = {sieve.name: sieve for sieve in sieves}
             for sieve in sieves:
                 for alias in sieve.aliases:
                     sievedict[alias] = sieve

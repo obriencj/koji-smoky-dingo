@@ -76,7 +76,7 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
         loaded = globfilter(loaded, skiplist, key="name", invert=True)
 
     # collect a mapping of builder ids to builder info
-    bldrs = dict((b["id"], b) for b in loaded)
+    bldrs = {b["id"]: b for b in loaded}
 
     updates = iter_bulk_load(session, session.getLastHostUpdate, bldrs)
 
