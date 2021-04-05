@@ -25,7 +25,7 @@ script:
   - tox
 
 after_success:
-  - if [ "$TRAVIS_PYTHON_VERSION" = "3.8" ] ; then coveralls ; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" = "3.8" ] ; then coverage combine ; coveralls  ; fi
 
 
 # The end.
