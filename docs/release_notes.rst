@@ -4,7 +4,7 @@ Release Notes
 .. toctree::
    :maxdepth: 1
 
-   release_notes/v1.0.0
+   release_notes/v2.0.0
 
 
 Previous Releases
@@ -13,6 +13,7 @@ Previous Releases
 .. toctree::
    :maxdepth: 1
 
+   release_notes/v1.0.0
    release_notes/v0.9.7
    release_notes/v0.9.6
    release_notes/v0.9.5

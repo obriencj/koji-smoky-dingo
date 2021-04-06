@@ -1,0 +1,17 @@
+Koji Smoky Dingo 2.0.0 Release Notes
+====================================
+
+*Unreleased*
+
+Version 2.0.0 continues the features from 1.0.0 with the following
+exceptions:
+
+* Removes support for Python 2
+* Drops dependency on `six`
+* `AppDirs` dependency is now a hard requirement
+* Removes support for RHEL 6 and RHEL 7
+* The `Sieve.__init__` method now accepts both positional and keyword
+  options by default.
+* Removed the `Sieve.receive_options` and `Sieve.set_options` methods
+  in favor of accepting options via keyword parameters in
+  `Sieve.__init__`
