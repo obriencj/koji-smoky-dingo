@@ -9,7 +9,7 @@ RUN dnf install -qy \
 
 ARG VERSION
 
-COPY kojismokydingo-${VERSION}.tar.gz tools/*.patch tools/*.sh /src/
+COPY kojismokydingo-${VERSION}.tar.gz tools/*.sh /src/
 
 RUN /src/rpmbuild.sh \
         /src /src/kojismokydingo-${VERSION}.tar.gz
