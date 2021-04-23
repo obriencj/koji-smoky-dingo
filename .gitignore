@@ -1,5 +1,6 @@
 *#
 *.bak
+*.dist-info
 *.dll
 *.egg-info
 *.gz
