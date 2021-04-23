@@ -82,14 +82,7 @@ STANDALONE = {
 
 def config():
     return {
-        "name": "kojismokydingo",
         "version": VERSION,
-        "author": "Christopher O'Brien",
-        "author_email": "obriencj@gmail.com",
-        "description": "A collection of Koji client plugins and utils",
-        "url": "https://github.com/obriencj/koji-smoky-dingo",
-
-        "license": "GNU General Public License v3 (GPLv3)",
 
         "classifiers": CLASSIFIERS,
 
