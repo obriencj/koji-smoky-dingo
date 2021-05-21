@@ -145,7 +145,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
         # and avoid the join
         packages = session.listPackages(tagID=tagid,
                                         inherited=inherit,
-                                        with_owner=False)
+                                        with_owners=False)
     else:
         packages = session.listPackages(tagID=tagid,
                                         inherited=inherit)
@@ -470,7 +470,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         # and avoid the join
         packages = session.listPackages(tagID=tagid,
                                         inherited=inherit,
-                                        with_owner=False)
+                                        with_owners=False)
     else:
         packages = session.listPackages(tagID=tagid,
                                         inherited=inherit)
