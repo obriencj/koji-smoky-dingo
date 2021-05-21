@@ -460,7 +460,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         return
 
     # check for missing package listings, and add as necessary
-        if version_check(session, (1, 25)):
+    if version_check(session, (1, 25)):
         # koji >= 1.25 allows us to not merge in package owner
         # data. Since we don't actually use that info, let's be kind
         # and avoid the join
