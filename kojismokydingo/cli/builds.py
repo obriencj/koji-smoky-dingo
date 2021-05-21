@@ -29,13 +29,13 @@ from operator import itemgetter
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
     int_or_str, pretty_json, open_output,
-    printerr, read_clean_lines, resplit)
+    printerr, read_clean_lines, resplit, )
 from .sift import BuildSifting, output_sifted
 from .. import (
     NoSuchUser,
     as_buildinfo, as_taginfo,
-    bulk_load, bulk_load_builds,
-    bulk_load_tags, iter_bulk_load, )
+    bulk_load, bulk_load_builds, bulk_load_tags, iter_bulk_load,
+    version_check, )
 from ..builds import (
     BUILD_COMPLETE, BUILD_DELETED,
     BuildFilter,
@@ -135,8 +135,17 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
         return
 
     # check for missing package listings, and add as necessary
-    packages = session.listPackages(tagID=tagid,
-                                    inherited=inherit)
+    if version_check(session, (1, 25)):
+        # koji >= 1.25 allows us to not merge in package owner
+        # data. Since we don't actually use that info, let's be kind
+        # and avoid the join
+        packages = session.listPackages(tagID=tagid,
+                                        inherited=inherit,
+                                        with_owners=False)
+    else:
+        packages = session.listPackages(tagID=tagid,
+                                        inherited=inherit)
+
     packages = set(pkg["package_id"] for pkg in packages)
 
     package_todo = []
@@ -407,9 +416,9 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
     # exists)
     desttag = ensure_tag(session, desttag) if create \
         else as_taginfo(session, desttag)
-    dtagid = desttag["id"]
+    tagid = desttag["id"]
 
-    if srctag["id"] == dtagid:
+    if srctag["id"] == tagid:
         debug("Source and destination tags are the same, nothing to do!")
         return
 
@@ -451,8 +460,17 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         return
 
     # check for missing package listings, and add as necessary
-    packages = session.listPackages(tagID=dtagid,
-                                    inherited=inherit)
+    if version_check(session, (1, 25)):
+        # koji >= 1.25 allows us to not merge in package owner
+        # data. Since we don't actually use that info, let's be kind
+        # and avoid the join
+        packages = session.listPackages(tagID=tagid,
+                                        inherited=inherit,
+                                        with_owners=False)
+    else:
+        packages = session.listPackages(tagID=tagid,
+                                        inherited=inherit)
+
     packages = set(pkg["package_id"] for pkg in packages)
 
     package_todo = []
@@ -467,7 +485,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         # we've got some package listings that need adding
 
         debug("Beginning package additions")
-        fn = lambda pad: session.packageListAdd(dtagid, pad[0], owner=pad[1],
+        fn = lambda pad: session.packageListAdd(tagid, pad[0], owner=pad[1],
                                                 force=force)
 
         for pad, res in iter_bulk_load(session, fn, package_todo, err=strict):
