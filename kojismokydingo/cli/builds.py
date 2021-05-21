@@ -420,9 +420,9 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
     # exists)
     desttag = ensure_tag(session, desttag) if create \
         else as_taginfo(session, desttag)
-    dtagid = desttag["id"]
+    tagid = desttag["id"]
 
-    if srctag["id"] == dtagid:
+    if srctag["id"] == tagid:
         debug("Source and destination tags are the same, nothing to do!")
         return
 
@@ -489,7 +489,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         # we've got some package listings that need adding
 
         debug("Beginning package additions")
-        fn = lambda pad: session.packageListAdd(dtagid, pad[0], owner=pad[1],
+        fn = lambda pad: session.packageListAdd(tagid, pad[0], owner=pad[1],
                                                 force=force)
 
         for pad, res in iter_bulk_load(session, fn, package_todo, err=strict):
