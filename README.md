@@ -119,8 +119,14 @@ python3 setup.py bdist_wheel
 pip3 install --user -I dist/kojismokydingo-2.0.0-py3-none-any.whl
 ```
 
+Additionally, you can install straight from PyPI
+
+```bash
+pip3 install kojismokydingo --user
+```
+
 And the following setting in ~/.koji/config assuming Python version
-3.7 -- read the output of the install command above to verify your
+3.8 -- read the output of the install command above to verify your
 install path. Note that the section title needs to match your koji
 profile, and that you need to configure this setting for each profile
 you'll want to use the meta plugin with.
@@ -137,7 +143,7 @@ With koji >= [1.18], the meta plugin can also be symlinked into
 
 ```bash
 mkdir -p ~/.koji/plugins
-ln -s ~/.local/lib/python3.8/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+ln -s ~/.local/lib/python$(python3 -c 'import sys; print("{}.{}".format(sys.version_info[0],sys.version_info[1]))')/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 ```
 
 
