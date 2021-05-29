@@ -143,7 +143,7 @@ With koji >= [1.18], the meta plugin can also be symlinked into
 
 ```bash
 mkdir -p ~/.koji/plugins
-ln -s ~/.local/lib/python$(python3 -c 'import sys; print("{}.{}".format(sys.version_info[0],sys.version_info[1]))')/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+ln -s ~/.local/lib/python$(python3 -c 'import sys; print("{}.{}".format(*sys.version_info))')/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 ```
 
 
