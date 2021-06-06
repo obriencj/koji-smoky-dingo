@@ -19,4 +19,5 @@ Core Modules
    kojismokydingo/common
    kojismokydingo/hosts
    kojismokydingo/tags
+   kojismokydingo/types
    kojismokydingo/users
