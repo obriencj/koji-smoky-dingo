@@ -97,6 +97,7 @@ def config():
         "install_requires": [
             "appdirs",
             "koji",
+            "typing_extensions ; python_version < '3.8'",
         ],
 
         "tests_require": [

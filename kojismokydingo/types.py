@@ -25,7 +25,12 @@ Python typing compatible definitions for the Koji dict types
 
 from enum import IntEnum
 from koji import BUILD_STATES
-from typing import Iterable, List, Optional, TypedDict, Union
+from typing import Iterable, List, Optional, Union
+
+try:
+    from typing import TypedDict
+except ImportError:
+    from typing_extensions import TypedDict
 
 
 __all__ = (
