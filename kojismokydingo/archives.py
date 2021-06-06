@@ -21,10 +21,12 @@ representing RPMs and build archives
 """
 
 
-from koji import PathInfo
+from koji import ClientSession, PathInfo
 from os.path import join
+from typing import Iterable, Union
 
 from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
+from .types import ArchiveInfos
 
 
 __all__ = (
@@ -47,11 +49,9 @@ __all__ = (
 )
 
 
-def as_pathinfo(path):
+def as_pathinfo(path: Union[str, PathInfo]) -> PathInfo:
     """
     Converts path into a PathInfo if it is not one already
-
-    :rtype: koji.PathInfo
     """
 
     if isinstance(path, PathInfo):
@@ -60,7 +60,11 @@ def as_pathinfo(path):
         return PathInfo(path or "")
 
 
-def filter_archives(session, archives, archive_types=(), arches=()):
+def filter_archives(
+        session: ClientSession,
+        archives: ArchiveInfos,
+        archive_types: Iterable[str] = (),
+        arches: Iterable[str] = ()) -> ArchiveInfos:
     """
     Given a list of archives (or RPMs dressed up like archives),
     return a new list of those archives which are of the given archive
@@ -68,17 +72,9 @@ def filter_archives(session, archives, archive_types=(), arches=()):
 
     :param archives: Archive infos to be filtered
 
-    :type archives: list[dict]
-
     :param archive_types: Desired archive type extensions
 
-    :type archive_types: list[str]
-
     :param arches: Desired architectures
-
-    :type arches: list[str]
-
-    :rtype: Iterator[dict]
     """
 
     if not (archive_types or arches):

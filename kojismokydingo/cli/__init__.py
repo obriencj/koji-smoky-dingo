@@ -37,6 +37,7 @@ from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os import devnull
 from os.path import basename
+from typing import Optional
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
@@ -423,16 +424,16 @@ class SmokyDingo(metaclass=ABCMeta):
         sub-command
     """
 
-    group = "misc"
-    description = "A CLI Plugin"
+    group: str = "misc"
+    description: str = "A CLI Plugin"
 
     # permission name required for use of this command. A value of
     # None indicates anonymous access. Checked in the pre_handle
     # method.
-    permission = None
+    permission: Optional[str] = None
 
 
-    def __init__(self, name=None):
+    def __init__(self, name: Optional[str] = None):
         if name is not None:
             self.name = name
 
@@ -617,8 +618,8 @@ class AnonSmokyDingo(SmokyDingo):
     read-only informational endpoints.
     """
 
-    group = "info"
-    permission = None
+    group: str = "info"
+    permission: Optional[str] = None
 
 
     def __init__(self, name=None):

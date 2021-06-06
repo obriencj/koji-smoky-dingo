@@ -23,9 +23,9 @@ Functions for working with Koji builds
 
 
 from itertools import chain, repeat
-from koji import BUILD_STATES
 from collections import OrderedDict
 from operator import itemgetter
+from typing import Iterable, Optional
 
 from . import (
     NoSuchBuild,
@@ -37,17 +37,13 @@ from . import (
 from .common import (
     chunkseq, merge_extend, rpm_evr_compare,
     unique, update_extend, )
+from .types import BuildInfo, BuildInfos, BuildState
 
 
 __all__ = (
-    "BUILD_BUILDING",
-    "BUILD_COMPLETE",
-    "BUILD_DELETED",
-    "BUILD_FAILED",
-    "BUILD_CANCELED",
-
     "BuildFilter",
     "BuildNEVRCompare",
+    "NEVRCompare",
 
     "build_dedup",
     "build_id_sort",
@@ -77,24 +73,21 @@ __all__ = (
 )
 
 
-BUILD_BUILDING = BUILD_STATES["BUILDING"]
-BUILD_COMPLETE = BUILD_STATES["COMPLETE"]
-BUILD_DELETED = BUILD_STATES["DELETED"]
-BUILD_FAILED = BUILD_STATES["FAILED"]
-BUILD_CANCELED = BUILD_STATES["CANCELED"]
-
-
-class BuildNEVRCompare():
+class NEVRCompare():
     """
-    An adapter for Name, Epoch, Version, Release comparisons of a
-    build info dictionary. Used by the nevr_sort_builds function.
+    A comparison for RPM-style Name, Epoch, Version, Release
+    sorting. Used by the `nvr_sort` function.
     """
 
-    def __init__(self, binfo):
-        self.build = binfo
-        self.n = binfo["name"]
+    def __init__(self, name: str,
+                 epoch: Optional[str],
+                 version: Optional[str],
+                 release: Optional[str]):
 
-        evr = (binfo["epoch"], binfo["version"], binfo["release"])
+        self.n = name
+
+        # just to make sure
+        evr = (epoch, version, release)
         self.evr = tuple(("0" if x is None else str(x)) for x in evr)
 
 
@@ -133,7 +126,31 @@ class BuildNEVRCompare():
         return self.__cmp__(other) >= 0
 
 
-def build_nvr_sort(build_infos, dedup=True):
+def nvr_sort(nvrs: Iterable[str], dedup=True):
+
+    nvrs = filter(None, nvrs)
+
+    if dedup:
+        nvrs = unique(nvrs)
+
+    return sorted(nvrs, key=NEVRCompare)
+
+
+class BuildNEVRCompare(NEVRCompare):
+    """
+    An adapter for RPM-style Name, Epoch, Version, Release comparisons
+    of a build info dictionary. Used by the `build_nvr_sort` function.
+    """
+
+    def __init__(self, binfo: BuildInfo):
+        self.build = binfo
+        super().__init__(binfo["name"],
+                         binfo["epoch"], binfo["version"], binfo["release"])
+
+
+def build_nvr_sort(
+        build_infos: BuildInfos,
+        dedup: bool = True) -> BuildInfos:
     """
     Given a sequence of build info dictionaries, sort them by Name,
     Epoch, Version, and Release using RPM's variation of comparison
@@ -144,12 +161,12 @@ def build_nvr_sort(build_infos, dedup=True):
     All None infos will be dropped.
 
     :param build_infos: build infos to be sorted and de-duplicated
-    :type build_infos: list[dict]
+    :type build_infos: BuildInfos
 
     :param dedup: remove duplicate entries. Default, True
     :type dedup: bool, optional
 
-    :rtype: list[dict]
+    :rtype: BuildInfos
     """
 
     build_infos = filter(None, build_infos)
@@ -160,7 +177,9 @@ def build_nvr_sort(build_infos, dedup=True):
     return sorted(build_infos, key=BuildNEVRCompare)
 
 
-def build_id_sort(build_infos, dedup=True):
+def build_id_sort(
+        build_infos: BuildInfos,
+        dedup: bool = True) -> BuildInfos:
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, sorted by the build ID
@@ -168,12 +187,12 @@ def build_id_sort(build_infos, dedup=True):
     All None infos will be dropped.
 
     :param build_infos: build infos to be sorted and de-duplicated
-    :type build_infos: list[dict]
+    :type build_infos: BuildInfos
 
     :param dedup: remove duplicate entries. Default, True
     :type dedup: bool, optional
 
-    :rtype: list[dict]
+    :rtype: BuildInfos
     """
 
     build_infos = filter(None, build_infos)
@@ -995,18 +1014,12 @@ def filter_builds_by_tags(session, build_infos,
     return builds.values()
 
 
-def filter_builds_by_state(build_infos, state=BUILD_COMPLETE):
+def filter_builds_by_state(
+        build_infos: BuildInfos,
+        state: BuildState = BuildState.COMPLETE) -> BuildInfos:
     """
     Given a sequence of build info dicts, return a generator of those
     matching the given state.
-
-    * BUILDING = 0
-    * COMPLETE = 1
-    * DELETED = 2
-    * FAILED = 3
-    * CANCELED = 4
-
-    See `koji.BUILD_STATES`
 
     Typically only COMPLETE and DELETED will be encountered here, the
     rest will rarely result in a build info dict existing.
@@ -1015,14 +1028,14 @@ def filter_builds_by_state(build_infos, state=BUILD_COMPLETE):
 
     :param build_infos: build infos to filter through
 
-    :type build_infos: list[dict] or Iterator[dict]
+    :type build_infos: Iterable[dict]
 
     :param state: state value to filter for. Default: only builds in
       the COMPLETE state are returned
 
     :type state: int, optional
 
-    :rtype: Iterator[dict]
+    :rtype: Iteratable[dict]
     """
 
     if state is None:
