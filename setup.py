@@ -97,6 +97,9 @@ def config():
         "install_requires": [
             "appdirs",
             "koji",
+
+            # backport requirements
+            "enum34 ; python_version < '3.4'",
             "typing_extensions ; python_version < '3.8'",
         ],
 

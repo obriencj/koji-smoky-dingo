@@ -29,7 +29,10 @@ from typing import Iterable, List, Optional, Union
 
 try:
     from typing import TypedDict
+
 except ImportError:
+    # Python < 3.8 doesn't have TypedDict yet, need to pull it in from
+    # the typing_extensions backport instead.
     from typing_extensions import TypedDict
 
 
