@@ -107,7 +107,6 @@ def config():
             "appdirs",
             "docutils",
             "koji",
-            "mock",
         ],
 
         # The koji_cli_plugins namespace package needs to be a plain

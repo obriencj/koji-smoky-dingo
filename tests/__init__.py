@@ -15,8 +15,8 @@
 import koji
 
 from collections import OrderedDict
-from mock import MagicMock, PropertyMock, patch
 from unittest import TestCase
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from kojismokydingo import (
     BadDingo, FeatureUnavailable,

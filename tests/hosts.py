@@ -13,8 +13,8 @@
 
 
 from datetime import datetime
-from mock import MagicMock
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from kojismokydingo import NoSuchChannel
 from kojismokydingo.hosts import gather_hosts_checkins

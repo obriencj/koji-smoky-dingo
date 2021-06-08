@@ -12,9 +12,9 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from mock import MagicMock
 from operator import itemgetter
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from kojismokydingo import NoSuchTag
 from kojismokydingo.common import unique
