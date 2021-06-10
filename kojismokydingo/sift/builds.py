@@ -24,6 +24,7 @@ dicts.
 
 
 from abc import abstractmethod
+from collections import defaultdict
 from koji import BUILD_STATES
 from operator import itemgetter
 
@@ -38,7 +39,8 @@ from .. import (
     iter_bulk_load, )
 from ..builds import (
     BuildNEVRCompare,
-    build_dedup, decorate_builds_btypes, decorate_builds_cg_list,
+    build_dedup, build_nvr_sort,
+    decorate_builds_btypes, decorate_builds_cg_list,
     decorate_builds_maven, gather_rpm_sigkeys, gavgetter, )
 from ..common import rpm_evr_compare, unique
 from ..tags import gather_tag_ids
@@ -57,6 +59,8 @@ __all__ = (
     "EVRCompareLE",
     "EVRCompareGT",
     "EVRCompareGE",
+    "EVRHigh",
+    "EVRLow",
     "ImportedSieve",
     "InheritedSieve",
     "LatestSieve",
@@ -388,6 +392,54 @@ class EVRCompareLE(EVRCompare):
     """
 
     name = "<="
+
+
+class EVRHigh(Sieve):
+    """
+    usage: (evr-high)
+
+    Filters to only the builds which are the higest EVR of their given
+    package name.
+    """
+
+    name = "evr-high"
+
+    aliases = ("latest-nvrs", )
+
+
+    def run(self, session, binfos):
+
+        collect = defaultdict(list)
+
+        for bld in binfos:
+            collect[bld["name"]].append(bld)
+
+        for binfos in collect.values():
+            yield build_nvr_sort(binfos)[-1]
+
+
+class EVRLow(Sieve):
+    """
+    usage: (evr-low)
+
+    Filters to only the builds which are the lowest EVR of their given
+    package name.
+    """
+
+    name = "evr-low"
+
+    aliases = ("oldest-nvrs", )
+
+
+    def run(self, session, binfos):
+
+        collect = defaultdict(list)
+
+        for bld in binfos:
+            collect[bld["name"]].append(bld)
+
+        for binfos in collect.values():
+            yield build_nvr_sort(binfos)[0]
 
 
 class TaggedSieve(MatcherSieve):
@@ -898,6 +950,8 @@ DEFAULT_BUILD_INFO_SIEVES = [
     EVRCompareGE,
     EVRCompareLT,
     EVRCompareLE,
+    EVRHigh,
+    EVRLow,
     ImportedSieve,
     InheritedSieve,
     LatestSieve,

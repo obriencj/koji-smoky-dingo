@@ -600,6 +600,43 @@ class CGImportedSieveTest(TestCase):
         self.assertEqual(res["default"], [BUILD_SAMPLE_4, BUILD_SAMPLE_5])
 
 
+class EVRHighLowTest(TestCase):
+
+
+    def test_evr_high(self):
+
+        src = """
+        (evr-high)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_5])
+
+        src = """
+        (!evr-high)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2,
+                          BUILD_SAMPLE_3, BUILD_SAMPLE_4])
+
+
+    def test_evr_low(self):
+
+        src = """
+        (evr-low)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_1])
+
+        src = """
+        (!evr-low)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3,
+                          BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+
 class SiftNVRsTest(TestCase):
 
 
