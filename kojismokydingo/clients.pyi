@@ -1,0 +1,3 @@
+from typing import Any
+
+def rebuild_client_config(session: Any, goptions: Any): ...

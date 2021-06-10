@@ -1,0 +1,3 @@
+from typing import Any, Optional
+
+def gather_hosts_checkins(session: Any, arches: Optional[Any] = ..., channel: Optional[Any] = ..., skiplist: Optional[Any] = ...): ...
