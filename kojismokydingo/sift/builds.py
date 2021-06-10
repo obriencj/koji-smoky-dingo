@@ -404,8 +404,6 @@ class EVRHigh(Sieve):
 
     name = "evr-high"
 
-    aliases = ("latest-nvrs", )
-
 
     def run(self, session, binfos):
 
@@ -427,8 +425,6 @@ class EVRLow(Sieve):
     """
 
     name = "evr-low"
-
-    aliases = ("oldest-nvrs", )
 
 
     def run(self, session, binfos):
