@@ -10,33 +10,6 @@ PYTHON ?= $(shell which python3 python 2>/dev/null \
 	        | head -n1)
 PYTHON := $(PYTHON)
 
-_WHEELCHECK := $(shell $(PYTHON) -c 'import wheel' 2>/dev/null)
-ifeq ($(.SHELLSTATUS),0)
-	BDIST := bdist_wheel
-	BDIST_FILE := dist/$(PROJECT)-$(VERSION)*.whl
-else
-	BDIST := build
-	BDIST_FILE := .
-endif
-
-_FLAKE8CHECK := $(shell $(PYTHON) -c 'import flake8' 2>/dev/null)
-ifeq ($(.SHELLSTATUS),0)
-	FLAKE8 := echo "running flake8" ; \
-		$(PYTHON) -B -m flake8 kojismokydingo koji_cli_plugins
-else
-	FLAKE8 := echo "flake8 not found"
-endif
-
-# python 2.6 needed an externally installed argparse, which has weird
-# output for some things (like mutually exclusive groups), so we skip
-# that test for 2.6
-_OLDCHECK := $(shell $(PYTHON) -c 'import sys; sys.exit(sys.version_info < (2, 7,))')
-ifeq ($(.SHELLSTATUS),0)
-	NOSEARGS :=
-else
-	NOSEARGS := -e 'test_command_help'
-endif
-
 
 # We use this later in setting up the gh-pages submodule for pushing,
 # so forks will push their docs to their own gh-pages branch.
@@ -48,7 +21,7 @@ default: quick-test	## Runs the quick-test target
 
 
 help:  ## Display this help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 
 report-python:
@@ -58,7 +31,7 @@ report-python:
 
 ##@ Local Build and Install
 build: clean-built report-python flake8	## Produces a wheel using the default system python
-	@$(PYTHON) setup.py $(BDIST)
+	@$(PYTHON) setup.py bdist_wheel
 
 
 install: quick-test	## Installs using the default python for the current user
@@ -99,8 +72,12 @@ test: clean	## Launches tox
 	@tox
 
 
-flake8: report-python	## Launches flake8
-	@$(FLAKE8)
+flake8:	## Launches flake8 via tox
+	@tox -e flake8
+
+
+mypy:	## Launches mypy via tox
+	@tox -e mypy
 
 
 quick-test: build	## Launches nosetest using the default python
@@ -172,7 +149,7 @@ clean-docs:	## Remove built docs
 	@rm -rf build/sphinx/*
 
 
-.PHONY: archive build clean clean-built clean-docs default deploy-docs docs help overview packaging-build packaging-test quick-test rpm srpm stage-docs test tidy
+.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test quick-test rpm srpm stage-docs test tidy
 
 
 # The end.

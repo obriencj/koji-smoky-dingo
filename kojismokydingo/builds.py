@@ -126,7 +126,7 @@ class NEVRCompare():
         return self.__cmp__(other) >= 0
 
 
-def nvr_sort(nvrs: Iterable[str], dedup=True):
+def nvr_sort(nvrs, dedup=True):
 
     nvrs = filter(None, nvrs)
 
@@ -148,9 +148,7 @@ class BuildNEVRCompare(NEVRCompare):
                          binfo["epoch"], binfo["version"], binfo["release"])
 
 
-def build_nvr_sort(
-        build_infos: BuildInfos,
-        dedup: bool = True) -> BuildInfos:
+def build_nvr_sort(build_infos, dedup=True):
     """
     Given a sequence of build info dictionaries, sort them by Name,
     Epoch, Version, and Release using RPM's variation of comparison
@@ -177,9 +175,7 @@ def build_nvr_sort(
     return sorted(build_infos, key=BuildNEVRCompare)
 
 
-def build_id_sort(
-        build_infos: BuildInfos,
-        dedup: bool = True) -> BuildInfos:
+def build_id_sort(build_infos, dedup=True):
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, sorted by the build ID

@@ -75,6 +75,11 @@ class LonelyDingo(SmokyDingo):
 
 
     def __call__(self, args=None):
+
+        # TODO: mypy hates that the method signature changes here, and
+        # it might be right about that being a problem. Look into
+        # it...
+
         parser = self.parser()
         options = parser.parse_args(args)
 

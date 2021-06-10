@@ -29,19 +29,6 @@ installed in order for the plugins to be loaded by the Koji CLI.
 VERSION = "2.0.0"
 
 
-CLASSIFIERS = [
-    "Environment :: Console",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Topic :: Software Development :: Build Tools",
-]
-
-
 COMMANDS = {
     "affected-targets": "kojismokydingo.cli.tags:AffectedTargets",
     "block-env-var": "kojismokydingo.cli.tags:BlockEnvVar",
@@ -84,8 +71,6 @@ def config():
     return {
         "version": VERSION,
 
-        "classifiers": CLASSIFIERS,
-
         "packages": [
             "koji_cli_plugins",
             "kojismokydingo",
@@ -93,6 +78,13 @@ def config():
             "kojismokydingo.sift",
             "kojismokydingo.standalone",
         ],
+
+        "package_data": {
+            "kojismokydingo": ["py.typed", "*.pyi"],
+            "kojismokydingo.cli": ["*.pyi"],
+            "kojismokydingo.sift": ["*.pyi"],
+            "kojismokydingo.standalone": ["*.pyi"],
+        },
 
         "install_requires": [
             "appdirs",
