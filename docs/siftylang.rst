@@ -393,6 +393,7 @@ patterns.
 Build Predicate ``evr-high``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
+
    (evr-high)
 
 Filters for builds with the highest EVR for each package name among
@@ -402,6 +403,7 @@ the original series.
 Build Predicate ``evr-low``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
+
    (evr-low)
 
 Filters the builds to only the lowest EVR for each package name among
