@@ -394,20 +394,28 @@ Build Predicate ``evr-high``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
-   (evr-high)
+   (evr-high [count: COUNT])
 
 Filters for builds with the highest EVR for each package name among
 the original series.
+
+``COUNT`` if specified must be a positive integer greater than zero,
+representing the maximum number of highest-EVR builds to match for
+each package name. Default behavior is a count of 1 (highest only).
 
 
 Build Predicate ``evr-low``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
-   (evr-low)
+   (evr-low [count: COUNT])
 
 Filters the builds to only the lowest EVR for each package name among
 the original series.
+
+``COUNT`` if specified must be a positive integer greater than zero,
+representing the maximum number of lowest-EVR builds to match for
+each package name. Default behavior is a count of 1 (lowest only).
 
 
 Build Predicate ``imported``
