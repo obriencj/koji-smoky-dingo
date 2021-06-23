@@ -139,7 +139,7 @@ class BuildNEVRCompare(object):
         return self.__cmp__(other) >= 0
 
 
-def build_nvr_sort(build_infos, dedup=True):
+def build_nvr_sort(build_infos, dedup=True, reverse=False):
     """
     Given a sequence of build info dictionaries, sort them by Name,
     Epoch, Version, and Release using RPM's variation of comparison
@@ -155,6 +155,9 @@ def build_nvr_sort(build_infos, dedup=True):
     :param dedup: remove duplicate entries. Default, True
     :type dedup: bool, optional
 
+    :param reverse: reverse the sorting. Default, False
+    :type reverse: bool, optional
+
     :rtype: list[dict]
     """
 
@@ -163,10 +166,10 @@ def build_nvr_sort(build_infos, dedup=True):
     if dedup:
         build_infos = unique(build_infos, key="id")
 
-    return sorted(build_infos, key=BuildNEVRCompare)
+    return sorted(build_infos, key=BuildNEVRCompare, reverse=reverse)
 
 
-def build_id_sort(build_infos, dedup=True):
+def build_id_sort(build_infos, dedup=True, reverse=False):
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, sorted by the build ID
@@ -179,6 +182,9 @@ def build_id_sort(build_infos, dedup=True):
     :param dedup: remove duplicate entries. Default, True
     :type dedup: bool, optional
 
+    :param reverse: reverse the sorting. Default, False
+    :type reverse: bool, optional
+
     :rtype: list[dict]
     """
 
@@ -187,7 +193,7 @@ def build_id_sort(build_infos, dedup=True):
     if dedup:
         build_infos = unique(build_infos, key="id")
 
-    return sorted(build_infos, key=itemgetter("id"))
+    return sorted(build_infos, key=itemgetter("id"), reverse=reverse)
 
 
 def build_dedup(build_infos):

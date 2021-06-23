@@ -600,6 +600,178 @@ class CGImportedSieveTest(TestCase):
         self.assertEqual(res["default"], [BUILD_SAMPLE_4, BUILD_SAMPLE_5])
 
 
+class EVRHighLowTest(TestCase):
+
+
+    def test_evr_high(self):
+
+        src = """
+        (evr-high)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_5])
+
+        src = """
+        (!evr-high)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2,
+                          BUILD_SAMPLE_3, BUILD_SAMPLE_4])
+
+
+    def test_evr_low(self):
+
+        src = """
+        (evr-low)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_1])
+
+        src = """
+        (!evr-low)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3,
+                          BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+
+class EVRHighLowTest(TestCase):
+
+
+    def test_evr_high(self):
+
+        src = """
+        (evr-high)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_5])
+
+        src = """
+        (!evr-high)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2,
+                          BUILD_SAMPLE_3, BUILD_SAMPLE_4])
+
+
+    def test_evr_high_count(self):
+
+        src = """
+        (evr-high count: 1)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_5])
+
+        src = """
+        (evr-high count: 2)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_5, BUILD_SAMPLE_4])
+
+        src = """
+        (!evr-high count: 1)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2,
+                          BUILD_SAMPLE_3, BUILD_SAMPLE_4])
+
+        src = """
+        (!evr-high count: 2)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1, BUILD_SAMPLE_2,
+                          BUILD_SAMPLE_3])
+
+        src = """
+        (evr-high count: 0)
+        """
+        with self.assertRaises(SifterError):
+            sift_builds(None, src, BUILD_SAMPLES)
+
+        src = """
+        (evr-high count: -1)
+        """
+        with self.assertRaises(SifterError):
+            sift_builds(None, src, BUILD_SAMPLES)
+
+        src = """
+        (evr-high count: tacos)
+        """
+        with self.assertRaises(SifterError):
+            sift_builds(None, src, BUILD_SAMPLES)
+
+
+    def test_evr_low(self):
+
+        src = """
+        (evr-low)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_1])
+
+        src = """
+        (!evr-low)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3,
+                          BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+
+    def test_evr_low_count(self):
+
+        src = """
+        (evr-low count: 1)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_1])
+
+        src = """
+        (evr-low count: 2)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"], [BUILD_SAMPLE_1, BUILD_SAMPLE_1_1])
+
+        src = """
+        (!evr-low count: 1)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_1_1, BUILD_SAMPLE_2, BUILD_SAMPLE_3,
+                          BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        src = """
+        (!evr-low count: 2)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_2, BUILD_SAMPLE_3,
+                          BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        src = """
+        (evr-low count: 0)
+        """
+        with self.assertRaises(SifterError):
+            sift_builds(None, src, BUILD_SAMPLES)
+
+        src = """
+        (evr-low count: -1)
+        """
+        with self.assertRaises(SifterError):
+            sift_builds(None, src, BUILD_SAMPLES)
+
+        src = """
+        (evr-low count: tacos)
+        """
+        with self.assertRaises(SifterError):
+            sift_builds(None, src, BUILD_SAMPLES)
+
+
 class SiftNVRsTest(TestCase):
 
 
