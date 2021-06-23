@@ -24,6 +24,8 @@ dicts.
 
 
 from abc import abstractmethod
+from collections import defaultdict
+from itertools import islice
 from koji import BUILD_STATES
 from operator import itemgetter
 
@@ -31,14 +33,15 @@ from . import (
     DEFAULT_SIEVES,
     IntStrSieve, ItemSieve, MatcherSieve, Number, Sieve,
     Sifter, SifterError, VariadicSieve,
-    ensure_int_or_str, ensure_str, ensure_symbol, )
+    ensure_int, ensure_int_or_str, ensure_str, ensure_symbol, )
 from .common import ensure_comparison, CacheMixin
 from .. import (
     as_taginfo, bulk_load_builds, bulk_load_tags, bulk_load_users,
     iter_bulk_load, )
 from ..builds import (
     BuildNEVRCompare,
-    build_dedup, decorate_builds_btypes, decorate_builds_cg_list,
+    build_dedup, build_nvr_sort,
+    decorate_builds_btypes, decorate_builds_cg_list,
     decorate_builds_maven, gather_rpm_sigkeys, gavgetter, )
 from ..common import rpm_evr_compare, unique
 from ..tags import gather_tag_ids
@@ -57,6 +60,8 @@ __all__ = (
     "EVRCompareLE",
     "EVRCompareGT",
     "EVRCompareGE",
+    "EVRHigh",
+    "EVRLow",
     "ImportedSieve",
     "InheritedSieve",
     "LatestSieve",
@@ -388,6 +393,69 @@ class EVRCompareLE(EVRCompare):
     """
 
     name = "<="
+
+
+
+class EVRSorted(Sieve):
+
+
+    def __init__(self, sifter, count=1):
+        count = ensure_int(count)
+
+        if count < 1:
+            raise SifterError("count must be greater than zero")
+
+        self.count = count
+        super().__init__(sifter, count=count)
+
+
+    def run(self, session, binfos):
+
+        collect = defaultdict(list)
+
+        for bld in binfos:
+            collect[bld["name"]].append(bld)
+
+        reverse = self._reverse
+        count = self.count
+
+        if count == 1:
+            for binfos in collect.values():
+                yield build_nvr_sort(binfos, reverse=reverse)[0]
+        else:
+            for binfos in collect.values():
+                blds = build_nvr_sort(binfos, reverse=reverse)
+                yield from islice(blds, 0, count)
+
+
+class EVRHigh(EVRSorted):
+    """
+    usage: (evr-high [count: COUNT])
+
+    Filters to only the builds which are the higest EVR of their given
+    package name.
+
+    COUNT if specified is the number of highest EVR builds to
+    return. Default is 1
+    """
+
+    name = "evr-high"
+    _reverse = True
+
+
+class EVRLow(EVRSorted):
+    """
+    usage: (evr-low [count: COUNT])
+
+    Filters to only the builds which are the lowest EVR of their given
+    package name.
+
+    COUNT if specified is the number of lowest EVR builds to
+    return. Default is 1
+    """
+
+    name = "evr-low"
+    _reverse = False
 
 
 class TaggedSieve(MatcherSieve):
@@ -898,6 +966,8 @@ DEFAULT_BUILD_INFO_SIEVES = [
     EVRCompareGE,
     EVRCompareLT,
     EVRCompareLE,
+    EVRHigh,
+    EVRLow,
     ImportedSieve,
     InheritedSieve,
     LatestSieve,

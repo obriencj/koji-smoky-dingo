@@ -126,16 +126,6 @@ class NEVRCompare():
         return self.__cmp__(other) >= 0
 
 
-def nvr_sort(nvrs, dedup=True):
-
-    nvrs = filter(None, nvrs)
-
-    if dedup:
-        nvrs = unique(nvrs)
-
-    return sorted(nvrs, key=NEVRCompare)
-
-
 class BuildNEVRCompare(NEVRCompare):
     """
     An adapter for RPM-style Name, Epoch, Version, Release comparisons
@@ -148,7 +138,7 @@ class BuildNEVRCompare(NEVRCompare):
                          binfo["epoch"], binfo["version"], binfo["release"])
 
 
-def build_nvr_sort(build_infos, dedup=True):
+def build_nvr_sort(build_infos, dedup=True, reverse=False):
     """
     Given a sequence of build info dictionaries, sort them by Name,
     Epoch, Version, and Release using RPM's variation of comparison
@@ -164,6 +154,9 @@ def build_nvr_sort(build_infos, dedup=True):
     :param dedup: remove duplicate entries. Default, True
     :type dedup: bool, optional
 
+    :param reverse: reverse the sorting. Default, False
+    :type reverse: bool, optional
+
     :rtype: BuildInfos
     """
 
@@ -172,10 +165,10 @@ def build_nvr_sort(build_infos, dedup=True):
     if dedup:
         build_infos = unique(build_infos, key="id")
 
-    return sorted(build_infos, key=BuildNEVRCompare)
+    return sorted(build_infos, key=BuildNEVRCompare, reverse=reverse)
 
 
-def build_id_sort(build_infos, dedup=True):
+def build_id_sort(build_infos, dedup=True, reverse=False):
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, sorted by the build ID
@@ -188,6 +181,9 @@ def build_id_sort(build_infos, dedup=True):
     :param dedup: remove duplicate entries. Default, True
     :type dedup: bool, optional
 
+    :param reverse: reverse the sorting. Default, False
+    :type reverse: bool, optional
+
     :rtype: BuildInfos
     """
 
@@ -196,7 +192,7 @@ def build_id_sort(build_infos, dedup=True):
     if dedup:
         build_infos = unique(build_infos, key="id")
 
-    return sorted(build_infos, key=itemgetter("id"))
+    return sorted(build_infos, key=itemgetter("id"), reverse=reverse)
 
 
 def build_dedup(build_infos):
