@@ -424,12 +424,13 @@ class EVRSorted(Sieve):
         count = self.count
 
         if count == 1:
-            for binfos in collect.values():
+            for binfos in itervalues(collect):
                 yield build_nvr_sort(binfos, reverse=reverse)[0]
         else:
-            for binfos in collect.values():
+            for binfos in itervalues(collect):
                 blds = build_nvr_sort(binfos, reverse=reverse)
-                yield from islice(blds, 0, count)
+                for bld in islice(blds, 0, count):
+                    yield bld
 
 
 class EVRHigh(EVRSorted):
