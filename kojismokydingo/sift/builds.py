@@ -243,7 +243,11 @@ class EVRCompare(Sieve):
         super().__init__(sifter, version)
 
         self.token = version
-        self.epoch, self.version, self.release = evr_split(version)
+
+        epoch, version, self.release = evr_split(version)
+        self.epoch = epoch or "0"
+        self.version = version or "0"
+
         self.op = ensure_comparison(self.name)
 
 

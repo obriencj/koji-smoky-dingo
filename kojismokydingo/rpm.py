@@ -146,10 +146,8 @@ def nevra_split(nevra):
     Splits an NEVRA into a five-tuple representing the name, epoch,
     version, release, and arch.
 
-    If name is absent, it is presumed to be ``None``
-    If epoch is absent, it is presumed to be ``"0"``
-    If arch is absent, it is presumed to be ``None``
-    If release is absent, it is presumed to be ``None``
+    If name, epoch, arch, or release are absent, they are represented
+    as a ``None``
 
     This differs from NEVRA splitting in that the last dotted segment
     of the release is considered to be the architecture. Because there
@@ -184,9 +182,8 @@ def nevr_split(nevr):
     Splits an NEVR into a four-tuple represending the name, epoch,
     version, and release.
 
-    If name is absent, it is presumed to be ``None``
-    If epoch is absent, it is presumed to be ``"0"``
-    If release is absent, it is presumed to be ``None``
+    If name, epoch, or release are absent they are represented as
+    ``None``
 
     This differs from NEVRA splitting in that the last dotted segment
     of the release is not considered an architecture. Because there
@@ -206,10 +203,18 @@ def nevr_split(nevr):
 
     epoch, version, release = evr_split(nevr)
 
-    if epoch and "-" in epoch:
-        name, epoch = epoch.rsplit("-", 1)
+    if epoch:
+        if "-" in epoch:
+            name, epoch = epoch.rsplit("-", 1)
+        else:
+            name = None
     else:
-        name = None
+        name = version
+        if release and "-" in release:
+            version, release = release.split("-", 1)
+        else:
+            version = release
+            release = None
 
     return name, epoch, version, release
 
@@ -235,7 +240,7 @@ def evr_split(evr):
     if ":" in version:
         epoch, version = version.split(":", 1)
     else:
-        epoch = "0"
+        epoch = None
 
     if "-" in version:
         version, release = version.split("-", 1)

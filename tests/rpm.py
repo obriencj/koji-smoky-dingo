@@ -14,7 +14,9 @@
 
 from unittest import TestCase
 
-from kojismokydingo.rpm import _rpm_str_compare, evr_compare
+from kojismokydingo.rpm import (
+    _rpm_str_compare, evr_compare,
+    nevra_split, nevr_split, evr_split, )
 
 
 try:
@@ -136,6 +138,75 @@ class TestEVRSort(TestCase):
             evr_r = ("0", vr, "1")
             self.assertEqual(evr_compare(evr_l, evr_r), 1)
             self.assertEqual(evr_compare(evr_r, evr_l), -1)
+
+
+NEVRA_SPLITS = [
+    ("bind-32:9.10.2-2.P1.fc22.x86_64",
+     ("bind", "32", "9.10.2", "2.P1.fc22", "x86_64")),
+    ("bind-9.10.2-2.P1.fc22.x86_64",
+     ("bind", None, "9.10.2", "2.P1.fc22", "x86_64")),
+    ("bind-32:9.10.2-2",
+     ("bind", "32", "9.10.2", "2", None)),
+    ("bind-9.10.2-2",
+     ("bind", None, "9.10.2", "2", None)),
+    ("bind-32:9.10.2",
+     ("bind", "32", "9.10.2", None, None)),
+    ("bind-9.10.2",
+     ("bind", None, "9.10.2", None, None)),
+    ("bind",
+     ("bind", None, None, None, None)),
+
+    # these should be the only cases where we have no name, very odd
+    # structure but discernable
+    ("32:9.10.2-2.P1.fc22.x86_64",
+     (None, "32", "9.10.2", "2.P1.fc22", "x86_64")),
+    ("32:9.10.2",
+     (None, "32", "9.10.2", None, None)),
+
+    ("",
+     ("", None, None, None, None)),
+]
+
+
+NEVR_SPLITS = [
+    ("bind-32:9.10.2-2.P1.fc22.x86_64",
+     ("bind", "32", "9.10.2", "2.P1.fc22.x86_64")),
+    ("bind-9.10.2-2.P1.fc22.x86_64",
+     ("bind", None, "9.10.2", "2.P1.fc22.x86_64")),
+    ("bind-32:9.10.2-2",
+     ("bind", "32", "9.10.2", "2")),
+    ("bind-9.10.2-2",
+     ("bind", None, "9.10.2", "2")),
+    ("bind-32:9.10.2",
+     ("bind", "32", "9.10.2", None)),
+    ("bind-9.10.2",
+     ("bind", None, "9.10.2", None)),
+    ("bind",
+     ("bind", None, None, None)),
+
+    # these should be the only cases where we have no name, very odd
+    # structure but discernable
+    ("32:9.10.2-2.P1.fc22.x86_64",
+     (None, "32", "9.10.2", "2.P1.fc22.x86_64")),
+    ("32:9.10.2",
+     (None, "32", "9.10.2", None)),
+
+    ("",
+     ("", None, None, None)),
+]
+
+
+class TestSplits(TestCase):
+
+
+    def test_nevra_split(self):
+        for src, expect in NEVRA_SPLITS:
+            self.assertEqual(nevra_split(src), expect)
+
+
+    def test_nevr_split(self):
+        for src, expect in NEVR_SPLITS:
+            self.assertEqual(nevr_split(src), expect)
 
 
 #
