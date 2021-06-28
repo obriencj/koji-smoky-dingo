@@ -34,7 +34,7 @@ from configparser import ConfigParser
 from datetime import datetime, timezone
 from fnmatch import fnmatchcase
 from glob import glob
-from itertools import filterfalse, zip_longest
+from itertools import filterfalse
 from operator import itemgetter
 from os.path import expanduser, isdir, join
 
@@ -56,7 +56,6 @@ __all__ = (
     "load_plugin_config",
     "merge_extend",
     "parse_datetime",
-    "rpm_evr_compare",
     "unique",
     "update_extend",
 )
@@ -275,115 +274,6 @@ def globfilter(seq, patterns,
         return fnmatches(val, patterns)
 
     return filterfalse(test, seq) if invert else filter(test, seq)
-
-
-def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
-    """
-    Split an E, V, or R string for comparison by its segments
-    """
-
-    return tuple(i for i in _split(s) if (i.isalnum() or i.startswith("~")))
-
-
-def _rpm_str_compare(left, right):
-    """
-    Comparison of left and right by RPM version comparison rules.
-
-    Either string should be *one* element of the EVR tuple (ie. either the
-    epoch, version, or release). Comparison will split the element on RPM's
-    special delimeters.
-    """
-
-    left = _rpm_str_split(left)
-    right = _rpm_str_split(right)
-
-    for lp, rp in zip_longest(left, right, fillvalue=""):
-
-        # Special comparison for tilde segments
-        if lp.startswith("~"):
-            # left is tilde
-
-            if rp.startswith("~"):
-                # right also is tilde, let's just chop off the tilde
-                # and fall through to non-tilde comparisons below
-
-                lp = lp[1:]
-                rp = rp[1:]
-
-            else:
-                # right is not tilde, therefore right is greater
-                return -1
-
-        elif rp.startswith("~"):
-            # left is not tilde, but right is, therefore left is greater
-            return 1
-
-        # Special comparison for digits vs. alphabetical
-        if lp.isdigit():
-            # left is numeric
-
-            if rp.isdigit():
-                # left and right are both numeric, convert and fall
-                # through
-                lp = int(lp)
-                rp = int(rp)
-
-            else:
-                # right is alphabetical or absent, left is greater
-                return 1
-
-        elif rp.isdigit():
-            # left is alphabetical but right is not, right is greater
-            return -1
-
-        # Final comparison for segment
-        if lp == rp:
-            # left and right are equivalent, check next segment
-            continue
-        else:
-            # left and right are not equivalent
-            return 1 if lp > rp else -1
-
-    else:
-        # ran out of segments to check, must be equivalent
-        return 0
-
-
-def rpm_evr_compare(left_evr, right_evr):
-    """
-    Compare two (Epoch, Version, Release) tuples.
-
-    This is an alternative implementation of the rpm lib's
-    labelCompare function.
-
-    Return values:
-
-    * 1 if left_evr is greater-than right_evr
-    * 0 if left_evr is equal-to right_evr
-    * -1 if left_evr is less-than right_evr
-
-    :param left_evr: The left Epoch, Version, Release for comparison
-    :type left_evr: (str, str, str)
-
-    :param right_evr: The right Epoch, Version, Release for comparison
-    :type right_evr: (str, str, str)
-
-    :rtype: int
-    """
-
-    for lp, rp in zip_longest(left_evr, right_evr, fillvalue="0"):
-        if lp == rp:
-            # fast check to potentially skip all the matching
-            continue
-
-        compared = _rpm_str_compare(lp, rp)
-        if compared:
-            # non zero comparison for segment, done checking
-            return compared
-
-    else:
-        # ran out of segments to check, must be equivalent
-        return 0
 
 
 def unique(sequence, key=None):

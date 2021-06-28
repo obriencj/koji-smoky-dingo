@@ -43,7 +43,8 @@ from ..builds import (
     build_dedup, build_nvr_sort,
     decorate_builds_btypes, decorate_builds_cg_list,
     decorate_builds_maven, gather_rpm_sigkeys, gavgetter, )
-from ..common import rpm_evr_compare, unique
+from ..common import unique
+from ..rpm import evr_compare, evr_split
 from ..tags import gather_tag_ids
 
 
@@ -240,21 +241,12 @@ class EVRCompare(Sieve):
     def __init__(self, sifter, version):
         version = ensure_str(version)
         super().__init__(sifter, version)
+
         self.token = version
 
-        if ":" in version:
-            epoch, version = version.split(":", 1)
-        else:
-            epoch = "0"
-
-        if "-" in version:
-            version, release = version.split("-", 1)
-        else:
-            release = None
-
-        self.epoch = epoch
-        self.version = version
-        self.release = release
+        epoch, version, self.release = evr_split(version)
+        self.epoch = epoch or "0"
+        self.version = version or "0"
 
         self.op = ensure_comparison(self.name)
 
@@ -265,7 +257,7 @@ class EVRCompare(Sieve):
 
         ours = (self.epoch, self.version, self.release or other[2])
 
-        relative = rpm_evr_compare(other, ours)
+        relative = evr_compare(other, ours)
         return self.op(relative, 0)
 
 
