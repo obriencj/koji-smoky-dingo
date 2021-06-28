@@ -35,8 +35,8 @@ from . import (
     bulk_load_buildroot_archives, bulk_load_buildroot_rpms,
     bulk_load_rpm_sigs, bulk_load_tasks, iter_bulk_load, )
 from .common import (
-    chunkseq, merge_extend, rpm_evr_compare,
-    unique, update_extend, )
+    chunkseq, merge_extend, unique, update_extend, )
+from .rpm import evr_compare
 
 
 __all__ = (
@@ -100,7 +100,7 @@ class BuildNEVRCompare():
 
     def __cmp__(self, other):
         if self.n == other.n:
-            return rpm_evr_compare(self.evr, other.evr)
+            return evr_compare(self.evr, other.evr)
 
         elif self.n < other.n:
             return -1

@@ -15,3 +15,5 @@ exceptions:
 * Removed the `Sieve.receive_options` and `Sieve.set_options` methods
   in favor of accepting options via keyword parameters in
   `Sieve.__init__`
+* Moved RPM comparison functions out from `kojismokydingo.common` to
+  their own new module `kojismokydingo.rpm`

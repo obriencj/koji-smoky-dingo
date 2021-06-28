@@ -35,7 +35,7 @@ from .common import CacheMixin, ensure_comparison
 from .. import (
     as_buildinfo, bulk_load_builds, bulk_load_tags, iter_bulk_load, )
 from ..builds import build_dedup
-from ..common import rpm_evr_compare
+from ..rpm import evr_compare
 from ..tags import (
     gather_tag_ids, tag_dedup, )
 
@@ -594,7 +594,7 @@ class CompareLatestSieve(Sieve):
 
         ours = (self.epoch, self.version, self.release or other[2])
 
-        relative = rpm_evr_compare(other, ours)
+        relative = evr_compare(other, ours)
         return self.op(relative, 0)
 
 
