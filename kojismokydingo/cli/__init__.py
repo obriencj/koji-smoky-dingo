@@ -37,10 +37,10 @@ from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from os import devnull
 from os.path import basename
-from typing import Optional
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
+from ..types import merge_annotations
 
 
 __all__ = (
@@ -424,16 +424,16 @@ class SmokyDingo(metaclass=ABCMeta):
         sub-command
     """
 
-    group: str = "misc"
-    description: str = "A CLI Plugin"
+    group = "misc"
+    description = "A CLI Plugin"
 
     # permission name required for use of this command. A value of
     # None indicates anonymous access. Checked in the pre_handle
     # method.
-    permission: Optional[str] = None
+    permission = None
 
 
-    def __init__(self, name: Optional[str] = None):
+    def __init__(self, name=None):
         if name is not None:
             self.name = name
 
@@ -485,8 +485,6 @@ class SmokyDingo(metaclass=ABCMeta):
         """
         Creates a new ArgumentParser instance and decorates it with
         arguments from the `arguments` method.
-
-        :rtype: `argparse.ArgumentParser`
         """
 
         invoke = " ".join((basename(sys.argv[0]), self.name))
@@ -498,6 +496,8 @@ class SmokyDingo(metaclass=ABCMeta):
         """
         Override to add relevant arguments to the given parser instance.
         May return an alternative parser instance or None.
+
+        :param parser: the parser to decorate with additional arguments
         """
 
         pass
@@ -618,8 +618,8 @@ class AnonSmokyDingo(SmokyDingo):
     read-only informational endpoints.
     """
 
-    group: str = "info"
-    permission: Optional[str] = None
+    group = "info"
+    permission = None
 
 
     def __init__(self, name=None):
@@ -681,6 +681,9 @@ class HostSmokyDingo(SmokyDingo):
 
     group = "admin"
     permission = "host"
+
+
+merge_annotations()
 
 
 #
