@@ -26,7 +26,7 @@ from os.path import join
 from typing import Iterable, Union
 
 from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
-from .types import ArchiveInfos
+from .types import merge_annotations
 
 
 __all__ = (
@@ -49,9 +49,11 @@ __all__ = (
 )
 
 
-def as_pathinfo(path: Union[str, PathInfo]) -> PathInfo:
+def as_pathinfo(path):
     """
     Converts path into a PathInfo if it is not one already
+
+    :param path: path basis for archives
     """
 
     if isinstance(path, PathInfo):
@@ -60,11 +62,7 @@ def as_pathinfo(path: Union[str, PathInfo]) -> PathInfo:
         return PathInfo(path or "")
 
 
-def filter_archives(
-        session: ClientSession,
-        archives: ArchiveInfos,
-        archive_types: Iterable[str] = (),
-        arches: Iterable[str] = ()) -> ArchiveInfos:
+def filter_archives(session, archives, archive_types=(), arches=()):
     """
     Given a list of archives (or RPMs dressed up like archives),
     return a new list of those archives which are of the given archive
@@ -656,6 +654,9 @@ def gather_latest_archives(session, tagname, btype=None,
             found.extend(archives)
 
     return found
+
+
+merge_annotations()
 
 
 #
