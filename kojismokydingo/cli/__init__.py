@@ -610,7 +610,7 @@ class SmokyDingo(metaclass=ABCMeta):
             self.session = None
 
 
-class AnonSmokyDingo(SmokyDingo):
+class AnonSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which upon activation will connect to koji hub, but
     will not authenticate. This means only hub RPC endpoints which do
@@ -643,7 +643,7 @@ class AnonSmokyDingo(SmokyDingo):
         pass
 
 
-class AdminSmokyDingo(SmokyDingo):
+class AdminSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'admin' permission after
     activation.
@@ -653,7 +653,7 @@ class AdminSmokyDingo(SmokyDingo):
     permission = "admin"
 
 
-class TagSmokyDingo(SmokyDingo):
+class TagSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'tag' or 'admin' permission after
     activation.
@@ -663,7 +663,7 @@ class TagSmokyDingo(SmokyDingo):
     permission = "tag"
 
 
-class TargetSmokyDingo(SmokyDingo):
+class TargetSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'target' or 'admin' permission
     after activation.
@@ -673,7 +673,7 @@ class TargetSmokyDingo(SmokyDingo):
     permission = "target"
 
 
-class HostSmokyDingo(SmokyDingo):
+class HostSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'host' or 'admin' permisson
     after activation.

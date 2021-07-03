@@ -29,7 +29,7 @@ from importlib.util import module_from_spec, spec_from_loader
 from inspect import currentframe
 from os import getenv
 from os.path import basename
-from koji import BUILD_STATES
+from koji import BUILD_STATES, CHECKSUM_TYPES, USERTYPES, USER_STATUS
 from typing import Iterable, List, Optional, Union
 
 
@@ -43,13 +43,13 @@ except ImportError:
 
 
 __all__ = (
-    "ArchiveChecksum",
     "ArchiveInfo",
     "ArchiveInfos",
     "BuildInfo",
     "BuildInfos",
     "BuildState",
-    # "HostInfo",
+    "ChecksumType",
+    "HostInfo",
     "MavenArchiveInfo",
     "RPMInfo",
     # "TagInfo",
@@ -61,10 +61,14 @@ __all__ = (
 )
 
 
-class ArchiveChecksum(IntEnum):
-    MD5 = 0
-    SHA1 = 1
-    SHA256 = 2
+class ChecksumType(IntEnum):
+    """
+    Supported checksum types
+    """
+
+    MD5 = CHECKSUM_TYPES['md5']
+    SHA1 = CHECKSUM_TYPES['sha1']
+    SHA256 = CHECKSUM_TYPES['sha256']
 
 
 class ArchiveInfo(TypedDict):
@@ -89,8 +93,8 @@ class ArchiveInfo(TypedDict):
     checksum: str
     """ hex representation of the checksum for this archive """
 
-    checksum_type: int
-    """ type of checksum, see `ArchiveChecksum` """
+    checksum_type: ChecksumType
+    """ type of cryptographic checksum used in the `checksum` field """
 
     extra: Optional[dict]
     """ additional metadata provided by content generators """
@@ -126,12 +130,6 @@ ArchiveInfos = Iterable[ArchiveInfo]
 class BuildState(IntEnum):
     """
     Values for a BuildInfo's state.
-
-    * BUILDING = 0
-    * COMPLETE = 1
-    * DELETED = 2
-    * FAILED = 3
-    * CANCELED = 4
 
     See `koji.BUILD_STATES`
     """
@@ -337,6 +335,150 @@ class WindowsArchiveInfo(ArchiveInfo):
     platforms: List[str]
 
 
+class HostInfo(TypedDict):
+    """
+    Data representing a koji host. These are typically obtained via the
+    ``getHost`` XMLRPC call
+    """
+
+    arches: str
+    """ space-separated list of architectures this host can handle """
+
+    capacity: float
+    """ maximum capacity for tasks """
+
+    comment: Optional[str]
+    """ text describing the current status or usage """
+
+    description: Optional[str]
+    """ text describing this host """
+
+    enabled: bool
+    """ whether this host is configured by the hub to take tasks """
+
+    id: int
+    """ internal identifier """
+
+    name: str
+    """ user name of this host's account, normally FQDN. """
+
+    ready: bool
+    """ whether this host is reporting itself as active and prepared to
+    accept tasks """
+
+    task_load: float
+    """ the load of currently running tasks on the host. Compared with the
+    capacity and a given task's weight, this can determine whether a
+    task will 'fit' on the host """
+
+    user_id: int
+    """ the user ID of this host's account. Hosts have a user account of
+    type HOST, which is how they authenticate with the hub """
+
+
+class UserStatus(IntEnum):
+    """
+    Valid values for the ``'status'`` item of a `UserInfo` dict
+    """
+
+    NORMAL = USER_STATUS['NORMAL']
+    """ account is enabled """
+
+    BLOCKED = USER_STATUS['BLOCKED']
+    """
+    account is blocked. May not call XMLRPC endpoints requiring
+    authentication
+    """
+
+
+class UserType(IntEnum):
+    """
+    Valid values for the ``'usertype'`` item of a `UserInfo` dict
+    """
+
+    NORMAL = USERTYPES['NORMAL']
+    """ Account is a normal user """
+
+    HOST = USERTYPES['HOST']
+    """ Account is a build host """
+
+    GROUP = USERTYPES['GROUP']
+    """ Account is a group """
+
+
+class UserInfo(TypedDict):
+    """
+    Data representing a koji user account. These are typically
+    obtained via the ``getUser`` XMLRPC call, or the
+    ``kojismokydingo.as_userinfo`` function.
+    """
+
+    id: int
+    """ internal identifer """
+
+    krb_principal: Optional[str]
+    """ kerberos principal associated with the user. Only used in koji
+    before 1.19 """
+
+    krb_principals: Optional[List[str]]
+    """ list of kerberos principals associated with the user. Used in koji
+    from 1.19 onwards. """
+
+    name: str
+    """ the username """
+
+    status: UserStatus
+    """ status of the account """
+
+    usertype: UserType
+    """ type of the account """
+
+
+UserSpec = Union[UserInfo, str, int]
+"""
+Acceptable ways to specify a user, either by a UserInfo dict, a
+username str, or a user's int ID
+"""
+
+
+class CGInfo(TypedDict):
+    """
+    Data representing a koji Content Generator. A dict of these are
+    typically obtained via the ``listCGs`` XMLRPC call, mapping their
+    friendly names to the CGInfo structure
+    """
+
+    id: int
+    """ internal identifier """
+
+    users: List[str]
+    """ list of account names with access to perform CGImports using
+    this content generator """
+
+
+class NamedCGInfo(CGInfo):
+    """
+    A CGInfo with its name merged into it. Obtained via
+    `kojismokydingo.users.collect_cgs`
+    """
+
+    name: str
+    """ friendly name for this content generator """
+
+
+class PermInfo(TypedDict):
+    pass
+
+
+class FullUserInfo(UserInfo):
+
+    permissions: List[PermInfo]
+
+    content_generators: List[NamedCGInfo]
+
+    members: Optional[List[str]]
+
+
 # Below this point are functions to asssist in merging .pyi type stubs
 # into the actual .py modules at runtime. This is primarily used to
 # allow sphinx to see the typing annotations without having to embed
@@ -403,14 +545,20 @@ def _merge_annotations(glbls, pyi_glbls):
             _merge_annotations(vars(thing), vars(pyi_thing))
 
 
-def merge_annotations(enabled=KSD_MERGE_PYI):
+def merge_annotations(force=False):
     """
-    Merge PEP-0484 stub files into the calling module's annotations.
+    Merge PEP-0484 stub files into the calling module's annotations if
+    the `KSD_MERGE_PYI` global is True. The value of `KSD_MERGE_PYI` is
+    set at load time based on an environment variable of the same
+    name.
 
     The .pyi file must be in the same path as the original .py file.
+
+    :param force: perform annotation merging even if KSD_MERGE_PYI is
+      not True
     """
 
-    if not enabled:
+    if not (force or KSD_MERGE_PYI):
         return
 
     back = currentframe().f_back

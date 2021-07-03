@@ -23,9 +23,8 @@ Koji Smoky Dingo - CLI User Commands
 from operator import itemgetter
 
 from . import AnonSmokyDingo, int_or_str, pretty_json
+from ..types import UserStatus, UserType
 from ..users import (
-    USER_NORMAL, USER_HOST, USER_GROUP,
-    STATUS_NORMAL, STATUS_BLOCKED,
     collect_cgs, collect_perminfo, collect_userinfo, )
 
 
@@ -53,12 +52,13 @@ def get_usertype_str(userinfo):
     :rtype: str
     """
 
-    val = userinfo.get("usertype", USER_NORMAL) or USER_NORMAL
-    if val == USER_NORMAL:
+    val = userinfo.get("usertype") or UserType.Normal
+
+    if val == UserType.NORMAL:
         return "NORMAL (user)"
-    elif val == USER_HOST:
+    elif val == UserType.HOST:
         return "HOST (builder)"
-    elif val == USER_GROUP:
+    elif val == UserType.GROUP:
         return "GROUP"
     else:
         return "Unknown (%i)" % val
@@ -75,10 +75,10 @@ def get_userstatus_str(userinfo):
     :rtype: str
     """
 
-    val = userinfo.get("status", STATUS_NORMAL) or STATUS_NORMAL
-    if val == STATUS_NORMAL:
+    val = userinfo.get("status") or UserStatus.NORMAL
+    if val == UserStatus.NORMAL:
         return "NORMAL (enabled)"
-    elif val == STATUS_BLOCKED:
+    elif val == UserStatus.BLOCKED:
         return "BLOCKED (disabled)"
     else:
         return "Unknown (%i)" % val

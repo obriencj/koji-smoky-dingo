@@ -1,12 +1,34 @@
-from typing import Any, Optional
 
-USER_NORMAL: Any
-USER_HOST: Any
-USER_GROUP: Any
-STATUS_NORMAL: Any
-STATUS_BLOCKED: Any
 
-def collect_userinfo(session: Any, user: Any): ...
-def collect_cg_access(session: Any, user: Any): ...
-def collect_cgs(session: Any, name: Optional[Any] = ...): ...
-def collect_perminfo(session: Any, permission: Any): ...
+from koji import ClientSession
+from typing import List, Optional, Union
+
+from .types import CGInfo, NamedCGInfo, UserInfo, UserSpec
+
+
+def collect_userinfo(
+        session: ClientSession,
+        user: UserSpec) -> UserInfo:
+    ...
+
+
+def collect_cg_access(
+        session: ClientSession,
+        user: UserSpec) -> List[NamedCGInfo]:
+    ...
+
+
+def collect_cgs(
+        session: ClientSession,
+        name: Optional[str] = ...) -> List[NamedCGInfo]:
+    ...
+
+
+def collect_perminfo(
+        session: ClientSession,
+        permission: Union[str, int]) -> dict:
+    ...
+
+
+#
+# The end.

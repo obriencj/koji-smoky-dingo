@@ -134,5 +134,22 @@ class SmokyDingo(metaclass=ABCMeta):
         ...
 
 
+class AnonSmokyDingo(SmokyDingo, metaclass=ABCMeta):
+    ...
+
+
+class TagSmokyDingo(SmokyDingo, metaclass=ABCMeta):
+    ...
+
+
+class TargetSmokyDingo(SmokyDingo, metaclass=ABCMeta):
+    ...
+
+
+class HostSmokyDingo(SmokyDingo, metaclass=ABCMeta):
+    ...
+
+
+
 #
 # The end.

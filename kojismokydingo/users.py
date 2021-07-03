@@ -20,20 +20,15 @@ Koji Smoki Dingo - users and permissions
 """
 
 
-from koji import ParameterError, USERTYPES, USER_STATUS
+from koji import ParameterError
 from operator import itemgetter
 from time import asctime, localtime
 
 from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
+from .types import UserType
 
 
 __all__ = (
-    "STATUS_NORMAL",
-    "STATUS_BLOCKED",
-    "USER_NORMAL",
-    "USER_HOST",
-    "USER_GROUP",
-
     "collect_cg_access",
     "collect_cgs",
     "collect_perminfo",
@@ -41,24 +36,16 @@ __all__ = (
 )
 
 
-# just borrowing from Koji's definitions
-USER_NORMAL = USERTYPES['NORMAL']
-USER_HOST = USERTYPES['HOST']
-USER_GROUP = USERTYPES['GROUP']
-
-STATUS_NORMAL = USER_STATUS['NORMAL']
-STATUS_BLOCKED = USER_STATUS['BLOCKED']
-
-
 def collect_userinfo(session, user):
     """
     Gather information about a named user, including the list of
     permissions the user has.
 
-    :param user: name of a user or their kerberos ID
-    :type user: str
+    Will convert the older `'krb_principal'` value (koji < 1.19) into
+    a `'krb_principals'` list (koji >= 1.19) to provide some level of
+    uniformity.
 
-    :rtype: dict
+    :param user: name of a user or their kerberos ID
 
     :raises NoSuchUser:
     """
@@ -80,7 +67,7 @@ def collect_userinfo(session, user):
     userinfo["permissions"] = session.getUserPerms(uid)
     userinfo["content_generators"] = collect_cg_access(session, userinfo)
 
-    if userinfo.get("usertype", USER_NORMAL) == USER_GROUP:
+    if userinfo.get("usertype", UserType.NORMAL) == UserType.GROUP:
         try:
             userinfo["members"] = session.getGroupMembers(uid)
         except Exception:
@@ -92,14 +79,9 @@ def collect_userinfo(session, user):
 
 def collect_cg_access(session, user):
     """
-    List of names of content generators user has access to run
-    CGImport with.
+    List of content generators user has access to run CGImport with.
 
     :param user: Name, ID, or userinfo dict
-
-    :type user: str or int or dict
-
-    :rtype: list[dict]
 
     :raises NoSuchUser: if user is an ID or name which cannot be
       resolved
