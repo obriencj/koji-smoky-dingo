@@ -82,13 +82,7 @@ def pretty_json(data, output=None, **pretty):
 
     :param data: value to be printed
 
-    :type data: int or str or dict or list or None
-
     :param output: stream to print to. Default, `sys.stdout`
-
-    :type output: io.TextIOBase, optional
-
-    :rtype: None
     """
 
     if output is None:
@@ -208,12 +202,8 @@ def clean_lines(lines, skip_comments=True):
 
     :param lines: Sequence of lines to process
 
-    :type lines: Iterator[str]
-
     :param skip_comments: Skip over lines with leading # characters.
       Default, True
-
-    :type skip_comments: bool, optional
 
     :rtype: List[str]
     """

@@ -1,55 +1,74 @@
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
 from abc import ABCMeta, abstractmethod
-from argparse import ArgumentParser
+from argparse import Action, ArgumentParser
+from io import TextIOBase
 from koji import ClientSession
-from typing import Any, Callable, Iterable, List, Optional, Union
+from typing import (
+    Any, Callable, ContextManager,
+    Iterable, List, Optional, Union, )
 
 
 def pretty_json(
         data: Any,
-        output: Optional[Any] = ...,
+        output: Optional[TextIOBase] = ...,
         **pretty: Any) -> None:
     ...
 
 
 def find_action(
-        parser: Any,
-        key: Any):
+        parser: ArgumentParser,
+        key: str) -> Optional[Action]:
     ...
 
 
 def remove_action(
-        parser: Any,
-        key: Any) -> None:
+        parser: ArgumentParser,
+        key: str) -> None:
     ...
 
 
 def resplit(
-        arglist: Any,
+        arglist: List[str],
         sep: str = ...) -> List[str]:
     ...
 
 
 def open_output(
         filename: str = ...,
-        append: Optional[Any] = ...) -> None:
+        append: Optional[bool] = ...) -> ContextManager:
     ...
 
 
 def clean_lines(
-        lines: Any,
-        skip_comments: bool = ...) -> Iterable[str]:
+        lines: Iterable[str],
+        skip_comments: bool = ...) -> List[str]:
     ...
 
 
 def read_clean_lines(
         filename: str = ...,
-        skip_comments: bool = ...) -> Iterable[str]:
+        skip_comments: bool = ...) -> List[str]:
     ...
 
 
-printerr: Callable
+def printerr(*values: Any,
+             sep: str = ' ',
+             end: str = '\n',
+             flush: bool = False) -> None:
+    ...
 
 
 def tabulate(
@@ -148,7 +167,6 @@ class TargetSmokyDingo(SmokyDingo, metaclass=ABCMeta):
 
 class HostSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     ...
-
 
 
 #
