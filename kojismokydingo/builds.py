@@ -37,7 +37,7 @@ from . import (
 from .common import (
     chunkseq, merge_extend, unique, update_extend, )
 from .rpm import evr_compare
-from .types import BuildInfo, BuildInfos, BuildState
+from .types import BuildInfo, BuildInfos, BuildState, merge_annotations
 
 
 __all__ = (
@@ -132,7 +132,7 @@ class BuildNEVRCompare(NEVRCompare):
     of a build info dictionary. Used by the `build_nvr_sort` function.
     """
 
-    def __init__(self, binfo: BuildInfo):
+    def __init__(self, binfo):
         self.build = binfo
         super().__init__(binfo["name"],
                          binfo["epoch"], binfo["version"], binfo["release"])
@@ -697,8 +697,6 @@ def iter_latest_maven_builds(session, tag, pkg_names=None, inherit=True):
 
     If pkg_names is given, then only those builds matching the given
     package names are yielded.
-
-    :rtype: Generator[tuple[str], dict]
     """
 
     taginfo = as_taginfo(session, tag)
@@ -774,18 +772,10 @@ def decorate_builds_btypes(session, build_infos, with_fields=True):
 
     :param session: an active koji session
 
-    :type session: koji.ClientSession
-
     :param build_infos: list of build infos to decorate and return
-
-    :type build_infos: list[dict] or Iterator[dict]
 
     :param with_fields: also decorate btype-specific fields. Default,
       True
-
-    :type with_fields: bool, optional
-
-    :rtype: tuple[dict]
     """
 
     build_infos = tuple(build_infos)
@@ -841,13 +831,7 @@ def decorate_builds_cg_list(session, build_infos):
 
     :param session: an active koji session
 
-    :type session: koji.ClientSession
-
     :param build_infos: list of build infos to decorate and return
-
-    :type build_infos: list[dict] or Iterator[dict]
-
-    :rtype: tuple[dict]
     """
 
     # some of the facets we might consider as a property of the build
@@ -961,19 +945,11 @@ def filter_builds_by_tags(session, build_infos,
     """
     :param build_infos: build infos to filter through
 
-    :type build_infos: list[dict] or Iterator[dict]
-
     :param limit_tag_ids: tag IDs that builds must be tagged with to
       pass. Default, do not limit to any tag membership.
 
-    :type limit_tag_ids: list[int]
-
     :param lookaside_tag_ids: tag IDs that builds must not be tagged
       with to pass. Default, do not filter against any tag membership.
-
-    :type lookaside_tag_ids: list[int]
-
-    :rtype: list[dict] or Iterator[dict]
     """
 
     limit = set(limit_tag_ids) if limit_tag_ids else None
@@ -1006,9 +982,7 @@ def filter_builds_by_tags(session, build_infos,
     return builds.values()
 
 
-def filter_builds_by_state(
-        build_infos: BuildInfos,
-        state: BuildState = BuildState.COMPLETE) -> BuildInfos:
+def filter_builds_by_state(build_infos, state=BuildState.COMPLETE):
     """
     Given a sequence of build info dicts, return a generator of those
     matching the given state.
@@ -1020,14 +994,8 @@ def filter_builds_by_state(
 
     :param build_infos: build infos to filter through
 
-    :type build_infos: Iterable[dict]
-
     :param state: state value to filter for. Default: only builds in
       the COMPLETE state are returned
-
-    :type state: int, optional
-
-    :rtype: Iteratable[dict]
     """
 
     if state is None:
@@ -1392,6 +1360,9 @@ class BuildFilter():
         work = self.filter_imported(work)
 
         return work
+
+
+merge_annotations()
 
 
 #

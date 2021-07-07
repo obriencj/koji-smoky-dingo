@@ -1,9 +1,25 @@
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
 from koji import ClientSession
-from typing import Any, Callable, Optional
+from typing import (
+    Any, Callable, Dict, Generator, Iterable, Iterator,
+    List, Optional, Tuple, Union, )
 
-from .types import BuildInfo, BuildInfos, BuildState
+from .types import (
+    BuildInfo, BuildInfos, BuildState,
+    DecoratedBuildInfos, MavenBuildInfo, TagSpec, )
 
 
 class NEVRCompare:
@@ -28,8 +44,12 @@ class NEVRCompare:
 
 
 class BuildNEVRCompare(NEVRCompare):
-    build: Any = ...
-    def __init__(self, binfo: BuildInfo) -> None: ...
+    build: BuildInfo = ...
+
+    def __init__(
+            self,
+            binfo: BuildInfo) -> None:
+        ...
 
 
 gavgetter: Callable[[tuple[str]], BuildInfo]
@@ -37,45 +57,177 @@ gavgetter: Callable[[tuple[str]], BuildInfo]
 
 def build_nvr_sort(
         build_infos: BuildInfos,
-        dedup: bool=...) -> BuildInfos:
+        dedup: bool=...,
+        reverse: bool=...) -> BuildInfos:
     ...
+
 
 def build_id_sort(
         build_infos: BuildInfos,
-        dedup: bool=...) -> BuildInfos:
+        dedup: bool=...,
+        reverse: bool=...) -> BuildInfos:
     ...
+
 
 def build_dedup(
         build_infos: BuildInfos) -> BuildInfos:
     ...
 
+
 def iter_bulk_move_builds(
         session: ClientSession,
-        srctag: Any,
-        dsttag: Any,
-        build_infos: Any,
+        srctag: TagSpec,
+        dsttag: TagSpec,
+        build_infos: BuildInfos,
         force: bool = ...,
         notify: bool = ...,
         size: int = ...,
-        strict: bool = ...) -> None:
+        strict: bool = ...) -> Iterator[List[Tuple[BuildInfo, Any]]]:
     ...
 
-def bulk_move_builds(session: Any, srctag: Any, dsttag: Any, build_infos: Any, force: bool = ..., notify: bool = ..., size: int = ..., strict: bool = ...): ...
-def bulk_move_nvrs(session: Any, srctag: Any, dsttag: Any, nvrs: Any, force: bool = ..., notify: bool = ..., size: int = ..., strict: bool = ...): ...
-def iter_bulk_tag_builds(session: Any, tag: Any, build_infos: Any, force: bool = ..., notify: bool = ..., size: int = ..., strict: bool = ...) -> None: ...
-def bulk_tag_builds(session: Any, tag: Any, build_infos: Any, force: bool = ..., notify: bool = ..., size: int = ..., strict: bool = ...): ...
-def bulk_tag_nvrs(session: Any, tag: Any, nvrs: Any, force: bool = ..., notify: bool = ..., size: int = ..., strict: bool = ...): ...
-def iter_bulk_untag_builds(session: Any, tag: Any, build_infos: Any, force: bool = ..., notify: bool = ..., size: int = ..., strict: bool = ...) -> None: ...
-def bulk_untag_builds(session: Any, tag: Any, build_infos: Any, force: bool = ..., notify: bool = ..., size: int = ..., strict: bool = ...): ...
-def bulk_untag_nvrs(session: Any, tag: Any, nvrs: Any, force: bool = ..., notify: bool = ..., size: int = ..., strict: bool = ...): ...
 
-def iter_latest_maven_builds(session: Any, tag: Any, pkg_names: Optional[Any] = ..., inherit: bool = ...): ...
-def latest_maven_builds(session: Any, tag: Any, pkg_names: Optional[Any] = ..., inherit: bool = ...): ...
-def decorate_builds_maven(session: Any, build_infos: Any): ...
-def decorate_builds_btypes(session: Any, build_infos: Any, with_fields: bool = ...): ...
-def decorate_builds_cg_list(session: Any, build_infos: Any): ...
-def filter_builds_by_tags(session: Any, build_infos: Any, limit_tag_ids: Any = ..., lookaside_tag_ids: Any = ...): ...
-def filter_builds_by_state(build_infos: BuildInfos, state: BuildState=...) -> BuildInfos: ...
+def bulk_move_builds(
+        session: ClientSession,
+        srctag: TagSpec,
+        dsttag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = ...,
+        notify: bool = ...,
+        size: int = ...,
+        strict: bool = ...) -> List[Tuple[BuildInfo, Any]]:
+    ...
+
+
+def bulk_move_nvrs(
+        session: ClientSession,
+        srctag: TagSpec,
+        dsttag: TagSpec,
+        nvrs: Iterable[Union[int, str]],
+        force: bool = ...,
+        notify: bool = ...,
+        size: int = ...,
+        strict: bool = ...) -> List[Tuple[BuildInfo, Any]]:
+    ...
+
+
+def iter_bulk_tag_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = ...,
+        notify: bool = ...,
+        size: int = ...,
+        strict: bool = ...) -> Iterator[List[Tuple[BuildInfo, Any]]]:
+    ...
+
+
+def bulk_tag_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = ...,
+        notify: bool = ...,
+        size: int = ...,
+        strict: bool = ...) -> List[Tuple[BuildInfo, Any]]:
+    ...
+
+
+def bulk_tag_nvrs(
+        session: ClientSession,
+        tag: TagSpec,
+        nvrs: Iterable[Union[int, str]],
+        force: bool = ...,
+        notify: bool = ...,
+        size: int = ...,
+        strict: bool = ...) -> List[Tuple[BuildInfo, Any]]:
+    ...
+
+
+def iter_bulk_untag_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = ...,
+        notify: bool = ...,
+        size: int = ...,
+        strict: bool = ...) -> Iterator[List[Tuple[BuildInfo, Any]]]:
+    ...
+
+
+def bulk_untag_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = ...,
+        notify: bool = ...,
+        size: int = ...,
+        strict: bool = ...) -> List[Tuple[BuildInfo, Any]]:
+    ...
+
+
+def bulk_untag_nvrs(
+        session: ClientSession,
+        tag: TagSpec,
+        nvrs: Iterable[Union[int, str]],
+        force: bool = ...,
+        notify: bool = ...,
+        size: int = ...,
+        strict: bool = ...) -> List[Tuple[BuildInfo, Any]]:
+    ...
+
+
+GAV = Tuple[str, str, str]
+
+
+def iter_latest_maven_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        pkg_names: Optional[Iterable[str]] = ...,
+        inherit: bool = ...) -> Iterator[Tuple[GAV, MavenBuildInfo]]:
+    ...
+
+
+def latest_maven_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        pkg_names: Optional[Iterable[str]] = ...,
+        inherit: bool = ...) -> Dict[GAV, MavenBuildInfo]:
+    ...
+
+
+def decorate_builds_maven(
+        session: ClientSession,
+        build_infos: BuildInfos) -> DecoratedBuildInfos:
+    ...
+
+
+def decorate_builds_btypes(
+        session: ClientSession,
+        build_infos: BuildInfos,
+        with_fields: bool = ...) -> DecoratedBuildInfos:
+    ...
+
+
+def decorate_builds_cg_list(
+        session: ClientSession,
+        build_infos: BuildInfos) -> DecoratedBuildInfos:
+    ...
+
+
+def filter_builds_by_tags(
+        session: ClientSession,
+        build_infos: BuildInfos,
+        limit_tag_ids: Iterable[int] = ...,
+        lookaside_tag_ids: Iterable[int] = ...) -> BuildInfos:
+    ...
+
+
+def filter_builds_by_state(
+        build_infos: BuildInfos,
+        state: BuildState = ...) -> BuildInfos:
+    ...
+
+
 def filter_imported_builds(build_infos: Any, by_cg: Any = ..., negate: bool = ...) -> None: ...
 def gather_buildroots(session: Any, build_ids: Any): ...
 def gather_rpm_sigkeys(session: Any, build_ids: Any): ...
@@ -89,3 +241,7 @@ class BuildFilter:
     def filter_imported(self, build_infos: Any): ...
     def filter_by_state(self, build_infos: Any): ...
     def __call__(self, build_infos: Any): ...
+
+
+#
+# The end.

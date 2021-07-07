@@ -47,12 +47,14 @@ __all__ = (
     "ArchiveInfos",
     "BuildInfo",
     "BuildInfos",
+    "BuildSpec",
     "BuildState",
     "ChecksumType",
     "HostInfo",
     "MavenArchiveInfo",
     "RPMInfo",
-    # "TagInfo",
+    "TagInfo",
+    "TagSpec",
     # "TargetInfo",
     # "TaskInfo",
     # "UserInfo",
@@ -250,9 +252,30 @@ class BuildInfo(TypedDict):
     stored on """
 
 
+class MavenBuildInfo(BuildInfo):
+    pass
+
+
+class DecoratedBuildInfo(BuildInfo):
+    pass
+
+
 BuildInfos = Iterable[BuildInfo]
 """
 An Iterable of BuildInfo dicts
+"""
+
+
+DecoratedBuildInfos = Iterable[DecoratedBuildInfo]
+"""
+An Iterable of DecoratedBuildInfo dicts
+"""
+
+
+BuildSpec = Union[int, str, BuildInfo]
+"""
+An indicator for a build in cases where the build may be
+communicated as its ID, its NVR, or as an already-loaded BuildInfo
 """
 
 
@@ -477,6 +500,17 @@ class FullUserInfo(UserInfo):
     content_generators: List[NamedCGInfo]
 
     members: Optional[List[str]]
+
+
+class TagInfo(TypedDict):
+    pass
+
+
+TagSpec = Union[int, str, TagInfo]
+"""
+An indicator for a tag in cases where the tag may be communicated
+as its ID, its name, or as an already-loaded TagInfo
+"""
 
 
 # Below this point are functions to asssist in merging .pyi type stubs

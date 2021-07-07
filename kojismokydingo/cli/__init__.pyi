@@ -65,19 +65,19 @@ def read_clean_lines(
 
 
 def printerr(*values: Any,
-             sep: str = ' ',
-             end: str = '\n',
-             flush: bool = False) -> None:
+             sep: str = ...,
+             end: str = ...,
+             flush: bool = ...) -> None:
     ...
 
 
 def tabulate(
-        headings: Any,
-        data: Any,
-        key: Optional[Any] = ...,
+        headings: List[str],
+        data: List[Any],
+        key: Union[int, str, Optional[Callable[[Any], Any]]] = ...,
         sorting: int = ...,
-        quiet: Optional[Any] = ...,
-        out: Optional[Any] = ...) -> None:
+        quiet: Optional[bool] = ...,
+        out: Optional[TextIOBase] = ...) -> None:
     ...
 
 

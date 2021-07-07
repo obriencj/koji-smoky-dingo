@@ -35,6 +35,7 @@ from itertools import zip_longest
 from json import dump
 from koji import GenericError
 from koji_cli.lib import activate_session, ensure_connection
+from operator import itemgetter
 from os import devnull
 from os.path import basename
 
@@ -101,6 +102,10 @@ def find_action(parser, key):
     """
     Hunts through a parser to discover an action whose dest, metavar,
     or option strings matches the given key.
+
+    :param parser: argument parser to search within
+
+    :param key: the dest, metavar, or option string of the action
     """
 
     for act in parser._actions:
@@ -204,8 +209,6 @@ def clean_lines(lines, skip_comments=True):
 
     :param skip_comments: Skip over lines with leading # characters.
       Default, True
-
-    :rtype: List[str]
     """
 
     if skip_comments:
@@ -233,14 +236,8 @@ def read_clean_lines(filename="-", skip_comments=True):
     :param filename: File name to read lines from, or ``-`` to indicate
       stdin. Default, read from `sys.stdin`
 
-    :type filename: str, optional
-
     :param skip_comments: Skip over lines with leading # characters.
       Default, True
-
-    :type skip_comments: bool, optional
-
-    :rtype: list[str]
     """
 
     if not filename:
@@ -254,7 +251,22 @@ def read_clean_lines(filename="-", skip_comments=True):
             return clean_lines(fin)
 
 
-printerr = partial(print, file=sys.stderr)
+def printerr(*values, sep=' ', end='\n', flush=False):
+    """
+    Prints values to stderr by default
+
+    :param values: values to be printed
+
+    :param sep: text inserted between values, defaults to a space
+
+    :param end: text appended after the last value, defaults to a newline
+
+    :param flush: forcibly flush the stream
+    """
+
+    # we don't use a partial because docs can't figure out a signature
+    # for print
+    return print(*values, sep=sep, end=end, file=sys.stderr, flush=flush)
 
 
 def tabulate(headings, data, key=None, sorting=0,
@@ -271,35 +283,21 @@ def tabulate(headings, data, key=None, sorting=0,
 
     :param headings: The column titles
 
-    :type headings: list[str]
-
     :param data: Rows of data
-
-    :type data: list
 
     :param key: Transformation to apply to each row of data to get the
       actual individual columns. Should be a unary function. Default,
       data is iterated as-is.
-
-    :type key: Callable[[object], object]
 
     :param sorting: Whether data rows should be sorted and in what
       direction. 0 for no sorting, 1 for ascending, -1 for
       descending. If key is specified, then sorting will be based on
       those transformations. Default, no sorting.
 
-    :type sorting: int, optional
-
     :param quiet: Whether to print headings or not. Default, only print
       headings if out is a TTY device.
 
-    :type quiet: bool, optional
-
     :param out: Stream to write output to. Default, `sys.stdout`
-
-    :type out: io.TextIOBase, optional
-
-    :rtype: None
     """
 
     if out is None:
@@ -311,9 +309,12 @@ def tabulate(headings, data, key=None, sorting=0,
     if quiet is None:
         quiet = not out.isatty()
 
-    # convert data to a list, and apply the key if necessary to find
-    # the real columns
-    if key:
+    if key is not None:
+        if not callable(key):
+            key = itemgetter(key)
+
+        # convert data to a list, and apply the key if necessary to find
+        # the real columns
         data = map(key, data)
 
     if sorting:
@@ -349,9 +350,6 @@ def space_normalize(txt):
     Normalizes the whitespace in txt to single spaces.
 
     :param txt: Original text
-    :type txt: str
-
-    :rtype: str
     """
 
     return " ".join(txt.split())
@@ -361,8 +359,6 @@ def int_or_str(value):
     """
     For use as an argument type where the value may be either an int
     (if it is entirely numeric) or a str.
-
-    :rtype: str or int
     """
 
     if isinstance(value, str):
