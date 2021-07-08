@@ -149,15 +149,10 @@ def build_nvr_sort(build_infos, dedup=True, reverse=False):
     All None infos will be dropped.
 
     :param build_infos: build infos to be sorted and de-duplicated
-    :type build_infos: BuildInfos
 
     :param dedup: remove duplicate entries. Default, True
-    :type dedup: bool, optional
 
     :param reverse: reverse the sorting. Default, False
-    :type reverse: bool, optional
-
-    :rtype: BuildInfos
     """
 
     build_infos = filter(None, build_infos)
@@ -176,15 +171,10 @@ def build_id_sort(build_infos, dedup=True, reverse=False):
     All None infos will be dropped.
 
     :param build_infos: build infos to be sorted and de-duplicated
-    :type build_infos: BuildInfos
 
     :param dedup: remove duplicate entries. Default, True
-    :type dedup: bool, optional
 
     :param reverse: reverse the sorting. Default, False
-    :type reverse: bool, optional
-
-    :rtype: BuildInfos
     """
 
     build_infos = filter(None, build_infos)
@@ -203,9 +193,6 @@ def build_dedup(build_infos):
     All None infos will be dropped.
 
     :param build_infos: build infos to be de-duplicated.
-    :type build_infos: list[dict]
-
-    :rtype: list[dict]
     """
 
     return unique(filter(None, build_infos), key="id")
@@ -225,6 +212,8 @@ def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
     record the results of each multicall and to present feedback to a
     user to indicate that the operations are continuing.
 
+    :param session: an active koji session
+
     :param srctag: Source tag's name or ID. Builds will be removed
       from this tag.
 
@@ -237,28 +226,16 @@ def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
 
     :param build_infos: Build infos to be tagged
 
-    :type build_infos: list[dict]
-
     :param force: Force tagging/untagging. Re-tags if necessary, bypasses
         policy. Default, False
 
-    :type force: bool, optional
-
     :param notify: Send tagging/untagging notifications. Default, False
-
-    :type notify: bool, optional
 
     :param size: Count of tagging operations to perform in a single
         multicall. Default, 100
 
-    :type size: int, optional
-
     :param strict: Raise an exception and discontinue execution at the
         first error. Default, False
-
-    :type strict: bool, optional
-
-    :rtype: Generator[list[tuple]]
 
     :raises kojismokydingo.NoSuchTag: If tag does not exist
     """
@@ -308,6 +285,8 @@ def bulk_move_builds(session, srctag, dsttag, build_infos,
     """
     Move a large number of builds using multicalls of tagBuildBypass and
     untagBuildBypass.
+
+    :param session: an active koji session
     """
 
     results = []
@@ -328,6 +307,8 @@ def bulk_move_nvrs(session, srctag, dsttag, nvrs,
     NVRs will be resolved to builds. If strict is True then any
     missing builds will result in a NoSuchBuild exception being
     raised. Otherwise missing builds will be ignored.
+
+    :param session: an active koji session
     """
 
     builds = bulk_load_builds(session, unique(nvrs), err=strict)
@@ -351,34 +332,22 @@ def iter_bulk_tag_builds(session, tag, build_infos,
     chance to record the results of each multicall, and to present
     feedback to a user to indicate that the operations are continuing.
 
+    :param session: an active koji session
+
     :param tag: Destination tag's name or ID
 
-    :type tag: str or int or dict
-
     :param build_infos: Build infos to be tagged
-
-    :type build_infos: list[dict]
 
     :param force: Force tagging. Re-tags if necessary, bypasses
         policy. Default, False
 
-    :type force: bool, optional
-
     :param notify: Send tagging notifications. Default, False
-
-    :type notify: bool, optional
 
     :param size: Count of tagging operations to perform in a single
         multicall. Default, 100
 
-    :type size: int, optional
-
     :param strict: Raise an exception and discontinue execution at the
         first error. Default, False
-
-    :type strict: bool, optional
-
-    :rtype: Generator[list[tuple]]
 
     :raises kojismokydingo.NoSuchTag: If tag does not exist
     """
@@ -401,36 +370,20 @@ def bulk_tag_builds(session, tag, build_infos,
     """
     :param session: an active koji session
 
-    :type session: koji.ClientSession
-
     :param tag: Destination tag's name or ID
 
-    :type tag: str or int
-
     :param build_infos: Build infos to be tagged
-
-    :type build_infos: list[dict]
 
     :param force: Force tagging. Re-tags if necessary, bypasses
       policy. Default, False
 
-    :type force: bool, optional
-
     :param notify: Send tagging notifications. Default, False
-
-    :type notify: bool, optional
 
     :param size: Count of tagging operations to perform in a single
       multicall. Default, 100
 
-    :type size: int, optional
-
     :param strict: Raise an exception and discontinue execution at the
       first error. Default, False
-
-    :type strict: bool, optional
-
-    :rtype: list[tuple]
 
     :raises kojismokydingo.NoSuchTag: If tag does not exist
     """
@@ -464,20 +417,12 @@ def bulk_tag_nvrs(session, tag, nvrs,
 
     :param session: an active koji session
 
-    :type session: koji.ClientSession
-
     :param tag: Destination tag's name or ID
-
-    :type tag: str or int
 
     :param nvrs: list of NVRs
 
-    :type nvrs: list[str]
-
     :param force: Bypass policy, retag if necessary. Default, follow
       policy and do not re-tag.
-
-    :type force: bool, optional
 
     :param notify: Start tagNotification tasks to send a notification
       email for every tagging event. Default, do not send
@@ -485,17 +430,11 @@ def bulk_tag_nvrs(session, tag, nvrs,
       tagNotification tasks can be overwhelming for the hub and may
       impact the system.
 
-    :type notify: bool, optional
-
     :param size: Count of tagging calls to make per multicall
       chunk. Default is 100
 
-    :type size: int, optional
-
     :param strict: Stop at the first failure. Default, continue after
       any failures. Errors will be available in the return results.
-
-    :type strict: bool, optional
 
     :raises kojismokydingo.NoSuchBuild: If strict and an NVR does not
       exist
@@ -527,33 +466,21 @@ def iter_bulk_untag_builds(session, tag, build_infos,
     a chance to record the results of each multicall, and to present
     feedback to a user to indicate that the operations are continuing.
 
-    :param tag: Tag's name or ID
+    :param session: an active koji session
 
-    :type tag: str or int or dict
+    :param tag: Tag's name or ID
 
     :param build_infos: Build infos to be untagged
 
-    :type build_infos: list[dict]
-
     :param force: Force untagging, bypasses policy. Default, False
 
-    :type force: bool, optional
-
     :param notify: Send untagging notifications. Default, False
-
-    :type notify: bool, optional
 
     :param size: Count of untagging operations to perform in a single
         multicall. Default, 100
 
-    :type size: int, optional
-
     :param strict: Raise an exception and discontinue execution at the
         first error. Default, False
-
-    :type strict: bool, optional
-
-    :rtype: Generator[list[tuple]]
 
     :raises kojismokydingo.NoSuchTag: If tag does not exist
     """
@@ -576,35 +503,19 @@ def bulk_untag_builds(session, tag, build_infos,
     """
     :param session: an active koji session
 
-    :type session: koji.ClientSession
-
     :param tag: Destination tag's name or ID
-
-    :type tag: str or int
 
     :param build_infos: Build infos to be untagged
 
-    :type build_infos: list[dict]
-
     :param force: Force untagging. Bypasses policy. Default, False
 
-    :type force: bool, optional
-
     :param notify: Send untagging notifications. Default, False
-
-    :type notify: bool, optional
 
     :param size: Count of untagging operations to perform in a single
       multicall. Default, 100
 
-    :type size: int, optional
-
     :param strict: Raise an exception and discontinue execution at the
       first error. Default, False
-
-    :type strict: bool, optional
-
-    :rtype: list[tuple]
 
     :raises kojismokydingo.NoSuchTag: If tag does not exist
     """
