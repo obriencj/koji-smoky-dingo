@@ -18,6 +18,8 @@ intersphinx_mapping = {
 }
 
 
+autoclass_content = 'both'
+
 autosectionlabel_maxdepth = 1
 autosectionlabel_prefix_document = False
 
@@ -31,6 +33,8 @@ master_doc = 'index'
 # for a list of supported languages.
 language = 'English'
 
+# Whe the actual fuck is this not the default everywhere for
+# everything all the time forever.
 today_fmt = '%Y-%m-%d'
 
 default_role = 'py:obj'

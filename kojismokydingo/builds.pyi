@@ -15,7 +15,7 @@
 from koji import ClientSession
 from typing import (
     Any, Callable, Dict, Generator, Iterable, Iterator,
-    List, Optional, Tuple, Union, )
+    List, Optional, Set, Tuple, Union, )
 
 from .types import (
     BuildInfo, BuildInfos, BuildState,
@@ -220,11 +220,37 @@ def filter_builds_by_state(
     ...
 
 
-def filter_imported_builds(build_infos: Any, by_cg: Any = ..., negate: bool = ...) -> None: ...
-def gather_buildroots(session: Any, build_ids: Any): ...
-def gather_rpm_sigkeys(session: Any, build_ids: Any): ...
-def gather_wrapped_builds(session: Any, task_ids: Any, results: Optional[Any] = ...): ...
-def gather_component_build_ids(session: Any, build_ids: Any, btypes: Optional[Any] = ...): ...
+def filter_imported_builds(
+        build_infos: BuildInfos,
+        by_cg: Optional[List[str]] = ...,
+        negate: bool = ...) -> BuildInfos:
+    ...
+
+
+def gather_buildroots(
+        session: ClientSession,
+        build_ids: Iterable[int]) -> Dict[int, List[dict]]:
+    ...
+
+
+def gather_rpm_sigkeys(
+        session: ClientSession,
+        build_ids: Iterable[int]) -> Dict[int, Set[str]]:
+    ...
+
+
+def gather_wrapped_builds(
+        session: ClientSession,
+        task_ids: Iterable[int],
+        results: Optional[dict] = ...) -> Dict[int, BuildInfo]:
+    ...
+
+
+def gather_component_build_ids(
+        session: ClientSession,
+        build_ids: Iterable[int],
+        btypes: Optional[List[str]] = ...) -> Dict[int, List[int]]:
+    ...
 
 
 class BuildFilter:
@@ -232,11 +258,11 @@ class BuildFilter:
     def __init__(
             self,
             session: ClientSession,
-            limit_tag_ids: Optional[Any] = ...,
-            lookaside_tag_ids: Optional[Any] = ...,
+            limit_tag_ids: Optional[List[int]] = ...,
+            lookaside_tag_ids: Optional[List[int]] = ...,
             imported: Optional[bool] = ...,
-            cg_list: Optional[Any] = ...,
-            btypes: Optional[Any] = ...,
+            cg_list: Optional[List[str]] = ...,
+            btypes: Optional[List[str]] = ...,
             state: Optional[BuildState] = ...) -> None:
         ...
 

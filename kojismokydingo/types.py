@@ -29,7 +29,9 @@ from importlib.util import module_from_spec, spec_from_loader
 from inspect import currentframe
 from os import getenv
 from os.path import basename
-from koji import BUILD_STATES, CHECKSUM_TYPES, USERTYPES, USER_STATUS
+from koji import (
+    BUILD_STATES, CHECKSUM_TYPES, USERTYPES, USER_STATUS,
+    PathInfo, )
 from typing import Iterable, List, Optional, Union
 
 
@@ -52,6 +54,7 @@ __all__ = (
     "ChecksumType",
     "HostInfo",
     "MavenArchiveInfo",
+    "PathSpec",
     "RPMInfo",
     "TagInfo",
     "TagSpec",
@@ -127,6 +130,12 @@ class ArchiveInfo(TypedDict):
 
 ArchiveInfos = Iterable[ArchiveInfo]
 """ An Iterable of ArchiveInfo dicts """
+
+
+ArchiveSpec = Union[int, str, ArchiveInfo]
+"""
+An archive ID, filename, or info dict
+"""
 
 
 class BuildState(IntEnum):
@@ -295,6 +304,12 @@ class MavenArchiveInfo(ArchiveInfo):
     """ The maven artifact's version """
 
 
+PathSpec = Union[str, PathInfo]
+"""
+
+"""
+
+
 class RPMInfo(TypedDict):
     """
     Data representing a koji RPM. These are typically obtained via the
@@ -354,6 +369,12 @@ class RPMInfo(TypedDict):
     """ The RPM's version field """
 
 
+RPMSpec = Union[int, str, RPMInfo]
+"""
+Ways to indicate an RPM to `as_rpminfo`
+"""
+
+
 class WindowsArchiveInfo(ArchiveInfo):
     platforms: List[str]
 
@@ -397,6 +418,12 @@ class HostInfo(TypedDict):
     user_id: int
     """ the user ID of this host's account. Hosts have a user account of
     type HOST, which is how they authenticate with the hub """
+
+
+HostSpec = Union[int, str, HostInfo]
+"""
+
+"""
 
 
 class UserStatus(IntEnum):
@@ -457,7 +484,7 @@ class UserInfo(TypedDict):
     """ type of the account """
 
 
-UserSpec = Union[UserInfo, str, int]
+UserSpec = Union[int, str, UserInfo]
 """
 Acceptable ways to specify a user, either by a UserInfo dict, a
 username str, or a user's int ID
@@ -502,14 +529,25 @@ class FullUserInfo(UserInfo):
     members: Optional[List[str]]
 
 
+class TargetInfo(TypedDict):
+    pass
+
+
+TargetSpec = Union[int, str, TargetInfo]
+"""
+An indicator for a target in cases where it may be communicated by
+its ID, its name, or an already-loaded TargetInfo
+"""
+
+
 class TagInfo(TypedDict):
     pass
 
 
 TagSpec = Union[int, str, TagInfo]
 """
-An indicator for a tag in cases where the tag may be communicated
-as its ID, its name, or as an already-loaded TagInfo
+An indicator for a tag in cases where it may be communicated by
+its ID, its name, or as an already-loaded TagInfo
 """
 
 

@@ -23,7 +23,6 @@ Functions for working with Koji builds
 
 
 from itertools import chain, repeat
-from collections import OrderedDict
 from operator import itemgetter
 from typing import Iterable, Optional
 
@@ -217,12 +216,8 @@ def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
     :param srctag: Source tag's name or ID. Builds will be removed
       from this tag.
 
-    :type srctag: str or int or dict
-
     :param dsttag: Destination tag's name or ID. Builds will be added
       to this tag.
-
-    :type dsttag: str or int or dict
 
     :param build_infos: Build infos to be tagged
 
@@ -548,19 +543,11 @@ def bulk_untag_nvrs(session, tag, nvrs,
 
     :param session: an active koji session
 
-    :type session: koji.ClientSession
-
     :param tag: Tag's name or ID
-
-    :type tag: str or int
 
     :param nvrs: list of NVRs
 
-    :type nvrs: list[str]
-
     :param force: Bypass policy checks
-
-    :type force: bool, optional
 
     :param notify: Start tagNotification tasks to send a notification
       email for every untagging event. Default, do not send
@@ -568,17 +555,11 @@ def bulk_untag_nvrs(session, tag, nvrs,
       tagNotification tasks can be overwhelming for the hub and may
       impact the system.
 
-    :type notify: bool, optional
-
     :param size: Count of untagging calls to make per multicall
       chunk. Default is 100
 
-    :type size: int, optional
-
     :param strict: Stop at the first failure. Default, continue after
       any failures. Errors will be available in the return results.
-
-    :type strict: bool, optional
 
     :raises kojismokydingo.NoSuchBuild: If strict and an NVR does not
       exist
@@ -740,7 +721,7 @@ def decorate_builds_cg_list(session, build_infos):
     build_infos which had not been previously decorated will be
     mutated with their new keys.
 
-    :param session: an active koji session
+    :param session: an active koji client session
 
     :param build_infos: list of build infos to decorate and return
     """
@@ -854,6 +835,8 @@ def filter_builds_by_tags(session, build_infos,
                           limit_tag_ids=(), lookaside_tag_ids=()):
 
     """
+    :param session: an active koji client session
+
     :param build_infos: build infos to filter through
 
     :param limit_tag_ids: tag IDs that builds must be tagged with to
@@ -871,7 +854,7 @@ def filter_builds_by_tags(session, build_infos,
 
     # a build ID: build_info mapping that we'll use to trim out
     # mismatches
-    builds = OrderedDict((b["id"], b) for b in build_infos)
+    builds = {b["id"]: b for b in build_infos}
 
     # for each build ID, load the list of tags for that build
     fn = lambda i: session.listTags(build=i)
@@ -945,15 +928,10 @@ def filter_imported_builds(build_infos, by_cg=(), negate=False):
     as this will always result in no matches.
 
     :param build_infos: build infos to filter through
-    :type build_infos: list[dict] or Iterator[dict]
 
     :param by_cg: Content generator names to filter for
-    :type by_cg: list[str], optional
 
     :param negate: whether to negate the test, Default False
-    :type negate: bool, optional
-
-    :rtype: Generator[dict]
     """
 
     by_cg = set(by_cg)
@@ -1001,11 +979,9 @@ def gather_buildroots(session, build_ids):
     For each build ID given, produce the list of buildroots used to
     create it.
 
+    :param session: an active koji session
+
     :param build_ids: build IDs to fetch buildroots for
-
-    :type build_ids: list[int]
-
-    :rtype: dict[int, list[dict]]
     """
 
     # multicall to fetch the artifacts for all build IDs
@@ -1041,6 +1017,10 @@ def gather_rpm_sigkeys(session, build_ids):
 
     Returns a dict mapping the original build IDs to a set of the
     discovered sigkeys.
+
+    :param session: an active koji session
+
+    :param build_ids: IDs of builds to gather keys from
     """
 
     # first load a mapping of build_id: [RPMS]
@@ -1069,13 +1049,16 @@ def gather_wrapped_builds(session, task_ids, results=None):
     tasks. For each which is a wrapperRPM task, associate the task ID
     with the underlying wrapped build info from the request.
 
-    :param task_ids: task IDs to check
-    :type task_ids: list[int] or Iterator[int]
+    :param session: an active koji session
 
-    :rtype: dict[int, dict]
+    :param task_ids: task IDs to check
+
+    :param results: optional results dict to store mapping of task_ids
+      to build dict in. If not specified a new dict will be created
+      and returned.
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
 
     tasks = bulk_load_tasks(session, task_ids, request=True)
 
@@ -1099,15 +1082,11 @@ def gather_component_build_ids(session, build_ids, btypes=None):
     considered. Otherwise, btypes may be a sequence of btype names and
     only component archives of those types will be considered.
 
+    :param session: an active koji session
+
     :param build_ids: Build IDs to collect components for
 
-    :type build_ids: list[int]
-
     :param btypes: Component archive btype filter. Default, all types
-
-    :type btypes: list[str], optional
-
-    :rtype: dict[int, list[int]]
     """
 
     # multicall to fetch the artifacts and RPMs for all build IDs
@@ -1160,34 +1139,27 @@ class BuildFilter():
                  limit_tag_ids=None, lookaside_tag_ids=None,
                  imported=None, cg_list=None,
                  btypes=None, state=None):
-
         """
+        :param session: an active koji client session
+
         :param limit_tag_ids: if specified, builds must be tagged with one
           of these tags
-        :type limit_tag_ids: list[int], optional
 
         :param lookaside_tag_ids: if specified, builds must not be tagged
           with any of these tags
-        :type lookaside_tag_ids: list[int], optional
 
         :param imported: if True, only imported builds are returned. If
           False, only unimported builds are returned. Default, does not
           test whether a build is imported or not.
-        :type imported: bool, optional
 
         :param cg_list: If specified, only builds which are produced by
           the named content generators will be returned.
-        :type cg_list: list[str], optional
 
         :param btypes: Filter for the given build types, by name. Default,
           any build type is allowed.
 
-        :type btypes: list[str], optional
-
         :param state: Filter by the given build state. Default, no
           filtering by state.
-
-        :type state: int, optional
         """
 
         self._session = session

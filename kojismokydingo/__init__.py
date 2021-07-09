@@ -21,7 +21,6 @@ build system
 """
 
 
-from collections import OrderedDict
 from functools import partial
 from koji import (
     ClientSession, Fault, GenericError, ParameterError,
@@ -101,6 +100,11 @@ class ProfileClientSession(ManagedClientSession):
     """
 
     def __init__(self, profile="koji"):
+        """
+        :param profile: name of the koji profile to load from local
+          configuration locations
+        """
+
         conf = read_config(profile)
         server = conf["server"]
         super().__init__(server, opts=conf)
@@ -262,31 +266,19 @@ def iter_bulk_load(session, loadfn, keys, err=True, size=100):
 
     :param session: The koji session
 
-    :type session: `koji.ClientSession`
-
     :param loadfn: The loading function, to be invoked in a multicall
       arrangement. Will be called once with each given key from keys
 
-    :type loadfn: Callable[[object], object]
-
     :param keys: The sequence of keys to be used to invoke loadfn.
-
-    :type keys: list[object]
 
     :param err: Whether to raise any underlying fault returns as
       exceptions. Default, True
 
-    :type err: bool, optional
-
     :param size: How many calls to loadfn to chunk up for each
       multicall. Default, 100
 
-    :type size: int, optional
-
     :raises koji.GenericError: if err is True and an issue
       occurrs while invoking the loadfn
-
-    :rtype: Generator[tuple[object, object]]
     """
 
     for key_chunk in chunkseq(keys, size):
@@ -314,52 +306,37 @@ def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
     key in `keys` using chunking multicalls limited to the specified
     size.
 
-    Returns an `OrderedDict` associating the individual keys with the
-    returned value of loadfn. If `results` is specified, it must
-    support dict-like assignment via an update method, and will be
-    used in place of a newly allocated `OrderedDict` to store and
-    return the results.
+    Returns a dict associating the individual keys with the returned
+    value of loadfn. If `results` is specified, it must support
+    dict-like assignment via an update method, and will be used in
+    place of a newly allocated dict to store and return the results.
 
-    :param session: The koji session
-
-    :type session: `koji.ClientSession`
+    :param session: an active koji client session
 
     :param loadfn: The loading function, to be invoked in a multicall
       arrangement. Will be called once with each given key from `keys`
-
-    :type loadfn: Callable[[object], object]
 
     :param keys: The sequence of keys to be used to invoke `loadfn`.
       These keys need to be individually hashable, or the `results`
       value needs to be specified with an instance that accepts
       assignmnet using these values as the key.
 
-    :type keys: list[object]
-
     :param err: Whether to raise any underlying fault returns as
       exceptions. Default, True
-
-    :type err: bool, optional
 
     :param size: How many calls to `loadfn` to chunk up for each
       multicall. Default, 100
 
-    :type size: int, optional
-
     :param results: storage for `loadfn` results. If specified, must
       support item assignment (like a dict) via an update method, and
       it will be populated and then used as the return value for this
-      function. Default, a new `OrderedDict` will be allocated.
-
-    :type results: dict, optional
+      function. Default, a new dict will be allocated.
 
     :raises koji.GenericError: if `err` is `True` and an issue
       occurrs while invoking the `loadfn`
-
-    :rtype: dict[object, object]
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
     results.update(iter_bulk_load(session, loadfn, keys, err, size))
     return results
 
@@ -369,7 +346,7 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     Load many buildinfo dicts from a koji client session and a
     sequence of NVRs.
 
-    Returns an OrderedDict associating the individual NVRs with their
+    Returns a dict associating the individual NVRs with their
     resulting buildinfo.
 
     If err is True (default) then any missing build info will raise a
@@ -377,32 +354,22 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     substituted into the ordered dict for the result.
 
     If results is non-None, it must support dict assignment, and will
-    be used in place of a newly allocated OrderedDict to store and
-    return the results.
+    be used in place of a newly allocated dict to store and return the
+    results.
 
     :param nvrs: Sequence of build NVRs or build IDs to load
-
-    :type nvrs: Iterator[str] or Iterator[int]
 
     :param err: Raise an exception if an NVR fails to load. Default,
       True.
 
-    :type err: bool, optional
-
     :param size: Count of NVRs to load in a single multicall. Default,
       100
 
-    :type size: int, optional
-
     :param results: mapping to store the results in. Default, produce
-      a new OrderedDict
-
-    :type results: Mapping, optional
-
-    :rtype: Mapping
+      a new dict
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
 
     for key, info in iter_bulk_load(session, session.getBuild, nvrs,
                                     False, size):
@@ -420,11 +387,11 @@ def bulk_load_tasks(session, task_ids, request=False,
     Load many taskinfo dicts from a koji client session and a sequence
     of task IDs.
 
-    Returns an OrderedDict associating the individual IDs with their
-    resulting taskinfo.
+    Returns a dict associating the individual IDs with their resulting
+    taskinfo.
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
 
     fn = partial(session.getTaskInfo, request=request)
 
@@ -450,7 +417,7 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
     :type size: int, optional
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
 
     if version_check(session, (1, 23)):
         fn = partial(session.getTag, blocked=True)
@@ -471,15 +438,15 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     Set up a chunking multicall to fetch the signatures for a list of
     RPM via `session.queryRPMSigs` for each ID in rpm_ids.
 
-    Returns an OrderedDict associating the individual RPM IDs with their
+    Returns a dict associating the individual RPM IDs with their
     resulting RPM signature lists.
 
     If results is non-None, it must support a dict-like update method,
-    and will be used in place of a newly allocated OrderedDict to
-    store and return the results.
+    and will be used in place of a newly allocated dict to store and
+    return the results.
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
     results.update(iter_bulk_load(session, session.queryRPMSigs,
                                   rpm_ids, True, size))
     return results
@@ -491,15 +458,15 @@ def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
     Set up a chunking multicall to fetch the archives of buildroots
     via `session.listArchives` for each buildroot ID in buildrood_ids.
 
-    Returns an OrderedDict associating the individual buildroot IDs with
-    their resulting archive lists.
+    Returns a dict associating the individual buildroot IDs with their
+    resulting archive lists.
 
     If results is non-None, it must support dict-like update method,
-    and will be used in place of a newly allocated OrderedDict to
-    store and return the results.
+    and will be used in place of a newly allocated dict to store and
+    return the results.
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
     fn = lambda i: session.listArchives(componentBuildrootID=i, type=btype)
     results.update(iter_bulk_load(session, fn, buildroot_ids, True, size))
     return results
@@ -511,15 +478,15 @@ def bulk_load_buildroot_rpms(session, buildroot_ids,
     Set up a chunking multicall to fetch the RPMs of buildroots via
     `session.listRPMs` for each buildroot ID in buildrood_ids.
 
-    Returns an OrderedDict associating the individual buildroot IDs with
-    their resulting RPM lists.
+    Returns a dict associating the individual buildroot IDs with their
+    resulting RPM lists.
 
     If results is non-None, it must support dict-like update method,
-    and will be used in place of a newly allocated OrderedDict to
-    store and return the results.
+    and will be used in place of a newly allocated dict to store and
+    return the results.
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
     fn = lambda i: session.listRPMs(componentBuildrootID=i)
     results.update(iter_bulk_load(session, fn, buildroot_ids, True, size))
     return results
@@ -531,15 +498,15 @@ def bulk_load_build_archives(session, build_ids, btype=None,
     Set up a chunking multicall to fetch the archives of builds
     via `session.listArchives` for each build ID in build_ids.
 
-    Returns an OrderedDict associating the individual build IDs with
-    their resulting archive lists.
+    Returns a dict associating the individual build IDs with their
+    resulting archive lists.
 
     If results is non-None, it must support dict-like update method,
-    and will be used in place of a newly allocated OrderedDict to
-    store and return the results.
+    and will be used in place of a newly allocated dict to store and
+    return the results.
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
     fn = lambda i: session.listArchives(buildID=i, type=btype)
     results.update(iter_bulk_load(session, fn, build_ids, True, size))
     return results
@@ -550,15 +517,15 @@ def bulk_load_build_rpms(session, build_ids, size=100, results=None):
     Set up a chunking multicall to fetch the RPMs of builds via
     `session.listRPMS` for each build ID in build_ids.
 
-    Returns an OrderedDict associating the individual build IDs with
-    their resulting RPM lists.
+    Returns a dict associating the individual build IDs with their
+    resulting RPM lists.
 
     If results is non-None, it must support a dict-like update method,
-    and will be used in place of a newly allocated OrderedDict to
-    store and return the results.
+    and will be used in place of a newly allocated dict to store and
+    return the results.
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
     results.update(iter_bulk_load(session, session.listRPMs,
                                   build_ids, True, size))
     return results
@@ -569,15 +536,15 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
     Set up a chunking multicall to fetch the buildroot data via
     `session.getBuildroot` for each ID in broot_ids.
 
-    Returns an OrderedDict associating the individual buildroot IDs
-    with their resulting buildroot info dicts.
+    Returns a dict associating the individual buildroot IDs with their
+    resulting buildroot info dicts.
 
     If results is non-None, it must support a dict-like update method,
-    and will be used in place of a newly allocated OrderedDict to
-    store and return the results.
+    and will be used in place of a newly allocated dict to store and
+    return the results.
     """
 
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
     results.update(iter_bulk_load(session, session.getBuildroot,
                                   broot_ids, True, size))
     return results
@@ -588,16 +555,16 @@ def bulk_load_users(session, users, err=True, size=100, results=None):
     Load many userinfo dicts from a koji client session and a sequence of
     user identifiers.
 
-    Returns an OrderedDict associating the individual identifiers with
-    their resulting userinfo.
+    Returns a dict associating the individual identifiers with their
+    resulting userinfo.
 
     If err is True (default) then any missing user info will raise a
     NoSuchUser exception. If err is False, then a None will be
     substituted into the ordered dict for the result.
 
     If results is non-None, it must support dict assignment, and will
-    be used in place of a newly allocated OrderedDict to store and
-    return the results.
+    be used in place of a newly allocated dict to store and return the
+    results.
 
     :param session: active koji session
 
@@ -617,13 +584,13 @@ def bulk_load_users(session, users, err=True, size=100, results=None):
     :type size: int, optional
 
     :param results: dict to store results in. Default, allocate a new
-      OrderedDict
+      dict
 
     :type results: dict, optional
     """
 
     users = tuple(users)
-    results = OrderedDict() if results is None else results
+    results = {} if results is None else results
 
     if not users:
         return results
@@ -823,12 +790,8 @@ def as_hostinfo(session, host):
 
     :param host: value to lookup
 
-    :type host: int or str or dict
-
     :raises NoSuchHost: if the host value could not be resolved
       into a host info dict
-
-    :rtype: dict
     """
 
     if isinstance(host, (str, int)):
@@ -850,17 +813,14 @@ def as_archiveinfo(session, archive):
 
     If archive is an:
      * int, will attempt to load as an archive ID
-     * str, will attempt to load as an archive filename
+     * str, will attempt to load as the first-found archive matching
+       the given filename
      * dict, will presume already an archive info
 
     :param archive: value to lookup
 
-    :type archive: int or str or dict
-
     :raises NoSuchArchive: if the archive value could not be resolved
       into an archive info dict
-
-    :rtype dict:
     """
 
     if isinstance(archive, int):
@@ -886,19 +846,15 @@ def as_rpminfo(session, rpm):
     """
     Coerces a host value into a RPM info dict.
 
-    If rpm is an:
+    If rpm is specified as an:
      * int, will attempt to load as a RPM ID
-     * str, will attempt to load as a RPM NVR
+     * str, will attempt to load as a RPM NVRA
      * dict, will presume already an RPM info
 
     :param rpm: value to lookup
 
-    :type rpm: int or str or dict
-
     :raises NoSuchRPM: if the rpm value could not be resolved
       into a RPM info dict
-
-    :rtype: dict
     """
 
     if isinstance(rpm, (str, int)):
@@ -923,10 +879,6 @@ def as_userinfo(session, user):
     returned unaltered.
 
     :param user: Name, ID, or User Info describing a koji user
-
-    :type user: str or int or dict
-
-    :rtype: dict
 
     :raises NoSuchUser: when user cannot be found
     """
@@ -983,9 +935,7 @@ def hub_version(session):
 
     If the getKojiVersion method isn't implemented on the hub, we
     presume that we're version 1.22 ``(1, 22)`` which is the last
-    version before getKojiVersion was added.
-
-    :rtype: tuple[int]
+    version before the getKojiVersion API was added.
     """
 
     # we need to use this instead of getattr as koji sessions will
@@ -1025,10 +975,6 @@ def version_check(session, minimum=(1, 23)):
     23)``
 
     :param minimum: Minimum version required. Default, ``(1, 23)``
-
-    :type minimum: tuple[int]
-
-    :rtype: bool
     """
 
     if isinstance(minimum, str):
@@ -1058,17 +1004,11 @@ def version_require(session, minimum=(1, 23), message=None):
 
     :param minimum: Minimum version required. Default, ``(1, 23)``
 
-    :type minimum: tuple[int]
-
     :param message: Message to use in exception if version check
       fails. Default, with a minimum of ``(1, 23)``, ``"requires >=
       1.23"``
 
-    :type message: str, optional
-
     :raises FeatureUnavailable: If the minimum version is not met
-
-    :rtype: bool
     """
 
     if version_check(session, minimum=minimum):

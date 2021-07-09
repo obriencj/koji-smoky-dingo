@@ -113,14 +113,8 @@ def gather_signed_rpms(session, archives, sigkeys):
 
     :param archives: list of RPM archive dicts
 
-    :type archives: list[dict]
-
     :param sigkeys: list of signature fingerprints, in order of
       precedence
-
-    :type sigkeys: list[str]
-
-    :rtype: list[dict]
     """
 
     if not sigkeys:
@@ -146,6 +140,19 @@ def gather_signed_rpms(session, archives, sigkeys):
 
 
 def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
+    """
+    Gathers a list of rpm dicts matching the given signature keys from
+    the specified build, and augments them with a filepath
+
+    :param session: an active koji client session
+
+    :param binfo: build to gather signed RPMs from
+
+    :param rpmkeys: list of keys, in order of preference
+
+    :param path: base path to prepend to the build RPM's new filepath
+      value
+    """
 
     binfo = as_buildinfo(session, binfo)
     bid = binfo["id"]
@@ -347,7 +354,7 @@ def gather_build_archives(session, binfo, btype=None,
 
 
 def gather_latest_rpms(session, tagname, rpmkeys=(),
-                       iherit=True, path=None):
+                       inherit=True, path=None):
     """
     Similar to session.getLatestRPMS(tagname) but will filter by
     available signatures, and augments the results to include a new
@@ -356,23 +363,13 @@ def gather_latest_rpms(session, tagname, rpmkeys=(),
 
     :param tagname: Name of the tag to search in for RPMs
 
-    :type tagname: str
-
     :param rpmkeys: RPM signatures to filter for, in order of
         preference. An empty string matches the unsigned copy. Default
         () for no signature filtering.
 
-    :type rpmkeys: list[str], optional
-
     :param inherit: Follow tag inheritance, default True
 
-    :type inherit: bool, optional
-
     :param path: The root dir for the archive file paths, default None
-
-    :type path: str, optional
-
-    :rtype: list[dict]
     """
 
     path = as_pathinfo(path)
@@ -441,13 +438,7 @@ def gather_latest_maven_archives(session, tagname,
 
     :param tagname: Name of the tag to search in for maven artifacts
 
-    :type tagname: str
-
     :param inherit: Follow tag inheritance, default True
-
-    :type inherit: bool, optional
-
-    :rtype: list[dict]
     """
 
     path = as_pathinfo(path)
@@ -474,13 +465,7 @@ def gather_latest_win_archives(session, tagname,
 
     :param tagname: Name of the tag to search in for maven artifacts
 
-    :type tagname: str
-
     :param inherit: Follow tag inheritance, default True
-
-    :type inherit: bool, optional
-
-    :rtype: list[dict]
     """
 
     path = as_pathinfo(path)
@@ -513,10 +498,7 @@ def gather_latest_win_archives(session, tagname,
 def gather_latest_image_archives(session, tagname,
                                  inherit=True, path=None):
     """
-
     :param inherit: Follow tag inheritance, default True
-
-    :type inherit: bool, optional
     """
 
     path = as_pathinfo(path)
@@ -549,30 +531,20 @@ def gather_latest_archives(session, tagname, btype=None,
     constitutes "latest" may change slightly depending on the archive
     types -- specifically maven.
 
+    :param session: an active koji client session
+
     :param tagname: Name of the tag to gather archives from
 
-    :type tagname: str
-
     :param btype: Name of the BType to gather. Default, gather all
-
-    :type btype: str, optional
 
     :param rpmkeys: List of RPM signatures to filter by. Only used when
         fetching type of rpm or None (all).
 
-    :type rpmkeys: list[str]
-
     :param inherit: Follow tag inheritance, default True
-
-    :type inherit: bool, optional
 
     :param path: Path prefix for archive filepaths.
 
-    :type path: str
-
     :raises NoSuchTag: if specified tag doesn't exist
-
-    :rtype: list[dict]
     """
 
     # we'll cheat a bit and use as_taginfo to verify that the tag
