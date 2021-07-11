@@ -12,7 +12,6 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from collections import OrderedDict
 from unittest import TestCase
 
 from kojismokydingo.sift import (

@@ -20,7 +20,6 @@ Koji Smoky Dingo - tags and targets
 """
 
 
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 
@@ -231,7 +230,7 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
     :type taginfo: dict
 
     :param into: Existing dict to collect extras into. Default, create
-        a new OrderedDict.
+        a new dict.
 
     :type into: dict, optional
 
@@ -243,7 +242,7 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
     :rtype: dict
     """
 
-    found = OrderedDict() if into is None else into
+    found = {} if into is None else into
 
     extra = taginfo.get("extra")
     if not extra:
@@ -279,9 +278,9 @@ def collect_tag_extras(session, taginfo, prefix=None):
     Similar to session.getBuildConfig but with additional information
     recording which tag in the inheritance supplied the setting.
 
-    Returns an OrderedDict of tag extra settings, keyed by the name of
-    the setting. Each setting is represented as its own dict composed
-    of the following keys:
+    Returns an dict of tag extra settings, keyed by the name of the
+    setting. Each setting is represented as its own dict composed of
+    the following keys:
 
     * name - the extra setting key
     * value - the extra setting value
@@ -299,7 +298,7 @@ def collect_tag_extras(session, taginfo, prefix=None):
 
     :type prefix: str, optional
 
-    :rtype: collections.OrderedDict[str, dict]
+    :rtype: dict[str, dict]
     """
 
     # this borrows heavily from the hub implementation of

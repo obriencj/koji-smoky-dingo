@@ -29,7 +29,6 @@ Some simple functions used by the other modules.
 
 import re
 
-from collections import OrderedDict
 from configparser import ConfigParser
 from datetime import datetime, timezone
 from fnmatch import fnmatchcase
@@ -299,19 +298,14 @@ def unique(sequence, key=None):
     :rtype: list
     """
 
-    # in python 3.6+ OrderedDict is not necessary here, but we're
-    # supporting 2.6, 2.7 as well. At some point Python will likely do
-    # something bad and deprecate OrderedDict, at that point we'll
-    # have to begin detecting the version and using just plain dict
-
     if key:
         if not callable(key):
             # undocumented behavior! woo!!
             key = itemgetter(key)
-        work = ((key(v), v) for v in sequence)
-        return list(OrderedDict(work).values())
+        work = {key(v): v for v in sequence}
+        return list(work.values())
     else:
-        return list(OrderedDict.fromkeys(sequence))
+        return list(dict.fromkeys(sequence))
 
 
 DATETIME_FORMATS = (

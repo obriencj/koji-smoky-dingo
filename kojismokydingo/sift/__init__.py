@@ -484,7 +484,7 @@ class Sifter():
         self._flags.clear()
 
         key = self.key
-        data = OrderedDict((key(b), b) for b in info_dicts if b)
+        data = {key(b): b for b in info_dicts if b}
         work = tuple(data.values())
 
         for expr in self._exprs:
@@ -541,7 +541,7 @@ class Sifter():
         bfl = self._flags.get(flagname)
         if bfl is None:
             # we want to preserve the order
-            bfl = self._flags[flagname] = OrderedDict()
+            bfl = self._flags[flagname] = {}
 
         bfl[self.key(data)] = True
 
@@ -558,7 +558,7 @@ class Sifter():
         cachekey = (cachename, key)
         cch = self._cache.get(cachekey)
         if cch is None:
-            cch = self._cache[cachekey] = OrderedDict()
+            cch = self._cache[cachekey] = {}
         return cch
 
 
@@ -780,8 +780,8 @@ class LogicOr(Logic):
 
 
     def run(self, session, info_dicts):
-        work = OrderedDict((self.key(b), b) for b in info_dicts)
-        results = OrderedDict()
+        work = {self.key(b): b for b in info_dicts}
+        results = {}
 
         for expr in self.tokens:
             if not work:
@@ -807,7 +807,7 @@ class LogicNot(Logic):
 
 
     def run(self, session, info_dicts):
-        work = OrderedDict((self.key(b), b) for b in info_dicts)
+        work = {self.key(b): b for b in info_dicts}
 
         for expr in self.tokens:
             if not work:

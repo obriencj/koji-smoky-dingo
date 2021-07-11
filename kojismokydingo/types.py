@@ -47,6 +47,7 @@ except ImportError:
 __all__ = (
     "ArchiveInfo",
     "ArchiveInfos",
+    "ArchiveSpec",
     "BuildInfo",
     "BuildInfos",
     "BuildSpec",
@@ -55,12 +56,18 @@ __all__ = (
     "HostInfo",
     "MavenArchiveInfo",
     "PathSpec",
+    "PermInfo",
+    "PermSpec",
     "RPMInfo",
+    "RPMSpec",
     "TagInfo",
     "TagSpec",
-    # "TargetInfo",
-    # "TaskInfo",
-    # "UserInfo",
+    "TargetInfo",
+    "TargetSpec",
+    "TaskInfo",
+    "TaskSpec",
+    "UserInfo",
+    "UserSpec",
 
     "merge_annotations",
 )
@@ -520,7 +527,13 @@ class PermInfo(TypedDict):
     pass
 
 
-class FullUserInfo(UserInfo):
+PermSpec = Union[int, str]
+"""
+a permission's ID or name
+"""
+
+
+class DecoratedUserInfo(UserInfo):
 
     permissions: List[PermInfo]
 
@@ -548,6 +561,16 @@ TagSpec = Union[int, str, TagInfo]
 """
 An indicator for a tag in cases where it may be communicated by
 its ID, its name, or as an already-loaded TagInfo
+"""
+
+
+class TaskInfo(TypedDict):
+    pass
+
+
+TaskSpec = Union[int, TaskInfo]
+"""
+task ID or TaskInfo dict
 """
 
 

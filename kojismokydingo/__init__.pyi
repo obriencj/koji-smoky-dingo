@@ -21,6 +21,7 @@ from typing import (
 from .types import (
     ArchiveInfo, ArchiveSpec,
     BuildInfo, BuildSpec,
+    HostInfo, HostSpec,
     RPMInfo, RPMSpec,
     TagInfo, TagSpec,
     TargetInfo, TargetSpec,
@@ -204,7 +205,7 @@ def as_rpminfo(
 
 def as_userinfo(
         session: ClientSession,
-        user: UserSpect) -> UserInfo:
+        user: UserSpec) -> UserInfo:
     ...
 
 
@@ -215,7 +216,7 @@ def hub_version(
 
 def version_check(
         session: ClientSession,
-        minimum: Tuple(int) = ...) -> bool:
+        minimum: Tuple[int] = ...) -> bool:
     ...
 
 

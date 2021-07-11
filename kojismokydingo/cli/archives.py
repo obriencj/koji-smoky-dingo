@@ -21,7 +21,6 @@ Koji Smoky Dingo - CLI Archive and RPM Commands
 
 
 from argparse import SUPPRESS
-from collections import OrderedDict
 
 from . import AnonSmokyDingo, pretty_json, resplit
 from .. import bulk_load_builds

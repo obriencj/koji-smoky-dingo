@@ -14,7 +14,6 @@
 
 import koji
 
-from collections import OrderedDict
 from unittest import TestCase
 from unittest.mock import MagicMock, PropertyMock, patch
 
@@ -116,8 +115,8 @@ class TestBulkLoad(TestCase):
 
 
     def test_iter_bulk_load(self):
-        data = OrderedDict((val, "dream %i" % val) for val in range(0, 100))
-        expect = OrderedDict(data)
+        data = {val: "dream %i" % val for val in range(0, 100)}
+        expect = dict(data)
 
         sess = self.session(data)
 
@@ -156,15 +155,15 @@ class TestBulkLoad(TestCase):
 
 
     def test_bulk_load(self):
-        data = OrderedDict((val, "dream %i" % val) for val in range(0, 100))
-        expect = OrderedDict(data)
+        data = {val: "dream %i" % val for val in range(0, 100)}
+        expect = dict(data)
 
         sess = self.session(data)
 
         res = bulk_load(sess, sess.ImpossibleDream,
                         data, size=5)
 
-        self.assertTrue(isinstance(res, OrderedDict))
+        self.assertTrue(isinstance(res, dict))
         self.assertEqual(res, expect)
         self.assertEqual(sess.ImpossibleDream.call_count, 100)
         self.assertEqual(sess.multiCall.call_count, 20)
@@ -180,7 +179,7 @@ class TestBulkLoad(TestCase):
 
         sess = self.session(data)
         res = bulk_load(sess, sess.ImpossibleDream, "1234", err=False)
-        self.assertTrue(isinstance(res, OrderedDict))
+        self.assertTrue(isinstance(res, dict))
 
         res = iter(res.items())
         self.assertEqual(next(res), ("1", "one"))
