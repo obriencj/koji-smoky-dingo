@@ -60,6 +60,7 @@ __all__ = (
     "PermSpec",
     "RPMInfo",
     "RPMSpec",
+    "SignedRPMInfo",
     "TagInfo",
     "TagSpec",
     "TargetInfo",
@@ -295,6 +296,13 @@ communicated as its ID, its NVR, or as an already-loaded BuildInfo
 """
 
 
+class DecoratedArchiveInfo(ArchiveInfo):
+    pass
+
+
+DecoratedArchiveInfos = Iterable[DecoratedArchiveInfo]
+
+
 class MavenArchiveInfo(ArchiveInfo):
     """
     An ArchiveInfo with additional fields representing the maven GAV
@@ -309,6 +317,9 @@ class MavenArchiveInfo(ArchiveInfo):
 
     version: str
     """ The maven artifact's version """
+
+
+MavenArchiveInfos = Iterable[MavenArchiveInfo]
 
 
 PathSpec = Union[str, PathInfo]
@@ -382,8 +393,29 @@ Ways to indicate an RPM to `as_rpminfo`
 """
 
 
+class SignedRPMInfo(RPMInfo):
+    pass
+
+
+class DecoratedRPMInfo(RPMInfo):
+    pass
+
+
+DecoratedRPMInfos = Iterable[DecoratedRPMInfo]
+
+
 class WindowsArchiveInfo(ArchiveInfo):
     platforms: List[str]
+
+
+WindowsArchiveInfos = Iterable[WindowsArchiveInfo]
+
+
+class ImageArchiveInfo(ArchiveInfo):
+    pass
+
+
+ImageArchiveInfos = Iterable[ImageArchiveInfo]
 
 
 class HostInfo(TypedDict):

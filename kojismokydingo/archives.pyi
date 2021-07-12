@@ -15,7 +15,10 @@
 from typing import Any, Iterable, Optional, Union
 from koji import ClientSession, PathInfo
 
-from .types import ArchiveInfos, BuildInfo, PathSpec, SignedRPMInfo
+from .types import (
+    ArchiveInfos, BuildInfo, DecoratedArchiveInfos, DecoratedRPMInfos,
+    ImageArchiveInfos, MavenArchiveInfos, PathSpec, SignedRPMInfo,
+    WindowsArchiveInfos, )
 
 
 def as_pathinfo(
@@ -56,7 +59,7 @@ def gather_build_maven_archives(
 def gather_build_win_archives(
         session: ClientSession,
         binfo: BuildInfo,
-        path: Optional[PathSpec] = ...) -> WinArchiveInfos:
+        path: Optional[PathSpec] = ...) -> WindowsArchiveInfos:
     ...
 
 
@@ -97,7 +100,7 @@ def gather_latest_win_archives(
         session: ClientSession,
         tagname: str,
         inherit: bool = ...,
-        path: Optional[PathSpec] = ...) -> WinArchiveInfos:
+        path: Optional[PathSpec] = ...) -> WindowsArchiveInfos:
     ...
 
 
