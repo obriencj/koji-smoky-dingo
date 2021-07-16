@@ -22,7 +22,8 @@ Some simple functions for working with the local client configuration
 """
 
 
-from ._magic import merge_annotations
+from koji import ClientSession
+from typing import Any, Dict, Tuple
 
 
 __all__ = (
@@ -30,7 +31,9 @@ __all__ = (
 )
 
 
-def rebuild_client_config(session, goptions):
+def rebuild_client_config(
+        session: ClientSession,
+        goptions: Any) -> Tuple[str, Dict[str, Any]]:
     """
     Reconstructs a koji client configuration based on the fields of a
     session and a session's goptions. Returns a tuple containing the
@@ -46,9 +49,6 @@ def rebuild_client_config(session, goptions):
     opts.update(session.opts)
 
     return (goptions.profile, opts)
-
-
-merge_annotations()
 
 
 #
