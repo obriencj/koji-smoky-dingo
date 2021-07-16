@@ -14,15 +14,15 @@
 
 from koji import ClientSession
 from typing import (
-    Any, Callable, Dict, Iterator, Iterable,
-    Optional, Tuple, Union )
+    Any, Callable, Dict, Iterator, Iterable, List,
+    Optional, Tuple, Union, )
 
 
 from .types import (
-    ArchiveInfo, ArchiveSpec,
+    ArchiveInfo, ArchiveInfos, ArchiveSpec,
     BuildInfo, BuildSpec,
     HostInfo, HostSpec,
-    RPMInfo, RPMSpec,
+    RPMInfo, RPMInfos, RPMSpec,
     TagInfo, TagSpec,
     TargetInfo, TargetSpec,
     TaskInfo, TaskSpec,
@@ -152,13 +152,64 @@ def bulk_load_tags(
     ...
 
 
-def bulk_load_rpm_sigs(session: Any, rpm_ids: Any, size: int = ..., results: Optional[Any] = ...): ...
-def bulk_load_buildroot_archives(session: Any, buildroot_ids: Any, btype: Optional[Any] = ..., size: int = ..., results: Optional[Any] = ...): ...
-def bulk_load_buildroot_rpms(session: Any, buildroot_ids: Any, size: int = ..., results: Optional[Any] = ...): ...
-def bulk_load_build_archives(session: Any, build_ids: Any, btype: Optional[Any] = ..., size: int = ..., results: Optional[Any] = ...): ...
-def bulk_load_build_rpms(session: Any, build_ids: Any, size: int = ..., results: Optional[Any] = ...): ...
-def bulk_load_buildroots(session: Any, broot_ids: Any, size: int = ..., results: Optional[Any] = ...): ...
-def bulk_load_users(session: Any, users: Any, err: bool = ..., size: int = ..., results: Optional[Any] = ...): ...
+def bulk_load_rpm_sigs(
+        session: ClientSession,
+        rpm_ids: Iterable[int],
+        size: int = ...,
+        results: Optional[dict] = ...) -> Dict[int, List[str]]:
+    ...
+
+
+def bulk_load_buildroot_archives(
+        session: ClientSession,
+        buildroot_ids: Iterable[int],
+        btype: Optional[str] = ...,
+        size: int = ...,
+        results: Optional[dict] = ...) -> Dict[int, ArchiveInfos]:
+    ...
+
+
+def bulk_load_buildroot_rpms(
+        session: ClientSession,
+        buildroot_ids: Iterable[int],
+        size: int = ...,
+        results: Optional[dict] = ...) -> Dict[int, RPMInfos]:
+    ...
+
+
+def bulk_load_build_archives(
+        session: ClientSession,
+        build_ids: Iterable[int],
+        btype: Optional[str] = ...,
+        size: int = ...,
+        results: Optional[dict] = ...) -> Dict[int, ArchiveInfos]:
+    ...
+
+
+def bulk_load_build_rpms(
+        session: ClientSession,
+        build_ids: Iterable[int],
+        size: int = ...,
+        results: Optional[dict] = ...) -> Dict[int, RPMInfos]:
+    ...
+
+
+def bulk_load_buildroots(
+        session: ClientSession,
+        broot_ids: Iterable[int],
+        size: int = ...,
+        results: Optional[dict] = ...) -> Dict[int, dict]:
+    ...
+
+
+def bulk_load_users(
+        session: ClientSession,
+        users: Iterable[Union[int, str]],
+        err: bool = ...,
+        size: int = ...,
+        results: Optional[dict] = ...) -> Dict[Union[int, str],
+                                               Optional[UserInfo]]:
+    ...
 
 
 def as_buildinfo(

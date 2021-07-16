@@ -36,7 +36,8 @@ from . import (
 from .common import (
     chunkseq, merge_extend, unique, update_extend, )
 from .rpm import evr_compare
-from .types import BuildInfo, BuildInfos, BuildState, merge_annotations
+from .types import BuildState
+from ._magic import merge_annotations
 
 
 __all__ = (

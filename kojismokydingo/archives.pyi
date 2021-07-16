@@ -29,8 +29,8 @@ def as_pathinfo(
 def filter_archives(
         session: ClientSession,
         archives: ArchiveInfos,
-        archive_types: Iterable[str]=...,
-        arches: Iterable[str]=...) -> ArchiveInfos:
+        archive_types: Iterable[str] = ...,
+        arches: Iterable[str] = ...) -> ArchiveInfos:
     ...
 
 

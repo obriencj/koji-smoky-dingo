@@ -41,7 +41,7 @@ from os.path import basename
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
-from ..types import merge_annotations
+from .._magic import merge_annotations
 
 
 __all__ = (

@@ -26,7 +26,7 @@ from os.path import join
 from typing import Iterable, Union
 
 from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
-from .types import merge_annotations
+from ._magic import merge_annotations
 
 
 __all__ = (

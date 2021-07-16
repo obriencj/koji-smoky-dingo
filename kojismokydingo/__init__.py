@@ -28,6 +28,7 @@ from koji import (
 from koji_cli.lib import activate_session, ensure_connection
 
 from .common import chunkseq
+from ._magic import merge_annotations
 
 
 __all__ = (
@@ -1020,6 +1021,9 @@ def version_require(session, minimum=(1, 23), message=None):
         message = "requires >= %s" % minimum
 
     raise FeatureUnavailable(message)
+
+
+merge_annotations()
 
 
 #
