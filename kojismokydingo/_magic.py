@@ -27,7 +27,7 @@ import sys
 
 from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec, spec_from_loader
-from inspect import currentframe
+from inspect import currentframe, signature
 from os import getenv
 from os.path import basename
 
@@ -89,19 +89,42 @@ def _load_pyi(spec):
     return pyi_mod
 
 
+def _match_signature(orig, pyi):
+
+    if not callable(orig):
+        return
+
+    try:
+        orig_sig = signature(orig)
+    except ValueError:
+        return
+
+    pyi_sig = signature(pyi)
+
+    if orig_sig.parameters.keys() != pyi_sig.parameters.keys():
+        raise TypeError(f"Cannot merge annotation stub for {orig.__name__},"
+                        " parameter mismatch")
+
+
 def _merge_annotations(glbls, pyi_glbls):
     """
     Merge the annotations from pyi_glbls into glbls. Recurses into
     type declarations.
     """
 
+    all_ = glbls.get("__all__", None)
+
     for key, pyi_thing in pyi_glbls.items():
         if key not in glbls or key.startswith("_"):
             continue
+        elif all_ and key not in all_:
+            continue
 
         thing = glbls[key]
-        thing_anno = getattr(thing, '__annotations__', None)
 
+        _match_signature(thing, pyi_thing)
+
+        thing_anno = getattr(thing, '__annotations__', None)
         pyi_anno = getattr(pyi_thing, '__annotations__', None)
 
         if thing_anno is None:
