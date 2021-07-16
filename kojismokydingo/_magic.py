@@ -63,12 +63,13 @@ def _load_pyi(spec):
     pyi_file = py_file + "i"
     pyi_path = spec.loader.resource_path(pyi_file)
 
-    # we'll pretend the .pyi file is a module named after the original
-    # with a suffix _pyi_
-    if spec.loader.is_package(spec.name):
-        pyi_name = spec.name + "._pyi_"
-    else:
+    # we'll pretend the .pyi file is a distinct module named after the
+    # original with a suffix _pyi_, or a submodule named _pyi_ in the
+    # case of a package
+    if spec.submodule_search_locations is None:
         pyi_name = spec.name + "_pyi_"
+    else:
+        pyi_name = spec.name + "._pyi_"
 
     # load the stubs into a new module
     pyi_loader = SourceFileLoader(pyi_name, pyi_path)
@@ -76,7 +77,9 @@ def _load_pyi(spec):
     pyi_mod = module_from_spec(pyi_spec)
 
     # in order for relative imports to work from within the pyi we may
-    # need the module to actually appear for a while.
+    # need the module to actually appear for a while. This is only
+    # truly necessary for when we're working with a package rather
+    # than a module, but may as well do it for both cases.
     sys.modules[pyi_name] = pyi_mod
     try:
         pyi_spec.loader.exec_module(pyi_mod)
