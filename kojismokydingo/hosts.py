@@ -24,6 +24,7 @@ Functions for working with Koji hosts
 
 from . import NoSuchChannel, iter_bulk_load
 from .common import globfilter, parse_datetime
+from ._magic import merge_annotations
 
 
 __all__ = (
@@ -41,19 +42,11 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     :param arches: List of architecture names to filter builders by.
         Default, all arches
 
-    :type arches: list[str], optional
-
     :param channel: Channel name to filter builders by. Default,
         builders in any channel.
 
-    :type channel: str, optional
-
     :param skiplist: List of glob-style patterns of builders to
         omit. Default, all builders included
-
-    :type skiplist: list[str], optional
-
-    :rtype: list[dict]
     """
 
     arches = arches or None
@@ -86,6 +79,9 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
         bldrs[bldr_id]["last_update"] = data
 
     return list(bldrs.values())
+
+
+merge_annotations()
 
 
 #

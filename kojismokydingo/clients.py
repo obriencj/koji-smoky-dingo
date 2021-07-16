@@ -22,6 +22,9 @@ Some simple functions for working with the local client configuration
 """
 
 
+from ._magic import merge_annotations
+
+
 __all__ = (
     "rebuild_client_config",
 )
@@ -32,8 +35,6 @@ def rebuild_client_config(session, goptions):
     Reconstructs a koji client configuration based on the fields of a
     session and a session's goptions. Returns a tuple containing the
     active profile's name, and the configuration as a dict.
-
-    :rtype: (str, dict)
     """
 
     opts = {
@@ -45,6 +46,9 @@ def rebuild_client_config(session, goptions):
     opts.update(session.opts)
 
     return (goptions.profile, opts)
+
+
+merge_annotations()
 
 
 #

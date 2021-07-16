@@ -23,6 +23,7 @@ Python typing compatible definitions for the Koji dict types
 """
 
 
+from datetime import datetime
 from enum import IntEnum
 from koji import (
     BUILD_STATES, CHECKSUM_TYPES, USERTYPES, USER_STATUS,
@@ -48,6 +49,8 @@ __all__ = (
     "BuildSpec",
     "BuildState",
     "ChecksumType",
+    "DecoratedHostInfo",
+    "DecoratedHostInfos",
     "DecoratedTagExtra",
     "DecoratedTagExtras",
     "HostInfo",
@@ -466,6 +469,14 @@ HostSpec = Union[int, str, HostInfo]
 """
 
 """
+
+
+class DecoratedHostInfo(HostInfo):
+    last_update: Optional[datetime]
+    """ The last time that a host checked in with an update """
+
+
+DecoratedHostInfos = Iterable[DecoratedHostInfo]
 
 
 class UserStatus(IntEnum):

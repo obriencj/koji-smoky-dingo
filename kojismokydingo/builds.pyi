@@ -49,15 +49,15 @@ gavgetter: Callable[[Tuple[str]], BuildInfo]
 
 def build_nvr_sort(
         build_infos: BuildInfos,
-        dedup: bool=...,
-        reverse: bool=...) -> BuildInfos:
+        dedup: bool = ...,
+        reverse: bool = ...) -> BuildInfos:
     ...
 
 
 def build_id_sort(
         build_infos: BuildInfos,
-        dedup: bool=...,
-        reverse: bool=...) -> BuildInfos:
+        dedup: bool = ...,
+        reverse: bool = ...) -> BuildInfos:
     ...
 
 
@@ -266,10 +266,26 @@ class BuildFilter:
             state: Optional[BuildState] = ...) -> None:
         ...
 
-    def filter_by_tags(self, build_infos: BuildInfos) -> BuildInfos: ...
-    def filter_by_btype(self, build_infos: BuildInfos) -> BuildInfos: ...
-    def filter_imported(self, build_infos: BuildInfos) -> BuildInfos: ...
-    def filter_by_state(self, build_infos: BuildInfos) -> BuildInfos: ...
+    def filter_by_tags(
+            self,
+            build_infos: BuildInfos) -> BuildInfos:
+        ...
+
+    def filter_by_btype(
+            self,
+            build_infos: BuildInfos) -> BuildInfos:
+
+        ...
+
+    def filter_imported(
+            self,
+            build_infos: BuildInfos) -> BuildInfos:
+        ...
+
+    def filter_by_state(
+            self,
+            build_infos: BuildInfos) -> BuildInfos:
+        ...
 
     def __call__(self, build_infos: BuildInfos) -> BuildInfos:
         ...

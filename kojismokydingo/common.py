@@ -38,6 +38,9 @@ from operator import itemgetter
 from os.path import expanduser, isdir, join
 
 
+from ._magic import merge_annotations
+
+
 try:
     import appdirs
 except ImportError:  # pragma: no cover
@@ -46,6 +49,7 @@ except ImportError:  # pragma: no cover
 
 __all__ = (
     "chunkseq",
+    "escapable_replace",
     "fnmatches",
     "find_config_dirs",
     "find_config_files",
@@ -95,13 +99,10 @@ def escapable_replace(orig, character, replacement):
        ``"Hello %"``
 
     :param orig: Original text
-    :type orig: str
 
     :param character: Single-character token.
-    :type character: str
 
     :param replacement: Replacement text
-    :type replacement: str
     """
 
     assert len(character) == 1, "escapable_replace requires single characters"
@@ -132,15 +133,10 @@ def fnmatches(value, patterns, ignore_case=False):
     match.
 
     :param value: string to be matched
-    :type value: str
 
     :param patterns: list of glob-style pattern strings
-    :type patterns: list[str]
 
     :param ignore_case: if True case is normalized, Default False
-    :type ignore_case: bool, optional
-
-    :rtype: bool
     """
 
     if ignore_case:
@@ -174,15 +170,9 @@ def update_extend(dict_orig, *dict_additions):
     :param dict_orig: The original dict, which may be mutated and whose
       values may be extended
 
-    :type dict_orig: dict[object, list]
-
     :param dict_additions: The additions dict. Will not be altered.
 
-    :type dict_additions: dict[object, list]
-
     :returns: The original dict instance
-
-    :rtype: dict[object, list]
     """
 
     for additions in dict_additions:
@@ -201,11 +191,7 @@ def merge_extend(*dict_additions):
 
     :param dict_additions: The additions dict. Will not be altered.
 
-    :type dict_additions: dict[object, list]
-
     :returns: A new dict, whose values are new lists
-
-    :rtype: dict[object, list]
     """
 
     return update_extend({}, *dict_additions)
@@ -230,30 +216,18 @@ def globfilter(seq, patterns,
       but may be any type provided the key parameter is specified to
       provide a string for matching based on the given object.
 
-    :type seq: list
-
     :param patterns: list of glob-style pattern strings. Members of
       seq which match any of these patterns are yielded.
-
-    :type patterns: list[str]
 
     :param key: A unary callable which translates individual items on
       seq into the value to be matched against the patterns. Default,
       match against values in seq directly.
 
-    :type key: Callable[[object], str], optional
-
     :param invert: Invert the logic, yielding the non-matches rather
       than the matches. Default, yields matches
 
-    :type invert: bool, optional
-
     :param ignore_case: pattern comparison is case normalized if
       True. Default, False
-
-    :type ignore_case: bool, optional
-
-    :rtype: Iterable[object]
     """
 
     if ignore_case:
@@ -287,15 +261,10 @@ def unique(sequence, key=None):
     de-duplication.
 
     :param sequence: series of hashable objects
-    :type sequence: list
 
     :param key: unary callable that produces a hashable identifying
       value. Default, use each object in sequence as its own
       identifier.
-
-    :type key: Callable[[object],object], optional
-
-    :rtype: list
     """
 
     if key:
@@ -371,18 +340,12 @@ def parse_datetime(src, strict=True):
 
     :param src: Date-time text to be parsed
 
-    :type src: str
-
     :param strict: Raise an exception if no matching format is known
       and the date-time text cannot be parsed. If False, simply return
       `None`
 
-    :type strict: bool, optional
-
     :raises Exception: if strict and no src matches none of the
       pre-defined formats
-
-    :rtype: `datetime` or `None`
     """
 
     for pattern, parser in DATETIME_FORMATS:
@@ -400,8 +363,6 @@ def find_config_dirs():
     """
     The site and user configuration dirs, as a tuple. Attempts to use
     the ``appdirs`` package if it is available.
-
-    :rtype: tuple[str]
     """
 
     if appdirs is None:
@@ -423,9 +384,6 @@ def find_config_files(dirs=None):
     defaults to the result of `find_config_dirs`
 
     :param dirs: list of directories to look for config files within
-    :type dirs: list[str], optional
-
-    :rtype: list[str]
     """
 
     if dirs is None:
@@ -448,8 +406,6 @@ def load_full_config(config_files=None):
 
     If `config_files` is None, use the results of `find_config_files`.
     Otherwise, `config_files` must be a sequence of filenames.
-
-    :rtype: ConfigParser
     """
 
     if config_files is None:
@@ -467,15 +423,10 @@ def get_plugin_config(conf, plugin, profile=None):
     given plugin, and optionally profile
 
     :param conf: Full configuration
-    :type conf: ConfigParser
 
     :param plugin: Plugin name
-    :type plugin: str
 
     :param profile: Profile name
-    :type profile: str, optional
-
-    :rtype: dict[str,object]
     """
 
     plugin_conf = {}
@@ -496,16 +447,15 @@ def load_plugin_config(plugin, profile=None):
     Configuration specific to a given plugin, and optionally profile
 
     :param plugin: Plugin name
-    :type plugin: str
 
     :param profile: Profile name
-    :type profile: str, optional
-
-    :rtype: dict[str,object]
     """
 
     conf = load_full_config()
     return get_plugin_config(conf, plugin, profile)
+
+
+merge_annotations()
 
 
 #
