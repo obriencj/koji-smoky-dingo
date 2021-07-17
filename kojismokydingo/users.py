@@ -20,12 +20,15 @@ Koji Smoki Dingo - users and permissions
 """
 
 
-from koji import ParameterError
+from koji import ClientSession, ParameterError
 from operator import itemgetter
 from time import asctime, localtime
+from typing import List, Optional, Union
 
 from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
-from .types import UserType
+from .types import (
+    CGInfo, DecoratedUserInfo, NamedCGInfo,
+    PermInfo, PermSpec, UserInfo, UserSpec, UserType, )
 
 
 __all__ = (
@@ -36,7 +39,9 @@ __all__ = (
 )
 
 
-def collect_userinfo(session, user):
+def collect_userinfo(
+        session: ClientSession,
+        user: UserSpec) -> DecoratedUserInfo:
     """
     Gather information about a named user, including the list of
     permissions the user has.
@@ -44,6 +49,8 @@ def collect_userinfo(session, user):
     Will convert the older `'krb_principal'` value (koji < 1.19) into
     a `'krb_principals'` list (koji >= 1.19) to provide some level of
     uniformity.
+
+    :param session: an active koji client session
 
     :param user: name of a user or their kerberos ID
 
@@ -77,9 +84,13 @@ def collect_userinfo(session, user):
     return userinfo
 
 
-def collect_cg_access(session, user):
+def collect_cg_access(
+        session: ClientSession,
+        user: UserSpec) -> List[NamedCGInfo]:
     """
     List of content generators user has access to run CGImport with.
+
+    :param session: an active koji client session
 
     :param user: Name, ID, or userinfo dict
 
@@ -98,13 +109,11 @@ def collect_cg_access(session, user):
     return found
 
 
-def collect_cgs(session, name=None):
+def collect_cgs(
+        session: ClientSession,
+        name: Optional[str] = None) -> List[NamedCGInfo]:
     """
     :param name: only collect the given CG. Default, collect all
-
-    :type name: str, optional
-
-    :rtype: list[dict]
 
     :raises NoSuchContentGenerator: if name is specified and no
       content generator matches
@@ -130,16 +139,17 @@ def collect_cgs(session, name=None):
     return result
 
 
-def collect_perminfo(session, permission):
+def collect_perminfo(
+        session: ClientSession,
+        permission: PermSpec) -> PermInfo:
     """
     Gather information about a named permission, including the list of
     users granted the permission, as well as the date that the
     permission was granted and the user that granted it.
 
-    :param permission: the ID or name of the permission
-    :type permission: int or str
+    :param session: an active koji client session
 
-    :rtype: dict
+    :param permission: the ID or name of the permission
 
     :raises NoSuchPermission: if there is no matching permission found
     """

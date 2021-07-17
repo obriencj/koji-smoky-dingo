@@ -646,7 +646,9 @@ DecoratedTagExtras = Dict[str, DecoratedTagExtra]
 
 
 class TaskInfo(TypedDict):
-    pass
+    id: int
+    method: str
+    request: Any
 
 
 TaskSpec = Union[int, TaskInfo]

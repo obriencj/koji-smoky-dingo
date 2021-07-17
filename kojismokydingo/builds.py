@@ -23,11 +23,15 @@ Functions for working with Koji builds
 
 
 from itertools import chain, repeat
+from koji import ClientSession
 from operator import itemgetter
-from typing import Iterable, Optional
+from typing import (
+    Any, Callable, Dict, Generator, Iterable, Iterator,
+    List, Optional, Set, Tuple, Union, )
+
 
 from . import (
-    NoSuchBuild,
+    NoSuchBuild, NoSuchTag,
     as_buildinfo, as_taginfo,
     bulk_load, bulk_load_build_archives, bulk_load_build_rpms,
     bulk_load_builds, bulk_load_buildroots,
@@ -36,8 +40,9 @@ from . import (
 from .common import (
     chunkseq, merge_extend, unique, update_extend, )
 from .rpm import evr_compare
-from .types import BuildState
-from ._magic import merge_annotations
+from .types import (
+    BuildInfo, BuildInfos, BuildState,
+    DecoratedBuildInfos, MavenBuildInfo, TagSpec, )
 
 
 __all__ = (
@@ -79,6 +84,10 @@ class NEVRCompare():
     sorting. Used by the `nvr_sort` function.
     """
 
+    n: str
+    evr: Tuple[str, str, str]
+
+
     def __init__(self, name: str,
                  epoch: Optional[str],
                  version: Optional[str],
@@ -87,8 +96,9 @@ class NEVRCompare():
         self.n = name
 
         # just to make sure
-        evr = (epoch, version, release)
-        self.evr = tuple(("0" if x is None else str(x)) for x in evr)
+        self.evr = ("0" if epoch is None else str(epoch),
+                    "0" if version is None else str(version),
+                    "0" if release is None else str(release))
 
 
     def __cmp__(self, other):
@@ -132,13 +142,20 @@ class BuildNEVRCompare(NEVRCompare):
     of a build info dictionary. Used by the `build_nvr_sort` function.
     """
 
-    def __init__(self, binfo):
+
+    build: BuildInfo
+
+
+    def __init__(self, binfo: BuildInfo):
         self.build = binfo
         super().__init__(binfo["name"],
                          binfo["epoch"], binfo["version"], binfo["release"])
 
 
-def build_nvr_sort(build_infos, dedup=True, reverse=False):
+def build_nvr_sort(
+        build_infos: BuildInfos,
+        dedup: bool = True,
+        reverse: bool = False) -> BuildInfos:
     """
     Given a sequence of build info dictionaries, sort them by Name,
     Epoch, Version, and Release using RPM's variation of comparison
@@ -163,7 +180,10 @@ def build_nvr_sort(build_infos, dedup=True, reverse=False):
     return sorted(build_infos, key=BuildNEVRCompare, reverse=reverse)
 
 
-def build_id_sort(build_infos, dedup=True, reverse=False):
+def build_id_sort(
+        build_infos: BuildInfos,
+        dedup: bool = True,
+        reverse: bool = False) -> BuildInfos:
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, sorted by the build ID
@@ -185,7 +205,8 @@ def build_id_sort(build_infos, dedup=True, reverse=False):
     return sorted(build_infos, key=itemgetter("id"), reverse=reverse)
 
 
-def build_dedup(build_infos):
+def build_dedup(
+        build_infos: BuildInfos) -> BuildInfos:
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, with order preserved.
@@ -198,9 +219,15 @@ def build_dedup(build_infos):
     return unique(filter(None, build_infos), key="id")
 
 
-def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
-                          force=False, notify=False,
-                          size=100, strict=False):
+def iter_bulk_move_builds(
+        session: ClientSession,
+        srctag: TagSpec,
+        dsttag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> Iterator[List[Tuple[BuildInfo, Any]]]:
     """
     Moves a large number of builds from one tag to another using
     multicall invocations of tagBuildBypass and untagBuildBypass.
@@ -233,7 +260,7 @@ def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
     :param strict: Raise an exception and discontinue execution at the
         first error. Default, False
 
-    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    :raises NoSuchTag: If tag does not exist
     """
 
     srctag = as_taginfo(session, srctag)
@@ -275,14 +302,39 @@ def iter_bulk_move_builds(session, srctag, dsttag, build_infos,
             yield results
 
 
-def bulk_move_builds(session, srctag, dsttag, build_infos,
-                     force=False, notify=False,
-                     size=100, strict=False):
+def bulk_move_builds(
+        session: ClientSession,
+        srctag: TagSpec,
+        dsttag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> List[Tuple[BuildInfo, Any]]:
     """
     Move a large number of builds using multicalls of tagBuildBypass and
     untagBuildBypass.
 
     :param session: an active koji session
+
+    :param srctag: Source tag's name or ID. Builds will be removed
+      from this tag.
+
+    :param dsttag: Destination tag's name or ID. Builds will be added
+      to this tag.
+
+    :param build_infos: Build infos to be tagged
+
+    :param force: Force tagging/untagging. Re-tags if necessary, bypasses
+        policy. Default, False
+
+    :param notify: Send tagging/untagging notifications. Default, False
+
+    :param size: Count of tagging operations to perform in a single
+        multicall. Default, 100
+
+    :param strict: Raise an exception and discontinue execution at the
+        first error. Default, False
     """
 
     results = []
@@ -293,9 +345,15 @@ def bulk_move_builds(session, srctag, dsttag, build_infos,
     return results
 
 
-def bulk_move_nvrs(session, srctag, dsttag, nvrs,
-                   force=False, notify=False,
-                   size=100, strict=False):
+def bulk_move_nvrs(
+        session: ClientSession,
+        srctag: TagSpec,
+        dsttag: TagSpec,
+        nvrs: Iterable[Union[int, str]],
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> List[Tuple[BuildInfo, Any]]:
     """
     Move a large number of NVRs using multicalls of tagBuildBypass and
     untagBuildBypass.
@@ -305,20 +363,43 @@ def bulk_move_nvrs(session, srctag, dsttag, nvrs,
     raised. Otherwise missing builds will be ignored.
 
     :param session: an active koji session
+
+    :param srctag: Source tag's name or ID. Builds will be removed
+      from this tag.
+
+    :param dsttag: Destination tag's name or ID. Builds will be added
+      to this tag.
+
+    :param nvrs: Builds to be tagged, specified by NVR or build ID
+
+    :param force: Force tagging/untagging. Re-tags if necessary, bypasses
+        policy. Default, False
+
+    :param notify: Send tagging/untagging notifications. Default, False
+
+    :param size: Count of tagging operations to perform in a single
+        multicall. Default, 100
+
+    :param strict: Raise an exception and discontinue execution at the
+        first error. Default, False
     """
 
-    builds = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = build_dedup(builds.values())
+    loaded = bulk_load_builds(session, unique(nvrs), err=strict)
+    builds = build_dedup(loaded.values())
 
     return bulk_move_builds(session, srctag, dsttag, builds,
                             force=force, notify=notify,
                             size=size, strict=strict)
 
 
-def iter_bulk_tag_builds(session, tag, build_infos,
-                         force=False, notify=False,
-                         size=100, strict=False):
-
+def iter_bulk_tag_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> Iterator[List[Tuple[BuildInfo, Any]]]:
     """
     Tags a large number of builds using multicall invocations of
     tagBuildBypass. Builds are specified by build info dicts.
@@ -345,7 +426,7 @@ def iter_bulk_tag_builds(session, tag, build_infos,
     :param strict: Raise an exception and discontinue execution at the
         first error. Default, False
 
-    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    :raises NoSuchTag: If tag does not exist
     """
 
     tag = as_taginfo(session, tag)
@@ -359,10 +440,14 @@ def iter_bulk_tag_builds(session, tag, build_infos,
         yield list(zip(build_chunk, results))
 
 
-def bulk_tag_builds(session, tag, build_infos,
-                    force=False, notify=False,
-                    size=100, strict=False):
-
+def bulk_tag_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> List[Tuple[BuildInfo, Any]]:
     """
     :param session: an active koji session
 
@@ -381,7 +466,7 @@ def bulk_tag_builds(session, tag, build_infos,
     :param strict: Raise an exception and discontinue execution at the
       first error. Default, False
 
-    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    :raises NoSuchTag: If tag does not exist
     """
 
     results = []
@@ -392,10 +477,14 @@ def bulk_tag_builds(session, tag, build_infos,
     return results
 
 
-def bulk_tag_nvrs(session, tag, nvrs,
-                  force=False, notify=False,
-                  size=100, strict=False):
-
+def bulk_tag_nvrs(
+        session: ClientSession,
+        tag: TagSpec,
+        nvrs: Iterable[Union[int, str]],
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> List[Tuple[BuildInfo, Any]]:
     """
     Tags a large number of builds using multicall invocations of
     tagBuildBypass.
@@ -432,27 +521,30 @@ def bulk_tag_nvrs(session, tag, nvrs,
     :param strict: Stop at the first failure. Default, continue after
       any failures. Errors will be available in the return results.
 
-    :raises kojismokydingo.NoSuchBuild: If strict and an NVR does not
-      exist
+    :raises NoSuchBuild: If strict and an NVR does not exist
 
-    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    :raises NoSuchTag: If tag does not exist
 
     :raises koji.GenericError: If strict and a tag policy prevents
       tagging
     """
 
-    builds = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = build_dedup(builds.values())
+    loaded = bulk_load_builds(session, unique(nvrs), err=strict)
+    builds = build_dedup(loaded.values())
 
     return bulk_tag_builds(session, tag, builds,
                            force=force, notify=notify,
                            size=size, strict=strict)
 
 
-def iter_bulk_untag_builds(session, tag, build_infos,
-                           force=False, notify=False,
-                           size=100, strict=False):
-
+def iter_bulk_untag_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> Iterator[List[Tuple[BuildInfo, Any]]]:
     """
     Untags a large number of builds using multicall invocations of
     untagBuildBypass. Builds are specified by build info dicts.
@@ -478,7 +570,7 @@ def iter_bulk_untag_builds(session, tag, build_infos,
     :param strict: Raise an exception and discontinue execution at the
         first error. Default, False
 
-    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    :raises NoSuchTag: If tag does not exist
     """
 
     tag = as_taginfo(session, tag)
@@ -492,10 +584,14 @@ def iter_bulk_untag_builds(session, tag, build_infos,
         yield list(zip(build_chunk, results))
 
 
-def bulk_untag_builds(session, tag, build_infos,
-                      force=False, notify=False,
-                      size=100, strict=False):
-
+def bulk_untag_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        build_infos: BuildInfos,
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> List[Tuple[BuildInfo, Any]]:
     """
     :param session: an active koji session
 
@@ -513,7 +609,7 @@ def bulk_untag_builds(session, tag, build_infos,
     :param strict: Raise an exception and discontinue execution at the
       first error. Default, False
 
-    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    :raises NoSuchTag: If tag does not exist
     """
 
     results = []
@@ -524,9 +620,14 @@ def bulk_untag_builds(session, tag, build_infos,
     return results
 
 
-def bulk_untag_nvrs(session, tag, nvrs,
-                    force=False, notify=False,
-                    size=100, strict=False):
+def bulk_untag_nvrs(
+        session: ClientSession,
+        tag: TagSpec,
+        nvrs: Iterable[Union[int, str]],
+        force: bool = False,
+        notify: bool = False,
+        size: int = 100,
+        strict: bool = False) -> List[Tuple[BuildInfo, Any]]:
     """
     Untags a large number of builds using multicall invocations of
     untagBuildBypass.
@@ -562,17 +663,16 @@ def bulk_untag_nvrs(session, tag, nvrs,
     :param strict: Stop at the first failure. Default, continue after
       any failures. Errors will be available in the return results.
 
-    :raises kojismokydingo.NoSuchBuild: If strict and an NVR does not
-      exist
+    :raises NoSuchBuild: If strict and an NVR does not exist
 
-    :raises kojismokydingo.NoSuchTag: If tag does not exist
+    :raises NoSuchTag: If tag does not exist
 
     :raises koji.GenericError: If strict and a tag policy prevents
       untagging
     """
 
-    builds = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = build_dedup(builds.values())
+    loaded = bulk_load_builds(session, unique(nvrs), err=strict)
+    builds = build_dedup(loaded.values())
 
     return bulk_untag_builds(session, tag, builds,
                              force=force, notify=notify,
@@ -583,7 +683,14 @@ gavgetter = itemgetter("maven_group_id", "maven_artifact_id",
                        "maven_version")
 
 
-def iter_latest_maven_builds(session, tag, pkg_names=None, inherit=True):
+GAV = Tuple[str, str, str]
+
+
+def iter_latest_maven_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        pkg_names: Optional[Iterable[str]] = None,
+        inherit: bool = True) -> Iterator[Tuple[GAV, MavenBuildInfo]]:
     """
     Yields ``((G, A, V), build_info)`` representing the latest build for
     each GAV in the tag.
@@ -598,7 +705,7 @@ def iter_latest_maven_builds(session, tag, pkg_names=None, inherit=True):
     if pkg_names is None:
         # pkgs = session.listPackages(tid, inherited=True)
         # pkg_names = [p['package_name'] for p in pkgs if not p['blocked']]
-        pkg_names = [None]
+        pkg_names = [None] # type: ignore
     else:
         pkg_names = unique(pkg_names)
 
@@ -615,22 +722,26 @@ def iter_latest_maven_builds(session, tag, pkg_names=None, inherit=True):
                 yield gav, bld
 
 
-def latest_maven_builds(session, tag, pkg_names=None, inherit=True):
+def latest_maven_builds(
+        session: ClientSession,
+        tag: TagSpec,
+        pkg_names: Optional[Iterable[str]] = None,
+        inherit: bool = True) -> Dict[GAV, MavenBuildInfo]:
     """
     Returns a dict mapping each (G, A, V) to a build_info dict,
     representing the latest build for each GAV in the tag.
 
     If pkg_names is given, then only those builds matching the given
     package names are returned.
-
-    :rtype: dict[tuple[str], dict]
     """
 
     builds = iter_latest_maven_builds(session, tag, pkg_names, inherit)
     return dict(builds)
 
 
-def decorate_builds_maven(session, build_infos):
+def decorate_builds_maven(
+        session: ClientSession,
+        build_infos: BuildInfos) -> DecoratedBuildInfos:
     """
     For any build info which does not have a maven_group_id and hasn't
     already been checked for additional btype data, augment the btype
@@ -648,7 +759,10 @@ def decorate_builds_maven(session, build_infos):
     return build_infos
 
 
-def decorate_builds_btypes(session, build_infos, with_fields=True):
+def decorate_builds_btypes(
+        session: ClientSession,
+        build_infos: BuildInfos,
+        with_fields: bool = True) -> DecoratedBuildInfos:
     """
     Augments a list of build_info dicts with two new keys:
 
@@ -708,7 +822,9 @@ def decorate_builds_btypes(session, build_infos, with_fields=True):
     return build_infos
 
 
-def decorate_builds_cg_list(session, build_infos):
+def decorate_builds_cg_list(
+        session: ClientSession,
+        build_infos: BuildInfos) -> DecoratedBuildInfos:
     """
     Augments a list of build_info dicts with two or four new keys:
 
@@ -832,9 +948,11 @@ def decorate_builds_cg_list(session, build_infos):
     return build_infos
 
 
-def filter_builds_by_tags(session, build_infos,
-                          limit_tag_ids=(), lookaside_tag_ids=()):
-
+def filter_builds_by_tags(
+        session: ClientSession,
+        build_infos: BuildInfos,
+        limit_tag_ids: Iterable[int] = (),
+        lookaside_tag_ids: Iterable[int] = ()) -> BuildInfos:
     """
     :param session: an active koji client session
 
@@ -877,7 +995,9 @@ def filter_builds_by_tags(session, build_infos,
     return builds.values()
 
 
-def filter_builds_by_state(build_infos, state=BuildState.COMPLETE):
+def filter_builds_by_state(
+        build_infos: BuildInfos,
+        state: BuildState = BuildState.COMPLETE) -> BuildInfos:
     """
     Given a sequence of build info dicts, return a generator of those
     matching the given state.
@@ -899,7 +1019,10 @@ def filter_builds_by_state(build_infos, state=BuildState.COMPLETE):
         return (b for b in build_infos if (b and b.get("state") == state))
 
 
-def filter_imported_builds(build_infos, by_cg=(), negate=False):
+def filter_imported_builds(
+        build_infos: BuildInfos,
+        by_cg: Iterable[str] = (),
+        negate: bool = False) -> BuildInfos:
     """
     Given a sequence of build info dicts, yield those which are
     imports.
@@ -975,7 +1098,9 @@ def filter_imported_builds(build_infos, by_cg=(), negate=False):
                     yield build
 
 
-def gather_buildroots(session, build_ids):
+def gather_buildroots(
+        session: ClientSession,
+        build_ids: Iterable[int]) -> Dict[int, List[dict]]:
     """
     For each build ID given, produce the list of buildroots used to
     create it.
@@ -1011,7 +1136,9 @@ def gather_buildroots(session, build_ids):
     return results
 
 
-def gather_rpm_sigkeys(session, build_ids):
+def gather_rpm_sigkeys(
+        session: ClientSession,
+        build_ids: Iterable[int]) -> Dict[int, Set[str]]:
     """
     Given a sequence of build IDs, collect the available sigkeys for
     each rpm in each build.
@@ -1033,10 +1160,12 @@ def gather_rpm_sigkeys(session, build_ids):
 
     results = {}
 
+    sigs: Set[str]
+
     # now just correlate the set of sigkeys back to each needed
     # cache entry
     for bid, rpms in loaded.items():
-        results[bid] = sigs = set()
+        sigs = results[bid] = set()
         for rpm in rpms:
             rsigs = (sig["sigkey"] for sig in rpm_sigs[rpm["id"]])
             sigs.update(rsigs)
@@ -1044,7 +1173,10 @@ def gather_rpm_sigkeys(session, build_ids):
     return results
 
 
-def gather_wrapped_builds(session, task_ids, results=None):
+def gather_wrapped_builds(
+        session: ClientSession,
+        task_ids: Iterable[int],
+        results: Optional[dict] = None) -> Dict[int, BuildInfo]:
     """
     Given a list of task IDs, identify any which are wrapperRPM
     tasks. For each which is a wrapperRPM task, associate the task ID
@@ -1070,7 +1202,10 @@ def gather_wrapped_builds(session, task_ids, results=None):
     return results
 
 
-def gather_component_build_ids(session, build_ids, btypes=None):
+def gather_component_build_ids(
+        session: ClientSession,
+        build_ids: Iterable[int],
+        btypes: Optional[Iterable[str]] = None) -> Dict[int, List[int]]:
     """
     Given a sequence of build IDs, identify the IDs of the component
     builds used to produce them (installed in the buildroots of the
@@ -1136,10 +1271,15 @@ def gather_component_build_ids(session, build_ids, btypes=None):
 
 class BuildFilter():
 
-    def __init__(self, session,
-                 limit_tag_ids=None, lookaside_tag_ids=None,
-                 imported=None, cg_list=None,
-                 btypes=None, state=None):
+    def __init__(
+            self,
+            session: ClientSession,
+            limit_tag_ids: Optional[Iterable[int]] = None,
+            lookaside_tag_ids: Optional[Iterable[int]] = None,
+            imported: Optional[bool] = None,
+            cg_list: Optional[Iterable[str]] = None,
+            btypes: Optional[Iterable[str]] = None,
+            state: Optional[BuildState] = None):
         """
         :param session: an active koji client session
 
@@ -1178,7 +1318,7 @@ class BuildFilter():
         self._state = state
 
 
-    def filter_by_tags(self, build_infos):
+    def filter_by_tags(self, build_infos: BuildInfos) -> BuildInfos:
         limit = self._limit_tag_ids
         lookaside = self._lookaside_tag_ids
 
@@ -1189,7 +1329,7 @@ class BuildFilter():
         return build_infos
 
 
-    def filter_by_btype(self, build_infos):
+    def filter_by_btype(self, build_infos: BuildInfos) -> BuildInfos:
 
         bt = self._btypes
         if not bt:
@@ -1203,7 +1343,7 @@ class BuildFilter():
         return filter(test, build_infos)
 
 
-    def filter_imported(self, build_infos):
+    def filter_imported(self, build_infos: BuildInfos) -> BuildInfos:
         if self._cg_list or self._imported is not None:
             negate = not (self._imported or self._imported is None)
 
@@ -1214,14 +1354,14 @@ class BuildFilter():
             return build_infos
 
 
-    def filter_by_state(self, build_infos):
+    def filter_by_state(self, build_infos: BuildInfos) -> BuildInfos:
         if self._state is not None:
             build_infos = filter_builds_by_state(build_infos, self._state)
 
         return build_infos
 
 
-    def __call__(self, build_infos):
+    def __call__(self, build_infos: BuildInfos) -> BuildInfos:
         # TODO: could we add some caching to this, such that we
         # associate the build ID with a bool indicating whether it's
         # been filtered before and whether it was included (True) or
@@ -1244,9 +1384,6 @@ class BuildFilter():
         work = self.filter_imported(work)
 
         return work
-
-
-merge_annotations()
 
 
 #
