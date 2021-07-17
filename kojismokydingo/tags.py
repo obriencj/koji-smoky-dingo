@@ -22,13 +22,18 @@ Koji Smoky Dingo - tags and targets
 
 from functools import partial
 from itertools import chain
+from koji import ClientSession
+from typing import Dict, Iterable, List, Optional, Set, Union
 
 from . import (
     NoSuchTag,
     as_taginfo, as_targetinfo,
     bulk_load, bulk_load_tags, )
 from .common import unique
-from ._magic import merge_annotations
+from .types import (
+    DecoratedTagExtras,
+    TagInfo, TagInfos, TagInheritance, TagInheritanceEntry,
+    TagSpec, TargetInfos, )
 
 
 __all__ = (
@@ -44,7 +49,8 @@ __all__ = (
 )
 
 
-def tag_dedup(tag_infos):
+def tag_dedup(
+        tag_infos: TagInfos) -> TagInfos:
     """
     Given a sequence of tag info dictionaries, return a de-duplicated
     list of same, with order preserved.
@@ -57,7 +63,9 @@ def tag_dedup(tag_infos):
     return unique(filter(None, tag_infos), key="id")
 
 
-def ensure_tag(session, name):
+def ensure_tag(
+        session: ClientSession,
+        name: str) -> TagInfo:
     """
     Given a name, resolve it to a tag info dict. If there is no such
     tag, then create it and return its newly created tag info.
@@ -68,7 +76,7 @@ def ensure_tag(session, name):
     try:
         info = as_taginfo(session, name)
     except NoSuchTag:
-        info = None
+        info = None  # type: ignore
 
     # we do it this way so we don't get a nested exception if
     # createTag fails
@@ -79,7 +87,10 @@ def ensure_tag(session, name):
     return info
 
 
-def resolve_tag(session, name, target=False):
+def resolve_tag(
+        session: ClientSession,
+        name: str,
+        target: bool = False) -> TagInfo:
     """
     Given a name, resolve it to a taginfo.
 
@@ -101,12 +112,14 @@ def resolve_tag(session, name, target=False):
 
     if target:
         tinfo = as_targetinfo(session, name)
-        name = tinfo.get("build_tag_name", name)
+        name = tinfo["build_tag_name"]
 
     return as_taginfo(session, name)
 
 
-def gather_affected_targets(session, tagnames):
+def gather_affected_targets(
+        session: ClientSession,
+        tagnames: Iterable[TagSpec]) -> TargetInfos:
     """
     Returns the list of target info dicts representing the targets
     which inherit any of the given named tags. That is to say, the
@@ -138,7 +151,10 @@ def gather_affected_targets(session, tagnames):
     return list(chain(*(t[0] for t in session.multiCall() if t)))
 
 
-def renum_inheritance(inheritance, begin=0, step=10):
+def renum_inheritance(
+        inheritance: TagInheritance,
+        begin: int = 0,
+        step: int = 10) -> TagInheritance:
     """
     Create a new copy of the tag inheritance data with the priority
     values renumbered. Ordering is preserved.
@@ -152,17 +168,19 @@ def renum_inheritance(inheritance, begin=0, step=10):
       first. Default, 10
     """
 
-    renumbered = list()
+    renumbered: TagInheritance = []
 
     for index, inher in enumerate(inheritance):
-        data = dict(inher)
+        data: TagInheritanceEntry = inher.copy()
         data['priority'] = begin + (index * step)
         renumbered.append(data)
 
     return renumbered
 
 
-def find_inheritance_parent(inheritance, parent_id):
+def find_inheritance_parent(
+        inheritance: TagInheritance,
+        parent_id: int) -> Optional[TagInheritanceEntry]:
     """
     Find the parent link in the inheritance list with the given tag ID.
 
@@ -182,7 +200,10 @@ def find_inheritance_parent(inheritance, parent_id):
         return None
 
 
-def convert_tag_extras(taginfo, into=None, prefix=None):
+def convert_tag_extras(
+        taginfo: TagInfo,
+        into: Optional[dict] = None,
+        prefix: Optional[str] = None) -> DecoratedTagExtras:
     """
     Provides a merged view of the tag extra settings for a tag. The
     extras are decorated with additional keys:
@@ -199,24 +220,16 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
 
     :param taginfo: A koji tag info dict
 
-    :type taginfo: dict
-
     :param into: Existing dict to collect extras into. Default, create
         a new dict.
 
-    :type into: dict, optional
-
     :param prefix: Only gather and convert extras with keys having
         this prefix. Default, gather all keys not already found.
-
-    :type prefix: str, optional
-
-    :rtype: dict
     """
 
     found = {} if into is None else into
 
-    extra = taginfo.get("extra")
+    extra = taginfo["extra"]
     if not extra:
         return found
 
@@ -245,7 +258,10 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
     return found
 
 
-def collect_tag_extras(session, tag, prefix=None):
+def collect_tag_extras(
+        session: ClientSession,
+        tag: TagSpec,
+        prefix: Optional[str] = None) -> DecoratedTagExtras:
     """
     Similar to session.getBuildConfig but with additional information
     recording which tag in the inheritance supplied the setting.
@@ -280,17 +296,21 @@ def collect_tag_extras(session, tag, prefix=None):
     tids = (tag["parent_id"] for tag in inher if not tag["noconfig"])
     parents = bulk_load_tags(session, tids)
 
-    for tag in parents.values():
+    for ptag in parents.values():
         # mix the extras into existing found results. note: we're not
         # checking for faults, because we got this list of tag IDs
         # straight from koji itself, but there could be some kind of
         # race condition from this.
-        convert_tag_extras(tag, into=found, prefix=prefix)
+        convert_tag_extras(ptag, into=found, prefix=prefix)
 
     return found
 
 
-def gather_tag_ids(session, shallow=(), deep=(), results=None):
+def gather_tag_ids(
+        session: ClientSession,
+        shallow: Optional[Iterable[Union[int, str]]] = None,
+        deep: Optional[Iterable[Union[int, str]]] = None,
+        results: Optional[set] = None) -> Set[int]:
     """
     Load IDs from shallow tags, and load IDs from deep tags and all
     their parents. Returns a set of all IDs found.
@@ -329,9 +349,6 @@ def gather_tag_ids(session, shallow=(), deep=(), results=None):
             results.update(t['parent_id'] for t in parents)
 
     return results
-
-
-merge_annotations()
 
 
 #

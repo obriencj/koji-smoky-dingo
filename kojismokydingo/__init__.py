@@ -371,7 +371,7 @@ def bulk_load_builds(
         err: bool = True,
         size: int = 100,
         results: Optional[dict] = None) -> Dict[Union[int, str],
-                                                Optional[BuildInfo]]:
+                                                BuildInfo]:
     """
     Load many buildinfo dicts from a koji client session and a
     sequence of NVRs.
@@ -417,7 +417,7 @@ def bulk_load_tasks(
         request: bool = False,
         err: bool = True,
         size: int = 100,
-        results: Optional[dict] = None) -> Dict[int, Optional[TaskInfo]]:
+        results: Optional[dict] = None) -> Dict[int, TaskInfo]:
     """
     Load many taskinfo dicts from a koji client session and a sequence
     of task IDs.
@@ -445,7 +445,7 @@ def bulk_load_tags(
         err: bool = True,
         size: int = 100,
         results: Optional[dict] = None) -> Dict[Union[int, str],
-                                                Optional[TagInfo]]:
+                                                TagInfo]:
     """
     Load many taginfo dicts from tag names or IDs.
 
@@ -618,7 +618,7 @@ def bulk_load_users(
         err: bool = True,
         size: int = 100,
         results: Optional[dict] = None) -> Dict[Union[int, str],
-                                                Optional[UserInfo]]:
+                                                UserInfo]:
     """
     Load many userinfo dicts from a koji client session and a sequence of
     user identifiers.

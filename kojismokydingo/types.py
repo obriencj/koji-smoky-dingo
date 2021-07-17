@@ -593,7 +593,8 @@ class DecoratedUserInfo(UserInfo):
 
 
 class TargetInfo(TypedDict):
-    pass
+
+    build_tag_name: str
 
 
 TargetInfos = Iterable[TargetInfo]
@@ -607,7 +608,12 @@ its ID, its name, or an already-loaded TargetInfo
 
 
 class TagInfo(TypedDict):
-    pass
+
+    id: int
+
+    name: str
+
+    extra: Dict[str, str]
 
 
 TagInfos = Iterable[TagInfo]
@@ -621,7 +627,8 @@ its ID, its name, or as an already-loaded TagInfo
 
 
 class TagInheritanceEntry(TypedDict):
-    pass
+    priority: int
+    parent_id: int
 
 
 TagInheritance = List[TagInheritanceEntry]
