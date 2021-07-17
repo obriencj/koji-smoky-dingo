@@ -28,7 +28,9 @@ from enum import IntEnum
 from koji import (
     BUILD_STATES, CHECKSUM_TYPES, USERTYPES, USER_STATUS,
     PathInfo, )
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import (
+    Any, Callable, Dict, Iterable, List,
+    Optional, Tuple, Union, )
 
 
 try:
@@ -55,6 +57,7 @@ __all__ = (
     "DecoratedTagExtras",
     "HostInfo",
     "HubVersionSpec",
+    "KeySpec",
     "MavenArchiveInfo",
     "PathSpec",
     "PermInfo",
@@ -652,6 +655,9 @@ a koji version requirement, specified as either a string or tuple of ints
   * ``"1.25"``
   * ``(1, 25)``
 """
+
+
+KeySpec = Union[Callable[[Any], Any], Any]
 
 
 #

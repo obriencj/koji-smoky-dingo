@@ -36,15 +36,18 @@ from glob import glob
 from itertools import filterfalse
 from operator import itemgetter
 from os.path import expanduser, isdir, join
+from typing import (
+    Any, Callable, Dict, Iterable, Iterator, List,
+    Optional, Tuple, Union, )
 
-
-from ._magic import merge_annotations
+from .types import KeySpec
 
 
 try:
     import appdirs
 except ImportError:  # pragma: no cover
     appdirs = None
+
 
 
 __all__ = (
@@ -64,18 +67,16 @@ __all__ = (
 )
 
 
-def chunkseq(seq, chunksize):
+def chunkseq(
+        seq: Iterable,
+        chunksize: int) -> Iterator[Iterable]:
     """
     Chop up a sequence into sub-sequences, each up to chunksize in
     length.
 
     :param seq: a sequence to chunk up
-    :type seq: list
 
     :param chunksize: max length for chunks
-    :type chunksize: int
-
-    :rtype: Generator[list]
     """
 
     if not isinstance(seq, (tuple, list)):
@@ -86,7 +87,10 @@ def chunkseq(seq, chunksize):
             offset in range(0, seqlen, chunksize))
 
 
-def escapable_replace(orig, character, replacement):
+def escapable_replace(
+        orig: str,
+        character: str,
+        replacement: str) -> str:
     """
     Single-character string substitutions. Doubled sentinel characters
     can be used to represent that exact character.
@@ -107,7 +111,7 @@ def escapable_replace(orig, character, replacement):
 
     assert len(character) == 1, "escapable_replace requires single characters"
 
-    gather = []
+    gather: List[str] = []
     collect = gather.append
 
     pieces = iter(orig)
@@ -127,7 +131,10 @@ def escapable_replace(orig, character, replacement):
     return "".join(gather)
 
 
-def fnmatches(value, patterns, ignore_case=False):
+def fnmatches(
+        value: str,
+        patterns: Iterable[str],
+        ignore_case: bool = False) -> bool:
     """
     Checks value against multiple glob patterns. Returns True if any
     match.
@@ -150,7 +157,9 @@ def fnmatches(value, patterns, ignore_case=False):
         return False
 
 
-def update_extend(dict_orig, *dict_additions):
+def update_extend(
+        dict_orig: Dict[Any, list],
+        *dict_additions: Dict[Any, list]) -> Dict[Any, list]:
     """
     Extend the list values of the original dict with the list values of
     the additions dict.
@@ -183,7 +192,8 @@ def update_extend(dict_orig, *dict_additions):
     return dict_orig
 
 
-def merge_extend(*dict_additions):
+def merge_extend(
+        *dict_additions: Dict[Any, list]) -> Dict[Any, list]:
     """
     Similar to `update_extend` but creates a new dict to hold results,
     and new initial lists to be extended, leaving all the arguments
@@ -197,8 +207,12 @@ def merge_extend(*dict_additions):
     return update_extend({}, *dict_additions)
 
 
-def globfilter(seq, patterns,
-               key=None, invert=False, ignore_case=False):
+def globfilter(
+        seq: Iterable,
+        patterns: Iterable[str],
+        key: Optional[KeySpec] = None,
+        invert: bool = False,
+        ignore_case: bool = False) -> Iterable:
     """
     Generator yielding members of sequence seq which match any of the
     glob patterns specified.
@@ -249,7 +263,9 @@ def globfilter(seq, patterns,
     return filterfalse(test, seq) if invert else filter(test, seq)
 
 
-def unique(sequence, key=None):
+def unique(
+        sequence: Iterable[Any],
+        key: Optional[KeySpec] = None) -> List[Any]:
     """
     Given a sequence, de-duplicate it into a new list, preserving
     order.
@@ -318,7 +334,9 @@ DATETIME_FORMATS = (
 )
 
 
-def parse_datetime(src, strict=True):
+def parse_datetime(
+        src: str,
+        strict: bool = True) -> Optional[datetime]:
     """
     Attempts to parse a datetime string in numerous ways based on
     pre-defined regex mappings
@@ -359,7 +377,7 @@ def parse_datetime(src, strict=True):
             return None
 
 
-def find_config_dirs():
+def find_config_dirs() -> Tuple[str, str]:
     """
     The site and user configuration dirs, as a tuple. Attempts to use
     the ``appdirs`` package if it is available.
@@ -375,7 +393,8 @@ def find_config_dirs():
     return (site_conf_dir, user_conf_dir)
 
 
-def find_config_files(dirs=None):
+def find_config_files(
+        dirs: Optional[Iterable[str]] = None) -> List[str]:
     """
     The ordered list of configuration files to be loaded.
 
@@ -389,7 +408,7 @@ def find_config_files(dirs=None):
     if dirs is None:
         dirs = find_config_dirs()
 
-    found = []
+    found: List[str] = []
 
     for confdir in dirs:
         if isdir(confdir):
@@ -399,7 +418,8 @@ def find_config_files(dirs=None):
     return found
 
 
-def load_full_config(config_files=None):
+def load_full_config(
+        config_files: Optional[Iterable[str]] = None) -> ConfigParser:
     """
     Configuration object representing the full merged view of config
     files.
@@ -417,7 +437,10 @@ def load_full_config(config_files=None):
     return conf
 
 
-def get_plugin_config(conf, plugin, profile=None):
+def get_plugin_config(
+        conf: ConfigParser,
+        plugin: str,
+        profile: Optional[str] = None) -> Dict[str, Any]:
     """
     Given a loaded configuration, return the section specific to the
     given plugin, and optionally profile
@@ -429,7 +452,7 @@ def get_plugin_config(conf, plugin, profile=None):
     :param profile: Profile name
     """
 
-    plugin_conf = {}
+    plugin_conf: Dict[str, Any] = {}
 
     if conf.has_section(plugin):
         plugin_conf.update(conf.items(plugin))
@@ -442,7 +465,9 @@ def get_plugin_config(conf, plugin, profile=None):
     return plugin_conf
 
 
-def load_plugin_config(plugin, profile=None):
+def load_plugin_config(
+        plugin: str,
+        profile: Optional[str] = None) -> Dict[str, Any]:
     """
     Configuration specific to a given plugin, and optionally profile
 
@@ -453,9 +478,6 @@ def load_plugin_config(plugin, profile=None):
 
     conf = load_full_config()
     return get_plugin_config(conf, plugin, profile)
-
-
-merge_annotations()
 
 
 #
