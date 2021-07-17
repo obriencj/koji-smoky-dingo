@@ -52,6 +52,7 @@ __all__ = (
     "NoSuchBuild",
     "NoSuchChannel",
     "NoSuchContentGenerator",
+    "NoSuchHost",
     "NoSuchPermission",
     "NoSuchRPM",
     "NoSuchTag",

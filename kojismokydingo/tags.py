@@ -70,6 +70,8 @@ def ensure_tag(
     Given a name, resolve it to a tag info dict. If there is no such
     tag, then create it and return its newly created tag info.
 
+    :param session: active koji session
+
     :param name: tag name
     """
 
@@ -99,15 +101,18 @@ def resolve_tag(
     If target is True, name is treated as a target's name, and the
     resulting taginfo will be from that target's build tag.
 
+    :param session: active koji session
+
     :param name: Tag or Target name
 
     :param target: if True then name specifies a target rather than a
       tag, so fetch the build tag name from the target and look up
       that. Default False; name specifies a tag.
 
-    :raises NoSuchTag:
+    :raises NoSuchTag: if the tag could not be resolved
 
-    :raises NoSuchTarget:
+    :raises NoSuchTarget: if ``target`` is True and name cannot be
+      resolved as a target
     """
 
     if target:

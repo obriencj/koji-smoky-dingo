@@ -24,7 +24,7 @@ Some simple functions used by the other modules.
 
 # Note: features implemented in this module should not be specific to
 # working with koji. ie: nothing should require a session object or
-# work with the koji-specific dict types (build info, tag info, etc)
+# work with the koji-specific types (build info, tag info, etc)
 
 
 import re
@@ -47,7 +47,6 @@ try:
     import appdirs
 except ImportError:  # pragma: no cover
     appdirs = None
-
 
 
 __all__ = (
@@ -362,7 +361,7 @@ def parse_datetime(
       and the date-time text cannot be parsed. If False, simply return
       `None`
 
-    :raises Exception: if strict and no src matches none of the
+    :raises ValueError: if strict and no src matches none of the
       pre-defined formats
     """
 
@@ -372,15 +371,15 @@ def parse_datetime(
             return parser(mtch.string)
     else:
         if strict:
-            raise Exception("Invalid date-time format, %r" % src)
+            raise ValueError("Invalid date-time format, %r" % src)
         else:
             return None
 
 
 def find_config_dirs() -> Tuple[str, str]:
     """
-    The site and user configuration dirs, as a tuple. Attempts to use
-    the ``appdirs`` package if it is available.
+    The site and user configuration dirs for koji-smoky-dingo, as a
+    tuple. Attempts to use the ``appdirs`` package if it is available.
     """
 
     if appdirs is None:
@@ -401,6 +400,10 @@ def find_config_files(
     If `dirs` is specified, it must be a sequence of directory names,
     from which conf files will be loaded in order. If unspecified,
     defaults to the result of `find_config_dirs`
+
+    Configuration files must have the extension ``.conf`` to be
+    considered. The files will be listed in directory order, and then
+    in alphabetical order from within each directory.
 
     :param dirs: list of directories to look for config files within
     """
@@ -426,6 +429,13 @@ def load_full_config(
 
     If `config_files` is None, use the results of `find_config_files`.
     Otherwise, `config_files` must be a sequence of filenames.
+
+    :param config_files: configuration files to be loaded, in order.
+      If not specified, the results of `find_config_files` will be
+      used.
+
+    :returns: a configuration representing a merged view of all config
+      files
     """
 
     if config_files is None:
@@ -443,13 +453,13 @@ def get_plugin_config(
         profile: Optional[str] = None) -> Dict[str, Any]:
     """
     Given a loaded configuration, return the section specific to the
-    given plugin, and optionally profile
+    given plugin, and optionally profile-specific as well.
 
-    :param conf: Full configuration
+    :param conf: loaded configuration data
 
-    :param plugin: Plugin name
+    :param plugin: plugin name
 
-    :param profile: Profile name
+    :param profile: profile name, optional
     """
 
     plugin_conf: Dict[str, Any] = {}
@@ -469,11 +479,25 @@ def load_plugin_config(
         plugin: str,
         profile: Optional[str] = None) -> Dict[str, Any]:
     """
-    Configuration specific to a given plugin, and optionally profile
+    Configuration specific to a given plugin, and optionally specific
+    to a given profile as well.
 
-    :param plugin: Plugin name
+    Profile-specific sections are denoted by a suffix on the section
+    name, eg.
 
-    :param profile: Profile name
+    ::
+
+      [my_plugin]
+      # this setting is for my_plugin on all profiles
+      setting = foo
+
+      [my_plugin:testing]
+      # this setting is for my_plugin on the testing profile
+      setting = bar
+
+    :param plugin: plugin name
+
+    :param profile: profile name
     """
 
     conf = load_full_config()
