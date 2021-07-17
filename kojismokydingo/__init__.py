@@ -26,9 +26,20 @@ from koji import (
     ClientSession, Fault, GenericError, ParameterError,
     convertFault, read_config)
 from koji_cli.lib import activate_session, ensure_connection
+from typing import (
+    Any, Callable, Dict, Iterator, Iterable, List,
+    Optional, Tuple, Union, )
 
 from .common import chunkseq
-from ._magic import merge_annotations
+from .types import (
+    ArchiveInfo, ArchiveInfos, ArchiveSpec,
+    BuildInfo, BuildSpec,
+    HostInfo, HostSpec,
+    RPMInfo, RPMInfos, RPMSpec,
+    TagInfo, TagSpec,
+    TargetInfo, TargetSpec,
+    TaskInfo, TaskSpec,
+    UserInfo, UserSpec, )
 
 
 __all__ = (
@@ -100,7 +111,7 @@ class ProfileClientSession(ManagedClientSession):
     which can be used via tha ``with`` keyword.
     """
 
-    def __init__(self, profile="koji"):
+    def __init__(self, profile: str = "koji"):
         """
         :param profile: name of the koji profile to load from local
           configuration locations
@@ -141,7 +152,7 @@ class BadDingo(Exception):
     `koji.GenericError`
     """
 
-    complaint = "Something bad happened"
+    complaint: str = "Something bad happened"
 
     def __str__(self):
         orig = super().__str__()
@@ -253,7 +264,12 @@ class FeatureUnavailable(BadDingo):
     complaint = "The koji hub version doesn't support this feature"
 
 
-def iter_bulk_load(session, loadfn, keys, err=True, size=100):
+def iter_bulk_load(
+        session: ClientSession,
+        loadfn: Callable[[Any], Any],
+        keys: Iterable[Any],
+        err: bool = True,
+        size: int = 100) -> Iterator[Tuple[Any, Any]]:
     """
     Generic bulk loading generator. Invokes the given loadfn on each
     key in keys using chunking multicalls limited to the specified
@@ -301,7 +317,13 @@ def iter_bulk_load(session, loadfn, keys, err=True, size=100):
                 yield key, None
 
 
-def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
+def bulk_load(
+        session: ClientSession,
+        loadfn: Callable[[Any], Any],
+        keys: Iterable[Any],
+        err: bool = True,
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[Any, Any]:
     """
     Generic bulk loading function. Invokes the given `loadfn` on each
     key in `keys` using chunking multicalls limited to the specified
@@ -323,10 +345,10 @@ def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
       assignmnet using these values as the key.
 
     :param err: Whether to raise any underlying fault returns as
-      exceptions. Default, True
+      exceptions. Default, `True`
 
     :param size: How many calls to `loadfn` to chunk up for each
-      multicall. Default, 100
+      multicall. Default, `100`
 
     :param results: storage for `loadfn` results. If specified, must
       support item assignment (like a dict) via an update method, and
@@ -342,7 +364,13 @@ def bulk_load(session, loadfn, keys, err=True, size=100, results=None):
     return results
 
 
-def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
+def bulk_load_builds(
+        session: ClientSession,
+        nvrs: Iterable[Union[str, int]],
+        err: bool = True,
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[Union[int, str],
+                                                Optional[BuildInfo]]:
     """
     Load many buildinfo dicts from a koji client session and a
     sequence of NVRs.
@@ -382,8 +410,13 @@ def bulk_load_builds(session, nvrs, err=True, size=100, results=None):
     return results
 
 
-def bulk_load_tasks(session, task_ids, request=False,
-                    err=True, size=100, results=None):
+def bulk_load_tasks(
+        session: ClientSession,
+        task_ids: Iterable[int],
+        request: bool = False,
+        err: bool = True,
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[int, Optional[TaskInfo]]:
     """
     Load many taskinfo dicts from a koji client session and a sequence
     of task IDs.
@@ -405,17 +438,21 @@ def bulk_load_tasks(session, task_ids, request=False,
     return results
 
 
-def bulk_load_tags(session, tags, err=True, size=100, results=None):
+def bulk_load_tags(
+        session: ClientSession,
+        tags: Iterable[Union[str, int]],
+        err: bool = True,
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[Union[int, str],
+                                                Optional[TagInfo]]:
     """
+    Load many taginfo dicts from tag names or IDs.
+
     :param err: Raise an exception if a tag fails to load. Default,
       True.
 
-    :type err: bool, optional
-
     :param size: Count of tags to load in a single multicall. Default,
       100
-
-    :type size: int, optional
     """
 
     results = {} if results is None else results
@@ -434,7 +471,11 @@ def bulk_load_tags(session, tags, err=True, size=100, results=None):
     return results
 
 
-def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
+def bulk_load_rpm_sigs(
+        session: ClientSession,
+        rpm_ids: Iterable[int],
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[int, List[str]]:
     """
     Set up a chunking multicall to fetch the signatures for a list of
     RPM via `session.queryRPMSigs` for each ID in rpm_ids.
@@ -453,8 +494,12 @@ def bulk_load_rpm_sigs(session, rpm_ids, size=100, results=None):
     return results
 
 
-def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
-                                 size=100, results=None):
+def bulk_load_buildroot_archives(
+        session: ClientSession,
+        buildroot_ids: Iterable[int],
+        btype: Optional[str] = None,
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[int, ArchiveInfos]:
     """
     Set up a chunking multicall to fetch the archives of buildroots
     via `session.listArchives` for each buildroot ID in buildrood_ids.
@@ -473,8 +518,11 @@ def bulk_load_buildroot_archives(session, buildroot_ids, btype=None,
     return results
 
 
-def bulk_load_buildroot_rpms(session, buildroot_ids,
-                             size=100, results=None):
+def bulk_load_buildroot_rpms(
+        session: ClientSession,
+        buildroot_ids: Iterable[int],
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[int, RPMInfos]:
     """
     Set up a chunking multicall to fetch the RPMs of buildroots via
     `session.listRPMs` for each buildroot ID in buildrood_ids.
@@ -493,8 +541,12 @@ def bulk_load_buildroot_rpms(session, buildroot_ids,
     return results
 
 
-def bulk_load_build_archives(session, build_ids, btype=None,
-                             size=100, results=None):
+def bulk_load_build_archives(
+        session: ClientSession,
+        build_ids: Iterable[int],
+        btype: Optional[str] = None,
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[int, ArchiveInfos]:
     """
     Set up a chunking multicall to fetch the archives of builds
     via `session.listArchives` for each build ID in build_ids.
@@ -513,7 +565,11 @@ def bulk_load_build_archives(session, build_ids, btype=None,
     return results
 
 
-def bulk_load_build_rpms(session, build_ids, size=100, results=None):
+def bulk_load_build_rpms(
+        session: ClientSession,
+        build_ids: Iterable[int],
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[int, RPMInfos]:
     """
     Set up a chunking multicall to fetch the RPMs of builds via
     `session.listRPMS` for each build ID in build_ids.
@@ -532,7 +588,11 @@ def bulk_load_build_rpms(session, build_ids, size=100, results=None):
     return results
 
 
-def bulk_load_buildroots(session, broot_ids, size=100, results=None):
+def bulk_load_buildroots(
+        session: ClientSession,
+        broot_ids: Iterable[int],
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[int, dict]:
     """
     Set up a chunking multicall to fetch the buildroot data via
     `session.getBuildroot` for each ID in broot_ids.
@@ -551,7 +611,13 @@ def bulk_load_buildroots(session, broot_ids, size=100, results=None):
     return results
 
 
-def bulk_load_users(session, users, err=True, size=100, results=None):
+def bulk_load_users(
+        session: ClientSession,
+        users: Iterable[Union[int, str]],
+        err: bool = True,
+        size: int = 100,
+        results: Optional[dict] = None) -> Dict[Union[int, str],
+                                                Optional[UserInfo]]:
     """
     Load many userinfo dicts from a koji client session and a sequence of
     user identifiers.
@@ -569,25 +635,15 @@ def bulk_load_users(session, users, err=True, size=100, results=None):
 
     :param session: active koji session
 
-    :type session: koji.ClientSession
-
     :param users: user names or IDs to load
 
-    :type users: Iterator[str] or Iterator[int]
-
     :param err: halt on problems and raise an exception. Default, True
-
-    :type err: bool, optional
 
     :param size: number of users to load in a single
       multicall. Default, 100
 
-    :type size: int, optional
-
     :param results: dict to store results in. Default, allocate a new
       dict
-
-    :type results: dict, optional
     """
 
     users = tuple(users)
@@ -643,7 +699,9 @@ def bulk_load_users(session, users, err=True, size=100, results=None):
     return results
 
 
-def as_buildinfo(session, build):
+def as_buildinfo(
+        session: ClientSession,
+        build: BuildSpec) -> BuildInfo:
     """
     Coerces a build value into a koji build info dict.
 
@@ -652,14 +710,12 @@ def as_buildinfo(session, build):
      * str, will attempt to load as an NVR
      * dict, will presume already a build info
 
-    :param build: value to lookup
+    :param session: active koji session
 
-    :type build: int or str or dict
+    :param build: value to lookup
 
     :raises NoSuchBuild: if the build value could not be resolved
       into a build info dict
-
-    :rtype: dict
     """
 
     if isinstance(build, (str, int)):
@@ -675,7 +731,9 @@ def as_buildinfo(session, build):
     return info
 
 
-def as_taginfo(session, tag):
+def as_taginfo(
+        session: ClientSession,
+        tag: TagSpec) -> TagInfo:
     """
     Coerces a tag value into a koji tag info dict.
 
@@ -684,19 +742,12 @@ def as_taginfo(session, tag):
      * str, will attempt to load as a tag name
      * dict, will presume already a tag info
 
+    :param session: active koji session
+
     :param tag: value to lookup
-
-    :type tag: int or str or dict
-
-    :param blocked: attempts to load blocked tag extra values. Default,
-      only loads
-
-    :type blocked: bool, optional
 
     :raises NoSuchTag: if the tag value could not be resolved into a
       tag info dict
-
-    :rtype: dict
     """
 
     if isinstance(tag, (str, int)):
@@ -717,7 +768,9 @@ def as_taginfo(session, tag):
     return info
 
 
-def as_taskinfo(session, task):
+def as_taskinfo(
+        session: ClientSession,
+        task: TaskSpec) -> TaskInfo:
     """
     Coerces a task value into a koji task info dict.
 
@@ -725,14 +778,12 @@ def as_taskinfo(session, task):
      * int, will attempt to load as a task ID
      * dict, will presume already a task info
 
-    :param task: value to lookup
+    :param session: active koji session
 
-    :type task: int or dict
+    :param task: value to lookup
 
     :raises NoSuchTask: if the task value could not be resolved
       into a task info dict
-
-    :rtype: dict
     """
 
     if isinstance(task, int):
@@ -748,7 +799,9 @@ def as_taskinfo(session, task):
     return info
 
 
-def as_targetinfo(session, target):
+def as_targetinfo(
+        session: ClientSession,
+        target: TargetSpec) -> TargetInfo:
     """
     Coerces a target value into a koji target info dict.
 
@@ -757,14 +810,12 @@ def as_targetinfo(session, target):
      * str, will attempt to load as a target name
      * dict, will presume already a target info
 
-    :param target: value to lookup
+    :param session: active koji session
 
-    :type target: int or str or dict
+    :param target: value to lookup
 
     :raises NoSuchTarget: if the target value could not be resolved
       into a target info dict
-
-    :rtype: dict
     """
 
     if isinstance(target, (str, int)):
@@ -780,7 +831,9 @@ def as_targetinfo(session, target):
     return info
 
 
-def as_hostinfo(session, host):
+def as_hostinfo(
+        session: ClientSession,
+        host: HostSpec) -> HostInfo:
     """
     Coerces a host value into a host info dict.
 
@@ -788,6 +841,8 @@ def as_hostinfo(session, host):
      * int, will attempt to load as a host ID
      * str, will attempt to load as a host name
      * dict, will presume already a host info
+
+    :param session: active koji session
 
     :param host: value to lookup
 
@@ -808,7 +863,9 @@ def as_hostinfo(session, host):
     return info
 
 
-def as_archiveinfo(session, archive):
+def as_archiveinfo(
+        session: ClientSession,
+        archive: ArchiveSpec) -> ArchiveInfo:
     """
     Coerces an archive value into an archive info dict.
 
@@ -817,6 +874,8 @@ def as_archiveinfo(session, archive):
      * str, will attempt to load as the first-found archive matching
        the given filename
      * dict, will presume already an archive info
+
+    :param session: active koji session
 
     :param archive: value to lookup
 
@@ -843,7 +902,9 @@ def as_archiveinfo(session, archive):
     return info
 
 
-def as_rpminfo(session, rpm):
+def as_rpminfo(
+        session: ClientSession,
+        rpm: RPMSpec) -> RPMInfo:
     """
     Coerces a host value into a RPM info dict.
 
@@ -851,6 +912,8 @@ def as_rpminfo(session, rpm):
      * int, will attempt to load as a RPM ID
      * str, will attempt to load as a RPM NVRA
      * dict, will presume already an RPM info
+
+    :param session: active koji session
 
     :param rpm: value to lookup
 
@@ -871,13 +934,17 @@ def as_rpminfo(session, rpm):
     return info
 
 
-def as_userinfo(session, user):
+def as_userinfo(
+        session: ClientSession,
+        user: UserSpec) -> UserInfo:
     """
     Resolves user to a userinfo dict.
 
     If user is a str or int, then getUser will be invoked. If user is
     already a dict, it's presumed to be a userinfo already and it's
     returned unaltered.
+
+    :param session: active koji session
 
     :param user: Name, ID, or User Info describing a koji user
 
@@ -928,7 +995,8 @@ def _int(val):
     return val
 
 
-def hub_version(session):
+def hub_version(
+        session: ClientSession) -> Tuple[int]:
     """
     Wrapper for ``session.getKojiVersion`` which caches the results on
     the session and splits the value into a tuple of ints for easy
@@ -937,6 +1005,8 @@ def hub_version(session):
     If the getKojiVersion method isn't implemented on the hub, we
     presume that we're version 1.22 ``(1, 22)`` which is the last
     version before the getKojiVersion API was added.
+
+    :param session: active koji session
     """
 
     # we need to use this instead of getattr as koji sessions will
@@ -962,7 +1032,9 @@ def hub_version(session):
     return hub_ver
 
 
-def version_check(session, minimum=(1, 23)):
+def version_check(
+        session: ClientSession,
+        minimum: Tuple[int] = (1, 23)) -> bool:
     """
     Verifies that the requested minimum version is met compared
     against session.getKojiVersion.
@@ -975,6 +1047,8 @@ def version_check(session, minimum=(1, 23)):
     Version is specified as a tuple of integers, eg. 1.23 is ``(1,
     23)``
 
+    :param session: active koji session
+
     :param minimum: Minimum version required. Default, ``(1, 23)``
     """
 
@@ -986,7 +1060,10 @@ def version_check(session, minimum=(1, 23)):
     return bool(hub_ver and hub_ver >= minimum)
 
 
-def version_require(session, minimum=(1, 23), message=None):
+def version_require(
+        session: ClientSession,
+        minimum: Tuple[int] = (1, 23),
+        message: Optional[str] = None) -> bool:
     """
     Verifies that the requested minimum version is met compared
     against ``session.getKojiVersion()``
@@ -1002,6 +1079,8 @@ def version_require(session, minimum=(1, 23), message=None):
     If the version requirement is not met, a `FeatureUnavailable`
     exception is raised, with the given message. If message is not
     provided, a simple one is constructed based on the minimum value.
+
+    :param session: active koji session
 
     :param minimum: Minimum version required. Default, ``(1, 23)``
 
@@ -1021,9 +1100,6 @@ def version_require(session, minimum=(1, 23), message=None):
         message = "requires >= %s" % minimum
 
     raise FeatureUnavailable(message)
-
-
-merge_annotations()
 
 
 #
