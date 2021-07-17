@@ -21,10 +21,12 @@ Functions for working with Koji hosts
 :license: GPL v3
 """
 
+from koji import ClientSession
+from typing import Iterable, Optional
 
 from . import NoSuchChannel, iter_bulk_load
 from .common import globfilter, parse_datetime
-from ._magic import merge_annotations
+from .types import DecoratedHostInfos
 
 
 __all__ = (
@@ -32,12 +34,18 @@ __all__ = (
 )
 
 
-def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
+def gather_hosts_checkins(
+        session: ClientSession,
+        arches: Optional[Iterable[str]] = None,
+        channel: Optional[str] = None,
+        skiplist: Optional[Iterable[str]] = None) -> DecoratedHostInfos:
     """
     Similar to session.listHosts, but results are decorated with a new
     "last_update" entry, which is the timestamp for the host's most
     recent check-in with the hub. This can be used to identify
     builders which are enabled, but no longer responding.
+
+    :param session: an active koji client session
 
     :param arches: List of architecture names to filter builders by.
         Default, all arches
@@ -79,9 +87,6 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
         bldrs[bldr_id]["last_update"] = data
 
     return list(bldrs.values())
-
-
-merge_annotations()
 
 
 #
