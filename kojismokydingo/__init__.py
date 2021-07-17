@@ -35,6 +35,7 @@ from .types import (
     ArchiveInfo, ArchiveInfos, ArchiveSpec,
     BuildInfo, BuildSpec,
     HostInfo, HostSpec,
+    HubVersionSpec,
     RPMInfo, RPMInfos, RPMSpec,
     TagInfo, TagSpec,
     TargetInfo, TargetSpec,
@@ -1034,7 +1035,7 @@ def hub_version(
 
 def version_check(
         session: ClientSession,
-        minimum: Tuple[int] = (1, 23)) -> bool:
+        minimum: HubVersionSpec = (1, 23)) -> bool:
     """
     Verifies that the requested minimum version is met compared
     against session.getKojiVersion.
@@ -1062,7 +1063,7 @@ def version_check(
 
 def version_require(
         session: ClientSession,
-        minimum: Tuple[int] = (1, 23),
+        minimum: HubVersionSpec = (1, 23),
         message: Optional[str] = None) -> bool:
     """
     Verifies that the requested minimum version is met compared

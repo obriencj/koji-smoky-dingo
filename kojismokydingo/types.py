@@ -28,7 +28,7 @@ from enum import IntEnum
 from koji import (
     BUILD_STATES, CHECKSUM_TYPES, USERTYPES, USER_STATUS,
     PathInfo, )
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 
 try:
@@ -54,6 +54,7 @@ __all__ = (
     "DecoratedTagExtra",
     "DecoratedTagExtras",
     "HostInfo",
+    "HubVersionSpec",
     "MavenArchiveInfo",
     "PathSpec",
     "PermInfo",
@@ -641,6 +642,15 @@ class TaskInfo(TypedDict):
 TaskSpec = Union[int, TaskInfo]
 """
 task ID or TaskInfo dict
+"""
+
+
+HubVersionSpec = Union[str, Tuple[int, ...]]
+"""
+a koji version requirement, specified as either a string or tuple of ints
+
+  * ``"1.25"``
+  * ``(1, 25)``
 """
 
 
