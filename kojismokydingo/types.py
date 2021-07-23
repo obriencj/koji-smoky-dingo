@@ -573,8 +573,17 @@ class NamedCGInfo(CGInfo):
     """ friendly name for this content generator """
 
 
+class PermUser(TypedDict):
+    user_name: str
+    permission_name: str
+    create_ts: Union[int, float]
+    create_date: datetime
+
+
 class PermInfo(TypedDict):
-    pass
+    id: int
+    name: str
+    users: List[PermUser]
 
 
 PermSpec = Union[int, str]

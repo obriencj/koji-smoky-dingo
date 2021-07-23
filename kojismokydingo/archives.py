@@ -23,10 +23,13 @@ representing RPMs and build archives
 
 from koji import ClientSession, PathInfo
 from os.path import join
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
-from ._magic import merge_annotations
+from .types import (
+    ArchiveInfos, BuildInfo, DecoratedArchiveInfos, DecoratedRPMInfos,
+    ImageArchiveInfos, MavenArchiveInfos, PathSpec, SignedRPMInfo,
+    WindowsArchiveInfos, )
 
 
 __all__ = (
@@ -49,7 +52,8 @@ __all__ = (
 )
 
 
-def as_pathinfo(path):
+def as_pathinfo(
+        path: PathSpec) -> PathInfo:
     """
     Converts path into a PathInfo if it is not one already
 
@@ -62,7 +66,11 @@ def as_pathinfo(path):
         return PathInfo(path or "")
 
 
-def filter_archives(session, archives, archive_types=(), arches=()):
+def filter_archives(
+        session: ClientSession,
+        archives: ArchiveInfos,
+        archive_types: Iterable[str] = (),
+        arches: Iterable[str] = ()) -> ArchiveInfos:
     """
     Given a list of archives (or RPMs dressed up like archives),
     return a new list of those archives which are of the given archive
@@ -103,7 +111,10 @@ def filter_archives(session, archives, archive_types=(), arches=()):
     return filter(filter_fn, archives)
 
 
-def gather_signed_rpms(session, archives, sigkeys):
+def gather_signed_rpms(
+        session: ClientSession,
+        archives: ArchiveInfos,
+        sigkeys: Iterable[str]) -> DecoratedRPMInfos:
     """
     Given a list of RPM archive dicts, query the session for all the
     pertinent signature headers, then try and find the best matching
@@ -139,7 +150,11 @@ def gather_signed_rpms(session, archives, sigkeys):
     return results
 
 
-def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
+def gather_build_rpms(
+        session: ClientSession,
+        binfo: BuildInfo,
+        rpmkeys: Iterable[str] = (),
+        path: Optional[PathSpec] = None) -> DecoratedRPMInfos:
     """
     Gathers a list of rpm dicts matching the given signature keys from
     the specified build, and augments them with a filepath
@@ -177,7 +192,10 @@ def gather_build_rpms(session, binfo, rpmkeys=(), path=None):
     return found
 
 
-def gather_build_maven_archives(session, binfo, path=None):
+def gather_build_maven_archives(
+        session: ClientSession,
+        binfo: BuildInfo,
+        path: Optional[PathSpec] = None) -> MavenArchiveInfos:
     """
     Gathers a list of maven archives for a given build_info. The
     archive records are augmented with an additional "filepath" entry,
@@ -185,13 +203,7 @@ def gather_build_maven_archives(session, binfo, path=None):
 
     :param binfo: Build info to fetch archives for
 
-    :type binfo: dict
-
     :param path: The root dir for the archive file paths, default None
-
-    :type path: str, optional
-
-    :rtype: list[dict]
     """
 
     binfo = as_buildinfo(session, binfo)
@@ -206,19 +218,18 @@ def gather_build_maven_archives(session, binfo, path=None):
     return found
 
 
-def gather_build_win_archives(session, binfo, path=None):
+def gather_build_win_archives(
+        session: ClientSession,
+        binfo: BuildInfo,
+        path: Optional[PathSpec] = None) -> WindowsArchiveInfos:
     """
     Gathers a list of Windows archives for a given build_info. The
     archive records are augmented with an additional "filepath" entry,
     the value of which is an expanded path to the file itself.
 
     :param binfo: Build info to fetch archives for
-    :type binfo: dict
 
     :param path: The root dir for the archive file paths, default None
-    :type path: str, optional
-
-    :rtype: list[dict]
     """
 
     binfo = as_buildinfo(session, binfo)
@@ -233,7 +244,10 @@ def gather_build_win_archives(session, binfo, path=None):
     return found
 
 
-def gather_build_image_archives(session, binfo, path=None):
+def gather_build_image_archives(
+        session: ClientSession,
+        binfo: BuildInfo,
+        path: Optional[PathSpec] = None) -> ImageArchiveInfos:
     """
     Gathers a list of image archives for a given build_info. The
     archive records are augmented with an additional "filepath" entry,
@@ -241,13 +255,7 @@ def gather_build_image_archives(session, binfo, path=None):
 
     :param binfo: Build info to fetch archives for
 
-    :type binfo: dict
-
     :param path: The root dir for the archive file paths, default None
-
-    :type path: str, optional
-
-    :rtype: list[dict]
     """
 
     binfo = as_buildinfo(session, binfo)
@@ -262,9 +270,12 @@ def gather_build_image_archives(session, binfo, path=None):
     return found
 
 
-def gather_build_archives(session, binfo, btype=None,
-                          rpmkeys=(), path=None):
-
+def gather_build_archives(
+        session: ClientSession,
+        binfo: BuildInfo,
+        btype: Optional[str] = None,
+        rpmkeys: Iterable[str] = (),
+        path: Optional[PathSpec] = None) -> DecoratedArchiveInfos:
     """
     Produce a list of archive dicts associated with a build info,
     optionally filtered by build-type and signing keys (for RPMs). The
@@ -279,23 +290,13 @@ def gather_build_archives(session, binfo, btype=None,
 
     :param binfo: Build info to fetch archives for
 
-    :type binfo: dict
-
     :param btype: BType to filter for. Default None for all types.
-
-    :type btype: str, optional
 
     :param rpmkeys: RPM signatures to filter for, in order of
         preference. An empty string matches the unsigned copy. Default
         () for no signature filtering.
 
-    :type rpmkeys: list[str], optional
-
     :param path: The root dir for the archive file paths, default None
-
-    :type path: str, optional
-
-    :rtype: list[dict]
     """
 
     binfo = as_buildinfo(session, binfo)
@@ -353,8 +354,12 @@ def gather_build_archives(session, binfo, btype=None,
     return found
 
 
-def gather_latest_rpms(session, tagname, rpmkeys=(),
-                       inherit=True, path=None):
+def gather_latest_rpms(
+        session: ClientSession,
+        tagname: str,
+        rpmkeys: Iterable[str] = (),
+        inherit: bool = True,
+        path: Optional[PathSpec] = None) -> DecoratedArchiveInfos:
     """
     Similar to session.getLatestRPMS(tagname) but will filter by
     available signatures, and augments the results to include a new
@@ -429,8 +434,11 @@ def _fake_maven_build(archive, path=None, btype="maven", cache={}):
     return bld
 
 
-def gather_latest_maven_archives(session, tagname,
-                                 inherit=True, path=None):
+def gather_latest_maven_archives(
+        session: ClientSession,
+        tagname: str,
+        inherit: bool = True,
+        path: Optional[PathSpec] = None) -> MavenArchiveInfos:
     """
     Similar to session.getLatestMavenArchives(tagname) but augments
     the results to include a new "filepath" entry which will point to
@@ -456,8 +464,11 @@ def gather_latest_maven_archives(session, tagname,
     return found
 
 
-def gather_latest_win_archives(session, tagname,
-                               inherit=True, path=None):
+def gather_latest_win_archives(
+        session: ClientSession,
+        tagname: str,
+        inherit: bool = True,
+        path: Optional[PathSpec] = None) -> WindowsArchiveInfos:
     """
     Similar to session.listTaggedArchives(tagname, type="win") but
     augments the results to include a new "filepath" entry which will
@@ -495,8 +506,11 @@ def gather_latest_win_archives(session, tagname,
     return found
 
 
-def gather_latest_image_archives(session, tagname,
-                                 inherit=True, path=None):
+def gather_latest_image_archives(
+        session: ClientSession,
+        tagname: str,
+        inherit: bool = True,
+        path: Optional[PathSpec] = None) -> ImageArchiveInfos:
     """
     :param inherit: Follow tag inheritance, default True
     """
@@ -523,9 +537,13 @@ def gather_latest_image_archives(session, tagname,
     return found
 
 
-def gather_latest_archives(session, tagname, btype=None,
-                           rpmkeys=(), inherit=True, path=None):
-
+def gather_latest_archives(
+        session: ClientSession,
+        tagname: str,
+        btype: Optional[str] = None,
+        rpmkeys: Iterable[str] = (),
+        inherit: bool = True,
+        path: Optional[PathSpec] = None) -> ArchiveInfos:
     """
     Gather the latest archives from a tag heirarchy. Rules for what
     constitutes "latest" may change slightly depending on the archive
@@ -626,9 +644,6 @@ def gather_latest_archives(session, tagname, btype=None,
             found.extend(archives)
 
     return found
-
-
-merge_annotations()
 
 
 #
