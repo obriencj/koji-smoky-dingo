@@ -23,7 +23,7 @@ Koji Smoki Dingo - users and permissions
 from koji import ClientSession, ParameterError
 from operator import itemgetter
 from time import asctime, localtime
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
 from .types import (
@@ -57,7 +57,7 @@ def collect_userinfo(
     :raises NoSuchUser:
     """
 
-    userinfo = as_userinfo(session, user)
+    userinfo = cast(DecoratedUserInfo, as_userinfo(session, user))
 
     # depending on koji version, getUser resulted in either a
     # krb_principal or krb_principals entry (or neither if it's not
@@ -66,7 +66,7 @@ def collect_userinfo(
     # https://pagure.io/koji/issue/1629
 
     if "krb_principal" in userinfo:
-        krb = userinfo.pop("krb_principal")
+        krb = userinfo["krb_principal"]
         userinfo["krb_principals"] = [krb] if krb else []
 
     uid = userinfo["id"]
@@ -79,7 +79,7 @@ def collect_userinfo(
             userinfo["members"] = session.getGroupMembers(uid)
         except Exception:
             # non-admin accounts cannot query group membership, so omit
-            userinfo["members"] = None
+            userinfo["members"] = None  # type: ignore
 
     return userinfo
 

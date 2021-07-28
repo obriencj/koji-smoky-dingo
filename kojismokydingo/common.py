@@ -158,7 +158,7 @@ def fnmatches(
 
 def update_extend(
         dict_orig: Dict[Any, list],
-        *dict_additions: Dict[Any, list]) -> Dict[Any, list]:
+        *dict_additions: Dict[Any, Iterable]) -> Dict[Any, list]:
     """
     Extend the list values of the original dict with the list values of
     the additions dict.
@@ -192,7 +192,7 @@ def update_extend(
 
 
 def merge_extend(
-        *dict_additions: Dict[Any, list]) -> Dict[Any, list]:
+        *dict_additions: Dict[Any, Iterable]) -> Dict[Any, list]:
     """
     Similar to `update_extend` but creates a new dict to hold results,
     and new initial lists to be extended, leaving all the arguments

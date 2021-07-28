@@ -28,7 +28,7 @@ from typing import Iterable, Optional, Union
 from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
 from .types import (
     ArchiveInfos, BuildInfo, DecoratedArchiveInfos, DecoratedRPMInfos,
-    ImageArchiveInfos, MavenArchiveInfos, PathSpec, SignedRPMInfo,
+    ImageArchiveInfos, MavenArchiveInfos, PathSpec,
     WindowsArchiveInfos, )
 
 

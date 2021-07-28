@@ -36,7 +36,7 @@ from .types import (
     BuildInfo, BuildSpec,
     HostInfo, HostSpec,
     HubVersionSpec,
-    RPMInfo, RPMInfos, RPMSpec,
+    RPMInfo, RPMInfos, RPMSignature, RPMSpec,
     TagInfo, TagSpec,
     TargetInfo, TargetSpec,
     TaskInfo, TaskSpec,
@@ -477,7 +477,7 @@ def bulk_load_rpm_sigs(
         session: ClientSession,
         rpm_ids: Iterable[int],
         size: int = 100,
-        results: Optional[dict] = None) -> Dict[int, List[str]]:
+        results: Optional[dict] = None) -> Dict[int, List[RPMSignature]]:
     """
     Set up a chunking multicall to fetch the signatures for a list of
     RPM via `session.queryRPMSigs` for each ID in rpm_ids.
@@ -501,7 +501,7 @@ def bulk_load_buildroot_archives(
         buildroot_ids: Iterable[int],
         btype: Optional[str] = None,
         size: int = 100,
-        results: Optional[dict] = None) -> Dict[int, ArchiveInfos]:
+        results: Optional[dict] = None) -> Dict[int, List[ArchiveInfo]]:
     """
     Set up a chunking multicall to fetch the archives of buildroots
     via `session.listArchives` for each buildroot ID in buildrood_ids.
@@ -524,7 +524,7 @@ def bulk_load_buildroot_rpms(
         session: ClientSession,
         buildroot_ids: Iterable[int],
         size: int = 100,
-        results: Optional[dict] = None) -> Dict[int, RPMInfos]:
+        results: Optional[dict] = None) -> Dict[int, List[RPMInfo]]:
     """
     Set up a chunking multicall to fetch the RPMs of buildroots via
     `session.listRPMs` for each buildroot ID in buildrood_ids.
@@ -548,7 +548,7 @@ def bulk_load_build_archives(
         build_ids: Iterable[int],
         btype: Optional[str] = None,
         size: int = 100,
-        results: Optional[dict] = None) -> Dict[int, ArchiveInfos]:
+        results: Optional[dict] = None) -> Dict[int, List[ArchiveInfo]]:
     """
     Set up a chunking multicall to fetch the archives of builds
     via `session.listArchives` for each build ID in build_ids.
@@ -571,7 +571,7 @@ def bulk_load_build_rpms(
         session: ClientSession,
         build_ids: Iterable[int],
         size: int = 100,
-        results: Optional[dict] = None) -> Dict[int, RPMInfos]:
+        results: Optional[dict] = None) -> Dict[int, List[RPMInfo]]:
     """
     Set up a chunking multicall to fetch the RPMs of builds via
     `session.listRPMS` for each build ID in build_ids.

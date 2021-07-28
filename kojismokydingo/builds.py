@@ -27,7 +27,7 @@ from koji import ClientSession
 from operator import itemgetter
 from typing import (
     Any, Callable, Dict, Generator, Iterable, Iterator,
-    List, Optional, Set, Tuple, Union, )
+    List, Optional, Set, Tuple, Union, cast, )
 
 
 from . import (
@@ -41,7 +41,7 @@ from .common import (
     chunkseq, merge_extend, unique, update_extend, )
 from .rpm import evr_compare
 from .types import (
-    BuildInfo, BuildInfos, BuildState,
+    BuildInfo, BuildInfos, BuildState, DecoratedBuildInfo,
     DecoratedBuildInfos, MavenBuildInfo, TagSpec, )
 
 
@@ -748,7 +748,7 @@ def decorate_builds_maven(
     data.
     """
 
-    build_infos = tuple(build_infos)
+    build_infos = cast(DecoratedBuildInfos, tuple(build_infos))
 
     wanted = tuple(bld for bld in build_infos if
                    ("maven_group_id" not in bld))
@@ -785,7 +785,7 @@ def decorate_builds_btypes(
       True
     """
 
-    build_infos = tuple(build_infos)
+    build_infos = cast(DecoratedBuildInfos, tuple(build_infos))
 
     wanted = {bld["id"]: bld for bld in build_infos if
               "archive_btype_names" not in bld}
@@ -817,7 +817,7 @@ def decorate_builds_btypes(
                 if "build_id" in data:
                     del data["build_id"]
                 for key, val in data.items():
-                    bld["_".join((btn, key))] = val
+                    bld["_".join((btn, key))] = val  # type: ignore
 
     return build_infos
 
@@ -854,7 +854,7 @@ def decorate_builds_cg_list(
     # possible while farming all the data, and we also make it so that
     # we do not re-decorate builds which have already been decorated.
 
-    build_infos = tuple(build_infos)
+    build_infos = cast(DecoratedBuildInfos, tuple(build_infos))
 
     wanted = {bld["id"]: bld for bld in build_infos if
               "archive_cg_names" not in bld}
@@ -888,10 +888,10 @@ def decorate_builds_cg_list(
     buildroots = bulk_load_buildroots(session, root_ids)
 
     for build_id, archive_list in archives.items():
-        bld = wanted[build_id]
+        bld = cast(DecoratedBuildInfo, wanted[build_id])
 
-        cg_ids = []
-        cg_names = []
+        cg_ids: List[int] = []
+        cg_names: List[str] = []
 
         for archive in archive_list:
             broot_id = archive["buildroot_id"]
@@ -1066,8 +1066,8 @@ def filter_imported_builds(
 
         # either get the decorated archive cg names, or start a fresh
         # one based on the possible cg_name associated with this build
-        build_cgs = set(build.get("archive_cg_names", ()))
-        cg_name = build.get("cg_name")
+        build_cgs = set(build.get("archive_cg_names", ()))  # type: ignore
+        cg_name: str = build.get("cg_name")
         if cg_name:
             build_cgs.add(cg_name)
 
@@ -1126,11 +1126,11 @@ def gather_buildroots(
     # multicall to fetch all the buildroots
     buildroots = bulk_load_buildroots(session, root_ids)
 
-    results = {}
+    results: Dict[int, List[dict]] = {}
 
     for build_id, archive_list in archives.items():
-        broots = (a["buildroot_id"] for a in archive_list)
-        broots = unique(filter(None, broots))
+        broots = unique(a["buildroot_id"] for a in archive_list
+                        if a["buildroot_id"])
         results[build_id] = [buildroots[b] for b in broots]
 
     return results
@@ -1158,7 +1158,7 @@ def gather_rpm_sigkeys(
     rpmids = (rpm["id"] for rpm in chain(*loaded.values()))
     rpm_sigs = bulk_load_rpm_sigs(session, rpmids)
 
-    results = {}
+    results: Dict[int, Set[str]] = {}
 
     sigs: Set[str]
 
@@ -1167,8 +1167,7 @@ def gather_rpm_sigkeys(
     for bid, rpms in loaded.items():
         sigs = results[bid] = set()
         for rpm in rpms:
-            rsigs = (sig["sigkey"] for sig in rpm_sigs[rpm["id"]])
-            sigs.update(rsigs)
+            sigs.update((sig["sigkey"] for sig in rpm_sigs[rpm["id"]]))
 
     return results
 

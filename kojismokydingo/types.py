@@ -29,8 +29,7 @@ from koji import (
     BUILD_STATES, CHECKSUM_TYPES, USERTYPES, USER_STATUS,
     PathInfo, )
 from typing import (
-    Any, Callable, Dict, Iterable, List,
-    Optional, Tuple, Union, )
+    Any, Callable, Dict, Iterable, List, Tuple, Union, )
 
 
 try:
@@ -64,8 +63,8 @@ __all__ = (
     "PermSpec",
     "RPMInfo",
     "RPMInfos",
+    "RPMSignature",
     "RPMSpec",
-    "SignedRPMInfo",
     "TagInfo",
     "TagInfos",
     "TagInheritance",
@@ -116,7 +115,7 @@ class ArchiveInfo(TypedDict):
     checksum_type: ChecksumType
     """ type of cryptographic checksum used in the `checksum` field """
 
-    extra: Optional[dict]
+    extra: dict
     """ additional metadata provided by content generators """
 
     filename: str
@@ -196,11 +195,11 @@ class BuildInfo(TypedDict):
     build_id: int
     """ The internal ID for the build record """
 
-    cg_id: Optional[int]
+    cg_id: int
     """ The ID of the content generator which has reserved or produced
     this build """
 
-    cg_name: Optional[str]
+    cg_name: str
     """ The name of the content generator which has reserved or produced
     this build """
 
@@ -221,12 +220,12 @@ class BuildInfo(TypedDict):
     creation_ts: Union[int, float]
     """ UTC timestamp indicating when this build record was created """
 
-    epoch: Optional[str]
+    epoch: str
     """ epoch of this build, or None if unspecified. This field is
     typically only used for RPM builds which have specified an epoch
     in their spec. """
 
-    extra: Optional[dict]
+    extra: dict
     """ flexible additional information for this build, used by content
     generators """
 
@@ -255,14 +254,14 @@ class BuildInfo(TypedDict):
     name field. """
 
     release: str
-    source: Optional[str]
-    start_time: Optional[str]
-    start_ts: Optional[Union[int, float]]
+    source: str
+    start_time: str
+    start_ts: Union[int, float]
 
     state: int
     """ state of the build, see `BuildState` """
 
-    task_id: Optional[int]
+    task_id: int
 
     version: str
     """ version portion of the NVR for the build """
@@ -277,11 +276,23 @@ class BuildInfo(TypedDict):
 
 
 class MavenBuildInfo(BuildInfo):
-    pass
+    maven_group_id: str
+    maven_artifact_id: str
+    maven_version: str
 
 
 class DecoratedBuildInfo(BuildInfo):
-    pass
+    archive_btype_names: List[str]
+    archive_btype_ids: List[int]
+
+    archive_cg_names: List[str]
+    archive_cg_ids: List[int]
+
+    maven_group_id: str
+    maven_artifact_id: str
+    maven_version: str
+
+    platform: str
 
 
 BuildInfos = Iterable[BuildInfo]
@@ -354,7 +365,7 @@ class RPMInfo(TypedDict):
     buildtime: int
     """ UTC timestamp of the time that this RPM was produced """
 
-    epoch: Optional[str]
+    epoch: str
     """ The RPM's epoch field, or None if not defined """
 
     external_repo_id: int
@@ -366,7 +377,7 @@ class RPMInfo(TypedDict):
     """ name identifying the repo that this RPM came from, or 'INTERNAL'
     if built in this koji instance """
 
-    extra: Optional[dict]
+    extra: dict
     """ Optional extra data """
 
     id: int
@@ -403,8 +414,12 @@ Ways to indicate an RPM to `as_rpminfo`
 """
 
 
-class SignedRPMInfo(RPMInfo):
-    pass
+class RPMSignature(TypedDict):
+    rpm_id: int
+
+    sigkey: str
+
+    sighash: str
 
 
 class DecoratedRPMInfo(RPMInfo):
@@ -440,10 +455,10 @@ class HostInfo(TypedDict):
     capacity: float
     """ maximum capacity for tasks """
 
-    comment: Optional[str]
+    comment: str
     """ text describing the current status or usage """
 
-    description: Optional[str]
+    description: str
     """ text describing this host """
 
     enabled: bool
@@ -476,7 +491,7 @@ HostSpec = Union[int, str, HostInfo]
 
 
 class DecoratedHostInfo(HostInfo):
-    last_update: Optional[datetime]
+    last_update: datetime
     """ The last time that a host checked in with an update """
 
 
@@ -523,11 +538,11 @@ class UserInfo(TypedDict):
     id: int
     """ internal identifer """
 
-    krb_principal: Optional[str]
+    krb_principal: str
     """ kerberos principal associated with the user. Only used in koji
     before 1.19 """
 
-    krb_principals: Optional[List[str]]
+    krb_principals: List[str]
     """ list of kerberos principals associated with the user. Used in koji
     from 1.19 onwards. """
 
@@ -598,7 +613,7 @@ class DecoratedUserInfo(UserInfo):
 
     content_generators: List[NamedCGInfo]
 
-    members: Optional[List[str]]
+    members: List[str]
 
 
 class TargetInfo(TypedDict):
