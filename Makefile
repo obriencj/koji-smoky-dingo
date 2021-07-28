@@ -1,14 +1,14 @@
 # Sorry that this Makefile is a bit of a disaster.
 
 
-PROJECT := kojismokydingo
-VERSION := $(shell tools/version.sh)
-ARCHIVE := $(PROJECT)-$(VERSION).tar.gz
-
-
-PYTHON ?= $(shell which python3 python 2>/dev/null \
-	        | head -n1)
+PYTHON ?= $(shell which python3 python 2>/dev/null | head -n1)
 PYTHON := $(PYTHON)
+
+
+PROJECT := $(shell $(PYTHON) ./setup.py --name)
+VERSION := $(shell $(PYTHON) ./setup.py --version)
+
+ARCHIVE := $(PROJECT)-$(VERSION).tar.gz
 
 
 # We use this later in setting up the gh-pages submodule for pushing,
