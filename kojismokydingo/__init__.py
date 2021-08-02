@@ -41,6 +41,7 @@ __all__ = (
     "NoSuchChannel",
     "NoSuchContentGenerator",
     "NoSuchPermission",
+    "NoSuchRepo",
     "NoSuchRPM",
     "NoSuchTag",
     "NoSuchTarget",
@@ -52,6 +53,7 @@ __all__ = (
     "as_archiveinfo",
     "as_buildinfo",
     "as_hostinfo",
+    "as_repoinfo",
     "as_rpminfo",
     "as_taginfo",
     "as_targetinfo",
@@ -221,6 +223,14 @@ class NoSuchArchive(BadDingo):
     """
 
     complaint = "No such archive"
+
+
+class NoSuchRepo(BadDingo):
+    """
+    A repository was not found
+    """
+
+    complaint = "No such repo"
 
 
 class NoSuchRPM(BadDingo):
@@ -878,6 +888,41 @@ def as_archiveinfo(session, archive):
 
     if not info:
         raise NoSuchArchive(archive)
+
+    return info
+
+
+def as_repoinfo(session, repo):
+    """
+    Coerces a repo value into a Repo info dict.
+
+    If repo is an:
+     * dict with name, will attempt to load the current repo from a
+       tag by that name
+     * str, will attempt to load the current repo from a tag by name
+     * int, will attempt to load the repo by ID
+     * dict, will presume already a repo info
+    """
+
+    info = None
+
+    if isinstance(repo, dict):
+        if "name" in repo:
+            repo = repo["name"]
+        else:
+            info = repo
+
+    if isinstance(repo, str):
+        repotag = session.getRepo(repo)
+        if repotag is None:
+            raise NoSuchRepo(repo)
+        repo = repotag["id"]
+
+    if isinstance(repo, int):
+        info = session.repoInfo(repo)
+
+    if not info:
+        raise NoSuchRepo(repo)
 
     return info
 

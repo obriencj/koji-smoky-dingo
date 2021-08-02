@@ -28,7 +28,7 @@ from os import system
 from . import AnonSmokyDingo, BadDingo, int_or_str, pretty_json
 from .. import (
     as_archiveinfo, as_buildinfo, as_hostinfo, as_rpminfo,
-    as_taginfo, as_targetinfo, as_taskinfo, as_userinfo, )
+    as_repoinfo, as_taginfo, as_targetinfo, as_taskinfo, as_userinfo, )
 from ..clients import rebuild_client_config
 from ..common import load_plugin_config
 
@@ -114,10 +114,49 @@ class ClientConfig(AnonSmokyDingo):
                                  json=options.json)
 
 
+def get_build_dir(session, goptions, buildid):
+    topurl = goptions.topurl
+    if not topurl:
+        raise BadDingo("Client has no topurl configured")
+    topurl = topurl.rstrip("/")
+
+    build = as_buildinfo(session, buildid)
+    name = build["name"]
+    version = build["version"]
+    release = build["release"]
+
+    return f"{topurl}/packages/{name}/{version}/{release}"
+
+
+def get_tag_repo_dir(session, goptions, tagid):
+    topurl = goptions.topurl
+    if not topurl:
+        raise BadDingo("Client has no topurl configured")
+    topurl = topurl.rstrip("/")
+
+    tag = as_taginfo(session, tagid)
+    repo = as_repoinfo(session, tag)
+
+    return f"{topurl}/repos/{tag['name']}/{repo['id']}"
+
+
+def get_tag_latest_dir(session, goptions, tagid):
+    topurl = goptions.topurl
+    if not topurl:
+        raise BadDingo("Client has no topurl configured")
+    topurl = topurl.rstrip("/")
+
+    tag = as_taginfo(session, tagid)
+    as_repoinfo(session, tag)
+
+    return f"{topurl}/repos/{tag['name']}/latest"
+
+
 OPEN_LOADFN = {
     "archive": as_archiveinfo,
     "build": as_buildinfo,
     "host": as_hostinfo,
+    "repo": as_repoinfo,
     "rpm": as_rpminfo,
     "tag": as_taginfo,
     "target": as_targetinfo,
@@ -126,22 +165,58 @@ OPEN_LOADFN = {
 }
 
 
-OPEN_CMD = {
-    "darwin": "open",
-    "linux": "xdg-open",
-    "win32": "start",
-}
+def get_type_url(session, goptions, datatype, fmt, element):
+
+    weburl = goptions.weburl
+    if not weburl:
+        raise BadDingo("Client has no weburl configured")
+    weburl = weburl.rstrip("/")
+
+    loadfn = OPEN_LOADFN.get(datatype)
+    if loadfn is None:
+        raise BadDingo("Unsupported type for open %s" % datatype)
+
+    loaded = loadfn(session, element)
+    typeurl = fmt.format(**loaded)
+
+    return f'{weburl}/{typeurl}'
 
 
 OPEN_URL = {
     "archive": "archiveinfo?archiveID={id}",
     "build": "buildinfo?buildID={id}",
     "host": "hostinfo?hostID={id}",
+    "repo": "repoinfo?repoID={id}",
     "rpm": "rpminfo?rpmID={id}",
     "tag": "taginfo?tagID={id}",
     "target": "buildtargetinfo?targetID={id}",
     "task": "taskinfo?taskID={id}",
     "user": "userinfo?userID={id}",
+
+    "build-dir": get_build_dir,
+    "tag-repo-dir": get_tag_repo_dir,
+    "tag-latest-dir": get_tag_latest_dir,
+}
+
+
+def get_open_url(session, goptions, datatype, element):
+
+    opener = OPEN_URL.get(datatype)
+    if opener is None:
+        raise BadDingo(f"Unsupported type for open {datatype}")
+
+    if callable(opener):
+        url = opener(session, goptions, element)
+    else:
+        url = get_type_url(session, goptions, datatype, opener, element)
+
+    return url
+
+
+OPEN_CMD = {
+    "darwin": "open",
+    "linux": "xdg-open",
+    "win32": "start",
 }
 
 
@@ -182,26 +257,17 @@ def cli_open(session, goptions, datatype, element,
 
     datatype = datatype.lower()
 
-    loadfn = OPEN_LOADFN.get(datatype)
-    if loadfn is None:
-        raise BadDingo("Unsupported type for open %s" % datatype)
-
     if command is None:
         command = get_open_command(goptions.profile)
 
-    weburl = goptions.weburl
-    if not weburl:
-        raise BadDingo("Client has no weburl configured")
+    url = get_open_url(session, goptions, datatype, element)
 
-    loaded = loadfn(session, element)
-
-    weburl = weburl.rstrip("/")
-    typeurl = OPEN_URL.get(datatype).format(**loaded)
-
+    # if the configured open command has a {url} marker in it, then we
+    # want to swap that in. Otherwise we'll just append it quoted
     if "{url}" in command:
-        cmd = command.format(url="/".join((weburl, typeurl)))
+        cmd = command.format(url=url)
     else:
-        cmd = "".join((command, ' "', weburl, "/", typeurl, '"'))
+        cmd = f'{command} "{url}"'
 
     system(cmd)
 
