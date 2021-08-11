@@ -5,19 +5,22 @@ koji open
 
 ::
 
- usage: koji open [-h] [--command COMMAND] TYPE KEY
+ usage: koji open [-h] [--command COMMAND | --print] TYPE KEY
 
  Launch web UI for koji data elements
 
  positional arguments:
-   TYPE                  The koji data element type. build, tag, target, user,
-                         host, rpm, archive, task
+   TYPE                  The koji data element type. Supported types: archive,
+                         build, build-dir, host, repo, rpm, tag, tag-latest-
+                         dir, tag-repo-dir, target, task, user
    KEY                   The key for the given element type.
 
  optional arguments:
    -h, --help            show this help message and exit
    --command COMMAND, -c COMMAND
                          Command to exec with the discovered koji web URL
+   --print, -p           Print URL to stdout rather than executing a command
+
 
 Launch local web browser to the informational page for a given koji data
 element.
