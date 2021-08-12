@@ -22,9 +22,6 @@ Some simple functions for working with the local client configuration
 """
 
 
-import sys
-
-
 __all__ = (
     "rebuild_client_config",
 )
