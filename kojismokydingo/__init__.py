@@ -40,6 +40,7 @@ __all__ = (
     "NoSuchBuild",
     "NoSuchChannel",
     "NoSuchContentGenerator",
+    "NoSuchPackage",
     "NoSuchPermission",
     "NoSuchRepo",
     "NoSuchRPM",
@@ -52,7 +53,9 @@ __all__ = (
 
     "as_archiveinfo",
     "as_buildinfo",
+    "as_channelinfo",
     "as_hostinfo",
+    "as_packageinfo",
     "as_repoinfo",
     "as_rpminfo",
     "as_taginfo",
@@ -175,6 +178,14 @@ class NoSuchContentGenerator(BadDingo):
     """
 
     complaint = "No such content generator"
+
+
+class NoSuchPackage(BadDingo):
+    """
+    A package was not found
+    """
+
+    complaint = "No such package"
 
 
 class NoSuchTag(BadDingo):
@@ -717,6 +728,33 @@ def as_buildinfo(session, build):
     return info
 
 
+def as_channelinfo(session, channel):
+    """
+    Coerces a channel value into a koji channel info dict.
+
+    If channel is an
+     * int, will attempt to load as a channel ID
+     * str, will attempt to load as a channel name
+     * dict, will presume already a channel info
+
+    :param session: an active koji client session
+
+    :param channel: value to lookup
+    """
+
+    if isinstance(channel, (str, int)):
+        info = session.getChannel(channel)
+    elif isinstance(channel, dict):
+        info = channel
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchChannel(channel)
+
+    return info
+
+
 def as_taginfo(session, tag):
     """
     Coerces a tag value into a koji tag info dict.
@@ -826,7 +864,7 @@ def as_hostinfo(session, host):
     """
     Coerces a host value into a host info dict.
 
-    If target is an:
+    If host is an:
      * int, will attempt to load as a host ID
      * str, will attempt to load as a host name
      * dict, will presume already a host info
@@ -850,6 +888,36 @@ def as_hostinfo(session, host):
 
     if not info:
         raise NoSuchHost(host)
+
+    return info
+
+
+def as_packageinfo(session, pkg):
+    """
+    Coerces a host value into a host info dict.
+
+    If pkg is an:
+     * int, will attempt to load as a package ID
+     * str, will attempt to load as a package name
+     * dict, will presume already a package info
+
+    :param session: an active koji client session
+
+    :param pkg: value to lookup
+
+    :raises NoSuchPackage: if the pkg value could not be resolved into
+      a package info dict
+    """
+
+    if isinstance(pkg, (str, int)):
+        info = session.getPackage(pkg)
+    elif isinstance(pkg, dict):
+        info = pkg
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchPackage(pkg)
 
     return info
 

@@ -30,8 +30,9 @@ from typing import Optional, Sequence, Union
 from . import AnonSmokyDingo, int_or_str, pretty_json
 from .. import (
     BadDingo,
-    as_archiveinfo, as_buildinfo, as_hostinfo, as_rpminfo,
-    as_repoinfo, as_taginfo, as_targetinfo, as_taskinfo, as_userinfo, )
+    as_archiveinfo, as_buildinfo, as_channelinfo, as_hostinfo,
+    as_packageinfo, as_rpminfo, as_repoinfo, as_taginfo, as_targetinfo,
+    as_taskinfo, as_userinfo, )
 from ..builds import BUILD_COMPLETE
 from ..clients import rebuild_client_config
 from ..common import load_plugin_config
@@ -183,7 +184,9 @@ def get_tag_latest_dir_url(
 OPEN_LOADFN = {
     "archive": as_archiveinfo,
     "build": as_buildinfo,
+    "channel": as_channelinfo,
     "host": as_hostinfo,
+    "package": as_packageinfo,
     "repo": as_repoinfo,
     "rpm": as_rpminfo,
     "tag": as_taginfo,
@@ -219,9 +222,9 @@ OPEN_URL = {
     "archive": "archiveinfo?archiveID={id}",
     "build": "buildinfo?buildID={id}",
     # "buildroot": "buildrootinfo?buildrootID={id}",
-    # "channel": "channelinfo?channelID={id}",
+    "channel": "channelinfo?channelID={id}",
     "host": "hostinfo?hostID={id}",
-    # "package": "packageinfo?packageID={id}",
+    "package": "packageinfo?packageID={id}",
     "repo": "repoinfo?repoID={id}",
     "rpm": "rpminfo?rpmID={id}",
     "tag": "taginfo?tagID={id}",

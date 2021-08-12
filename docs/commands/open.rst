@@ -11,8 +11,8 @@ koji open
 
  positional arguments:
    TYPE                  The koji data element type. Supported types: archive,
-                         build, build-dir, host, repo, rpm, tag, tag-latest-
-                         dir, tag-repo-dir, target, task, user
+                         build, build-dir, channel, host, package, repo, rpm,
+                         tag, tag-latest-dir, tag-repo-dir, target, task, user
    KEY                   The key for the given element type.
 
  optional arguments:
