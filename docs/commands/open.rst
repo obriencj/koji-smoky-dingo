@@ -25,6 +25,20 @@ koji open
 Launch local web browser to the informational page for a given koji data
 element.
 
+The types ``archive``, ``build``, ``channel``, ``host``, ``package``,
+``repo``, ``rpm``, ``tag``, ``target``, ``task``, and ``user`` all
+open the relevant koji web info page if a matching element could be
+found.
+
+The type ``tag-latest-dir`` accepts a tag as the argument, and will
+open the tag's latest repository directory.
+
+The type ``tag-repo-dir`` works similar to ``tag-latest-dir`` but
+points to the actual repo ID path rather than the ``latest`` symlink.
+
+The type ``build-dir`` accepts a build as the argument, and will open
+the storage directory for that build's archives and logs.
+
 
 References
 ----------

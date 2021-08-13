@@ -39,11 +39,14 @@ from ..common import load_plugin_config
 
 
 __all__ = (
+    "CannotOpenURL",
     "ClientConfig",
     "ClientOpen",
 
     "cli_client_config",
     "cli_open",
+    "get_open_command",
+    "get_open_url",
 )
 
 
@@ -205,7 +208,7 @@ def get_type_url(
 
     weburl: str = goptions.weburl
     if not weburl:
-        raise BadDingo("Client has no weburl configured")
+        raise CannotOpenURL("Client has no weburl configured")
     weburl = weburl.rstrip("/")
 
     loadfn = OPEN_LOADFN.get(datatype)

@@ -145,7 +145,7 @@ class BadDingo(Exception):
 
     def __str__(self):
         orig = super().__str__()
-        return ": ".join([self.complaint, orig])
+        return f"{self.complaint}: {orig}"
 
 
 class NoSuchBuild(BadDingo):
