@@ -51,6 +51,12 @@ __all__ = (
 
 
 class CannotOpenURL(BadDingo):
+    """
+    A problem occured opening a URL
+
+    :since: 2.0
+    """
+
     complaint = "Cannot open URL"
 
 
@@ -61,6 +67,11 @@ def cli_client_config(
         quiet: bool = False,
         config: bool = False,
         json: bool = False):
+    """
+    Implements the ``koji client-config`` command
+
+    :since: 1.0
+    """
 
     profile, opts = rebuild_client_config(session, goptions)
 
@@ -130,10 +141,13 @@ class ClientConfig(AnonSmokyDingo):
                                  json=options.json)
 
 
-def get_build_dir_url(
+def _get_build_dir_url(
         session: ClientSession,
         goptions: object,
         buildid: Union[str, int]) -> str:
+    """
+    :since: 2.0
+    """
 
     topurl: str = goptions.topurl
     if not topurl:
@@ -152,10 +166,13 @@ def get_build_dir_url(
     return f"{topurl}/packages/{name}/{version}/{release}"
 
 
-def get_tag_repo_dir_url(
+def _get_tag_repo_dir_url(
         session: ClientSession,
         goptions: object,
         tagid: Union[str, int]) -> str:
+    """
+    :since: 2.0
+    """
 
     topurl: str = goptions.topurl
     if not topurl:
@@ -168,10 +185,13 @@ def get_tag_repo_dir_url(
     return f"{topurl}/repos/{tag['name']}/{repo['id']}"
 
 
-def get_tag_latest_dir_url(
+def _get_tag_latest_dir_url(
         session: ClientSession,
         goptions: object,
         tagid: Union[str, int]) -> str:
+    """
+    :since: 2.0
+    """
 
     topurl: str = goptions.topurl
     if not topurl:
@@ -199,12 +219,15 @@ OPEN_LOADFN = {
 }
 
 
-def get_type_url(
+def _get_type_url(
         session: ClientSession,
         goptions: object,
         datatype: str,
         fmt: str,
         element: str) -> str:
+    """
+    :since: 2.0
+    """
 
     weburl: str = goptions.weburl
     if not weburl:
@@ -235,9 +258,9 @@ OPEN_URL = {
     "task": "taskinfo?taskID={id}",
     "user": "userinfo?userID={id}",
 
-    "build-dir": get_build_dir_url,
-    "tag-repo-dir": get_tag_repo_dir_url,
-    "tag-latest-dir": get_tag_latest_dir_url,
+    "build-dir": _get_build_dir_url,
+    "tag-repo-dir": _get_tag_repo_dir_url,
+    "tag-latest-dir": _get_tag_latest_dir_url,
 }
 
 
@@ -257,6 +280,8 @@ def get_open_url(
     :param datatype: name of the data type
 
     :param element: identifier for an element of the given data type
+
+    :since: 2.0
     """
 
     opener = OPEN_URL.get(datatype)
@@ -266,7 +291,7 @@ def get_open_url(
     if callable(opener):
         url = opener(session, goptions, element)
     else:
-        url = get_type_url(session, goptions, datatype, opener, element)
+        url = _get_type_url(session, goptions, datatype, opener, element)
 
     return url
 
@@ -293,6 +318,8 @@ def get_open_command(
       then will return None instead
 
     :raises BadDingo: when `err` is `True` and no command could be found
+
+    :since: 1.0
     """
 
     default_command = OPEN_CMD.get(sys.platform)
@@ -312,6 +339,11 @@ def cli_open(
         datatype: str,
         element: str,
         command: Optional[str] = None) -> int:
+    """
+    Implements the ``koji open`` command
+
+    :since: 1.0
+    """
 
     datatype = datatype.lower()
 
