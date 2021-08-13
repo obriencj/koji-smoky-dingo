@@ -183,6 +183,8 @@ class NoSuchContentGenerator(BadDingo):
 class NoSuchPackage(BadDingo):
     """
     A package was not found
+
+    :since: 2.0
     """
 
     complaint = "No such package"
@@ -239,6 +241,8 @@ class NoSuchArchive(BadDingo):
 class NoSuchRepo(BadDingo):
     """
     A repository was not found
+
+    :since: 2.0
     """
 
     complaint = "No such repo"
@@ -740,6 +744,8 @@ def as_channelinfo(session, channel):
     :param session: an active koji client session
 
     :param channel: value to lookup
+
+    :since: 2.0
     """
 
     if isinstance(channel, (str, int)):
@@ -907,6 +913,8 @@ def as_packageinfo(session, pkg):
 
     :raises NoSuchPackage: if the pkg value could not be resolved into
       a package info dict
+
+    :since: 2.0
     """
 
     if isinstance(pkg, (str, int)):
@@ -970,6 +978,8 @@ def as_repoinfo(session, repo):
      * str, will attempt to load the current repo from a tag by name
      * int, will attempt to load the repo by ID
      * dict, will presume already a repo info
+
+    :since: 2.0
     """
 
     info = None
