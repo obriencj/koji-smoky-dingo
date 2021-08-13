@@ -40,7 +40,9 @@ __all__ = (
     "NoSuchBuild",
     "NoSuchChannel",
     "NoSuchContentGenerator",
+    "NoSuchPackage",
     "NoSuchPermission",
+    "NoSuchRepo",
     "NoSuchRPM",
     "NoSuchTag",
     "NoSuchTarget",
@@ -51,7 +53,10 @@ __all__ = (
 
     "as_archiveinfo",
     "as_buildinfo",
+    "as_channelinfo",
     "as_hostinfo",
+    "as_packageinfo",
+    "as_repoinfo",
     "as_rpminfo",
     "as_taginfo",
     "as_targetinfo",
@@ -140,7 +145,7 @@ class BadDingo(Exception):
 
     def __str__(self):
         orig = super().__str__()
-        return ": ".join([self.complaint, orig])
+        return f"{self.complaint}: {orig}"
 
 
 class NoSuchBuild(BadDingo):
@@ -173,6 +178,16 @@ class NoSuchContentGenerator(BadDingo):
     """
 
     complaint = "No such content generator"
+
+
+class NoSuchPackage(BadDingo):
+    """
+    A package was not found
+
+    :since: 2.0
+    """
+
+    complaint = "No such package"
 
 
 class NoSuchTag(BadDingo):
@@ -221,6 +236,16 @@ class NoSuchArchive(BadDingo):
     """
 
     complaint = "No such archive"
+
+
+class NoSuchRepo(BadDingo):
+    """
+    A repository was not found
+
+    :since: 2.0
+    """
+
+    complaint = "No such repo"
 
 
 class NoSuchRPM(BadDingo):
@@ -707,6 +732,35 @@ def as_buildinfo(session, build):
     return info
 
 
+def as_channelinfo(session, channel):
+    """
+    Coerces a channel value into a koji channel info dict.
+
+    If channel is an
+     * int, will attempt to load as a channel ID
+     * str, will attempt to load as a channel name
+     * dict, will presume already a channel info
+
+    :param session: an active koji client session
+
+    :param channel: value to lookup
+
+    :since: 2.0
+    """
+
+    if isinstance(channel, (str, int)):
+        info = session.getChannel(channel)
+    elif isinstance(channel, dict):
+        info = channel
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchChannel(channel)
+
+    return info
+
+
 def as_taginfo(session, tag):
     """
     Coerces a tag value into a koji tag info dict.
@@ -816,7 +870,7 @@ def as_hostinfo(session, host):
     """
     Coerces a host value into a host info dict.
 
-    If target is an:
+    If host is an:
      * int, will attempt to load as a host ID
      * str, will attempt to load as a host name
      * dict, will presume already a host info
@@ -840,6 +894,38 @@ def as_hostinfo(session, host):
 
     if not info:
         raise NoSuchHost(host)
+
+    return info
+
+
+def as_packageinfo(session, pkg):
+    """
+    Coerces a host value into a host info dict.
+
+    If pkg is an:
+     * int, will attempt to load as a package ID
+     * str, will attempt to load as a package name
+     * dict, will presume already a package info
+
+    :param session: an active koji client session
+
+    :param pkg: value to lookup
+
+    :raises NoSuchPackage: if the pkg value could not be resolved into
+      a package info dict
+
+    :since: 2.0
+    """
+
+    if isinstance(pkg, (str, int)):
+        info = session.getPackage(pkg)
+    elif isinstance(pkg, dict):
+        info = pkg
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchPackage(pkg)
 
     return info
 
@@ -878,6 +964,43 @@ def as_archiveinfo(session, archive):
 
     if not info:
         raise NoSuchArchive(archive)
+
+    return info
+
+
+def as_repoinfo(session, repo):
+    """
+    Coerces a repo value into a Repo info dict.
+
+    If repo is an:
+     * dict with name, will attempt to load the current repo from a
+       tag by that name
+     * str, will attempt to load the current repo from a tag by name
+     * int, will attempt to load the repo by ID
+     * dict, will presume already a repo info
+
+    :since: 2.0
+    """
+
+    info = None
+
+    if isinstance(repo, dict):
+        if "name" in repo:
+            repo = repo["name"]
+        else:
+            info = repo
+
+    if isinstance(repo, str):
+        repotag = session.getRepo(repo)
+        if repotag is None:
+            raise NoSuchRepo(repo)
+        repo = repotag["id"]
+
+    if isinstance(repo, int):
+        info = session.repoInfo(repo)
+
+    if not info:
+        raise NoSuchRepo(repo)
 
     return info
 

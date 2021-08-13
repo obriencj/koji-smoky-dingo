@@ -23,28 +23,55 @@ Koji Smoky Dingo - CLI Client Commands
 import sys
 
 from configparser import ConfigParser
+from koji import ClientSession
 from os import system
+from typing import Optional, Sequence, Union
 
-from . import AnonSmokyDingo, BadDingo, int_or_str, pretty_json
+from . import AnonSmokyDingo, int_or_str, pretty_json
 from .. import (
-    as_archiveinfo, as_buildinfo, as_hostinfo, as_rpminfo,
-    as_taginfo, as_targetinfo, as_taskinfo, as_userinfo, )
+    BadDingo,
+    as_archiveinfo, as_buildinfo, as_channelinfo, as_hostinfo,
+    as_packageinfo, as_rpminfo, as_repoinfo, as_taginfo, as_targetinfo,
+    as_taskinfo, as_userinfo, )
+from ..builds import BUILD_COMPLETE
 from ..clients import rebuild_client_config
 from ..common import load_plugin_config
 
 
 __all__ = (
+    "CannotOpenURL",
     "ClientConfig",
     "ClientOpen",
 
     "cli_client_config",
     "cli_open",
     "get_open_command",
+    "get_open_url",
 )
 
 
-def cli_client_config(session, goptions,
-                      only=(), quiet=False, config=False, json=False):
+class CannotOpenURL(BadDingo):
+    """
+    A problem occured opening a URL
+
+    :since: 2.0
+    """
+
+    complaint = "Cannot open URL"
+
+
+def cli_client_config(
+        session: ClientSession,
+        goptions: object,
+        only: Sequence[str] = (),
+        quiet: bool = False,
+        config: bool = False,
+        json: bool = False):
+    """
+    Implements the ``koji client-config`` command
+
+    :since: 1.0
+    """
 
     profile, opts = rebuild_client_config(session, goptions)
 
@@ -103,7 +130,7 @@ class ClientConfig(AnonSmokyDingo):
 
     def activate(self):
         # entirely local, do not even attempt to connect to koji
-        pass
+        return
 
 
     def handle(self, options):
@@ -114,16 +141,159 @@ class ClientConfig(AnonSmokyDingo):
                                  json=options.json)
 
 
+def _get_build_dir_url(
+        session: ClientSession,
+        goptions: object,
+        buildid: Union[str, int]) -> str:
+    """
+    :since: 2.0
+    """
+
+    topurl: str = goptions.topurl
+    if not topurl:
+        raise CannotOpenURL("Client has no topurl configured")
+    topurl = topurl.rstrip("/")
+
+    build = as_buildinfo(session, buildid)
+
+    if build["state"] != BUILD_COMPLETE:
+        raise CannotOpenURL("Build directory is not available")
+
+    name = build["name"]
+    version = build["version"]
+    release = build["release"]
+
+    return f"{topurl}/packages/{name}/{version}/{release}"
+
+
+def _get_tag_repo_dir_url(
+        session: ClientSession,
+        goptions: object,
+        tagid: Union[str, int]) -> str:
+    """
+    :since: 2.0
+    """
+
+    topurl: str = goptions.topurl
+    if not topurl:
+        raise CannotOpenURL("Client has no topurl configured")
+    topurl = topurl.rstrip("/")
+
+    tag = as_taginfo(session, tagid)
+    repo = as_repoinfo(session, tag)
+
+    return f"{topurl}/repos/{tag['name']}/{repo['id']}"
+
+
+def _get_tag_latest_dir_url(
+        session: ClientSession,
+        goptions: object,
+        tagid: Union[str, int]) -> str:
+    """
+    :since: 2.0
+    """
+
+    topurl: str = goptions.topurl
+    if not topurl:
+        raise CannotOpenURL("Client has no topurl configured")
+    topurl = topurl.rstrip("/")
+
+    tag = as_taginfo(session, tagid)
+    as_repoinfo(session, tag)
+
+    return f"{topurl}/repos/{tag['name']}/latest"
+
+
 OPEN_LOADFN = {
     "archive": as_archiveinfo,
     "build": as_buildinfo,
+    "channel": as_channelinfo,
     "host": as_hostinfo,
+    "package": as_packageinfo,
+    "repo": as_repoinfo,
     "rpm": as_rpminfo,
     "tag": as_taginfo,
     "target": as_targetinfo,
     "task": as_taskinfo,
     "user": as_userinfo,
 }
+
+
+def _get_type_url(
+        session: ClientSession,
+        goptions: object,
+        datatype: str,
+        fmt: str,
+        element: str) -> str:
+    """
+    :since: 2.0
+    """
+
+    weburl: str = goptions.weburl
+    if not weburl:
+        raise CannotOpenURL("Client has no weburl configured")
+    weburl = weburl.rstrip("/")
+
+    loadfn = OPEN_LOADFN.get(datatype)
+    if loadfn is None:
+        raise CannotOpenURL("Unsupported type for open %s" % datatype)
+
+    loaded = loadfn(session, element)
+    typeurl = fmt.format(**loaded)
+
+    return f'{weburl}/{typeurl}'
+
+
+OPEN_URL = {
+    "archive": "archiveinfo?archiveID={id}",
+    "build": "buildinfo?buildID={id}",
+    # "buildroot": "buildrootinfo?buildrootID={id}",
+    "channel": "channelinfo?channelID={id}",
+    "host": "hostinfo?hostID={id}",
+    "package": "packageinfo?packageID={id}",
+    "repo": "repoinfo?repoID={id}",
+    "rpm": "rpminfo?rpmID={id}",
+    "tag": "taginfo?tagID={id}",
+    "target": "buildtargetinfo?targetID={id}",
+    "task": "taskinfo?taskID={id}",
+    "user": "userinfo?userID={id}",
+
+    "build-dir": _get_build_dir_url,
+    "tag-repo-dir": _get_tag_repo_dir_url,
+    "tag-latest-dir": _get_tag_latest_dir_url,
+}
+
+
+def get_open_url(
+        session: ClientSession,
+        goptions: object,
+        datatype: str,
+        element: str) -> str:
+    """
+    Given a client configuration, datatype, and element identifier,
+    produce a URL referencing the hub or topdir path for that record.
+
+    :param session: an active koji client session
+
+    :param goptions: koji client options
+
+    :param datatype: name of the data type
+
+    :param element: identifier for an element of the given data type
+
+    :since: 2.0
+    """
+
+    opener = OPEN_URL.get(datatype)
+    if opener is None:
+        raise BadDingo(f"Unsupported type for open: {datatype}")
+
+    if callable(opener):
+        url = opener(session, goptions, element)
+    else:
+        url = _get_type_url(session, goptions, datatype, opener, element)
+
+    return url
 
 
 OPEN_CMD = {
@@ -133,19 +303,9 @@ OPEN_CMD = {
 }
 
 
-OPEN_URL = {
-    "archive": "archiveinfo?archiveID={id}",
-    "build": "buildinfo?buildID={id}",
-    "host": "hostinfo?hostID={id}",
-    "rpm": "rpminfo?rpmID={id}",
-    "tag": "taginfo?tagID={id}",
-    "target": "buildtargetinfo?targetID={id}",
-    "task": "taskinfo?taskID={id}",
-    "user": "userinfo?userID={id}",
-}
-
-
-def get_open_command(profile=None, err=True):
+def get_open_command(
+        profile: Optional[str] = None,
+        err: bool = True) -> str:
     """
     Determine the command used to open URLs. Attempts to load
     profile-specific plugin configuration under the heading 'open' and
@@ -154,16 +314,12 @@ def get_open_command(profile=None, err=True):
 
     :param profile: name of koji profile
 
-    :type profile: str, optional
-
     :param err: raise an exception if no command is discovered. If False
       then will return None instead
 
-    :type err: bool, optional
+    :raises BadDingo: when `err` is `True` and no command could be found
 
-    :rtype: str
-
-    :raises BadDingo: when `err` is True and no command could be found
+    :since: 1.0
     """
 
     default_command = OPEN_CMD.get(sys.platform)
@@ -172,38 +328,44 @@ def get_open_command(profile=None, err=True):
     command = conf.get("command", default_command)
 
     if err and command is None:
-        raise BadDingo("Unable to determine command for launching browser")
+        raise BadDingo("Unable to determine default open command")
 
     return command
 
 
-def cli_open(session, goptions, datatype, element,
-             command=None):
+def cli_open(
+        session: ClientSession,
+        goptions: object,
+        datatype: str,
+        element: str,
+        command: Optional[str] = None) -> int:
+    """
+    Implements the ``koji open`` command
+
+    :since: 1.0
+    """
 
     datatype = datatype.lower()
-
-    loadfn = OPEN_LOADFN.get(datatype)
-    if loadfn is None:
-        raise BadDingo("Unsupported type for open %s" % datatype)
 
     if command is None:
         command = get_open_command(goptions.profile)
 
-    weburl = goptions.weburl
-    if not weburl:
-        raise BadDingo("Client has no weburl configured")
+    url = get_open_url(session, goptions, datatype, element)
 
-    loaded = loadfn(session, element)
+    # special case triggered by using '-p' or '-c -' just prints URL
+    # to stdout
+    if command == "-":
+        print(url)
+        return
 
-    weburl = weburl.rstrip("/")
-    typeurl = OPEN_URL.get(datatype).format(**loaded)
-
+    # if the configured open command has a {url} marker in it, then we
+    # want to swap that in. Otherwise we'll just append it quoted
     if "{url}" in command:
-        cmd = command.format(url="/".join((weburl, typeurl)))
+        cmd = command.format(url=url)
     else:
-        cmd = "".join((command, ' "', weburl, "/", typeurl, '"'))
+        cmd = f'{command} "{url}"'
 
-    system(cmd)
+    return system(cmd)
 
 
 class ClientOpen(AnonSmokyDingo):
@@ -215,15 +377,23 @@ class ClientOpen(AnonSmokyDingo):
     def arguments(self, parser):
         addarg = parser.add_argument
 
+        known = ", ".join(sorted(OPEN_URL))
         addarg("datatype", type=str, metavar="TYPE",
-               help="The koji data element type. build, tag, target, user,"
-               " host, rpm, archive, task")
+               help="The koji data element type."
+               f" Supported types: {known}")
 
         addarg("element", type=int_or_str, metavar="KEY",
                help="The key for the given element type.")
 
+        grp = parser.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
         addarg("--command", "-c", default=None, metavar="COMMAND",
                help="Command to exec with the discovered koji web URL")
+
+        addarg("--print", "-p", default=None, dest="command",
+               action="store_const", const="-",
+               help="Print URL to stdout rather than executing a command")
 
         return parser
 
