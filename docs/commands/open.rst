@@ -25,6 +25,14 @@ koji open
 Launch local web browser to the informational page for a given koji data
 element.
 
+The ``--command=COMMAND`` option can be specified to pass the relevant
+URL to an arbitrary executable rather than the platform-default URL
+opener.  On linux, the default command is ``xdg-open``, on macOS it is
+``open`` and on Microsoft Windows it is ``start``. The default can
+also be set as a plugin configuration as the value ``command`` under
+the ``[open]`` section header. The return code of the executed command
+will become the return code of the ``koji open`` invocation.
+
 The types ``archive``, ``build``, ``channel``, ``host``, ``package``,
 ``repo``, ``rpm``, ``tag``, ``target``, ``task``, and ``user`` all
 open the relevant koji web info page if a matching element could be
@@ -45,3 +53,5 @@ References
 
 * :py:obj:`kojismokydingo.cli.clients.ClientOpen`
 * :py:func:`kojismokydingo.cli.clients.cli_open`
+* :py:func:`kojismokydingo.cli.clients.get_open_command`
+* :py:func:`kojismokydingo.cli.clients.get_open_url`
