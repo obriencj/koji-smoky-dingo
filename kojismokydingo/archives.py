@@ -23,13 +23,13 @@ representing RPMs and build archives
 
 from koji import ClientSession, PathInfo
 from os.path import join
-from typing import Iterable, Optional, Union
+from typing import Any, Iterable, List, Optional, Set, Union, cast
 
 from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
 from .types import (
-    ArchiveInfos, BuildInfo, DecoratedArchiveInfos, DecoratedRPMInfos,
-    ImageArchiveInfos, MavenArchiveInfos, PathSpec,
-    WindowsArchiveInfos, )
+    ArchiveInfo, ArchiveInfos, BuildInfo, DecoratedArchiveInfo,
+    DecoratedArchiveInfos, DecoratedBuildInfo, DecoratedRPMInfos,
+    ImageArchiveInfos, MavenArchiveInfos, PathSpec, WindowsArchiveInfos, )
 
 
 __all__ = (
@@ -299,18 +299,18 @@ def gather_build_archives(
     :param path: The root dir for the archive file paths, default None
     """
 
-    binfo = as_buildinfo(session, binfo)
+    binfo = cast(DecoratedBuildInfo, as_buildinfo(session, binfo))
 
     known_types = ("rpm", "maven", "win", "image", )
-    found = []
+    found: List[Any] = []
 
     # Check for a decorated list of build types. If not present, then
     # get it from koji directly. Having this allows us to avoid
     # querying koji for archives of a btype that the build doesn't
     # have.
-    build_types = binfo.get("archive_btype_names", None)
+    build_types: List[str] = binfo.get("archive_btype_names", None)
     if build_types is None:
-        build_types = set(session.getBuildType(binfo["id"]))
+        build_types = session.getBuildType(binfo["id"])
 
     if btype and btype not in build_types:
         # we already know we'll find nothing, so don't bother asking
@@ -573,7 +573,7 @@ def gather_latest_archives(
     tagname = taginfo["name"]
 
     known_types = ("rpm", "maven", "win", "image")
-    found = []
+    found: List[ArchiveInfo] = []
 
     # the known types have additional metadata when queried, and have
     # pre-defined path structures. We'll be querying those directly

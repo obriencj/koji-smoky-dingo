@@ -38,9 +38,9 @@ from operator import itemgetter
 from os.path import expanduser, isdir, join
 from typing import (
     Any, Callable, Dict, Iterable, Iterator, List,
-    Optional, Tuple, Union, )
+    Optional, Sequence, Tuple, Union, )
 
-from .types import KeySpec
+from .types import IterList, KeySpec
 
 
 try:
@@ -158,7 +158,7 @@ def fnmatches(
 
 def update_extend(
         dict_orig: Dict[Any, list],
-        *dict_additions: Dict[Any, Iterable]) -> Dict[Any, list]:
+        *dict_additions: Dict[Any, List]) -> Dict[Any, list]:
     """
     Extend the list values of the original dict with the list values of
     the additions dict.
@@ -183,6 +183,10 @@ def update_extend(
     :returns: The original dict instance
     """
 
+    # oddity here, really *dict_additions should be Dict[Any,
+    # Iterable] but for some bizarre reason MyPy doesn't consider
+    # lists to be iterable when they're dict values. Really weird.
+
     for additions in dict_additions:
         for key, val in additions.items():
             orig = dict_orig.setdefault(key, [])
@@ -192,7 +196,7 @@ def update_extend(
 
 
 def merge_extend(
-        *dict_additions: Dict[Any, Iterable]) -> Dict[Any, list]:
+        *dict_additions: Dict[Any, List]) -> Dict[Any, list]:
     """
     Similar to `update_extend` but creates a new dict to hold results,
     and new initial lists to be extended, leaving all the arguments

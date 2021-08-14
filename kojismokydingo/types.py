@@ -41,6 +41,9 @@ except ImportError:
     from typing_extensions import TypedDict
 
 
+IterList = Union[Iterable, List]
+
+
 __all__ = (
     "ArchiveInfo",
     "ArchiveInfos",

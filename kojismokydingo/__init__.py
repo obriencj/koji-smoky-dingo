@@ -28,7 +28,7 @@ from koji import (
 from koji_cli.lib import activate_session, ensure_connection
 from typing import (
     Any, Callable, Dict, Iterator, Iterable, List,
-    Optional, Tuple, Union, )
+    Optional, Sequence, Tuple, Union, )
 
 from .common import chunkseq
 from .types import (

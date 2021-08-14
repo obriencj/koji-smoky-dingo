@@ -1244,7 +1244,8 @@ def gather_component_build_ids(
 
     # dig up the component archives (pretending that RPMs are just
     # another archive type as usual) and map them to the buildroot ID.
-    components = {}
+    components: Dict[int, list] = {}
+    more: Dict[int, list]
 
     for bt in btypes:
         if bt == "rpm":
@@ -1257,10 +1258,10 @@ def gather_component_build_ids(
     results = {}
 
     for build_id, archive_list in archives.items():
-        cids = set()
+        cids: Set[int] = set()
         for archive in archive_list:
             broot_id = archive["buildroot_id"]
-            archives = components.get(broot_id, ())
+            archives = components.get(broot_id, ())  # type: ignore
             cids.update(c["build_id"] for c in archives)
 
         results[build_id] = list(cids)
@@ -1369,7 +1370,7 @@ class BuildFilter():
         # will filtering ever actually be used multiple times?
 
         # ensure this is a real list and not a generator of some sort
-        work = list(build_infos)
+        work: BuildInfos = list(build_infos)
 
         work = self.filter_by_state(work)
 
