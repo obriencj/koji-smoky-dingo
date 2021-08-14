@@ -17,3 +17,10 @@ exceptions:
   `Sieve.__init__`
 * Moved RPM comparison functions out from `kojismokydingo.common` to
   their own new module `kojismokydingo.rpm`
+* Added as_channelinfo, as_packageinfo, as_repoinfo, NoSuchPackage,
+  NoSuchRepo to the core API
+* Added support for more types to the ``open`` command: channel,
+  package, repo, build-dir, tag-repo-dir, and tag-latest-dir
+* Added ``--print`` option to the ``open`` command
+* Made the ``open`` command return the return code of the URL opening
+  executable
