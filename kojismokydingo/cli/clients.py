@@ -33,9 +33,9 @@ from .. import (
     as_archiveinfo, as_buildinfo, as_channelinfo, as_hostinfo,
     as_packageinfo, as_rpminfo, as_repoinfo, as_taginfo, as_targetinfo,
     as_taskinfo, as_userinfo, )
-from ..builds import BUILD_COMPLETE
 from ..clients import rebuild_client_config
 from ..common import load_plugin_config
+from ..types import BuildState
 
 
 __all__ = (
@@ -156,7 +156,7 @@ def _get_build_dir_url(
 
     build = as_buildinfo(session, buildid)
 
-    if build["state"] != BUILD_COMPLETE:
+    if build["state"] != BuildState.BUILD_COMPLETE:
         raise CannotOpenURL("Build directory is not available")
 
     name = build["name"]

@@ -705,7 +705,7 @@ def iter_latest_maven_builds(
     if pkg_names is None:
         # pkgs = session.listPackages(tid, inherited=True)
         # pkg_names = [p['package_name'] for p in pkgs if not p['blocked']]
-        pkg_names = [None] # type: ignore
+        pkg_names = [None]
     else:
         pkg_names = unique(pkg_names)
 
