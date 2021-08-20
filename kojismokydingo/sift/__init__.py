@@ -646,9 +646,9 @@ class Sieve(metaclass=ABCMeta):
 
         if params:
             e = " ".join(params)
-            return "".join(("(", self.name, " ", e, ")"))
+            return f"({self.name} {e})"
         else:
-            return "".join(("(", self.name, ")"))
+            return f"({self.name})"
 
 
     def check(self,
@@ -861,8 +861,7 @@ class Flagger(LogicAnd):
 
     def __repr__(self):
         e = " ".join(map(repr, self.tokens))
-        return "".join(("(", self.name, " ", repr(self.flag),
-                        " " if e else "", e, ")"))
+        return f"({self.name} {self.flag!r} {e})"
 
 
 class VariadicSieve(Sieve, metaclass=ABCMeta):
@@ -946,9 +945,9 @@ class ItemSieve(VariadicSieve, metaclass=ABCMeta):
 
     def __repr__(self):
         if self.token is None:
-            return "".join(("(", self.name, ")"))
+            return f"({self.name})"
         else:
-            return "".join(("(", self.name, " ", repr(self.token), ")"))
+            return f"({self.name} {self.token!r})"
 
 
 class ItemPathSieve(Sieve):
@@ -989,12 +988,14 @@ class ItemPathSieve(Sieve):
 
 
     def __repr__(self):
-        toks = [self.name, str(self.path)]
-        toks.extend(map(str, self.tokens))
-        return "".join(("(", " ".join(toks), ")"))
+        if self.tokens:
+            e = " ".join(map(str, self.tokens))
+            return f"({self.name} {self.path!s} {e})"
+        else:
+            return f"({self.name} {self.path!s})"
 
 
-DEFAULT_SIEVES = [
+DEFAULT_SIEVES: List[Type[Sieve]] = [
     Flagged, Flagger,
     ItemPathSieve,
     LogicAnd, LogicOr, LogicNot,

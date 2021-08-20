@@ -27,7 +27,7 @@ from abc import abstractmethod
 from collections import defaultdict
 from itertools import islice
 from koji import BUILD_STATES, ClientSession
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Type
 from operator import itemgetter
 
 from . import (
@@ -47,7 +47,7 @@ from ..builds import (
 from ..common import unique
 from ..rpm import evr_compare, evr_split
 from ..tags import gather_tag_ids
-from ..types import BuildInfos
+from ..types import BuildInfo, BuildInfos
 
 
 __all__ = (
@@ -387,7 +387,6 @@ class EVRCompareLE(EVRCompare):
     """
 
     name = "<="
-
 
 
 class EVRSorted(Sieve):
@@ -949,7 +948,7 @@ class CompareLatestNVRSieve(CompareLatestSieve):
 #     name = "compare-latest-maven"
 
 
-DEFAULT_BUILD_INFO_SIEVES = [
+DEFAULT_BUILD_INFO_SIEVES: List[Type[Sieve]] = [
     CGImportedSieve,
     CompareLatestIDSieve,
     CompareLatestNVRSieve,
@@ -981,17 +980,15 @@ DEFAULT_BUILD_INFO_SIEVES = [
 ]
 
 
-def build_info_sieves():
+def build_info_sieves() -> List[Type[Sieve]]:
     """
     A new list containing the default build-info sieve classes.
 
     This function is used by `build_info_sifter` when creating its
     `Sifter` instance.
-
-    :rtype: list[type[Sieve]]
     """
 
-    sieves = []
+    sieves: List[Type[Sieve]] = []
 
     # TODO: grab some more via entry_points
     sieves.extend(DEFAULT_SIEVES)
@@ -1008,6 +1005,8 @@ def build_info_sifter(
     Sieves.
 
     :param source: sieve expressions source
+
+    :param params: sieve parameters
     """
 
     return Sifter(build_info_sieves(), source, "id", params)
@@ -1017,11 +1016,20 @@ def sift_builds(
         session: ClientSession,
         src_str: str,
         build_infos: BuildInfos,
-        params: Dict[str, str] = None):
+        params: Dict[str, str] = None) -> Dict[str, List[BuildInfo]]:
     """
+    Filter a group of build infos with a sieve compiled from the given
+    source string.
+
+    :param session: an active koji client session
+
     :param src_str: sieve expressions source
 
     :param build_infos: list of build info dicts to filter
+
+    :param params: sieve parameters
+
+    :returns: mapping of flags to matching build info dicts
     """
 
     sifter = build_info_sifter(src_str, params)
@@ -1032,11 +1040,20 @@ def sift_nvrs(
         session: ClientSession,
         src_str: str,
         nvrs: Iterable[str],
-        params: Dict[str, str] = None) -> Dict[str, List[dict]]:
+        params: Dict[str, str] = None) -> Dict[str, List[BuildInfo]]:
     """
+    Load a group of NVRs as build infos and filter them with a sieve
+    compiled from the given source string.
+
+    :param session: an active koji client session
+
     :param src_str: sieve expressions source
 
     :param nvrs: list of NVRs to load and filter
+
+    :param params: sieve parameters
+
+    :returns: mapping of flags to matching build info dicts
     """
 
     loaded = bulk_load_builds(session, nvrs, err=False)

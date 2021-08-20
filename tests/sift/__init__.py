@@ -707,6 +707,19 @@ class SifterTest(TestCase):
         self.assertEqual(res["default"], [PIZZA])
 
         src = """
+        (item name)
+        """
+        sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], ItemPathSieve))
+        self.assertEqual(repr(sieves[0]),
+                         "(item ItemPath(Item('name')))")
+
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], DATA)
+
+        src = """
         (item name Pizza Tacos)
         """
         sifter = self.compile_sifter(src)
