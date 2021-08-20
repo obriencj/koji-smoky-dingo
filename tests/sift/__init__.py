@@ -25,7 +25,7 @@ from kojismokydingo.sift import (
 )
 from kojismokydingo.sift.parse import (
     AllItems, Glob, Item, ItemMatch, ItemPath,
-    Null, Number, ParserError, Regex, Symbol, SymbolGroup,
+    Null, Number, ParserError, Reader, Regex, Symbol, SymbolGroup,
     convert_token,
 )
 
@@ -138,14 +138,29 @@ DATA = [
 
 class SifterTest(TestCase):
 
+
     def compile_sifter(self, src, **params):
         sieves = [NameSieve, TypeSieve, BrandSieve, CategorySieve, Poke]
         sieves.extend(DEFAULT_SIEVES)
 
-        return Sifter(sieves, src, params=params)
+        return Sifter(sieves, Reader(src), params=params)
+
+
+    def test_from_str(self):
+        sifter = Sifter(DEFAULT_SIEVES, "")
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 0)
 
 
     def test_empty(self):
+        sifter = self.compile_sifter("")
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 0)
+
+        sifter = self.compile_sifter("  \n  ")
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 0)
+
         sifter = self.compile_sifter("")
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 0)

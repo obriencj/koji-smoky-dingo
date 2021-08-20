@@ -33,15 +33,16 @@ from functools import partial
 from io import StringIO
 from itertools import zip_longest
 from json import dump
-from koji import GenericError
+from koji import ClientSession, GenericError
 from koji_cli.lib import activate_session, ensure_connection
 from operator import itemgetter
 from os import devnull
 from os.path import basename
+from typing import Any, Dict, List
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
-from .._magic import merge_annotations
+from ..types import GOptions
 
 
 __all__ = (
@@ -410,18 +411,18 @@ class SmokyDingo(metaclass=ABCMeta):
         sub-command
     """
 
-    group = "misc"
-    description = "A CLI Plugin"
+    group: str = "misc"
+    description: str = "A CLI Plugin"
 
     # permission name required for use of this command. A value of
     # None indicates anonymous access. Checked in the pre_handle
     # method.
-    permission = None
+    permission: str = None
 
 
-    def __init__(self, name=None):
+    def __init__(self, name: str = None):
         if name is not None:
-            self.name = name
+            self.name: str = name
 
         elif getattr(self, "name", None) is None:
             # check that the class doesn't already define a name as a
@@ -431,13 +432,13 @@ class SmokyDingo(metaclass=ABCMeta):
 
         # this is used to register the command with koji in a manner
         # that it expects to deal with
-        self.__name__ = "handle_" + self.name.replace("-", "_")
+        self.__name__: str = "handle_" + self.name.replace("-", "_")
 
         # this is necessary for koji to recognize us as a cli command.
         # We only set this on instances, not on the class itself,
         # because it is only the instances which should be used that
         # way.
-        self.exported_cli = True
+        self.exported_cli: bool = True
 
         # allow a docstr to be specified on subclasses, but if absent
         # let's set it based on the group and description.
@@ -451,12 +452,12 @@ class SmokyDingo(metaclass=ABCMeta):
             self.__doc__ = desc
 
         # populated by the get_plugin_config method
-        self.config = None
+        self.config: Dict[str, Any] = None
 
         # these will be populated once the command instance is
         # actually called
-        self.goptions = None
-        self.session = None
+        self.goptions: GOptions = None
+        self.session: ClientSession = None
 
 
     def get_plugin_config(self, key, default=None):
@@ -552,7 +553,10 @@ class SmokyDingo(metaclass=ABCMeta):
                 pass
 
 
-    def __call__(self, goptions, session, args):
+    def __call__(self,
+                 goptions: GOptions,
+                 session: ClientSession,
+                 args: List[str]) -> int:
         """
         This is the koji CLI handler interface. The global options, the
         session, and the unparsed command arguments are provided.
@@ -667,9 +671,6 @@ class HostSmokyDingo(SmokyDingo, metaclass=ABCMeta):
 
     group = "admin"
     permission = "host"
-
-
-merge_annotations()
 
 
 #

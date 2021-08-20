@@ -35,11 +35,17 @@ import re
 from abc import ABCMeta, abstractproperty
 from collections import OrderedDict
 from functools import partial
+from io import TextIOBase
+from koji import ClientSession
 from operator import itemgetter
+from typing import (
+    Any, Iterable, Callable, Dict, List, Sequence, Set,
+    Tuple, Type, Union, )
 
 from .. import BadDingo
+from ..types import KeySpec
 from .parse import (
-    Glob, ItemPath, Matcher, Number, Regex, Symbol, SymbolGroup,
+    Glob, ItemPath, Matcher, Number, Reader, Regex, Symbol, SymbolGroup,
     convert_token, parse_exprs, )
 
 
@@ -83,12 +89,12 @@ class SifterError(BadDingo):
     complaint = "Error compiling Sifter"
 
 
-def ensure_symbol(value, msg=None):
+def ensure_symbol(
+        value: Any,
+        msg: str = None) -> Symbol:
     """
     Checks that the value is a Symbol, and returns it. If value was
     not a Symbol, raises a SifterError.
-
-    :rtype: Symbol
     """
 
     if isinstance(value, Symbol):
@@ -101,7 +107,10 @@ def ensure_symbol(value, msg=None):
                       (msg, value, type(value).__name__))
 
 
-def ensure_all_symbol(values, expand=True, msg=None):
+def ensure_all_symbol(
+        values: List[Any],
+        expand: bool = True,
+        msg: str = None) -> List[Symbol]:
     """
     Checks that all of the elements in values are Symbols, and returns
     them as a new list.  If not, raises a SifterError.
@@ -110,9 +119,8 @@ def ensure_all_symbol(values, expand=True, msg=None):
     to their full combination of Symbols and inlined. Otherwise, the
     inclusion of a SymbolGroup is an error.
 
-    :type values: list
-
-    :rtype: list[Symbol]
+    :param expand: convert any SymbolGroups into their combinant
+      Symbols
     """
 
     result = []
@@ -133,13 +141,13 @@ def ensure_all_symbol(values, expand=True, msg=None):
     return result
 
 
-def ensure_str(value, msg=None):
+def ensure_str(
+        value: Any,
+        msg: str = None) -> str:
     """
     Checks that value is either an int, str, or Symbol, and returns a
     str version of it. If value is not an int, str, or Symbol, raises
     a SifterError.
-
-    :rtype: str
     """
 
     if isinstance(value, (int, str)):
@@ -152,7 +160,9 @@ def ensure_str(value, msg=None):
                       (msg, value, type(value).__name__))
 
 
-def ensure_int(value, msg=None):
+def ensure_int(
+        value: Any,
+        msg: str = None) -> int:
     """
     Checks that valie is an int or Number, and returns it as an
     int. If value is not an int or Number, raises a SifterError.
@@ -168,13 +178,13 @@ def ensure_int(value, msg=None):
                       (msg, value, type(value).__name__))
 
 
-def ensure_int_or_str(value, msg=None):
+def ensure_int_or_str(
+        value: Any,
+        msg: str = None) -> Union[int, str]:
     """
     Checks that value is either a int, Number, str, or Symbol. Returns
     an int or str as appropriate. If value is not an int, Number, str,
     nor Symbol, raises a SifterError.
-
-    :rtype: int or str
     """
 
     if isinstance(value, int):
@@ -190,7 +200,9 @@ def ensure_int_or_str(value, msg=None):
                       (msg, value, type(value).__name__))
 
 
-def ensure_all_int_or_str(values, msg=None):
+def ensure_all_int_or_str(
+        values: Iterable[Any],
+        msg: str = None) -> List[Union[int, str]]:
     """
     Checks that all values are either a int, Number, str, or Symbol.
     Returns each as an int or str as appropriate in a new list. If any
@@ -198,19 +210,17 @@ def ensure_all_int_or_str(values, msg=None):
     SifterError.
 
     :type values: list
-
-    :rtype: list[int or str]
     """
 
     return [ensure_int_or_str(v, msg) for v in values]
 
 
-def ensure_matcher(value, msg=None):
+def ensure_matcher(
+        value: Any,
+        msg: str = None) -> Union[str, Matcher]:
     """
     Checks that value is either a str, or a Matcher instance, and
     returns it. If not, raises a SifterError.
-
-    :rtype: Matcher
     """
 
     if isinstance(value, (str, Matcher)):
@@ -223,26 +233,24 @@ def ensure_matcher(value, msg=None):
                       (msg, value, type(value).__name__))
 
 
-def ensure_all_matcher(values, msg=None):
+def ensure_all_matcher(
+        values: Iterable[Any],
+        msg: str = None) -> List[Union[str, Matcher]]:
     """
     Checks that all of the elements in values are either a str,
     Symbol, Regex, or Glob instance, and returns them as a new list.
     If not, raises a SifterError.
-
-    :type values: list
-
-    :rtype: list[Matcher]
     """
 
     return [ensure_matcher(v, msg) for v in values]
 
 
-def ensure_sieve(value, msg=None):
+def ensure_sieve(
+        value: Any,
+        msg: str = None) -> 'Sieve':
     """
     Checks that value is a Sieve instance, and returns it.  If not,
     raises a SifterError.
-
-    :rtype: Sieve
     """
 
     if isinstance(value, Sieve):
@@ -255,25 +263,22 @@ def ensure_sieve(value, msg=None):
                       (msg, value, type(value).__name__))
 
 
-def ensure_all_sieve(values, msg=None):
+def ensure_all_sieve(
+        values: Iterable[Any],
+        msg: str = None) -> List['Sieve']:
     """
     Checks that all of the elements in values are Sieve instances, and
     returns them in a new list. If not, raises a SifterError.
-
-    :type values: list
-
-    :rtype: list[Sieve]
     """
 
     return [ensure_sieve(v, msg) for v in values]
 
 
-def gather_args(values):
+def gather_args(
+        values: Iterable[str]) -> Tuple[list, dict]:
     """
     Converts list of values into an *args and **kwds pair for use in
     creating a Sieve instance.
-
-    :rtype: tuple
     """
 
     missing = object()
@@ -284,7 +289,7 @@ def gather_args(values):
     for val in ivals:
         if isinstance(val, Symbol) and val.endswith(":"):
             key = val.rstrip(":")
-            val = next(ivals, missing)
+            val = next(ivals, missing)  # type: ignore
             if val is missing:
                 msg = "Missing value for keyword argument %s" % key
                 raise SifterError(msg)
@@ -298,7 +303,12 @@ def gather_args(values):
 
 class Sifter():
 
-    def __init__(self, sieves, source, key="id", params=None):
+    def __init__(self,
+                 sieves: Union[Dict[str, Type['Sieve']],
+                               Iterable[Type['Sieve']]],
+                 source: Union[str, Reader],
+                 key: KeySpec = "id",
+                 params: Dict[str, str] = None):
         """
         A flagging data filter, compiled from an s-expression syntax.
 
@@ -312,46 +322,41 @@ class Sifter():
           attribute of each class is used as the lookup value when
           compiling a sieve expression
 
-        :type sieves: list[type[Sieve]]
-
         :param source: Source from which to parse Sieve expressions
-
-        :type source: stream or str
 
         :param key: Unique hashable identifier key for the info
           dicts. This is used to deduplicate or otherwise correlate
           the incoming information. Default, use the "id" value.
 
-        :type key: str, optional
-
         :param params: Map of text substitutions for quoted strings
-
-        :type params: dict[str, str], optional
         """
 
         if not callable(key):
             key = itemgetter(key)
-        self.key = key
+        self.key: Callable = key
 
-        self.params = params or {}
+        self.params: Dict[str, str] = params or {}
 
         # {flagname: set(data_id)}
-        self._flags = {}
+        self._flags: Dict[str, Set[Any]] = {}
 
         # {(cachename, data_id): {}}
-        self._cache = {}
+        self._cache: Dict[Tuple[str, Any], Any] = {}
+
+        sievedict: Dict[str, Type[Sieve]]
 
         if not isinstance(sieves, dict):
             # convert a list of sieves into a dict mapping the sieve
             # names and their aliases to the classes
             sieves = tuple(sieves)
-            sievedict = {sieve.name: sieve for sieve in sieves}
+            sievedict = {sieve.name: sieve  # type: ignore
+                         for sieve in sieves}
             for sieve in sieves:
                 for alias in sieve.aliases:
                     sievedict[alias] = sieve
             sieves = sievedict
 
-        self._sieve_classes = sieves
+        self._sieve_classes: Dict[str, Type[Sieve]] = sieves
 
         exprs = self._compile(source) if source else []
         self._exprs = ensure_all_sieve(exprs)
@@ -365,12 +370,17 @@ class Sifter():
         return self._exprs
 
 
-    def _compile(self, source):
+    def _compile(self, source: Union[Reader, str]):
         """
         Turns a source string into a list of Sieve instances
         """
 
-        return [self._convert(p) for p in parse_exprs(source)]
+        if isinstance(source, Reader):
+            reader = source
+        else:
+            reader = Reader(str(source))
+
+        return [self._convert(p) for p in parse_exprs(reader)]
 
 
     def _convert_sieve_aliases(self, sym, args):
@@ -473,12 +483,12 @@ class Sifter():
         return result
 
 
-    def run(self, session, info_dicts):
+    def run(self,
+            session: ClientSession,
+            info_dicts: Iterable[dict]) -> Dict[str, List[dict]]:
         """
         Clears existing flags and runs contained sieves on the given
         info_dicts.
-
-        :rtype: dict[str,list[dict]]
         """
 
         self._flags.clear()
@@ -601,14 +611,16 @@ class Sieve(metaclass=ABCMeta):
 
 
     @abstractproperty
-    def name(self):
+    def name(self) -> str:
         pass
 
 
-    aliases = ()
+    aliases: Sequence[str] = ()
 
 
-    def __init__(self, sifter, *tokens, **options):
+    def __init__(self,
+                 sifter: Sifter,
+                 *tokens, **options):
         self.sifter = sifter
         self.key = sifter.key
         self.tokens = tokens
@@ -633,7 +645,9 @@ class Sieve(metaclass=ABCMeta):
             return "".join(("(", self.name, ")"))
 
 
-    def check(self, session, info):
+    def check(self,
+              session: ClientSession,
+              info: dict) -> bool:
         """
         Override to return True if the predicate matches the given
         info dict.
@@ -643,15 +657,14 @@ class Sieve(metaclass=ABCMeta):
         included in the results.
 
         :param info: The info dict to be checked.
-        :type info: dict
-
-        :rtype: bool
         """
 
         pass
 
 
-    def prep(self, session, info_dicts):
+    def prep(self,
+             session: ClientSession,
+             info_dicts: Iterable[dict]):
         """
         Override if some bulk pre-loading operations are necessary.
 
@@ -659,28 +672,24 @@ class Sieve(metaclass=ABCMeta):
         operations to be performed over the entire set of info dicts
         to be filtered, rather than one at a time in the `check`
         method
-
-        :type info_dicts: list[dict]
-        :rtype: None
         """
 
-        pass
+        return
 
 
-    def run(self, session, info_dicts):
+    def run(self,
+            session: ClientSession,
+            info_dicts: Iterable[dict]) -> Iterable[dict]:
         """
         Use this Sieve instance to select and return a subset of the
         info_dicts sequence.
-
-        :type info_dicts: list[dict]
-        :rtype: list[dict]
         """
 
         self.prep(session, info_dicts)
         return filter(partial(self.check, session), info_dicts)
 
 
-    def get_cache(self, key):
+    def get_cache(self, key: str) -> dict:
         """
         Gets a cache dict from the sifter using the name of this sieve
         and the given key (which must be hashable)
@@ -692,7 +701,7 @@ class Sieve(metaclass=ABCMeta):
         return self.sifter.get_cache(self.name, key)
 
 
-    def get_info_cache(self, info):
+    def get_info_cache(self, info: dict) -> dict:
         """
         Gets a cache dict from the sifter using the name of this sieve and
         the sifter's designated key for the given info dict. The default

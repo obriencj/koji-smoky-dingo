@@ -28,8 +28,10 @@ from typing import Any, Iterable, List, Optional, Set, Union, cast
 from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
 from .types import (
     ArchiveInfo, ArchiveInfos, BuildInfo, DecoratedArchiveInfo,
-    DecoratedArchiveInfos, DecoratedBuildInfo, DecoratedRPMInfos,
-    ImageArchiveInfos, MavenArchiveInfos, PathSpec, WindowsArchiveInfos, )
+    DecoratedArchiveInfos, DecoratedBuildInfo,
+    DecoratedRPMInfo, DecoratedRPMInfos,
+    ImageArchiveInfos, MavenArchiveInfos, PathSpec, RPMInfos,
+    WindowsArchiveInfos, )
 
 
 __all__ = (
@@ -113,7 +115,7 @@ def filter_archives(
 
 def gather_signed_rpms(
         session: ClientSession,
-        archives: ArchiveInfos,
+        archives: RPMInfos,
         sigkeys: Iterable[str]) -> DecoratedRPMInfos:
     """
     Given a list of RPM archive dicts, query the session for all the
@@ -128,13 +130,14 @@ def gather_signed_rpms(
       precedence
     """
 
+    rpm_archives = cast(DecoratedRPMInfos, archives)
     if not sigkeys:
-        return archives
+        return rpm_archives
 
-    results = []
+    results: List[DecoratedRPMInfo] = []
 
     # an ID: RPM Archive mapping
-    rpms = {rpm["id"]: rpm for rpm in archives}
+    rpms = {rpm["id"]: rpm for rpm in rpm_archives}
 
     # now bulk load all the sigs for each RPM ID
     rpm_sigs = bulk_load_rpm_sigs(session, rpms)

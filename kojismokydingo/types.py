@@ -426,7 +426,7 @@ class RPMSignature(TypedDict):
 
 
 class DecoratedRPMInfo(RPMInfo):
-    pass
+    sigkey: str
 
 
 DecoratedRPMInfos = Iterable[DecoratedRPMInfo]
@@ -694,6 +694,12 @@ a koji version requirement, specified as either a string or tuple of ints
 
 
 KeySpec = Union[Callable[[Any], Any], Any]
+
+
+class GOptions:
+    topurl: str
+    weburl: str
+    profile: str
 
 
 #
