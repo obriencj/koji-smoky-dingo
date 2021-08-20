@@ -337,8 +337,8 @@ class Sifter():
 
         self.params: Dict[str, str] = params or {}
 
-        # {flagname: set(data_id)}
-        self._flags: Dict[str, Set[Any]] = {}
+        # {flagname: {data_id: bool}}
+        self._flags: Dict[str, Dict[Any, bool]] = {}
 
         # {(cachename, data_id): {}}
         self._cache: Dict[Tuple[str, Any], Any] = {}
@@ -532,26 +532,32 @@ class Sifter():
         self._flags.clear()
 
 
-    def is_flagged(self, flagname, data):
+    def is_flagged(
+            self,
+            flagname: str,
+            data: dict) -> bool:
         """
         True if the data has been flagged with the given flagname, either
         via a ``(flag ...)`` sieve expression, or via `set_flag`
         """
 
         return ((flagname in self._flags) and
-                (self.key(data) in self._flags[flagname]))
+                (self._flags[flagname].get(self.key(data), False)))
 
 
-    def set_flag(self, flagname, data):
+    def set_flag(
+            self,
+            flagname: str,
+            data: dict):
         """
         Records the given data as having been flagged with the given
         flagname.
         """
 
-        bfl = self._flags.get(flagname)
+        bfl: Dict[Any, bool] = self._flags.get(flagname)
         if bfl is None:
             # we want to preserve the order
-            bfl = self._flags[flagname] = {}
+            self._flags[flagname] = bfl = {}
 
         bfl[self.key(data)] = True
 

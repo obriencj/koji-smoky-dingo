@@ -26,7 +26,8 @@ dicts.
 from abc import abstractmethod
 from collections import defaultdict
 from itertools import islice
-from koji import BUILD_STATES
+from koji import BUILD_STATES, ClientSession
+from typing import Dict, Iterable, List
 from operator import itemgetter
 
 from . import (
@@ -46,6 +47,7 @@ from ..builds import (
 from ..common import unique
 from ..rpm import evr_compare, evr_split
 from ..tags import gather_tag_ids
+from ..types import BuildInfos
 
 
 __all__ = (
@@ -264,7 +266,7 @@ class EVRCompare(Sieve):
     def __repr__(self):
         # we don't want to auto-quote the token which the default
         # Sieve impl does.
-        return "".join(("(", self.name, " ", self.token, ")"))
+        return f"({self.name} {self.token})"
 
 
 class EVRCompareEQ(EVRCompare):
@@ -998,44 +1000,43 @@ def build_info_sieves():
     return sieves
 
 
-def build_info_sifter(source, params=None):
+def build_info_sifter(
+        source: str,
+        params: Dict[str, str] = None) -> Sifter:
     """
     Create a Sifter from the source using the default build-info
     Sieves.
 
     :param source: sieve expressions source
-    :type source: stream or str
-
-    :rtype: Sifter
     """
 
     return Sifter(build_info_sieves(), source, "id", params)
 
 
-def sift_builds(session, src_str, build_infos, params=None):
+def sift_builds(
+        session: ClientSession,
+        src_str: str,
+        build_infos: BuildInfos,
+        params: Dict[str, str] = None):
     """
     :param src_str: sieve expressions source
-    :type src_str: src
 
     :param build_infos: list of build info dicts to filter
-    :type build_infos: list[dict]
-
-    :rtype: dict[str,list[dict]]
     """
 
     sifter = build_info_sifter(src_str, params)
     return sifter(session, build_infos)
 
 
-def sift_nvrs(session, src_str, nvrs, params=None):
+def sift_nvrs(
+        session: ClientSession,
+        src_str: str,
+        nvrs: Iterable[str],
+        params: Dict[str, str] = None) -> Dict[str, List[dict]]:
     """
     :param src_str: sieve expressions source
-    :type src_str: src
 
     :param nvrs: list of NVRs to load and filter
-    :type nvrs: list[str]
-
-    :rtype: dict[str,list[dict]]
     """
 
     loaded = bulk_load_builds(session, nvrs, err=False)
