@@ -37,7 +37,7 @@ build: clean-built report-python flake8	## Produces a wheel using the default sy
 install: quick-test	## Installs using the default python for the current user
 	@$(PYTHON) -B -m pip.__main__ \
 		install --no-deps --user -I \
-		dist/kojismokydingo-$(VERSION)-py3-none-any.whl
+		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
 
 
 ##@ Cleanup
@@ -51,7 +51,7 @@ tidy:	## Removes stray eggs and .pyc files
 
 clean-built:
 	@rm -rf build/* dist/*
-	@if [ -f "$(ARCHIVE)" ] ; then rm -f "$(ARCHIVE)" ; fi
+	@if [ -f ./"$(ARCHIVE)" ] ; then rm -f ./"$(ARCHIVE)" ; fi
 
 
 clean: clean-built tidy	## Removes built content, test logs, coverage reports
