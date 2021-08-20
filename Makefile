@@ -36,7 +36,8 @@ build: clean-built report-python flake8	## Produces a wheel using the default sy
 
 install: quick-test	## Installs using the default python for the current user
 	@$(PYTHON) -B -m pip.__main__ \
-		install --no-deps --user -I $(BDIST_FILE)
+		install --no-deps --user -I \
+		dist/kojismokydingo-$(VERSION)-py3-none-any.whl
 
 
 ##@ Cleanup
