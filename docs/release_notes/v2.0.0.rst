@@ -6,10 +6,19 @@ Koji Smoky Dingo 2.0.0 Release Notes
 Version 2.0.0 continues the features from 1.0.0 with the following
 exceptions:
 
+
+General
+-------
 * Removes support for Python 2
+* Removes support for RHEL/CentOS 6 & 7
+
+
+API
+---
+
+* Adds typing annotations for majority of API
 * Drops dependency on `six`
 * `AppDirs` dependency is now a hard requirement
-* Removes support for RHEL 6 and RHEL 7
 * The `Sieve.__init__` method now accepts both positional and keyword
   options by default.
 * Removed the `Sieve.receive_options` and `Sieve.set_options` methods
@@ -19,6 +28,11 @@ exceptions:
   their own new module `kojismokydingo.rpm`
 * Added as_channelinfo, as_packageinfo, as_repoinfo, NoSuchPackage,
   NoSuchRepo to the core API
+
+
+Commands
+--------
+
 * Added support for more types to the ``open`` command: channel,
   package, repo, build-dir, tag-repo-dir, and tag-latest-dir
 * Added ``--print`` option to the ``open`` command

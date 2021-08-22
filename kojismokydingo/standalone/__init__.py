@@ -28,6 +28,7 @@ import sys
 from argparse import ArgumentParser
 from koji import GenericError
 from os.path import basename
+from typing import List
 
 from .. import AnonClientSession, BadDingo, ProfileClientSession
 from ..cli import AnonSmokyDingo, SmokyDingo, printerr
@@ -40,17 +41,26 @@ __all__ = (
 
 
 class LonelyDingo(SmokyDingo):
+    """
+    An adaptive layer to assist in converting a SmokyDingo instance
+    into a callable suitable for use as a console_scripts entry point.
+    """
 
-    default_profile = None
+
+    default_profile: str = None
+    """
+    when set this becomes the default value for the ``--profile=``
+    argument added to argument parser
+    """
 
 
     @classmethod
-    def main(cls, name=None, args=None):
+    def main(cls, name: str = None, args: List[str] = None):
         return cls(name)(args)
 
 
-    def create_session(self, options):
-        return ProfileClientSession(options)
+    def create_session(self, profile: str):
+        return ProfileClientSession(profile)
 
 
     def parser(self):
@@ -60,7 +70,7 @@ class LonelyDingo(SmokyDingo):
         return self.arguments(argp) or argp
 
 
-    def profile_arguments(self, parser):
+    def profile_arguments(self, parser: ArgumentParser) -> ArgumentParser:
         grp = parser.add_argument_group("Koji Profile options")
         addarg = grp.add_argument
 
@@ -121,8 +131,8 @@ class AnonLonelyDingo(LonelyDingo):
     entry point.
     """
 
-    def create_session(self, options):
-        return AnonClientSession(options)
+    def create_session(self, profile):
+        return AnonClientSession(profile)
 
 
 #

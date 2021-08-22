@@ -302,6 +302,13 @@ def gather_args(
 
 
 class Sifter():
+    """
+    A flagging data filter, compiled from an s-expression syntax.
+
+    Sifter instances are callable, and when invoked with a session and
+    a list of info dicts will perform filtering tests on the data to
+    determine which items match the predicates from the source syntax.
+    """
 
     def __init__(self,
                  sieves: Union[Dict[str, Type['Sieve']],
@@ -310,13 +317,6 @@ class Sifter():
                  key: KeySpec = "id",
                  params: Dict[str, str] = None):
         """
-        A flagging data filter, compiled from an s-expression syntax.
-
-        Sifter instances are callable, and when invoked with a session
-        and a list of info dicts will perform filtering tests on the
-        data to determine which items match the predicates from the
-        source syntax.
-
         :param sieves: list of classes to use in compiling the source
           str. Each class should be a subclass of Sieve. The name
           attribute of each class is used as the lookup value when
@@ -362,7 +362,7 @@ class Sifter():
         self._exprs = ensure_all_sieve(exprs)
 
 
-    def sieve_exprs(self):
+    def sieve_exprs(self) -> List['Sieve']:
         """
         The list of Sieve expressions in this Sifter
         """
@@ -383,7 +383,10 @@ class Sifter():
         return [self._convert(p) for p in parse_exprs(reader)]
 
 
-    def _convert_sieve_aliases(self, sym, args):
+    def _convert_sieve_aliases(
+            self,
+            sym: Symbol,
+            args: Tuple) -> Tuple[Symbol, Tuple]:
         """
         When there is no sieve with a matchin name for sym, we check if it
         could be a convenience alias for some other forms.
@@ -391,8 +394,6 @@ class Sifter():
         * (not-FOO ARGS...)  becomes  (not (FOO ARGS...))
         * (!FOO ARGS...)  becomes  (not (FOO ARGS...))
         * (BAR?)  becomes  (flagged BAR)
-
-        :rtype: Symbol, tuple
         """
 
         if sym.startswith("not-"):

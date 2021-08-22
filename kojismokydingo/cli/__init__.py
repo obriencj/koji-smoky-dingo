@@ -27,7 +27,7 @@ kojismokydingometa plugin.
 import sys
 
 from abc import ABCMeta, abstractmethod
-from argparse import ArgumentParser
+from argparse import Action, ArgumentParser, Namespace
 from contextlib import contextmanager
 from functools import partial
 from io import StringIO
@@ -38,7 +38,9 @@ from koji_cli.lib import activate_session, ensure_connection
 from operator import itemgetter
 from os import devnull
 from os.path import basename
-from typing import Any, Dict, List
+from typing import (
+    Any, Callable, Dict, Iterable, List, Optional,
+    Sequence, TextIO, Union, )
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
@@ -75,7 +77,10 @@ JSON_PRETTY_OPTIONS = {
 }
 
 
-def pretty_json(data, output=None, **pretty):
+def pretty_json(
+        data: Union[dict, int, str, list, tuple],
+        output: Optional[TextIO] = None,
+        **pretty):
     """
     Presents JSON in a pretty way.
 
@@ -85,6 +90,8 @@ def pretty_json(data, output=None, **pretty):
     :param data: value to be printed
 
     :param output: stream to print to. Default, `sys.stdout`
+
+    :param pretty: additional or overriding options to `json.dump`
     """
 
     if output is None:
@@ -99,7 +106,9 @@ def pretty_json(data, output=None, **pretty):
     print(file=output)
 
 
-def find_action(parser, key):
+def find_action(
+        parser: ArgumentParser,
+        key: str) -> Optional[Action]:
     """
     Hunts through a parser to discover an action whose dest, metavar,
     or option strings matches the given key.
@@ -107,6 +116,8 @@ def find_action(parser, key):
     :param parser: argument parser to search within
 
     :param key: the dest, metavar, or option string of the action
+
+    :returns: the first matching Action, or None
     """
 
     for act in parser._actions:
@@ -116,10 +127,16 @@ def find_action(parser, key):
     return None
 
 
-def remove_action(parser, key):
+def remove_action(
+        parser: ArgumentParser,
+        key: str):
     """
     Hunts through a parser to remove an action based on the given key. The
     key can match either the dest, the metavar, or the option strings.
+
+    :param parser: argument parser to remove the action from
+
+    :param key: value to identify the action by
     """
 
     found = find_action(parser, key)
@@ -136,7 +153,9 @@ def remove_action(parser, key):
             grp._group_actions.remove(found)
 
 
-def resplit(arglist, sep=","):
+def resplit(
+        arglist: Iterable[str],
+        sep: str = ",") -> List[str]:
     """
     Collapses comma-separated and multi-specified items into a single
     list. Useful with ``action="append"`` in an argparse
@@ -149,6 +168,10 @@ def resplit(arglist, sep=","):
     to become
 
     ``x = [1, 2, 3, 4, 5, 6, 7, 8]``
+
+    :param arglist: original series of arguments to be resplit
+
+    :param sep: separator character
     """
 
     work = map(str.strip, sep.join(arglist).split(sep))
@@ -156,7 +179,9 @@ def resplit(arglist, sep=","):
 
 
 @contextmanager
-def open_output(filename="-", append=None):
+def open_output(
+        filename: str = "-",
+        append: Optional[bool] = None):
     """
     Context manager for a CLI output file.
 
@@ -196,7 +221,9 @@ def open_output(filename="-", append=None):
         stream.close()
 
 
-def clean_lines(lines, skip_comments=True):
+def clean_lines(
+        lines: Iterable[str],
+        skip_comments: bool = True) -> List[str]:
     """
     Filters clean lines from a sequence.
 
@@ -220,7 +247,9 @@ def clean_lines(lines, skip_comments=True):
     return list(filter(None, lines))
 
 
-def read_clean_lines(filename="-", skip_comments=True):
+def read_clean_lines(
+        filename: str = "-",
+        skip_comments: bool = True) -> List[str]:
     """
     Reads clean lines from a named file. If filename is ``-`` then
     read from `sys.stdin` instead.
@@ -252,7 +281,11 @@ def read_clean_lines(filename="-", skip_comments=True):
             return clean_lines(fin)
 
 
-def printerr(*values, sep=' ', end='\n', flush=False):
+def printerr(
+        *values: Any,
+        sep: str = ' ',
+        end: str = '\n',
+        flush: bool = False):
     """
     Prints values to stderr by default
 
@@ -270,8 +303,13 @@ def printerr(*values, sep=' ', end='\n', flush=False):
     return print(*values, sep=sep, end=end, file=sys.stderr, flush=flush)
 
 
-def tabulate(headings, data, key=None, sorting=0,
-             quiet=None, out=None):
+def tabulate(
+        headings: Sequence[str],
+        data: Any,
+        key: Callable = None,
+        sorting: int = 0,
+        quiet: Union[bool, None] = None,
+        out: TextIO = None):
     """
     Prints tabulated data, with the given headings.
 
@@ -346,7 +384,7 @@ def tabulate(headings, data, key=None, sorting=0,
         print(fmt.format(*row), file=out)
 
 
-def space_normalize(txt):
+def space_normalize(txt: str) -> str:
     """
     Normalizes the whitespace in txt to single spaces.
 
@@ -356,7 +394,7 @@ def space_normalize(txt):
     return " ".join(txt.split())
 
 
-def int_or_str(value):
+def int_or_str(value: Any) -> Union[int, str]:
     """
     For use as an argument type where the value may be either an int
     (if it is entirely numeric) or a str.
@@ -460,7 +498,7 @@ class SmokyDingo(metaclass=ABCMeta):
         self.session: ClientSession = None
 
 
-    def get_plugin_config(self, key, default=None):
+    def get_plugin_config(self, key: str, default=None):
         if self.config is None:
             profile = self.goptions.profile if self.goptions else None
             self.config = load_plugin_config(self.name, profile)
@@ -468,18 +506,18 @@ class SmokyDingo(metaclass=ABCMeta):
         return self.config.get(key, default)
 
 
-    def parser(self):
+    def parser(self) -> ArgumentParser:
         """
         Creates a new ArgumentParser instance and decorates it with
         arguments from the `arguments` method.
         """
 
-        invoke = " ".join((basename(sys.argv[0]), self.name))
+        invoke = f"{basename(sys.argv[0])} {self.name}"
         argp = ArgumentParser(prog=invoke, description=self.description)
         return self.arguments(argp) or argp
 
 
-    def arguments(self, parser):
+    def arguments(self, parser: ArgumentParser):
         """
         Override to add relevant arguments to the given parser instance.
         May return an alternative parser instance or None.
@@ -490,7 +528,10 @@ class SmokyDingo(metaclass=ABCMeta):
         pass
 
 
-    def validate(self, parser, options):
+    def validate(
+            self,
+            parser: ArgumentParser,
+            options: Namespace):
         """
         Override to perform validation on options values. Return value is
         ignored, use `parser.error` if needed.
@@ -499,7 +540,9 @@ class SmokyDingo(metaclass=ABCMeta):
         pass
 
 
-    def pre_handle(self, options):
+    def pre_handle(
+            self,
+            options: Namespace):
         """
         Verify necessary permissions are in place before attempting any
         further calls.
@@ -516,7 +559,8 @@ class SmokyDingo(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def handle(self, options):
+    def handle(self,
+               options: Namespace) -> Optional[int]:
         """
         Perform the full set of actions for this command.
         """
@@ -553,10 +597,11 @@ class SmokyDingo(metaclass=ABCMeta):
                 pass
 
 
-    def __call__(self,
-                 goptions: GOptions,
-                 session: ClientSession,
-                 args: List[str]) -> int:
+    def __call__(
+            self,
+            goptions: GOptions,
+            session: ClientSession,
+            args: List[str]) -> int:
         """
         This is the koji CLI handler interface. The global options, the
         session, and the unparsed command arguments are provided.
