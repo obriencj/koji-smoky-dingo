@@ -80,10 +80,7 @@ def config():
         ],
 
         "package_data": {
-            "kojismokydingo": ["py.typed", "*.pyi"],
-            "kojismokydingo.cli": ["*.pyi"],
-            "kojismokydingo.sift": ["*.pyi"],
-            "kojismokydingo.standalone": ["*.pyi"],
+            "kojismokydingo": ["py.typed", ],
         },
 
         "install_requires": [
