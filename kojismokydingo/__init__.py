@@ -28,7 +28,7 @@ from koji import (
 from koji_cli.lib import activate_session, ensure_connection
 from typing import (
     Any, Callable, Dict, Iterator, Iterable, List,
-    Optional, Sequence, Tuple, Union, )
+    Optional, Sequence, Tuple, Union, cast)
 
 from .common import chunkseq
 from .types import (
@@ -36,6 +36,7 @@ from .types import (
     BuildInfo, BuildSpec,
     HostInfo, HostSpec,
     HubVersionSpec,
+    RepoInfo, RepoSpec,
     RPMInfo, RPMInfos, RPMSignature, RPMSpec,
     TagInfo, TagSpec,
     TargetInfo, TargetSpec,
@@ -835,6 +836,9 @@ def as_taskinfo(
      * int, will attempt to load as a task ID
      * dict, will presume already a task info
 
+    Note that if this function does attempt to load a task, it will
+    request it with the task's request data as well.
+
     :param session: active koji session
 
     :param task: value to lookup
@@ -991,7 +995,9 @@ def as_archiveinfo(
     return info
 
 
-def as_repoinfo(session, repo):
+def as_repoinfo(
+        session: ClientSession,
+        repo: RepoSpec) -> RepoInfo:
     """
     Coerces a repo value into a Repo info dict.
 
@@ -1005,13 +1011,14 @@ def as_repoinfo(session, repo):
     :since: 2.0
     """
 
-    info = None
+    info: RepoInfo = None
 
     if isinstance(repo, dict):
         if "name" in repo:
-            repo = repo["name"]
+            tag = cast(TagInfo, repo)
+            repo = tag["name"]
         else:
-            info = repo
+            info = cast(RepoInfo, repo)
 
     if isinstance(repo, str):
         repotag = session.getRepo(repo)

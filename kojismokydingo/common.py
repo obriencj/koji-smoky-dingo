@@ -339,7 +339,7 @@ DATETIME_FORMATS = (
 
 def parse_datetime(
         src: str,
-        strict: bool = True) -> Optional[datetime]:
+        strict: bool = True) -> datetime:
     """
     Attempts to parse a datetime string in numerous ways based on
     pre-defined regex mappings
@@ -363,7 +363,7 @@ def parse_datetime(
 
     :param strict: Raise an exception if no matching format is known
       and the date-time text cannot be parsed. If False, simply return
-      `None`
+      `None` when the value cannot be parsed.
 
     :raises ValueError: if strict and no src matches none of the
       pre-defined formats

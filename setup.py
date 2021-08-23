@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # This library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +17,6 @@
 """
 Koji Smoky Dingo - a collection of Koji command-line features for
 advanced users.
-
-Note that this package needs the kojismokydingometa plugin to be
-installed in order for the plugins to be loaded by the Koji CLI.
 
 :author: Christopher O'Brien  <obriencj@gmail.com>
 :license: GPL version 3
