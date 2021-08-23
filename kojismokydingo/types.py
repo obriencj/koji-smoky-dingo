@@ -76,6 +76,11 @@ __all__ = (
     "TagInfos",
     "TagInheritance",
     "TagInheritanceEntry",
+    "TagGroup",
+    "TagGroups",
+    "TagGroupPackage",
+    "TagPackageList",
+    "TagPackageListEntry",
     "TagSpec",
     "TargetInfo",
     "TargetInfos",
@@ -861,6 +866,68 @@ class DecoratedTagExtra(TypedDict):
 
 
 DecoratedTagExtras = Dict[str, DecoratedTagExtra]
+
+
+class TagPackageListEntry(TypedDict):
+    """
+    ``listPackages`` XMLRPC call.
+    """
+
+    blocked: bool
+    """ if True this entry represents a block """
+
+    extra_arches: str
+    """ additional architectures, separated by spaces """
+
+    owner_id: int
+    """ ID of the user who is the owner of the package for this tag """
+
+    owner_name: str
+    """ name of the user who is the owner of the package for this tag """
+
+    package_id: int
+    """ ID of the package """
+
+    package_name: str
+    """ name of the package """
+
+    tag_id: int
+    """ ID of the package listing's tag """
+
+    tag_name: str
+    """ name of the package listing's tag """
+
+
+TagPackageList = List[TagPackageListEntry]
+
+
+class TagGroupPackage(TypedDict):
+    basearchonly: str
+    blocked: bool
+    group_id: int
+    package: str
+    requires: str
+    tag_id: int
+    type: str
+
+
+class TagGroup(TypedDict):
+    biarchonly: bool
+    blocked: bool
+    description: str
+    display_name: str
+    exported: bool
+    group_id: int
+    grouplist: List
+    is_default: bool
+    langonly: str
+    name: str
+    packagelist: List[TagGroupPackage]
+    tag_id: int
+    uservisible: bool
+
+
+TagGroups = List[TagGroup]
 
 
 class TaskState(IntEnum):

@@ -33,8 +33,8 @@ master_doc = 'index'
 # for a list of supported languages.
 language = 'English'
 
-# Whe the actual fuck is this not the default everywhere for
-# everything all the time forever.
+# Why is this not the default everywhere for everything all the time
+# forever? Use ISO-8601 or GTFO.
 today_fmt = '%Y-%m-%d'
 
 default_role = 'py:obj'
