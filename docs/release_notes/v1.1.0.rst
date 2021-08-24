@@ -8,6 +8,8 @@ This release adds the following:
 - `evr-high` and `evr-low` build filtering sieves. Reduces builds of
   the same package name to a single build of either the highest or
   lowest EVR, respectively
+- fixed backtrace in the `latest-archives` command where the validate
+  function was incompletely decorating a path option
 
 Closed Issues:
 <https://github.com/obriencj/koji-smoky-dingo/milestone/8?closed=1>
