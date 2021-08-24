@@ -243,6 +243,13 @@ class LatestArchives(AnonSmokyDingo, ArchiveFiltering):
 
 
     def validate(self, parser, options):
+
+        goptions = self.goptions
+        if options.as_url:
+            options.path = goptions.topurl
+        else:
+            options.path = goptions.topdir
+
         return self.validate_archive_options(parser, options)
 
 
