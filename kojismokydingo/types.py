@@ -52,6 +52,7 @@ __all__ = (
     "ArchiveSpec",
     "BuildInfo",
     "BuildInfos",
+    "BuildrootInfo",
     "BuildSpec",
     "BuildState",
     "ChecksumType",
@@ -59,6 +60,7 @@ __all__ = (
     "DecoratedHostInfos",
     "DecoratedTagExtra",
     "DecoratedTagExtras",
+    "GOptions",
     "HostInfo",
     "HubVersionSpec",
     "KeySpec",
@@ -175,6 +177,10 @@ ArchiveSpec = Union[int, str, ArchiveInfo]
 """
 An archive ID, filename, or info dict
 """
+
+
+class BuildrootInfo(TypedDict):
+    pass
 
 
 class BuildState(IntEnum):
@@ -300,10 +306,18 @@ class BuildInfo(TypedDict):
     stored on """
 
 
+class ImageBuildInfo(BuildInfo):
+    pass
+
+
 class MavenBuildInfo(BuildInfo):
     maven_group_id: str
     maven_artifact_id: str
     maven_version: str
+
+
+class WindowsBuildInfo(BuildInfo):
+    platform: str
 
 
 class DecoratedBuildInfo(BuildInfo):
@@ -337,32 +351,6 @@ BuildSpec = Union[int, str, BuildInfo]
 An indicator for a build in cases where the build may be
 communicated as its ID, its NVR, or as an already-loaded BuildInfo
 """
-
-
-class DecoratedArchiveInfo(ArchiveInfo):
-    pass
-
-
-DecoratedArchiveInfos = Iterable[DecoratedArchiveInfo]
-
-
-class MavenArchiveInfo(ArchiveInfo):
-    """
-    An ArchiveInfo with additional fields representing the maven GAV
-    (Group, Artifact, Version)
-    """
-
-    artifact_id: str
-    """ The maven artifact's name """
-
-    group_id: str
-    """ The maven artifact's group """
-
-    version: str
-    """ The maven artifact's version """
-
-
-MavenArchiveInfos = Iterable[MavenArchiveInfo]
 
 
 PathSpec = Union[str, PathInfo]
@@ -466,15 +454,43 @@ class DecoratedRPMInfo(RPMInfo):
 DecoratedRPMInfos = Iterable[DecoratedRPMInfo]
 
 
+class DecoratedArchiveInfo(ArchiveInfo):
+    filepath: str
+
+
+DecoratedArchiveInfos = Iterable[DecoratedArchiveInfo]
+
+
+class MavenArchiveInfo(ArchiveInfo):
+    """
+    An ArchiveInfo with additional fields representing the maven GAV
+    (Group, Artifact, Version)
+    """
+
+    artifact_id: str
+    """ The maven artifact's name """
+
+    group_id: str
+    """ The maven artifact's group """
+
+    version: str
+    """ The maven artifact's version """
+
+
+MavenArchiveInfos = Iterable[MavenArchiveInfo]
+
+
 class WindowsArchiveInfo(ArchiveInfo):
     platforms: List[str]
+    relpath: str
+    flags: str
 
 
 WindowsArchiveInfos = Iterable[WindowsArchiveInfo]
 
 
 class ImageArchiveInfo(ArchiveInfo):
-    pass
+    arch: str
 
 
 ImageArchiveInfos = Iterable[ImageArchiveInfo]
@@ -945,6 +961,7 @@ class TaskInfo(TypedDict):
     """
 
     arch: str
+    """ task architecture, or 'noarch' """
 
     awaited: Union[bool, None]
     """ True if this task is currently being waiting-for by its parent
@@ -1039,6 +1056,10 @@ class GOptions(Values):
     """
     Represents the koji client configuration options as provided by the
     baseline koji CLI.
+
+    `Values` instances with these fields are fed to
+    `kojismokydingo.cli.SmokyDingo` instances via their ``__call__``
+    handlers.
 
     Note that koji uses the `optparse` package, while koji smoky dingo
     uses the `argparse` package.
