@@ -13,7 +13,15 @@
 
 
 """
-Typing annotations for the koji XMLRPC API
+Koji - type stubs
+
+Typing annotations stub for the parts of koji used by koji smoky
+dingo. In particular there are annotations for the virtual XMLRPC
+methods on the ClientSession class which should help check that the
+calls are being used correctly.
+
+:author: Christopher O'Brien <obriencj@gmail.com>
+:license: GPL v3
 """
 
 
@@ -21,9 +29,10 @@ from typing import (
     Any, Dict, List, Optional, TypedDict, Tuple, Union, )
 
 from kojismokydingo.types import (
-    ArchiveInfo, BuildInfo, BuildrootInfo, ChannelInfo,
-    CGInfo, HostInfo, PermInfo, RPMInfo, TagInfo, TagInheritance,
-    TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
+    ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
+    ChannelInfo, CGInfo, HostInfo, PermInfo, RepoInfo, RPMInfo, TagInfo,
+    TagGroup, TagInheritance, TagPackageInfo, TargetInfo, TaskInfo,
+    UserInfo, )
 
 
 BUILD_STATES: Dict[str, int]
@@ -123,11 +132,6 @@ class PathInfo:
         ...
 
 
-TODO = Any
-""" this type alias is a placeholder for cases where I am unsure what
-the actual type of a parameter is """
-
-
 class ClientSession:
 
     baseurl: str
@@ -154,6 +158,23 @@ class ClientSession:
         pass
 
     def getAllPerms(self) -> List[PermInfo]:
+        ...
+
+    def getArchive(
+            self,
+            archive_id: int,
+            strict: bool = False) -> ArchiveInfo:
+        ...
+
+    def getArchiveType(
+            self,
+            filename: Optional[str] = None,
+            type_name: Optional[str] = None,
+            type_id: Optional[int] = None,
+            strict: bool = False) -> ArchiveTypeInfo:
+        ...
+
+    def getArchiveTypes(self) -> List[ArchiveTypeInfo]:
         ...
 
     def getBuild(
@@ -243,6 +264,16 @@ class ClientSession:
             blocked: bool = False) -> TagInfo:
         ...
 
+    def getTagGroups(
+            self,
+            tag: Union[int, str],
+            event: Optional[int] = None,
+            inherit: bool = True,
+            incl_pkgs: bool = True,
+            incl_reqs: bool = True,
+            incl_blocked: bool = False) -> List[TagGroup]:
+        ...
+
     def getTaskInfo(
             self,
             task_id: int,
@@ -275,6 +306,12 @@ class ClientSession:
             imageID: Optional[int] = None,
             archiveID: Optional[int] = None,
             strict: bool = False) -> List[ArchiveInfo]:
+        ...
+
+    def listBTypes(
+            self,
+            query: Optional[Dict[str,str]] = None,
+            queryOpts: Optional[dict] = None) -> List[BTypeInfo]:
         ...
 
     def listCGs(self) -> Dict[str, CGInfo]:
@@ -334,6 +371,12 @@ class ClientSession:
             self,
             strict: bool = False,
             batch: Optional[int] = None) -> List[Union[FaultInfo, List[Any]]]:
+        ...
+
+    def repoInfo(
+            self,
+            repo_id: int,
+            struct: bool = False) -> RepoInfo:
         ...
 
     def tagBuildBypass(

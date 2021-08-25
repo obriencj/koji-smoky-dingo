@@ -28,8 +28,8 @@ from typing import (
 
 from . import as_buildinfo, as_taginfo, bulk_load, bulk_load_rpm_sigs
 from .types import (
-    ArchiveInfo, ArchiveInfos, BuildInfo, DecoratedArchiveInfo,
-    DecoratedArchiveInfos, DecoratedBuildInfo,
+    ArchiveInfo, ArchiveInfos, ArchiveTypeInfo, BuildInfo,
+    DecoratedArchiveInfo, DecoratedArchiveInfos, DecoratedBuildInfo,
     DecoratedRPMInfo, DecoratedRPMInfos,
     PathSpec, RPMInfos, )
 

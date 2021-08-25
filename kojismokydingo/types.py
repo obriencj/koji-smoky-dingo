@@ -50,11 +50,13 @@ __all__ = (
     "ArchiveInfo",
     "ArchiveInfos",
     "ArchiveSpec",
+    "ArchiveTypeInfo",
     "BuildInfo",
     "BuildInfos",
     "BuildrootInfo",
     "BuildSpec",
     "BuildState",
+    "BTypeInfo",
     "ChannelInfo",
     "ChecksumType",
     "CGInfo",
@@ -205,6 +207,21 @@ ArchiveSpec = Union[int, str, ArchiveInfo]
 """
 An archive ID, filename, or info dict
 """
+
+
+class ArchiveTypeInfo(TypedDict):
+
+    description: str
+    """ short title of the type """
+
+    extensions: str
+    """ space separated extensions for this type """
+
+    id: int
+    """ the internal ID of the archive type """
+
+    name: str
+    """ the name of the archive type """
 
 
 class BuildrootInfo(TypedDict):
@@ -375,6 +392,14 @@ BuildSpec = Union[int, str, BuildInfo]
 An indicator for a build in cases where the build may be
 communicated as its ID, its NVR, or as an already-loaded BuildInfo
 """
+
+
+class BTypeInfo(TypedDict):
+    id: int
+    """ the internal ID of the btype """
+
+    name: str
+    """ the name of the btype """
 
 
 PathSpec = Union[str, PathInfo]
