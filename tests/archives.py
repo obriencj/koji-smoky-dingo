@@ -13,8 +13,8 @@
 
 
 from koji import PathInfo
-from mock import MagicMock
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from kojismokydingo.archives import (
     as_pathinfo,

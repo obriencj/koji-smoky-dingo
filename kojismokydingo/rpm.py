@@ -30,6 +30,7 @@ __all__ = (
 import re
 
 from itertools import zip_longest
+from typing import Tuple
 
 
 def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
@@ -40,7 +41,7 @@ def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
     return tuple(i for i in _split(s) if (i.isalnum() or i.startswith("~")))
 
 
-def _rpm_str_compare(left, right):
+def _rpm_str_compare(left: str, right: str) -> int:
     """
     Comparison of left and right by RPM version comparison rules.
 
@@ -104,7 +105,9 @@ def _rpm_str_compare(left, right):
         return 0
 
 
-def evr_compare(left_evr, right_evr):
+def evr_compare(
+        left_evr: Tuple[str, str, str],
+        right_evr: Tuple[str, str, str]) -> int:
     """
     Compare two (Epoch, Version, Release) tuples.
 
@@ -118,12 +121,8 @@ def evr_compare(left_evr, right_evr):
     * -1 if left_evr is less-than right_evr
 
     :param left_evr: The left Epoch, Version, Release for comparison
-    :type left_evr: (str, str, str)
 
     :param right_evr: The right Epoch, Version, Release for comparison
-    :type right_evr: (str, str, str)
-
-    :rtype: int
     """
 
     for lp, rp in zip_longest(left_evr, right_evr, fillvalue="0"):
@@ -141,7 +140,7 @@ def evr_compare(left_evr, right_evr):
         return 0
 
 
-def nevra_split(nevra):
+def nevra_split(nevra: str) -> Tuple[str, str, str, str, str]:
     """
     Splits an NEVRA into a five-tuple representing the name, epoch,
     version, release, and arch.
@@ -177,7 +176,7 @@ def nevra_split(nevra):
     return name, epoch, version, release, arch
 
 
-def nevr_split(nevr):
+def nevr_split(nevr: str) -> Tuple[str, str, str, str]:
     """
     Splits an NEVR into a four-tuple represending the name, epoch,
     version, and release.
@@ -219,7 +218,7 @@ def nevr_split(nevr):
     return name, epoch, version, release
 
 
-def evr_split(evr):
+def evr_split(evr: str) -> Tuple[str, str, str]:
     """
     Splits an EVR into a dict with the keys epoch, version, and release.
 

@@ -27,19 +27,24 @@ kojismokydingometa plugin.
 import sys
 
 from abc import ABCMeta, abstractmethod
-from argparse import ArgumentParser
+from argparse import Action, ArgumentParser, Namespace
 from contextlib import contextmanager
 from functools import partial
 from io import StringIO
 from itertools import zip_longest
 from json import dump
-from koji import GenericError
+from koji import ClientSession, GenericError
 from koji_cli.lib import activate_session, ensure_connection
+from operator import itemgetter
 from os import devnull
 from os.path import basename
+from typing import (
+    Any, Callable, Dict, Iterable, List, Optional,
+    Sequence, TextIO, Union, )
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
+from ..types import GOptions
 
 
 __all__ = (
@@ -72,7 +77,10 @@ JSON_PRETTY_OPTIONS = {
 }
 
 
-def pretty_json(data, output=None, **pretty):
+def pretty_json(
+        data: Union[dict, int, str, list, tuple],
+        output: Optional[TextIO] = None,
+        **pretty):
     """
     Presents JSON in a pretty way.
 
@@ -81,13 +89,9 @@ def pretty_json(data, output=None, **pretty):
 
     :param data: value to be printed
 
-    :type data: int or str or dict or list or None
-
     :param output: stream to print to. Default, `sys.stdout`
 
-    :type output: io.TextIOBase, optional
-
-    :rtype: None
+    :param pretty: additional or overriding options to `json.dump`
     """
 
     if output is None:
@@ -102,10 +106,18 @@ def pretty_json(data, output=None, **pretty):
     print(file=output)
 
 
-def find_action(parser, key):
+def find_action(
+        parser: ArgumentParser,
+        key: str) -> Optional[Action]:
     """
     Hunts through a parser to discover an action whose dest, metavar,
     or option strings matches the given key.
+
+    :param parser: argument parser to search within
+
+    :param key: the dest, metavar, or option string of the action
+
+    :returns: the first matching Action, or None
     """
 
     for act in parser._actions:
@@ -115,10 +127,16 @@ def find_action(parser, key):
     return None
 
 
-def remove_action(parser, key):
+def remove_action(
+        parser: ArgumentParser,
+        key: str):
     """
     Hunts through a parser to remove an action based on the given key. The
     key can match either the dest, the metavar, or the option strings.
+
+    :param parser: argument parser to remove the action from
+
+    :param key: value to identify the action by
     """
 
     found = find_action(parser, key)
@@ -135,7 +153,9 @@ def remove_action(parser, key):
             grp._group_actions.remove(found)
 
 
-def resplit(arglist, sep=","):
+def resplit(
+        arglist: Iterable[str],
+        sep: str = ",") -> List[str]:
     """
     Collapses comma-separated and multi-specified items into a single
     list. Useful with ``action="append"`` in an argparse
@@ -148,6 +168,10 @@ def resplit(arglist, sep=","):
     to become
 
     ``x = [1, 2, 3, 4, 5, 6, 7, 8]``
+
+    :param arglist: original series of arguments to be resplit
+
+    :param sep: separator character
     """
 
     work = map(str.strip, sep.join(arglist).split(sep))
@@ -155,7 +179,9 @@ def resplit(arglist, sep=","):
 
 
 @contextmanager
-def open_output(filename="-", append=None):
+def open_output(
+        filename: str = "-",
+        append: Optional[bool] = None):
     """
     Context manager for a CLI output file.
 
@@ -195,7 +221,9 @@ def open_output(filename="-", append=None):
         stream.close()
 
 
-def clean_lines(lines, skip_comments=True):
+def clean_lines(
+        lines: Iterable[str],
+        skip_comments: bool = True) -> List[str]:
     """
     Filters clean lines from a sequence.
 
@@ -207,14 +235,8 @@ def clean_lines(lines, skip_comments=True):
 
     :param lines: Sequence of lines to process
 
-    :type lines: Iterator[str]
-
     :param skip_comments: Skip over lines with leading # characters.
       Default, True
-
-    :type skip_comments: bool, optional
-
-    :rtype: List[str]
     """
 
     if skip_comments:
@@ -225,7 +247,9 @@ def clean_lines(lines, skip_comments=True):
     return list(filter(None, lines))
 
 
-def read_clean_lines(filename="-", skip_comments=True):
+def read_clean_lines(
+        filename: str = "-",
+        skip_comments: bool = True) -> List[str]:
     """
     Reads clean lines from a named file. If filename is ``-`` then
     read from `sys.stdin` instead.
@@ -242,14 +266,8 @@ def read_clean_lines(filename="-", skip_comments=True):
     :param filename: File name to read lines from, or ``-`` to indicate
       stdin. Default, read from `sys.stdin`
 
-    :type filename: str, optional
-
     :param skip_comments: Skip over lines with leading # characters.
       Default, True
-
-    :type skip_comments: bool, optional
-
-    :rtype: list[str]
     """
 
     if not filename:
@@ -263,11 +281,35 @@ def read_clean_lines(filename="-", skip_comments=True):
             return clean_lines(fin)
 
 
-printerr = partial(print, file=sys.stderr)
+def printerr(
+        *values: Any,
+        sep: str = ' ',
+        end: str = '\n',
+        flush: bool = False):
+    """
+    Prints values to stderr by default
+
+    :param values: values to be printed
+
+    :param sep: text inserted between values, defaults to a space
+
+    :param end: text appended after the last value, defaults to a newline
+
+    :param flush: forcibly flush the stream
+    """
+
+    # we don't use a partial because docs can't figure out a signature
+    # for print
+    return print(*values, sep=sep, end=end, file=sys.stderr, flush=flush)
 
 
-def tabulate(headings, data, key=None, sorting=0,
-             quiet=None, out=None):
+def tabulate(
+        headings: Sequence[str],
+        data: Any,
+        key: Callable = None,
+        sorting: int = 0,
+        quiet: Union[bool, None] = None,
+        out: TextIO = None):
     """
     Prints tabulated data, with the given headings.
 
@@ -280,35 +322,21 @@ def tabulate(headings, data, key=None, sorting=0,
 
     :param headings: The column titles
 
-    :type headings: list[str]
-
     :param data: Rows of data
-
-    :type data: list
 
     :param key: Transformation to apply to each row of data to get the
       actual individual columns. Should be a unary function. Default,
       data is iterated as-is.
-
-    :type key: Callable[[object], object]
 
     :param sorting: Whether data rows should be sorted and in what
       direction. 0 for no sorting, 1 for ascending, -1 for
       descending. If key is specified, then sorting will be based on
       those transformations. Default, no sorting.
 
-    :type sorting: int, optional
-
     :param quiet: Whether to print headings or not. Default, only print
       headings if out is a TTY device.
 
-    :type quiet: bool, optional
-
     :param out: Stream to write output to. Default, `sys.stdout`
-
-    :type out: io.TextIOBase, optional
-
-    :rtype: None
     """
 
     if out is None:
@@ -320,9 +348,12 @@ def tabulate(headings, data, key=None, sorting=0,
     if quiet is None:
         quiet = not out.isatty()
 
-    # convert data to a list, and apply the key if necessary to find
-    # the real columns
-    if key:
+    if key is not None:
+        if not callable(key):
+            key = itemgetter(key)
+
+        # convert data to a list, and apply the key if necessary to find
+        # the real columns
         data = map(key, data)
 
     if sorting:
@@ -353,25 +384,20 @@ def tabulate(headings, data, key=None, sorting=0,
         print(fmt.format(*row), file=out)
 
 
-def space_normalize(txt):
+def space_normalize(txt: str) -> str:
     """
     Normalizes the whitespace in txt to single spaces.
 
     :param txt: Original text
-    :type txt: str
-
-    :rtype: str
     """
 
     return " ".join(txt.split())
 
 
-def int_or_str(value):
+def int_or_str(value: Any) -> Union[int, str]:
     """
     For use as an argument type where the value may be either an int
     (if it is entirely numeric) or a str.
-
-    :rtype: str or int
     """
 
     if isinstance(value, str):
@@ -423,18 +449,18 @@ class SmokyDingo(metaclass=ABCMeta):
         sub-command
     """
 
-    group = "misc"
-    description = "A CLI Plugin"
+    group: str = "misc"
+    description: str = "A CLI Plugin"
 
     # permission name required for use of this command. A value of
     # None indicates anonymous access. Checked in the pre_handle
     # method.
-    permission = None
+    permission: str = None
 
 
-    def __init__(self, name=None):
+    def __init__(self, name: str = None):
         if name is not None:
-            self.name = name
+            self.name: str = name
 
         elif getattr(self, "name", None) is None:
             # check that the class doesn't already define a name as a
@@ -444,13 +470,13 @@ class SmokyDingo(metaclass=ABCMeta):
 
         # this is used to register the command with koji in a manner
         # that it expects to deal with
-        self.__name__ = "handle_" + self.name.replace("-", "_")
+        self.__name__: str = "handle_" + self.name.replace("-", "_")
 
         # this is necessary for koji to recognize us as a cli command.
         # We only set this on instances, not on the class itself,
         # because it is only the instances which should be used that
         # way.
-        self.exported_cli = True
+        self.exported_cli: bool = True
 
         # allow a docstr to be specified on subclasses, but if absent
         # let's set it based on the group and description.
@@ -464,15 +490,15 @@ class SmokyDingo(metaclass=ABCMeta):
             self.__doc__ = desc
 
         # populated by the get_plugin_config method
-        self.config = None
+        self.config: Dict[str, Any] = None
 
         # these will be populated once the command instance is
         # actually called
-        self.goptions = None
-        self.session = None
+        self.goptions: GOptions = None
+        self.session: ClientSession = None
 
 
-    def get_plugin_config(self, key, default=None):
+    def get_plugin_config(self, key: str, default=None):
         if self.config is None:
             profile = self.goptions.profile if self.goptions else None
             self.config = load_plugin_config(self.name, profile)
@@ -480,29 +506,32 @@ class SmokyDingo(metaclass=ABCMeta):
         return self.config.get(key, default)
 
 
-    def parser(self):
+    def parser(self) -> ArgumentParser:
         """
         Creates a new ArgumentParser instance and decorates it with
         arguments from the `arguments` method.
-
-        :rtype: `argparse.ArgumentParser`
         """
 
-        invoke = " ".join((basename(sys.argv[0]), self.name))
+        invoke = f"{basename(sys.argv[0])} {self.name}"
         argp = ArgumentParser(prog=invoke, description=self.description)
         return self.arguments(argp) or argp
 
 
-    def arguments(self, parser):
+    def arguments(self, parser: ArgumentParser):
         """
         Override to add relevant arguments to the given parser instance.
         May return an alternative parser instance or None.
+
+        :param parser: the parser to decorate with additional arguments
         """
 
         pass
 
 
-    def validate(self, parser, options):
+    def validate(
+            self,
+            parser: ArgumentParser,
+            options: Namespace):
         """
         Override to perform validation on options values. Return value is
         ignored, use `parser.error` if needed.
@@ -511,7 +540,9 @@ class SmokyDingo(metaclass=ABCMeta):
         pass
 
 
-    def pre_handle(self, options):
+    def pre_handle(
+            self,
+            options: Namespace):
         """
         Verify necessary permissions are in place before attempting any
         further calls.
@@ -528,7 +559,8 @@ class SmokyDingo(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def handle(self, options):
+    def handle(self,
+               options: Namespace) -> Optional[int]:
         """
         Perform the full set of actions for this command.
         """
@@ -565,7 +597,11 @@ class SmokyDingo(metaclass=ABCMeta):
                 pass
 
 
-    def __call__(self, goptions, session, args):
+    def __call__(
+            self,
+            goptions: GOptions,
+            session: ClientSession,
+            args: List[str]) -> int:
         """
         This is the koji CLI handler interface. The global options, the
         session, and the unparsed command arguments are provided.
@@ -609,7 +645,7 @@ class SmokyDingo(metaclass=ABCMeta):
             self.session = None
 
 
-class AnonSmokyDingo(SmokyDingo):
+class AnonSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which upon activation will connect to koji hub, but
     will not authenticate. This means only hub RPC endpoints which do
@@ -642,7 +678,7 @@ class AnonSmokyDingo(SmokyDingo):
         pass
 
 
-class AdminSmokyDingo(SmokyDingo):
+class AdminSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'admin' permission after
     activation.
@@ -652,7 +688,7 @@ class AdminSmokyDingo(SmokyDingo):
     permission = "admin"
 
 
-class TagSmokyDingo(SmokyDingo):
+class TagSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'tag' or 'admin' permission after
     activation.
@@ -662,7 +698,7 @@ class TagSmokyDingo(SmokyDingo):
     permission = "tag"
 
 
-class TargetSmokyDingo(SmokyDingo):
+class TargetSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'target' or 'admin' permission
     after activation.
@@ -672,7 +708,7 @@ class TargetSmokyDingo(SmokyDingo):
     permission = "target"
 
 
-class HostSmokyDingo(SmokyDingo):
+class HostSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'host' or 'admin' permisson
     after activation.

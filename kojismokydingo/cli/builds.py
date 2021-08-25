@@ -37,13 +37,13 @@ from .. import (
     bulk_load, bulk_load_builds, bulk_load_tags, iter_bulk_load,
     version_check, )
 from ..builds import (
-    BUILD_COMPLETE, BUILD_DELETED,
     BuildFilter,
     build_dedup, build_id_sort, build_nvr_sort,
     decorate_builds_btypes, decorate_builds_cg_list,
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_move_builds, iter_bulk_tag_builds, iter_bulk_untag_builds, )
 from ..tags import ensure_tag, gather_tag_ids
+from ..types import BuildInfo, BuildInfos, BuildState
 from ..common import chunkseq, unique
 
 
@@ -684,11 +684,13 @@ class BuildFiltering(BuildSifting):
         grp = grp.add_mutually_exclusive_group()
         addarg = grp.add_argument
 
-        addarg("--completed", action="store_const", const=BUILD_COMPLETE,
+        addarg("--completed",
+               action="store_const", const=BuildState.COMPLETE,
                dest="state", default=None,
                help="Limit to completed builds")
 
-        addarg("--deleted", action="store_const", const=BUILD_DELETED,
+        addarg("--deleted",
+               action="store_const", const=BuildState.DELETED,
                dest="state", default=None,
                help="Limit to deleted builds")
 

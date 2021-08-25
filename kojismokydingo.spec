@@ -75,11 +75,7 @@ Koji Smoky Dingo
 
 %package -n %{srcname}-docs
 Summary:        Documentation for %{srcname}
-%if %{with python3}
-BuildRequires:  make python3-sphinx
-%else
-BuildRequires:  make python2-sphinx
-%endif
+BuildRequires:  make python3-sphinx python3-sphinx-autodoc-typehints
 
 %description -n %{srcname}-docs
 Docs for Koji Smoky Dingo
@@ -96,9 +92,16 @@ Docs for Koji Smoky Dingo
 Summary:        %{summary}
 BuildRequires:  python3-devel
 BuildRequires:  python3-pip python3-setuptools python3-wheel
-Requires:	python3 python3-appdirs python3-setuptools
+Requires:	python3 python3-setuptools
+
+%if 0%{?rhel} <= 8
+# centos/rhel 8 doesn't have the automatic Requires generation stuff,
+# so we'll have to be explicit
+Requires:       python3-appdirs
 Requires:       python3-koji
-Obsoletes:	python3-%{srcname}-meta <= 0.9.0
+Requires:       python3-typing-extensions
+%endif
+
 %{?python_provide:%python_provide python3-%{srcname}}
 %{?py_provides:%py_provides python3-%{srcname}}
 

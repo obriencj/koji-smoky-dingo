@@ -23,11 +23,15 @@ Sieves
 
 import operator
 
+from koji import ClientSession
 from operator import itemgetter
+from typing import Callable, Dict, Iterable, List, Set, Tuple, cast
 
 from . import SifterError, Sieve
 from .. import iter_bulk_load
-from ..builds import latest_maven_builds
+from ..builds import GAV, latest_maven_builds
+from ..types import (
+    BuildInfo, TagGroup, TagPackageInfo, )
 
 
 __all__ = ("CacheMixin", "ensure_comparison", )
@@ -43,16 +47,14 @@ _OPMAP = {
 }
 
 
-def ensure_comparison(value):
+def ensure_comparison(value: str) -> Callable:
     """
     Converts a comparison operator symbol into a comparison function.
 
     :param value: The symbol or string to convert. Should be one of
       '==', '!=', '>', '>=', '<', '<='
 
-    :type value: str
-
-    :rtype: callable
+    :raises SifterError: if the value isn't one of the known operators
     """
 
     if value in _OPMAP:
@@ -70,15 +72,17 @@ class CacheMixin(Sieve):
     cache is cleared when the sifter's `reset` method is invoked.
     """
 
-    def _mixin_cache(self, name):
+    def _mixin_cache(self, name: str) -> dict:
         return self.sifter.get_cache("*mixin", name)
 
 
-    def latest_builds(self, session, tag_id, inherit=True):
+    def latest_builds(
+            self,
+            session: ClientSession,
+            tag_id: int,
+            inherit: bool = True) -> List[BuildInfo]:
         """
-        a caching wrapper for session.getLatestBuilds
-
-        :rtype: list[dict]
+        a caching wrapper for ``session.getLatestBuilds``
         """
 
         cache = self._mixin_cache("latest_builds")
@@ -93,12 +97,14 @@ class CacheMixin(Sieve):
         return found
 
 
-    def latest_build_ids(self, session, tag_id, inherit=True):
+    def latest_build_ids(
+            self,
+            session: ClientSession,
+            tag_id: int,
+            inherit: bool = True) -> Set[int]:
         """
-        a caching wrapper for session.getLatestBuilds which returns a set
-        containing only the build IDs
-
-        :rtype: set[int]
+        a caching wrapper for ``session.getLatestBuilds`` which returns a
+        set containing only the build IDs
         """
 
         cache = self._mixin_cache("latest_build_ids")
@@ -113,12 +119,14 @@ class CacheMixin(Sieve):
         return found
 
 
-    def latest_builds_by_name(self, session, tag_id, inherit=True):
+    def latest_builds_by_name(
+            self,
+            session: ClientSession,
+            tag_id: int,
+            inherit: bool = True) -> Dict[str, BuildInfo]:
         """
         a caching wrapper for session.getLatestBuilds which returns a dict
         mapping the build names to the build info
-
-        :rtype: dict[str, dict]
         """
 
         cache = self._mixin_cache("latest_builds_by_name")
@@ -133,7 +141,11 @@ class CacheMixin(Sieve):
         return found
 
 
-    def latest_maven_builds(self, session, tag_id, inherit=True):
+    def latest_maven_builds(
+            self,
+            session: ClientSession,
+            tag_id: int,
+            inherit: bool = True) -> Dict[GAV, BuildInfo]:
         """
         a caching wrapper for `kojismokydingo.builds.latest_maven_builds`
 
@@ -152,12 +164,14 @@ class CacheMixin(Sieve):
         return found
 
 
-    def latest_maven_build_ids(self, session, tag_id, inherit=True):
+    def latest_maven_build_ids(
+            self,
+            session: ClientSession,
+            tag_id: int,
+            inherit: bool = True) -> Set[int]:
         """
         a caching wrapper for `kojismokydingo.builds.latest_maven_builds`
         which returns a set containing only the build IDs
-
-        :rtype: set[int]
         """
 
         cache = self._mixin_cache("latest_maven_build_ids")
@@ -172,26 +186,29 @@ class CacheMixin(Sieve):
         return found
 
 
-    def bulk_list_packages(self, session, tag_ids, inherited=True):
+    def bulk_list_packages(
+            self,
+            session: ClientSession,
+            tag_ids: Iterable[int],
+            inherited: bool = True) -> Dict[int, List[TagPackageInfo]]:
         """
         a multicall caching wrapper for session.listPackages
 
         shares the same cache as `list_packages` (and therefore
         `allowed_packages` and `blocked_packages`)
-
-        :rtype: dict[int,list[dict]]
         """
 
-        cache = self._mixing_cache("list_packages")
+        cache = cast(Dict[Tuple[int, bool], List[TagPackageInfo]],
+                     self._mixin_cache("list_packages"))
 
-        result = {}
+        result: Dict[int, List[TagPackageInfo]] = {}
         needed = []
 
         for tid in tag_ids:
             if (tid, inherited) not in cache:
                 needed.append(tid)
             else:
-                result[tid] = cache
+                result[tid] = cache[(tid, inherited)]
 
         fn = lambda i: session.listPackages(i, inherited=inherited)
         for tid, pkgs in iter_bulk_load(session, fn, needed):
@@ -200,11 +217,13 @@ class CacheMixin(Sieve):
         return result
 
 
-    def list_packages(self, session, tag_id, inherited=True):
+    def list_packages(
+            self,
+            session: ClientSession,
+            tag_id: int,
+            inherited: bool = True) -> List[TagPackageInfo]:
         """
-        a caching wrapper for session.listPackages
-
-        :rtype: list[dict]
+        a caching wrapper for ``session.listPackages``
         """
 
         cache = self._mixin_cache("list_packages")
@@ -219,12 +238,14 @@ class CacheMixin(Sieve):
         return found
 
 
-    def allowed_packages(self, session, tag_id, inherited=True):
+    def allowed_packages(
+            self,
+            session: ClientSession,
+            tag_id: int,
+            inherited: bool = True) -> Set[str]:
         """
         a caching wrapper for session.listPackages which returns a set
         containing only the package names which are not blocked.
-
-        :rtype: set[str]
         """
 
         cache = self._mixin_cache("allowed_packages")
@@ -242,12 +263,14 @@ class CacheMixin(Sieve):
         return found
 
 
-    def blocked_packages(self, session, tag_id, inherited=True):
+    def blocked_packages(
+            self,
+            session: ClientSession,
+            tag_id: int,
+            inherited: bool = True) -> Set[str]:
         """
         a caching wrapper for session.listPackages which returns a set
         containing only the package names which are blocked.
-
-        :rtype: set[str]
         """
 
         cache = self._mixin_cache("blocked_packages")
@@ -265,11 +288,12 @@ class CacheMixin(Sieve):
         return found
 
 
-    def get_tag_groups(self, session, tag_id):
+    def get_tag_groups(
+            self,
+            session: ClientSession,
+            tag_id: int) -> List[TagGroup]:
         """
-        a caching wrapper for session.getTagGroups
-
-        :rtype: list[dict]
+        a caching wrapper for ``session.getTagGroups``
         """
 
         cache = self._mixin_cache("groups")
@@ -281,12 +305,13 @@ class CacheMixin(Sieve):
         return found
 
 
-    def bulk_get_tag_groups(self, session, tag_ids):
+    def bulk_get_tag_groups(
+            self,
+            session: ClientSession,
+            tag_ids: Iterable[int]) -> Dict[int, List[TagGroup]]:
         """
-        a multicall caching wrapper for session.getTagGroups. Shares a
+        a multicall caching wrapper for ``session.getTagGroups``. Shares a
         cache with `get_tag_groups`
-
-        :rtype: dict[int, list[dict]]
         """
 
         cache = self._mixin_cache("groups")
@@ -307,4 +332,5 @@ class CacheMixin(Sieve):
         return result
 
 
+#
 # The end.

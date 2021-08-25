@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # This library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,28 +18,12 @@
 Koji Smoky Dingo - a collection of Koji command-line features for
 advanced users.
 
-Note that this package needs the kojismokydingometa plugin to be
-installed in order for the plugins to be loaded by the Koji CLI.
-
 :author: Christopher O'Brien  <obriencj@gmail.com>
 :license: GPL version 3
 """
 
 
 VERSION = "2.0.0"
-
-
-CLASSIFIERS = [
-    "Environment :: Console",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Topic :: Software Development :: Build Tools",
-]
 
 
 COMMANDS = {
@@ -84,8 +68,6 @@ def config():
     return {
         "version": VERSION,
 
-        "classifiers": CLASSIFIERS,
-
         "packages": [
             "koji_cli_plugins",
             "kojismokydingo",
@@ -94,16 +76,23 @@ def config():
             "kojismokydingo.standalone",
         ],
 
+        "package_data": {
+            "kojismokydingo": ["py.typed", ],
+        },
+
         "install_requires": [
             "appdirs",
             "koji",
+
+            # backport requirements
+            "enum34 ; python_version < '3.4'",
+            "typing_extensions ; python_version < '3.8'",
         ],
 
         "tests_require": [
             "appdirs",
             "docutils",
             "koji",
-            "mock",
         ],
 
         # The koji_cli_plugins namespace package needs to be a plain

@@ -21,13 +21,13 @@ Koji Smoky Dingo - CLI Archive and RPM Commands
 
 
 from argparse import SUPPRESS
-from collections import OrderedDict
 
 from . import AnonSmokyDingo, pretty_json, resplit
 from .. import bulk_load_builds
 from ..archives import (
     filter_archives, gather_build_archives, gather_latest_archives, )
-from ..builds import BUILD_COMPLETE, build_dedup
+from ..builds import build_dedup
+from ..types import BuildState
 
 
 __all__ = (
@@ -57,7 +57,7 @@ def cli_list_build_archives(session, nvrs, btype,
         # normally show no archives, but with that setting enabled,
         # any state will show archives if the data is recorded in
         # koji.
-        if deleted or binfo.get("state") == BUILD_COMPLETE:
+        if deleted or binfo.get("state") == BuildState.COMPLETE:
             found.extend(gather_build_archives(session, binfo, btype,
                                                rpmkeys, path))
 

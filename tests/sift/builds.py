@@ -12,8 +12,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from mock import MagicMock
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from kojismokydingo.builds import build_id_sort
 from kojismokydingo.sift import Sifter, SifterError

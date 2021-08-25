@@ -5,6 +5,7 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
+    'sphinx_autodoc_typehints'
     # 'numpydoc',
 ]
 
@@ -16,6 +17,8 @@ intersphinx_mapping = {
     # "koji": ('https://docs.pagure.io/koji', None),
 }
 
+
+autoclass_content = 'both'
 
 autosectionlabel_maxdepth = 1
 autosectionlabel_prefix_document = False
@@ -30,6 +33,8 @@ master_doc = 'index'
 # for a list of supported languages.
 language = 'English'
 
+# Why is this not the default everywhere for everything all the time
+# forever? Use ISO-8601 or GTFO.
 today_fmt = '%Y-%m-%d'
 
 default_role = 'py:obj'

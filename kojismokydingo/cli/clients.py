@@ -25,7 +25,7 @@ import sys
 from configparser import ConfigParser
 from koji import ClientSession
 from os import system
-from typing import Optional, Sequence, Union
+from typing import Any, Callable, Dict, Optional, Sequence, Union
 
 from . import AnonSmokyDingo, int_or_str, pretty_json
 from .. import (
@@ -33,9 +33,9 @@ from .. import (
     as_archiveinfo, as_buildinfo, as_channelinfo, as_hostinfo,
     as_packageinfo, as_rpminfo, as_repoinfo, as_taginfo, as_targetinfo,
     as_taskinfo, as_userinfo, )
-from ..builds import BUILD_COMPLETE
 from ..clients import rebuild_client_config
 from ..common import load_plugin_config
+from ..types import BuildState, GOptions
 
 
 __all__ = (
@@ -62,7 +62,7 @@ class CannotOpenURL(BadDingo):
 
 def cli_client_config(
         session: ClientSession,
-        goptions: object,
+        goptions: GOptions,
         only: Sequence[str] = (),
         quiet: bool = False,
         config: bool = False,
@@ -86,7 +86,7 @@ def cli_client_config(
 
     if config:
         cfg = ConfigParser()
-        cfg._sections[profile] = opts
+        cfg._sections[profile] = opts  # type: ignore
         cfg.write(sys.stdout)
         return
 
@@ -143,7 +143,7 @@ class ClientConfig(AnonSmokyDingo):
 
 def _get_build_dir_url(
         session: ClientSession,
-        goptions: object,
+        goptions: GOptions,
         buildid: Union[str, int]) -> str:
     """
     :since: 2.0
@@ -156,7 +156,7 @@ def _get_build_dir_url(
 
     build = as_buildinfo(session, buildid)
 
-    if build["state"] != BUILD_COMPLETE:
+    if build["state"] != BuildState.COMPLETE:
         raise CannotOpenURL("Build directory is not available")
 
     name = build["name"]
@@ -168,7 +168,7 @@ def _get_build_dir_url(
 
 def _get_tag_repo_dir_url(
         session: ClientSession,
-        goptions: object,
+        goptions: GOptions,
         tagid: Union[str, int]) -> str:
     """
     :since: 2.0
@@ -187,7 +187,7 @@ def _get_tag_repo_dir_url(
 
 def _get_tag_latest_dir_url(
         session: ClientSession,
-        goptions: object,
+        goptions: GOptions,
         tagid: Union[str, int]) -> str:
     """
     :since: 2.0
@@ -204,7 +204,7 @@ def _get_tag_latest_dir_url(
     return f"{topurl}/repos/{tag['name']}/latest"
 
 
-OPEN_LOADFN = {
+OPEN_LOADFN: Dict[str, Callable] = {
     "archive": as_archiveinfo,
     "build": as_buildinfo,
     "channel": as_channelinfo,
@@ -221,7 +221,7 @@ OPEN_LOADFN = {
 
 def _get_type_url(
         session: ClientSession,
-        goptions: object,
+        goptions: GOptions,
         datatype: str,
         fmt: str,
         element: str) -> str:
@@ -244,7 +244,7 @@ def _get_type_url(
     return f'{weburl}/{typeurl}'
 
 
-OPEN_URL = {
+OPEN_URL: Dict[str, Union[str, Callable]] = {
     "archive": "archiveinfo?archiveID={id}",
     "build": "buildinfo?buildID={id}",
     # "buildroot": "buildrootinfo?buildrootID={id}",
@@ -266,7 +266,7 @@ OPEN_URL = {
 
 def get_open_url(
         session: ClientSession,
-        goptions: object,
+        goptions: GOptions,
         datatype: str,
         element: str) -> str:
     """
@@ -284,7 +284,7 @@ def get_open_url(
     :since: 2.0
     """
 
-    opener = OPEN_URL.get(datatype)
+    opener: Union[str, Callable] = OPEN_URL.get(datatype)
     if opener is None:
         raise BadDingo(f"Unsupported type for open: {datatype}")
 
@@ -335,7 +335,7 @@ def get_open_command(
 
 def cli_open(
         session: ClientSession,
-        goptions: object,
+        goptions: GOptions,
         datatype: str,
         element: str,
         command: Optional[str] = None) -> int:
@@ -356,7 +356,7 @@ def cli_open(
     # to stdout
     if command == "-":
         print(url)
-        return
+        return 0
 
     # if the configured open command has a {url} marker in it, then we
     # want to swap that in. Otherwise we'll just append it quoted

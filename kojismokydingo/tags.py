@@ -20,15 +20,20 @@ Koji Smoky Dingo - tags and targets
 """
 
 
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
+from koji import ClientSession, GenericError
+from typing import Dict, Iterable, List, Optional, Set, Union
 
 from . import (
     NoSuchTag,
     as_taginfo, as_targetinfo,
     bulk_load, bulk_load_tags, )
 from .common import unique
+from .types import (
+    DecoratedTagExtras,
+    TagInfo, TagInfos, TagInheritance, TagInheritanceEntry,
+    TagSpec, TargetInfo, )
 
 
 __all__ = (
@@ -44,7 +49,8 @@ __all__ = (
 )
 
 
-def tag_dedup(tag_infos):
+def tag_dedup(
+        tag_infos: TagInfos) -> TagInfos:
     """
     Given a sequence of tag info dictionaries, return a de-duplicated
     list of same, with order preserved.
@@ -52,41 +58,35 @@ def tag_dedup(tag_infos):
     All None infos will be dropped.
 
     :param tag_infos: tag infos to be de-duplicated.
-    :type tag_infos: list[dict]
-
-    :rtype: list[dict]
     """
 
     return unique(filter(None, tag_infos), key="id")
 
 
-def ensure_tag(session, name):
+def ensure_tag(
+        session: ClientSession,
+        name: str) -> TagInfo:
     """
     Given a name, resolve it to a tag info dict. If there is no such
     tag, then create it and return its newly created tag info.
 
+    :param session: active koji session
+
     :param name: tag name
-
-    :type name: str
-
-    :rtype: dict
     """
 
     try:
-        info = as_taginfo(session, name)
-    except NoSuchTag:
-        info = None
+        session.createTag(name)
+    except GenericError:
+        pass
 
-    # we do it this way so we don't get a nested exception if
-    # createTag fails
-    if info is None:
-        tag_id = session.createTag(name)
-        info = as_taginfo(session, tag_id)
-
-    return info
+    return as_taginfo(session, name)
 
 
-def resolve_tag(session, name, target=False):
+def resolve_tag(
+        session: ClientSession,
+        name: str,
+        target: bool = False) -> TagInfo:
     """
     Given a name, resolve it to a taginfo.
 
@@ -95,31 +95,30 @@ def resolve_tag(session, name, target=False):
     If target is True, name is treated as a target's name, and the
     resulting taginfo will be from that target's build tag.
 
+    :param session: active koji session
+
     :param name: Tag or Target name
 
-    :type name: str
+    :param target: if True then name specifies a target rather than a
+      tag, so fetch the build tag name from the target and look up
+      that. Default False; name specifies a tag.
 
-    :param target: name specified a target rather than a tag, fetch
-      the build tag name from the target and look up that. Default,
-      name specifies a tag.
+    :raises NoSuchTag: if the tag could not be resolved
 
-    :type target: bool, optional
-
-    :raises NoSuchTag:
-
-    :raises NoSuchTarget:
-
-    :rtype: dict
+    :raises NoSuchTarget: if ``target`` is True and name cannot be
+      resolved as a target
     """
 
     if target:
         tinfo = as_targetinfo(session, name)
-        name = tinfo.get("build_tag_name", name)
+        name = tinfo["build_tag_name"]
 
     return as_taginfo(session, name)
 
 
-def gather_affected_targets(session, tagnames):
+def gather_affected_targets(
+        session: ClientSession,
+        tagnames: Iterable[TagSpec]) -> List[TargetInfo]:
     """
     Returns the list of target info dicts representing the targets
     which inherit any of the given named tags. That is to say, the
@@ -130,78 +129,66 @@ def gather_affected_targets(session, tagnames):
 
     :param tagnames: List of tag names
 
-    :type tagnames: list[str]
-
     :raises NoSuchTag: if any of the names do not resolve to a tag
       info
-
-    :rtype: list[dict]
     """
 
     tags = [as_taginfo(session, t) for t in set(tagnames)]
 
-    session.multicall = True
-    for tag in tags:
-        session.getFullInheritance(tag['id'], reverse=True)
-    parents = [p[0] for p in session.multiCall() if p]
+    ifn = lambda tag: session.getFullInheritance(tag['id'], reverse=True)
+    loaded = bulk_load(session, ifn, tags)
+    parents = filter(None, loaded.values())
 
     tagids = set(chain(*((ch['tag_id'] for ch in ti) for ti in parents)))
     tagids.update(tag['id'] for tag in tags)
 
-    session.multicall = True
-    for ti in tagids:
-        session.getBuildTargets(buildTagID=ti)
+    tfn = lambda ti: session.getBuildTargets(buildTagID=ti)
+    loaded = bulk_load(session, tfn, tagids)
+    targets = chain(*filter(None, loaded.values()))
 
-    return list(chain(*(t[0] for t in session.multiCall() if t)))
+    return list(targets)
 
 
-def renum_inheritance(inheritance, begin=0, step=10):
+def renum_inheritance(
+        inheritance: TagInheritance,
+        begin: int = 0,
+        step: int = 10) -> TagInheritance:
     """
     Create a new copy of the tag inheritance data with the priority
     values renumbered. Ordering is preserved.
 
     :param inheritance: Inheritance structure data
 
-    :type inheritance: list[dict]
-
     :param begin: Starting point for renumbering priority
       values. Default, 0
 
-    :type begin: int, optional
-
     :param step: Priority value increment for each priority after the
       first. Default, 10
-
-    :type step: int, optional
-
-    :rtype: list[dict]
     """
 
-    renumbered = list()
+    renumbered: TagInheritance = []
 
     for index, inher in enumerate(inheritance):
-        data = dict(inher)
+        data: TagInheritanceEntry = inher.copy()
         data['priority'] = begin + (index * step)
         renumbered.append(data)
 
     return renumbered
 
 
-def find_inheritance_parent(inheritance, parent_id):
+def find_inheritance_parent(
+        inheritance: TagInheritance,
+        parent_id: int) -> Optional[TagInheritanceEntry]:
     """
     Find the parent link in the inheritance list with the given tag ID.
 
-    :param inheritance: the output of a getFullInheritance call
-
-    :type inheritance: list[dict]
+    :param inheritance: the output of a ``getFullInheritance`` call
 
     :param parent_id: the ID of a parent tag to look for in the
         inheritance data.
 
     :returns: matching inheritance link data, or None if none are
         found with the given parent_id
-
-    :rtype: dict
     """
 
     for parent in inheritance:
@@ -211,7 +198,10 @@ def find_inheritance_parent(inheritance, parent_id):
         return None
 
 
-def convert_tag_extras(taginfo, into=None, prefix=None):
+def convert_tag_extras(
+        taginfo: TagInfo,
+        into: Optional[dict] = None,
+        prefix: Optional[str] = None) -> DecoratedTagExtras:
     """
     Provides a merged view of the tag extra settings for a tag. The
     extras are decorated with additional keys:
@@ -223,29 +213,21 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
 
     When into is not None, then only settings which are not already
     present in that dict will be set. This behavior is used by
-    :py:func:`collect_tag_extras` to merge the extra settings across a
-    tag and all its parents into a single dict.
+    `collect_tag_extras` to merge the extra settings across a tag and
+    all its parents into a single dict.
 
     :param taginfo: A koji tag info dict
 
-    :type taginfo: dict
-
     :param into: Existing dict to collect extras into. Default, create
-        a new OrderedDict.
-
-    :type into: dict, optional
+        a new dict.
 
     :param prefix: Only gather and convert extras with keys having
         this prefix. Default, gather all keys not already found.
-
-    :type prefix: str, optional
-
-    :rtype: dict
     """
 
-    found = OrderedDict() if into is None else into
+    found = {} if into is None else into
 
-    extra = taginfo.get("extra")
+    extra = taginfo["extra"]
     if not extra:
         return found
 
@@ -274,14 +256,17 @@ def convert_tag_extras(taginfo, into=None, prefix=None):
     return found
 
 
-def collect_tag_extras(session, taginfo, prefix=None):
+def collect_tag_extras(
+        session: ClientSession,
+        tag: TagSpec,
+        prefix: Optional[str] = None) -> DecoratedTagExtras:
     """
     Similar to session.getBuildConfig but with additional information
     recording which tag in the inheritance supplied the setting.
 
-    Returns an OrderedDict of tag extra settings, keyed by the name of
-    the setting. Each setting is represented as its own dict composed
-    of the following keys:
+    Returns an dict of tag extra settings, keyed by the name of the
+    setting. Each setting is represented as its own dict composed of
+    the following keys:
 
     * name - the extra setting key
     * value - the extra setting value
@@ -289,41 +274,41 @@ def collect_tag_extras(session, taginfo, prefix=None):
     * tag_name - the name of the tag this setting came from
     * tag_id - the ID of the tag this setting came from
 
-    :param taginfo: koji tag info dict, or tag name
+    :param session: an active koji client session
 
-    :type taginfo: int or str or dict
+    :param tag: koji tag info dict, or tag name
 
     :param prefix: Extra name prefix to select for. If set, only tag
       extra fields whose key starts with the prefix string will be
       collected. Default, collect all.
-
-    :type prefix: str, optional
-
-    :rtype: collections.OrderedDict[str, dict]
     """
 
     # this borrows heavily from the hub implementation of
     # getBuildConfig, but gives us a chance to record what tag in the
     # inheritance that the setting is coming from
 
-    taginfo = as_taginfo(session, taginfo)
+    taginfo = as_taginfo(session, tag)
     found = convert_tag_extras(taginfo, prefix=prefix)
 
     inher = session.getFullInheritance(taginfo["id"])
     tids = (tag["parent_id"] for tag in inher if not tag["noconfig"])
     parents = bulk_load_tags(session, tids)
 
-    for tag in parents.values():
+    for ptag in parents.values():
         # mix the extras into existing found results. note: we're not
         # checking for faults, because we got this list of tag IDs
         # straight from koji itself, but there could be some kind of
         # race condition from this.
-        convert_tag_extras(tag, into=found, prefix=prefix)
+        convert_tag_extras(ptag, into=found, prefix=prefix)
 
     return found
 
 
-def gather_tag_ids(session, shallow=(), deep=(), results=None):
+def gather_tag_ids(
+        session: ClientSession,
+        shallow: Optional[Iterable[Union[int, str]]] = None,
+        deep: Optional[Iterable[Union[int, str]]] = None,
+        results: Optional[set] = None) -> Set[int]:
     """
     Load IDs from shallow tags, and load IDs from deep tags and all
     their parents. Returns a set of all IDs found.
@@ -332,16 +317,13 @@ def gather_tag_ids(session, shallow=(), deep=(), results=None):
     disovered tag IDs will be added. Otherwise a new set will be
     allocated and returned.
 
+    :param session: an active koji client session
+
     :param shallow: list of tag names to resolve IDs for
-    :type shallow: list[str], optional
 
     :param deep: list of tag names to resolve IDs and parent IDs for
-    :type deep: list[str], optional
 
     :param results: storage for resolved IDs. Default, create a new set
-    :type results: set[int], optional
-
-    :rtype: set[int]
     """
 
     results = set() if results is None else results

@@ -30,6 +30,7 @@ from fnmatch import translate
 from functools import partial
 from io import StringIO
 from itertools import chain, product
+from typing import Iterable, Iterator, List, Sequence, Sized, Union, cast
 
 from .. import BadDingo
 
@@ -131,24 +132,26 @@ class SymbolGroup(Matcher):
         return "SymbolGroup(%r)" % self.src
 
 
-class FormattedSeries():
+class FormattedSeries(Sequence[str]):
     """
-    A portion of a SymbolGroup representing a repeatable formatted
+    A portion of a `SymbolGroup` representing a repeatable formatted
     sequence.
     """
 
-    def __init__(self, fmt, seq):
+    def __init__(self, fmt: str, seq: Sequence):
         """
         :param fmt: formatting to apply
-        :type fmt: str
 
         :param seq: sequence which can safely have `iter` called on it
           multiple times
-        :type seq: iterable
         """
 
         self._fmt = fmt
         self._seq = seq
+
+
+    def __getitem__(self, index):
+        return self._fmt.format(self._seq[index])
 
 
     def __iter__(self):
@@ -256,7 +259,7 @@ class Item():
     Seeks path members by an int or str key.
     """
 
-    def __init__(self, key):
+    def __init__(self, key: Union[int, str, slice, Matcher]):
         if isinstance(key, int):
             key = int(key)
         elif isinstance(key, str):
@@ -265,7 +268,7 @@ class Item():
         self.key = key
 
 
-    def get(self, d):
+    def get(self, d: dict) -> Iterator:
         key = self.key
         try:
             if isinstance(key, slice):
@@ -289,7 +292,7 @@ class ItemMatch(Item):
     or Regex)
     """
 
-    def get(self, d):
+    def get(self, d: dict) -> Iterator:
         if isinstance(d, dict):
             data = d.items()
         else:
@@ -310,9 +313,9 @@ class AllItems(Item):
         pass
 
 
-    def get(self, d):
+    def get(self, d: dict) -> Iterator:
         if isinstance(d, dict):
-            return d.values()
+            return iter(d.values())
         else:
             return iter(d)
 
@@ -321,29 +324,33 @@ class AllItems(Item):
         return "AllItems()"
 
 
+ItemPathSpec = Union[Item, Matcher, str, int, slice]
+
+
 class ItemPath():
     """
     Represents a collection of elements inside a nested tree of lists
     and dicts
     """
 
-    def __init__(self, *paths):
-        self.paths = list(paths)
+    def __init__(self, *paths: ItemPathSpec):
+        ipaths: List[Item] = []
+        self.paths = ipaths
 
-        for i, p in enumerate(paths):
+        for p in paths:
             if isinstance(p, Item):
-                continue
+                ipaths.append(p)
             elif isinstance(p, (str, int, slice)):
-                self.paths[i] = Item(p)
+                ipaths.append(Item(p))
             elif isinstance(p, Matcher):
-                self.paths[i] = ItemMatch(p)
+                ipaths.append(ItemMatch(p))
             else:
                 msg = "Unexpected path element in ItemPath: %r" % p
                 raise ParserError(msg)
 
 
-    def get(self, data):
-        work = [data]
+    def get(self, data: dict) -> Iterator:
+        work = iter([data])
         for element in self.paths:
             work = chain(*map(element.get, filter(None, work)))
         return work
@@ -355,30 +362,27 @@ class ItemPath():
 
 class Reader(StringIO):
 
-    def __init__(self, source):
+    def __init__(self, source: str):
         # force it to be readonly
         super().__init__(source)
 
 
-    def peek(self, count=1):
+    def peek(self, count: int = 1) -> str:
         where = self.tell()
         val = self.read(count)
         self.seek(where)
         return val
 
 
-def split_symbol_groups(reader):
+def split_symbol_groups(
+        source: str) -> Iterator[Sequence[str]]:
     """
     Invoked to by `convert_token` to split up a symbol into a series
     of groups which can then be combined to form a SymbolGroup.
-
-    :rtype: generator[list[str]]
     """
 
-    if isinstance(reader, str):
-        reader = Reader(reader)
-
-    token = None
+    reader = Reader(source)
+    token: StringIO = None
     esc = False
 
     srciter = iter(partial(reader.read, 1), '')
@@ -398,7 +402,7 @@ def split_symbol_groups(reader):
             if token:
                 yield [token.getvalue()]
                 token = None
-            yield convert_group(parse_quoted(reader, '}'))
+            yield convert_group(cast(str, parse_quoted(reader, '}')))
             continue
 
         else:
@@ -412,27 +416,25 @@ def split_symbol_groups(reader):
         token = None
 
 
-def _trailing_esc(val):
+def _trailing_esc(val: str) -> int:
     # a count of trailing escapes, just to figure out if there's an
     # odd or even amount (and hence whether there's an unterminated
     # escape at the end
     return len(val) - len(val.rstrip("\\"))
 
 
-def convert_group(grp):
+def convert_group(grp: str) -> Union[FormattedSeries, List[str]]:
     """
     A helper function for `split_symbol_groups`
-
-    :rtype: list[str] or FormattedSeries
     """
 
     if "," not in grp:
         if ".." in grp:
             return convert_range(grp)
         else:
-            return ["".join(("{", grp, "}"))]
+            return [f"{{{grp}}}"]
 
-    work = []
+    work: List[str] = []
     for brk in grp.split(","):
         if work and work[-1] and _trailing_esc(work[-1][-1]) & 1:
             work[-1] = ",".join((work[-1][:-1], brk))
@@ -440,12 +442,12 @@ def convert_group(grp):
             work.append(brk)
 
     if len(work) == 1:
-        return ["".join(("{", work[0], "}"))]
+        return [f"{{{work[0]}}}"]
     else:
         return work
 
 
-def convert_range(rng):
+def convert_range(rng: str) -> Union[FormattedSeries, List[str]]:
     """
     A helper function for `convert_group` to work with the group range
     notation.
@@ -455,39 +457,40 @@ def convert_range(rng):
     and padding will be applied to values that
 
     produces a FormattedSeries built on a range instance
-
-    :rtype: FormattedSeries
     """
 
-    broken = rng.split("..")
+    broken: List[str] = rng.split("..")
     blen = len(broken)
 
     if blen == 2:
         start, stop = broken
-        step = 1
+        step: Union[int, str] = 1
     elif blen == 3:
         start, stop, step = broken
     else:
-        return ["".join(("{", rng, "}"))]
+        return [f"{{{rng}}}"]
 
     try:
         istart = int(start)
         istop = int(stop) + 1
         istep = int(step)
     except ValueError:
-        return ["".join(("{", rng, "}"))]
+        return [f"{{{rng}}}"]
 
     sss = (start, stop)
     if any(map(lambda v: len(v) > 1 and v.startswith("0"), sss)):
         pad_to = max(map(len, sss))
-        fmt = "{0:0%id}" % pad_to
+        fmt = f"{{0:0{pad_to}d}}"
     else:
         fmt = "{0:d}"
 
     return FormattedSeries(fmt, range(istart, istop, istep))
 
 
-def parse_exprs(reader, start=None, stop=None):
+def parse_exprs(
+        reader: Reader,
+        start: str = None,
+        stop: str = None) -> Iterator:
     """
     Simple s-expr parser. Reads from a string or character iterator,
     emits expressions as nested lists.
@@ -500,19 +503,17 @@ def parse_exprs(reader, start=None, stop=None):
     # for Sibilant's parser as well. And now it lives here, in Koji
     # Smoky Dingo.
 
-    if isinstance(reader, str):
-        reader = Reader(reader)
-
     if not (start and stop):
         unterminated = True
-        start, stop = '()'
+        start = '('
+        stop = ')'
     else:
         unterminated = False
 
     token_breaks = "".join((start, stop, ' [;#|/\"\'\n\r\t'))
 
-    token = None
-    esc = False
+    token: StringIO = None
+    esc: str = None
 
     srciter = iter(partial(reader.read, 1), '')
     for c in srciter:
@@ -522,7 +523,7 @@ def parse_exprs(reader, start=None, stop=None):
             if c not in token_breaks:
                 token.write(esc)
             token.write(c)
-            esc = False
+            esc = None
             continue
 
         if c == '\\':
@@ -588,11 +589,11 @@ ESCAPE_SEQUENCE_RE = re.compile(r'''
 )''', re.UNICODE | re.VERBOSE)
 
 
-def convert_escapes(val):
+def convert_escapes(val: str) -> str:
     """
     Decodes common escape sequences embedded in a str
 
-    :rtype: str
+    :param val: source str to decode
     """
 
     def descape(m):
@@ -603,7 +604,7 @@ def convert_escapes(val):
 NUMBER_RE = Regex(r"^-?\d+$")
 
 
-def convert_token(val):
+def convert_token(val: str) -> Union[Matcher, str, bool]:
     """
     Converts unquoted values to a Matcher instance.
 
@@ -615,9 +616,6 @@ def convert_token(val):
     * Everything else becomes a Symbol.
 
     :param val: token value to be converted
-    :type val: str
-
-    :rtype: Matcher
     """
 
     if val in (None, "None", "null", "nil"):
@@ -651,17 +649,23 @@ def convert_token(val):
             return Symbol(val)
 
 
-def parse_itempath(reader, prefix=None, char=None):
+def parse_itempath(
+        reader: Reader,
+        prefix: str = None,
+        char: str = None) -> ItemPath:
     """
-    Parses an ItemPath definition from the given reader.
+    Parses an `ItemPath` definition from the given reader.
 
-    :rtype: ItemPath
+    :param reader: source reader to parse from
+
+    :param prefix: an initial path token to convert as the start of the
+      path
+
+    :param char: the initiating character that has already been read from
+      the reader, if any
     """
 
-    if isinstance(reader, str):
-        reader = Reader(reader)
-
-    paths = []
+    paths: List[ItemPathSpec] = []
 
     if prefix:
         paths.append(convert_token(prefix))
@@ -671,8 +675,8 @@ def parse_itempath(reader, prefix=None, char=None):
 
     token_breaks = ' .[]();#|/\"\'\n\r\t'
 
-    token = None
-    esc = False
+    token: StringIO = None
+    esc: str = None
 
     srciter = iter(partial(reader.peek, 1), '')
     for c in srciter:
@@ -682,7 +686,7 @@ def parse_itempath(reader, prefix=None, char=None):
             if c not in token_breaks:
                 token.write(esc)
             token.write(c)
-            esc = False
+            esc = None
 
         elif c == '\\':
             esc = c
@@ -726,7 +730,7 @@ _slice_like = Regex(r"^("
                     r")$")
 
 
-def convert_slice(val):
+def convert_slice(val: str) -> slice:
     """
     Converted a colon-separated string into a slice. Raises a TypeError
     if the elements do not convert cleanly to integers
@@ -735,23 +739,18 @@ def convert_slice(val):
     * val of ``1:`` results in ``slice(1, None, None)``
     * val of ``:1`` results in ``slice(None, 1, None)``
     * val of ``"1:2:3"`` results in ``slice(1, 2, 3)``
-
-    :rtype: slice
     """
 
     vals = ((int(v) if v else None) for v in val.split(":"))
     return slice(*vals)
 
 
-def parse_index(reader, start=None):
+def parse_index(
+        reader: Reader,
+        start: str = None) -> ItemPathSpec:
     """
-    Parse an index portion of an ItemPath from the reader
-
-    :rtype: AllItems or slice or Matcher
+    Parse an index portion of an `ItemPath` from the reader
     """
-
-    if isinstance(reader, str):
-        reader = Reader(reader)
 
     if not start:
         start = reader.read(1)
@@ -770,17 +769,24 @@ def parse_index(reader, start=None):
         return AllItems()
 
     elif lval == 1:
-        val = val[0]
-        if _slice_like == val:
-            val = convert_slice(val)
-        return val
+        sval: str = val[0]
+        if _slice_like == sval:
+            return convert_slice(sval)
+        else:
+            return sval
 
     else:
         msg = "Too many arguments in item index: %r" % val
         raise ParserError(msg)
 
 
-def parse_quoted(reader, quotec=None, advanced_escapes=True):
+QuotedSpec = Union[Glob, Regex, str]
+
+
+def parse_quoted(
+        reader: Reader,
+        quotec: str = None,
+        advanced_escapes: bool = True) -> QuotedSpec:
     """
     Helper function for `parse_exprs`, will parse quoted values and
     return the appropriate wrapper type depending on the quoting
@@ -800,9 +806,6 @@ def parse_quoted(reader, quotec=None, advanced_escapes=True):
     that it should be taken from the first character of the src.
     """
 
-    if isinstance(reader, str):
-        reader = Reader(reader)
-
     if not quotec:
         quotec = reader.read(1)
         if not quotec:
@@ -810,7 +813,7 @@ def parse_quoted(reader, quotec=None, advanced_escapes=True):
             raise ParserError(msg)
 
     token = StringIO()
-    esc = False
+    esc: str = None
 
     srciter = iter(partial(reader.read, 1), '')
     for c in srciter:
@@ -818,7 +821,7 @@ def parse_quoted(reader, quotec=None, advanced_escapes=True):
             if advanced_escapes and c != quotec:
                 token.write(esc)
             token.write(c)
-            esc = False
+            esc = None
         elif c == quotec:
             break
         elif c == '\\':
@@ -839,16 +842,17 @@ def parse_quoted(reader, quotec=None, advanced_escapes=True):
         while reader.peek(1) in "aiLmsux":
             flags.append(reader.read(1))
 
-        val = Regex(val, "".join(flags))
+        return Regex(val, "".join(flags))
 
     elif quotec == "|":
-        flags = False
+        iflag = False
         if reader.peek(1) == 'i':
             reader.read(1)
-            flags = True
-        val = Glob(val, ignorecase=flags)
+            iflag = True
+        return Glob(val, ignorecase=iflag)
 
-    return val
+    else:
+        return val
 
 
 #

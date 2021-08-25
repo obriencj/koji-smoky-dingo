@@ -22,18 +22,24 @@ Some simple functions for working with the local client configuration
 """
 
 
+from koji import ClientSession
+from typing import Any, Dict, Tuple
+
+from .types import GOptions
+
+
 __all__ = (
     "rebuild_client_config",
 )
 
 
-def rebuild_client_config(session, goptions):
+def rebuild_client_config(
+        session: ClientSession,
+        goptions: GOptions) -> Tuple[str, Dict[str, Any]]:
     """
     Reconstructs a koji client configuration based on the fields of a
     session and a session's goptions. Returns a tuple containing the
     active profile's name, and the configuration as a dict.
-
-    :rtype: (str, dict)
     """
 
     opts = {

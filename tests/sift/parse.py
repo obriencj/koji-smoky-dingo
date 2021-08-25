@@ -17,9 +17,8 @@ from unittest import TestCase
 from kojismokydingo.sift import ItemPathSieve, ItemSieve, SifterError
 from kojismokydingo.sift.parse import (
     AllItems, Glob, Item, ItemMatch, ItemPath, Null,
-    Number, ParserError, Regex, RegexError, Symbol, SymbolGroup,
-
-    parse_exprs, parse_index, parse_itempath, parse_quoted,
+    Number, ParserError, Reader, Regex, RegexError, Symbol, SymbolGroup,
+    convert_range, parse_exprs, parse_index, parse_itempath, parse_quoted,
 )
 
 
@@ -179,10 +178,21 @@ class ItemPathTest(TestCase):
                          " Item(slice(1, -1, None)))")
 
 
+class FormattedSeriesTest(TestCase):
+
+    def test_formatted_series(self):
+        f = convert_range("001..005")
+        self.assertEqual(len(f), 5)
+        self.assertEqual(list(f), ["001", "002", "003", "004", "005"])
+        self.assertEqual(f[0], "001")
+        self.assertEqual(f[4], "005")
+
+
 class ParserTest(TestCase):
 
+
     def parse(self, src):
-        return list(parse_exprs(src))
+        return list(parse_exprs(Reader(src)))
 
 
     def check_empty(self, src):
@@ -915,101 +925,119 @@ class ParserTest(TestCase):
 class TestParseQuoted(TestCase):
 
 
+    def parse(self, src, quotec=None):
+        return parse_quoted(Reader(src), quotec=quotec)
+
+
     def test_str(self):
 
-        val = parse_quoted('""', quotec=None)
+        val = self.parse('""', quotec=None)
         self.assertEqual("", val)
 
-        val = parse_quoted('"foo"', quotec=None)
+        val = self.parse('"foo"', quotec=None)
         self.assertEqual("foo", val)
 
-        val = parse_quoted('foo"', quotec='"')
+        val = self.parse('foo"', quotec='"')
         self.assertEqual("foo", val)
 
-        val = parse_quoted(r'foo\""', quotec='"')
+        val = self.parse(r'foo\""', quotec='"')
         self.assertEqual('foo"', val)
 
 
     def test_err_str(self):
-        self.assertRaises(ParserError, parse_quoted, '')
-        self.assertRaises(ParserError, parse_quoted, '"foo')
-        self.assertRaises(ParserError, parse_quoted, 'foo', quotec='"')
+        self.assertRaises(ParserError, self.parse, '')
+        self.assertRaises(ParserError, self.parse, '"foo')
+        self.assertRaises(ParserError, self.parse, 'foo', quotec='"')
+
+        self.assertRaises(AttributeError, parse_quoted, '""')
 
 
 class TestParseIndex(TestCase):
 
+
+    def parse(self, src):
+        return parse_index(Reader(src))
+
+
     def test_parse_index(self):
 
-        ix = parse_index("[]")
+        ix = self.parse("[]")
         self.assertTrue(isinstance(ix, AllItems))
 
-        ix = parse_index("[1:]")
+        ix = self.parse("[1:]")
         self.assertTrue(isinstance(ix, slice))
 
-        self.assertRaises(ParserError, parse_index, '')
-        self.assertRaises(ParserError, parse_index, "[")
-        self.assertRaises(ParserError, parse_index, "[1:")
-        self.assertRaises(ParserError, parse_index, "]")
+        self.assertRaises(ParserError, self.parse, '')
+        self.assertRaises(ParserError, self.parse, "[")
+        self.assertRaises(ParserError, self.parse, "[1:")
+        self.assertRaises(ParserError, self.parse, "]")
+
+        self.assertRaises(AttributeError, parse_index, '')
 
 
 class TestParseItemPath(TestCase):
 
+
+    def parse(self, src):
+        return parse_itempath(Reader(src))
+
+
     def test_repr(self):
 
-        ip = parse_itempath("foo")
+        ip = self.parse("foo")
         self.assertEqual(repr(ip), "ItemPath(Item('foo'))")
 
-        ip = parse_itempath("[]")
+        ip = self.parse("[]")
         self.assertEqual(repr(ip), "ItemPath(AllItems())")
 
-        ip = parse_itempath("[1:]")
+        ip = self.parse("[1:]")
         self.assertEqual(repr(ip),
                          "ItemPath(Item(slice(1, None, None)))")
 
-        ip = parse_itempath("[{foo,bar}]")
+        ip = self.parse("[{foo,bar}]")
         self.assertEqual(repr(ip),
                          "ItemPath(ItemMatch(SymbolGroup('{foo,bar}')))")
 
 
     def test_parse_item(self):
 
-        ip = parse_itempath("foo")
+        ip = self.parse("foo")
         self.assertTrue(isinstance(ip, ItemPath))
         self.assertEqual(len(ip.paths), 1)
         self.assertEqual(type(ip.paths[0]), Item)
         self.assertEqual(ip.paths[0].key, Symbol("foo"))
 
-        ip = parse_itempath(".foo")
+        ip = self.parse(".foo")
         self.assertTrue(isinstance(ip, ItemPath))
         self.assertEqual(len(ip.paths), 1)
         self.assertEqual(type(ip.paths[0]), Item)
         self.assertEqual(ip.paths[0].key, Symbol("foo"))
 
-        ip = parse_itempath("[foo]")
+        ip = self.parse("[foo]")
         self.assertTrue(isinstance(ip, ItemPath))
         self.assertEqual(len(ip.paths), 1)
         self.assertEqual(type(ip.paths[0]), Item)
         self.assertEqual(ip.paths[0].key, Symbol("foo"))
 
-        ip = parse_itempath("[1:]")
+        ip = self.parse("[1:]")
         self.assertTrue(isinstance(ip, ItemPath))
         self.assertEqual(len(ip.paths), 1)
         self.assertEqual(type(ip.paths[0]), Item)
         self.assertEqual(ip.paths[0].key, slice(1, None, None))
 
-        ip = parse_itempath("[:-1]")
+        ip = self.parse("[:-1]")
         self.assertTrue(isinstance(ip, ItemPath))
         self.assertEqual(len(ip.paths), 1)
         self.assertEqual(type(ip.paths[0]), Item)
         self.assertEqual(ip.paths[0].key, slice(None, -1, None))
 
-        ip = parse_itempath("[1:3]")
+        ip = self.parse("[1:3]")
         self.assertTrue(isinstance(ip, ItemPath))
         self.assertEqual(len(ip.paths), 1)
         self.assertEqual(type(ip.paths[0]), Item)
         self.assertEqual(ip.paths[0].key, slice(1, 3, None))
 
-        ip = parse_itempath("[1:3:2]")
+        ip = self.parse("[1:3:2]")
         self.assertTrue(isinstance(ip, ItemPath))
         self.assertEqual(len(ip.paths), 1)
         self.assertEqual(type(ip.paths[0]), Item)
@@ -1018,7 +1046,7 @@ class TestParseItemPath(TestCase):
 
     def test_parse_item_match(self):
 
-        ip = parse_itempath(".{foo,bar}")
+        ip = self.parse(".{foo,bar}")
         self.assertTrue(isinstance(ip, ItemPath))
         self.assertEqual(len(ip.paths), 1)
         self.assertEqual(type(ip.paths[0]), ItemMatch)
@@ -1026,9 +1054,11 @@ class TestParseItemPath(TestCase):
 
 
     def test_err(self):
-        self.assertRaises(ParserError, parse_itempath, ".foo[")
-        self.assertRaises(ParserError, parse_itempath, ".foo]")
+        self.assertRaises(ParserError, self.parse, ".foo[")
+        self.assertRaises(ParserError, self.parse, ".foo]")
         self.assertRaises(ParserError, ItemPath, [None])
+
+        self.assertRaises(AttributeError, parse_itempath, '')
 
 
 #

@@ -15,10 +15,10 @@
 from configparser import ConfigParser
 from contextlib import contextmanager
 from datetime import datetime
-from mock import MagicMock, patch
 from operator import itemgetter
 from pkg_resources import resource_filename
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from kojismokydingo.common import (
     chunkseq, escapable_replace, fnmatches,

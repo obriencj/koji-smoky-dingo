@@ -21,9 +21,12 @@ Functions for working with Koji hosts
 :license: GPL v3
 """
 
+from koji import ClientSession
+from typing import Dict, Iterable, List, Optional, cast
 
 from . import NoSuchChannel, iter_bulk_load
 from .common import globfilter, parse_datetime
+from .types import DecoratedHostInfo, HostInfo
 
 
 __all__ = (
@@ -31,29 +34,27 @@ __all__ = (
 )
 
 
-def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
+def gather_hosts_checkins(
+        session: ClientSession,
+        arches: Optional[List[str]] = None,
+        channel: Optional[str] = None,
+        skiplist: Optional[List[str]] = None) -> List[DecoratedHostInfo]:
     """
     Similar to session.listHosts, but results are decorated with a new
     "last_update" entry, which is the timestamp for the host's most
     recent check-in with the hub. This can be used to identify
     builders which are enabled, but no longer responding.
 
+    :param session: an active koji client session
+
     :param arches: List of architecture names to filter builders by.
         Default, all arches
-
-    :type arches: list[str], optional
 
     :param channel: Channel name to filter builders by. Default,
         builders in any channel.
 
-    :type channel: str, optional
-
     :param skiplist: List of glob-style patterns of builders to
         omit. Default, all builders included
-
-    :type skiplist: list[str], optional
-
-    :rtype: list[dict]
     """
 
     arches = arches or None
@@ -69,6 +70,7 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
     else:
         chan_id = None
 
+    loaded: Iterable[HostInfo]
     loaded = session.listHosts(arches, chan_id, None, True, None, None)
     loaded = filter(None, loaded)
 
@@ -76,7 +78,8 @@ def gather_hosts_checkins(session, arches=None, channel=None, skiplist=None):
         loaded = globfilter(loaded, skiplist, key="name", invert=True)
 
     # collect a mapping of builder ids to builder info
-    bldrs = {b["id"]: b for b in loaded}
+    bldrs: Dict[int, DecoratedHostInfo]
+    bldrs = {b["id"]: cast(DecoratedHostInfo, b) for b in loaded}
 
     updates = iter_bulk_load(session, session.getLastHostUpdate, bldrs)
 

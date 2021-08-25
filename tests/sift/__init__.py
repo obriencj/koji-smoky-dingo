@@ -12,7 +12,6 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from collections import OrderedDict
 from unittest import TestCase
 
 from kojismokydingo.sift import (
@@ -26,7 +25,7 @@ from kojismokydingo.sift import (
 )
 from kojismokydingo.sift.parse import (
     AllItems, Glob, Item, ItemMatch, ItemPath,
-    Null, Number, ParserError, Regex, Symbol, SymbolGroup,
+    Null, Number, ParserError, Reader, Regex, Symbol, SymbolGroup,
     convert_token,
 )
 
@@ -139,14 +138,29 @@ DATA = [
 
 class SifterTest(TestCase):
 
+
     def compile_sifter(self, src, **params):
         sieves = [NameSieve, TypeSieve, BrandSieve, CategorySieve, Poke]
         sieves.extend(DEFAULT_SIEVES)
 
-        return Sifter(sieves, src, params=params)
+        return Sifter(sieves, Reader(src), params=params)
+
+
+    def test_from_str(self):
+        sifter = Sifter(DEFAULT_SIEVES, "")
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 0)
 
 
     def test_empty(self):
+        sifter = self.compile_sifter("")
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 0)
+
+        sifter = self.compile_sifter("  \n  ")
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 0)
+
         sifter = self.compile_sifter("")
         sieves = sifter.sieve_exprs()
         self.assertEqual(len(sieves), 0)
@@ -691,6 +705,19 @@ class SifterTest(TestCase):
 
         res = sifter(None, DATA)
         self.assertEqual(res["default"], [PIZZA])
+
+        src = """
+        (item name)
+        """
+        sifter = self.compile_sifter(src)
+        sieves = sifter.sieve_exprs()
+        self.assertEqual(len(sieves), 1)
+        self.assertTrue(isinstance(sieves[0], ItemPathSieve))
+        self.assertEqual(repr(sieves[0]),
+                         "(item ItemPath(Item('name')))")
+
+        res = sifter(None, DATA)
+        self.assertEqual(res["default"], DATA)
 
         src = """
         (item name Pizza Tacos)

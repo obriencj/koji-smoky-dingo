@@ -24,12 +24,11 @@ Some simple functions used by the other modules.
 
 # Note: features implemented in this module should not be specific to
 # working with koji. ie: nothing should require a session object or
-# work with the koji-specific dict types (build info, tag info, etc)
+# work with the koji-specific types (build info, tag info, etc)
 
 
 import re
 
-from collections import OrderedDict
 from configparser import ConfigParser
 from datetime import datetime, timezone
 from fnmatch import fnmatchcase
@@ -37,6 +36,11 @@ from glob import glob
 from itertools import filterfalse
 from operator import itemgetter
 from os.path import expanduser, isdir, join
+from typing import (
+    Any, Callable, Dict, Iterable, Iterator, List,
+    Optional, Sequence, Tuple, TypeVar, Union, )
+
+from .types import IterList, KeySpec
 
 
 try:
@@ -47,6 +51,7 @@ except ImportError:  # pragma: no cover
 
 __all__ = (
     "chunkseq",
+    "escapable_replace",
     "fnmatches",
     "find_config_dirs",
     "find_config_files",
@@ -61,18 +66,16 @@ __all__ = (
 )
 
 
-def chunkseq(seq, chunksize):
+def chunkseq(
+        seq: Iterable,
+        chunksize: int) -> Iterator[Iterable]:
     """
     Chop up a sequence into sub-sequences, each up to chunksize in
     length.
 
     :param seq: a sequence to chunk up
-    :type seq: list
 
     :param chunksize: max length for chunks
-    :type chunksize: int
-
-    :rtype: Generator[list]
     """
 
     if not isinstance(seq, (tuple, list)):
@@ -83,7 +86,10 @@ def chunkseq(seq, chunksize):
             offset in range(0, seqlen, chunksize))
 
 
-def escapable_replace(orig, character, replacement):
+def escapable_replace(
+        orig: str,
+        character: str,
+        replacement: str) -> str:
     """
     Single-character string substitutions. Doubled sentinel characters
     can be used to represent that exact character.
@@ -96,18 +102,15 @@ def escapable_replace(orig, character, replacement):
        ``"Hello %"``
 
     :param orig: Original text
-    :type orig: str
 
     :param character: Single-character token.
-    :type character: str
 
     :param replacement: Replacement text
-    :type replacement: str
     """
 
     assert len(character) == 1, "escapable_replace requires single characters"
 
-    gather = []
+    gather: List[str] = []
     collect = gather.append
 
     pieces = iter(orig)
@@ -127,21 +130,19 @@ def escapable_replace(orig, character, replacement):
     return "".join(gather)
 
 
-def fnmatches(value, patterns, ignore_case=False):
+def fnmatches(
+        value: str,
+        patterns: Iterable[str],
+        ignore_case: bool = False) -> bool:
     """
     Checks value against multiple glob patterns. Returns True if any
     match.
 
     :param value: string to be matched
-    :type value: str
 
     :param patterns: list of glob-style pattern strings
-    :type patterns: list[str]
 
     :param ignore_case: if True case is normalized, Default False
-    :type ignore_case: bool, optional
-
-    :rtype: bool
     """
 
     if ignore_case:
@@ -155,7 +156,9 @@ def fnmatches(value, patterns, ignore_case=False):
         return False
 
 
-def update_extend(dict_orig, *dict_additions):
+def update_extend(
+        dict_orig: Dict[Any, list],
+        *dict_additions: Dict[Any, List]) -> Dict[Any, list]:
     """
     Extend the list values of the original dict with the list values of
     the additions dict.
@@ -175,16 +178,14 @@ def update_extend(dict_orig, *dict_additions):
     :param dict_orig: The original dict, which may be mutated and whose
       values may be extended
 
-    :type dict_orig: dict[object, list]
-
     :param dict_additions: The additions dict. Will not be altered.
 
-    :type dict_additions: dict[object, list]
-
     :returns: The original dict instance
-
-    :rtype: dict[object, list]
     """
+
+    # oddity here, really *dict_additions should be Dict[Any,
+    # Iterable] but for some bizarre reason MyPy doesn't consider
+    # lists to be iterable when they're dict values. Really weird.
 
     for additions in dict_additions:
         for key, val in additions.items():
@@ -194,7 +195,8 @@ def update_extend(dict_orig, *dict_additions):
     return dict_orig
 
 
-def merge_extend(*dict_additions):
+def merge_extend(
+        *dict_additions: Dict[Any, List]) -> Dict[Any, list]:
     """
     Similar to `update_extend` but creates a new dict to hold results,
     and new initial lists to be extended, leaving all the arguments
@@ -202,18 +204,21 @@ def merge_extend(*dict_additions):
 
     :param dict_additions: The additions dict. Will not be altered.
 
-    :type dict_additions: dict[object, list]
-
     :returns: A new dict, whose values are new lists
-
-    :rtype: dict[object, list]
     """
 
     return update_extend({}, *dict_additions)
 
 
-def globfilter(seq, patterns,
-               key=None, invert=False, ignore_case=False):
+T = TypeVar('T')
+
+
+def globfilter(
+        seq: Iterable[T],
+        patterns: Iterable[str],
+        key: Optional[KeySpec] = None,
+        invert: bool = False,
+        ignore_case: bool = False) -> Iterable[T]:
     """
     Generator yielding members of sequence seq which match any of the
     glob patterns specified.
@@ -231,30 +236,18 @@ def globfilter(seq, patterns,
       but may be any type provided the key parameter is specified to
       provide a string for matching based on the given object.
 
-    :type seq: list
-
     :param patterns: list of glob-style pattern strings. Members of
       seq which match any of these patterns are yielded.
-
-    :type patterns: list[str]
 
     :param key: A unary callable which translates individual items on
       seq into the value to be matched against the patterns. Default,
       match against values in seq directly.
 
-    :type key: Callable[[object], str], optional
-
     :param invert: Invert the logic, yielding the non-matches rather
       than the matches. Default, yields matches
 
-    :type invert: bool, optional
-
     :param ignore_case: pattern comparison is case normalized if
       True. Default, False
-
-    :type ignore_case: bool, optional
-
-    :rtype: Iterable[object]
     """
 
     if ignore_case:
@@ -276,7 +269,9 @@ def globfilter(seq, patterns,
     return filterfalse(test, seq) if invert else filter(test, seq)
 
 
-def unique(sequence, key=None):
+def unique(
+        sequence: Iterable[Any],
+        key: Optional[KeySpec] = None) -> List[Any]:
     """
     Given a sequence, de-duplicate it into a new list, preserving
     order.
@@ -288,30 +283,20 @@ def unique(sequence, key=None):
     de-duplication.
 
     :param sequence: series of hashable objects
-    :type sequence: list
 
     :param key: unary callable that produces a hashable identifying
       value. Default, use each object in sequence as its own
       identifier.
-
-    :type key: Callable[[object],object], optional
-
-    :rtype: list
     """
-
-    # in python 3.6+ OrderedDict is not necessary here, but we're
-    # supporting 2.6, 2.7 as well. At some point Python will likely do
-    # something bad and deprecate OrderedDict, at that point we'll
-    # have to begin detecting the version and using just plain dict
 
     if key:
         if not callable(key):
             # undocumented behavior! woo!!
             key = itemgetter(key)
-        work = ((key(v), v) for v in sequence)
-        return list(OrderedDict(work).values())
+        work = {key(v): v for v in sequence}
+        return list(work.values())
     else:
-        return list(OrderedDict.fromkeys(sequence))
+        return list(dict.fromkeys(sequence))
 
 
 DATETIME_FORMATS = (
@@ -355,7 +340,9 @@ DATETIME_FORMATS = (
 )
 
 
-def parse_datetime(src, strict=True):
+def parse_datetime(
+        src: str,
+        strict: bool = True) -> datetime:
     """
     Attempts to parse a datetime string in numerous ways based on
     pre-defined regex mappings
@@ -377,18 +364,12 @@ def parse_datetime(src, strict=True):
 
     :param src: Date-time text to be parsed
 
-    :type src: str
-
     :param strict: Raise an exception if no matching format is known
       and the date-time text cannot be parsed. If False, simply return
-      `None`
+      `None` when the value cannot be parsed.
 
-    :type strict: bool, optional
-
-    :raises Exception: if strict and no src matches none of the
+    :raises ValueError: if strict and no src matches none of the
       pre-defined formats
-
-    :rtype: `datetime` or `None`
     """
 
     for pattern, parser in DATETIME_FORMATS:
@@ -397,17 +378,15 @@ def parse_datetime(src, strict=True):
             return parser(mtch.string)
     else:
         if strict:
-            raise Exception("Invalid date-time format, %r" % src)
+            raise ValueError("Invalid date-time format, %r" % src)
         else:
             return None
 
 
-def find_config_dirs():
+def find_config_dirs() -> Tuple[str, str]:
     """
-    The site and user configuration dirs, as a tuple. Attempts to use
-    the ``appdirs`` package if it is available.
-
-    :rtype: tuple[str]
+    The site and user configuration dirs for koji-smoky-dingo, as a
+    tuple. Attempts to use the ``appdirs`` package if it is available.
     """
 
     if appdirs is None:
@@ -420,7 +399,8 @@ def find_config_dirs():
     return (site_conf_dir, user_conf_dir)
 
 
-def find_config_files(dirs=None):
+def find_config_files(
+        dirs: Optional[Iterable[str]] = None) -> List[str]:
     """
     The ordered list of configuration files to be loaded.
 
@@ -428,16 +408,17 @@ def find_config_files(dirs=None):
     from which conf files will be loaded in order. If unspecified,
     defaults to the result of `find_config_dirs`
 
-    :param dirs: list of directories to look for config files within
-    :type dirs: list[str], optional
+    Configuration files must have the extension ``.conf`` to be
+    considered. The files will be listed in directory order, and then
+    in alphabetical order from within each directory.
 
-    :rtype: list[str]
+    :param dirs: list of directories to look for config files within
     """
 
     if dirs is None:
         dirs = find_config_dirs()
 
-    found = []
+    found: List[str] = []
 
     for confdir in dirs:
         if isdir(confdir):
@@ -447,7 +428,8 @@ def find_config_files(dirs=None):
     return found
 
 
-def load_full_config(config_files=None):
+def load_full_config(
+        config_files: Optional[Iterable[str]] = None) -> ConfigParser:
     """
     Configuration object representing the full merged view of config
     files.
@@ -455,7 +437,12 @@ def load_full_config(config_files=None):
     If `config_files` is None, use the results of `find_config_files`.
     Otherwise, `config_files` must be a sequence of filenames.
 
-    :rtype: ConfigParser
+    :param config_files: configuration files to be loaded, in order.
+      If not specified, the results of `find_config_files` will be
+      used.
+
+    :returns: a configuration representing a merged view of all config
+      files
     """
 
     if config_files is None:
@@ -467,24 +454,22 @@ def load_full_config(config_files=None):
     return conf
 
 
-def get_plugin_config(conf, plugin, profile=None):
+def get_plugin_config(
+        conf: ConfigParser,
+        plugin: str,
+        profile: Optional[str] = None) -> Dict[str, Any]:
     """
     Given a loaded configuration, return the section specific to the
-    given plugin, and optionally profile
+    given plugin, and optionally profile-specific as well.
 
-    :param conf: Full configuration
-    :type conf: ConfigParser
+    :param conf: loaded configuration data
 
-    :param plugin: Plugin name
-    :type plugin: str
+    :param plugin: plugin name
 
-    :param profile: Profile name
-    :type profile: str, optional
-
-    :rtype: dict[str,object]
+    :param profile: profile name, optional
     """
 
-    plugin_conf = {}
+    plugin_conf: Dict[str, Any] = {}
 
     if conf.has_section(plugin):
         plugin_conf.update(conf.items(plugin))
@@ -497,17 +482,29 @@ def get_plugin_config(conf, plugin, profile=None):
     return plugin_conf
 
 
-def load_plugin_config(plugin, profile=None):
+def load_plugin_config(
+        plugin: str,
+        profile: Optional[str] = None) -> Dict[str, Any]:
     """
-    Configuration specific to a given plugin, and optionally profile
+    Configuration specific to a given plugin, and optionally specific
+    to a given profile as well.
 
-    :param plugin: Plugin name
-    :type plugin: str
+    Profile-specific sections are denoted by a suffix on the section
+    name, eg.
 
-    :param profile: Profile name
-    :type profile: str, optional
+    ::
 
-    :rtype: dict[str,object]
+      [my_plugin]
+      # this setting is for my_plugin on all profiles
+      setting = foo
+
+      [my_plugin:testing]
+      # this setting is for my_plugin on the testing profile
+      setting = bar
+
+    :param plugin: plugin name
+
+    :param profile: profile name
     """
 
     conf = load_full_config()

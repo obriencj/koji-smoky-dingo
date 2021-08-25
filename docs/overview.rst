@@ -146,7 +146,7 @@ included spec to produce an RPM and install that.
 .. code:: bash
 
    make clean rpm
-   dnf install dist/noarch/python3-kojismokydingo-1.0.0-1.fc32.noarch.rpm
+   dnf install dist/noarch/python3-kojismokydingo-2.0.0-0.fc32.noarch.rpm
 
 As a System-wide Wheel via Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,13 +156,8 @@ achieve this by specifying the specific root or prefix parameter
 
 .. code:: bash
 
-   # Python 2.7 global install
-   python2 setup.py bdist_wheel
-   pip2 install --prefix /usr -I dist/kojismokydingo-1.0.0-py2-none-any.whl
-
-   # Python 3 global install
    python3 setup.py bdist_wheel
-   pip3 install --prefix /usr -I dist/kojismokydingo-1.0.0-py3-none-any.whl
+   pip3 install --prefix /usr -I dist/kojismokydingo-2.0.0-py3-none-any.whl
 
 As a User-only Wheel via Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -173,11 +168,16 @@ install it anywhere and tell koji to look in that particular
 
 .. code:: bash
 
-   # Python 3 user install
    python3 setup.py bdist_wheel
-   pip3 install --user -I dist/kojismokydingo-1.0.0-py3-none-any.whl
+   pip3 install --user -I dist/kojismokydingo-2.0.0-py3-none-any.whl
 
-And the following setting in ~/.koji/config assuming Python version 3.7
+Additionally, you can install straight from PyPI
+
+.. code:: bash
+
+   pip3 install kojismokydingo --user
+
+And the following setting in ~/.koji/config assuming Python version 3.8
 – read the output of the install command above to verify your install
 path. Note that the section title needs to match your koji profile, and
 that you need to configure this setting for each profile you’ll want to
@@ -186,7 +186,7 @@ use the meta plugin with.
 ::
 
    [koji]
-   plugin_paths = ~/.local/lib/python3.7/site-packages/koji_cli_plugins/
+   plugin_paths = ~/.local/lib/python3.8/site-packages/koji_cli_plugins/
 
 With koji >=
 `1.18 <https://docs.pagure.org/koji/release_notes/release_notes_1.18/>`__,
@@ -195,7 +195,7 @@ the meta plugin can also be symlinked into ``~/.koji/plugins``
 .. code:: bash
 
    mkdir -p ~/.koji/plugins
-   ln -s ~/.local/lib/python3.7/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+   ln -s ~/.local/lib/python$(python3 -c 'import sys; print("{}.{}".format(*sys.version_info))')/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 
 Contact
 -------
