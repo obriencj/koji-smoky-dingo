@@ -152,21 +152,6 @@ class TestEnsureTag(TestCase):
         return sess, send, create
 
 
-    def test_ensure_tag_create(self):
-
-        key = "example-1.0-build"
-
-        sess, send, create = self.session([None, self.DATA])
-        res = ensure_tag(sess, key)
-        self.assertEqual(res, self.DATA)
-        self.assertEqual(send.call_count, 2)
-        self.assertEqual(send.call_args_list[0][0], (key,))
-        self.assertEqual(send.call_args_list[0][1], {"blocked": True})
-        self.assertEqual(send.call_args_list[1][0], (1,))
-        self.assertEqual(send.call_args_list[1][1], {"blocked": True})
-        self.assertEqual(create.call_count, 1)
-
-
     def test_ensure_tag_exists(self):
 
         key = "example-1.0-build"
@@ -177,7 +162,7 @@ class TestEnsureTag(TestCase):
         self.assertEqual(send.call_count, 1)
         self.assertEqual(send.call_args_list[0][0], (key,))
         self.assertEqual(send.call_args_list[0][1], {"blocked": True})
-        self.assertEqual(create.call_count, 0)
+        self.assertEqual(create.call_count, 1)
 
 
 #

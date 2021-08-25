@@ -1057,8 +1057,10 @@ def as_rpminfo(
       into a RPM info dict
     """
 
+    info: RPMInfo
+
     if isinstance(rpm, (str, int)):
-        info = session.getRPM(rpm)
+        info = session.getRPM(rpm)  # type: ignore
     elif isinstance(rpm, dict):
         info = rpm
     else:

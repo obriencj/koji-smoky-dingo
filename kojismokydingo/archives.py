@@ -24,7 +24,8 @@ representing RPMs and build archives
 from koji import ClientSession, PathInfo
 from os.path import join
 from typing import (
-    Any, Container, Iterable, List, Optional, Set, Union, cast, )
+    Any, Container, Dict, Iterable, List, Optional,
+    Set, Sequence, Union, cast, )
 
 from . import as_buildinfo, as_taginfo, bulk_load, bulk_load_rpm_sigs
 from .types import (
@@ -113,7 +114,7 @@ def filter_archives(
 def gather_signed_rpms(
         session: ClientSession,
         archives: RPMInfos,
-        sigkeys: Iterable[str]) -> DecoratedRPMInfos:
+        sigkeys: Sequence[str]) -> List[DecoratedRPMInfo]:
     """
     Given a list of RPM archive dicts, query the session for all the
     pertinent signature headers, then try and find the best matching
@@ -124,12 +125,14 @@ def gather_signed_rpms(
     :param archives: list of RPM archive dicts
 
     :param sigkeys: list of signature fingerprints, in order of
-      precedence
+      precedence. case insensitive.
     """
 
-    rpm_archives = cast(DecoratedRPMInfos, archives)
+    rpm_archives = cast(List[DecoratedRPMInfo], archives)
     if not sigkeys:
         return rpm_archives
+    else:
+        sigkeys = [s.lower() for s in sigkeys]
 
     results: List[DecoratedRPMInfo] = []
 
@@ -140,7 +143,7 @@ def gather_signed_rpms(
     rpm_sigs = bulk_load_rpm_sigs(session, rpms)
 
     for rpm_id, rpm in rpms.items():
-        found = set(sig["sigkey"] for sig in rpm_sigs[rpm_id])
+        found = set(sig["sigkey"].lower() for sig in rpm_sigs[rpm_id])
         for wanted in sigkeys:
             if wanted in found:
                 rpm["sigkey"] = wanted
@@ -153,7 +156,7 @@ def gather_signed_rpms(
 def gather_build_rpms(
         session: ClientSession,
         binfo: BuildInfo,
-        rpmkeys: Iterable[str] = (),
+        rpmkeys: Sequence[str] = (),
         path: Optional[PathSpec] = None) -> List[DecoratedRPMInfo]:
     """
     Gathers a list of rpm dicts matching the given signature keys from
@@ -174,7 +177,7 @@ def gather_build_rpms(
     path = as_pathinfo(path)
 
     build_path = path.build(binfo)
-    found = session.listRPMs(buildID=bid)
+    found = cast(List[DecoratedRPMInfo], session.listRPMs(buildID=bid))
 
     if rpmkeys:
         found = gather_signed_rpms(session, found, rpmkeys)
@@ -277,7 +280,7 @@ def gather_build_archives(
         session: ClientSession,
         binfo: BuildInfo,
         btype: Optional[str] = None,
-        rpmkeys: Iterable[str] = (),
+        rpmkeys: Sequence[str] = (),
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Produce a list of archive dicts associated with a build info,
@@ -361,9 +364,9 @@ def gather_build_archives(
 def gather_latest_rpms(
         session: ClientSession,
         tagname: str,
-        rpmkeys: Iterable[str] = (),
+        rpmkeys: Sequence[str] = (),
         inherit: bool = True,
-        path: Optional[PathSpec] = None) -> DecoratedArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedRPMInfo]:
     """
     Similar to session.getLatestRPMS(tagname) but will filter by
     available signatures, and augments the results to include a new
@@ -383,22 +386,18 @@ def gather_latest_rpms(
 
     path = as_pathinfo(path)
 
-    found, builds = session.getLatestRPMS(tagname)
-
-    # decorate the build info with its path data
-    for bld in builds:
-        bld["build_path"] = path.build(bld)
-
-    builds = {bld["id"]: bld for bld in builds}
+    lfound, lbuilds = session.getLatestRPMS(tagname)
+    bpaths = {bld["id"]: path.build(bld) for bld in lbuilds}
 
     if rpmkeys:
-        found = gather_signed_rpms(session, found, rpmkeys)
+        found = gather_signed_rpms(session, lfound, rpmkeys)
 
     for f in found:
-        bld = builds[f["build_id"]]
+        pth = bpaths[f["build_id"]]
+
         key = f["sigkey"] if rpmkeys else None
         rpmpath = path.signed(f, key) if key else path.rpm(f)
-        f["filepath"] = join(bld["build_path"], rpmpath)
+        f["filepath"] = join(pth, rpmpath)
 
         # fake some archive members, since RPMs are missing these
         f["type_id"] = 0
@@ -488,25 +487,20 @@ def gather_latest_win_archives(
 
     found = []
 
-    archives, builds = session.listTaggedArchives(tagname,
-                                                  inherit=inherit,
-                                                  latest=True,
-                                                  type="win")
-
-    # decorate the build infos with the type paths for windows
-    for bld in builds:
-        bld["build_path"] = path.winbuild(bld)
+    archives, lbuilds = session.listTaggedArchives(tagname,
+                                                   inherit=inherit,
+                                                   latest=True,
+                                                   type="win")
 
     # convert builds to an id:binfo mapping
-    builds = {bld["id"]: bld for bld in builds}
+    bpaths = {bld["id"]: path.winbuild(bld) for bld in lbuilds}
 
     for archive in archives:
-        bld = builds[archive["build_id"]]
-        build_path = bld["build_path"]
+        pth = bpaths[archive["build_id"]]
 
         # build an archive filepath from that
         decor = cast(DecoratedArchiveInfo, archive)
-        decor["filepath"] = join(build_path, path.winfile(archive))
+        decor["filepath"] = join(pth, path.winfile(archive))
         found.append(decor)
 
     return found
@@ -514,10 +508,14 @@ def gather_latest_win_archives(
 
 def gather_latest_image_archives(
         session: ClientSession,
-        tagname: str,
+        tagname: Union[int, str],
         inherit: bool = True,
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
+    :param session: an active koji client session
+
+    :param tagname: Name of the tag to gather archives from
+
     :param inherit: Follow tag inheritance, default True
     """
 
@@ -546,9 +544,9 @@ def gather_latest_image_archives(
 
 def gather_latest_archives(
         session: ClientSession,
-        tagname: str,
+        tagname: Union[int, str],
         btype: Optional[str] = None,
-        rpmkeys: Iterable[str] = (),
+        rpmkeys: Sequence[str] = (),
         inherit: bool = True,
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
@@ -580,7 +578,7 @@ def gather_latest_archives(
     tagname = taginfo["name"]
 
     known_types = ("rpm", "maven", "win", "image")
-    found: List[ArchiveInfo] = []
+    found: List[DecoratedArchiveInfo] = []
 
     # the known types have additional metadata when queried, and have
     # pre-defined path structures. We'll be querying those directly
@@ -590,7 +588,7 @@ def gather_latest_archives(
 
     if btype in (None, "rpm"):
         found.extend(gather_latest_rpms(session, tagname, rpmkeys,
-                                        inherit, path))
+                                        inherit, path))  # type: ignore
 
     if btype in (None, "maven"):
         found.extend(gather_latest_maven_archives(session, tagname,
@@ -610,13 +608,13 @@ def gather_latest_archives(
     if btype is None:
         # listTaggedArchives is very convenient, but only works with
         # win, maven, and None
-        archives, builds = session.listTaggedArchives(tagname,
-                                                      inherit=inherit,
-                                                      latest=True,
-                                                      type=None)
+        archives, lbuilds = session.listTaggedArchives(tagname,
+                                                       inherit=inherit,
+                                                       latest=True,
+                                                       type=None)
 
         # convert builds to an id:binfo mapping
-        builds = {bld["id"]: bld for bld in builds}
+        builds = {bld["id"]: bld for bld in lbuilds}
 
         for archive in archives:
             abtype = archive["btype"]
@@ -640,11 +638,11 @@ def gather_latest_archives(
     else:
         # btype is not one of the known ones, and it's also not None.
         if inherit:
-            builds = session.getLatestBuilds(tagname, type=btype)
+            ibuilds = session.getLatestBuilds(tagname, type=btype)
         else:
-            builds = session.listTagged(tagname, latest=True, type=btype)
+            ibuilds = session.listTagged(tagname, latest=True, type=btype)
 
-        for bld in builds:
+        for bld in ibuilds:
             build_path = path.typedir(bld, btype)
             archives = session.listArchives(buildID=bld["id"], type=btype)
             for archive in archives:

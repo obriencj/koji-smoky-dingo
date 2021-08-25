@@ -30,9 +30,9 @@ from typing import (
 
 from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
-    ChannelInfo, CGInfo, HostInfo, PermInfo, RepoInfo, RPMInfo, TagInfo,
-    TagGroup, TagInheritance, TagPackageInfo, TargetInfo, TaskInfo,
-    UserInfo, )
+    ChannelInfo, CGInfo, HostInfo, PermInfo, RepoInfo, RepoState,
+    RPMInfo, RPMSignature, TagInfo, TagGroup, TagInheritance,
+    TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
 
 
 BUILD_STATES: Dict[str, int]
@@ -224,6 +224,11 @@ class ClientSession:
             reverse: bool = False) -> TagInheritance:
         ...
 
+    def getGroupMembers(
+            self,
+            group: Union[int, str]) -> List[UserInfo]:
+        ...
+
     def getHost(
             self,
             hostInfo: Union[int, str],
@@ -244,11 +249,44 @@ class ClientSession:
             self,
             tag: Union[int, str],
             event: Optional[int] = None,
-            package: Optional[Union[int, str]] = None,
+            Package: Optional[Union[int, str]] = None,
             type: Optional[str] = None) -> List[BuildInfo]:
         ...
 
+    def getLatestMavenArchives(
+            self,
+            tag: Union[int, str],
+            event: Optional[int] = None,
+            inherit: bool = True) -> List[ArchiveInfo]:
+        ...
+
+    def getLatestRPMS(
+            self,
+            tag: Union[int, str],
+            package: Optional[Union[int, str]] = None,
+            arch: Optional[str] = None,
+            event: Optional[int] = None,
+            rpmsigs: bool = False,
+            type: Optional[str] = None) -> Tuple[List[RPMInfo],
+                                                 List[BuildInfo]]:
+        ...
+
     def getPerms(self) -> List[str]:
+        ...
+
+    def getRepo(
+            self,
+            tag: Union[int, str],
+            state: Optional[RepoState] = None,
+            event: Optional[int] = None,
+            dist: bool = False) -> RepoInfo:
+        ...
+
+    def getRPM(
+            self,
+            rpminfo: Union[int, str],
+            strict: bool = False,
+            multi: bool = False) -> Union[RPMInfo, List[RPMInfo]]:
         ...
 
     def getUserPerms(
@@ -340,6 +378,17 @@ class ClientSession:
             with_owners: bool = True) -> List[TagPackageInfo]:
         ...
 
+    def listRPMs(
+            self,
+            buildID: Optional[int] = None,
+            buildrootID: Optional[int] = None,
+            imageID: Optional[int] = None,
+            componentBuildrootID: Optional[int] = None,
+            hostID: Optional[int] = None,
+            arches: Optional[str] = None,
+            queryOpts: Optional[dict] = None) -> List[RPMInfo]:
+        ...
+
     def listTagged(
             self,
             tag: Union[int, str],
@@ -350,6 +399,17 @@ class ClientSession:
             package: Optional[Union[int, str]] = None,
             owner: Optional[Union[int, str]] = None,
             type: Optional[str] = None) -> List[BuildInfo]:
+        ...
+
+    def listTaggedArchives(
+            self,
+            tag: Union[int, str],
+            event: Optional[int] = None,
+            inherit: bool = False,
+            latest: bool = False,
+            package: Optional[Union[int, str]] = None,
+            type: Optional[str] = None) -> Tuple[List[ArchiveInfo],
+                                                 List[BuildInfo]]:
         ...
 
     def listTags(
@@ -371,6 +431,19 @@ class ClientSession:
             self,
             strict: bool = False,
             batch: Optional[int] = None) -> List[Union[FaultInfo, List[Any]]]:
+        ...
+
+    def queryHistory(
+            self,
+            tables: Optional[List[str]] = None,
+            **kwargs: Any) -> Dict[str, List[Dict[str, Any]]]:
+        ...
+
+    def queryRPMSigs(
+            self,
+            rpm_id: Optional[int] = None,
+            sigkey: Optional[str] = None,
+            queryOpts: Optional[dict] = None) -> List[RPMSignature]:
         ...
 
     def repoInfo(

@@ -76,7 +76,7 @@ def ensure_tag(
     """
 
     try:
-        tag_id = session.createTag(name)
+        session.createTag(name)
     except GenericError:
         pass
 

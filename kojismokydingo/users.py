@@ -28,7 +28,7 @@ from typing import List, Optional, Union, cast
 from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
 from .types import (
     CGInfo, DecoratedPermInfo, DecoratedUserInfo, NamedCGInfo,
-    PermSpec, UserInfo, UserSpec, UserType, )
+    PermSpec, PermUser, UserInfo, UserSpec, UserType, )
 
 
 __all__ = (
@@ -177,7 +177,7 @@ def collect_perminfo(
         user["permission_name"] = user.pop("permission.name")
         user["create_date"] = asctime(localtime(user["create_ts"]))
 
-    pinfo["users"] = users
+    pinfo["users"] = cast(List[PermUser], users)
 
     return pinfo
 

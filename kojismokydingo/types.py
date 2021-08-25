@@ -31,7 +31,8 @@ from koji import (
     PathInfo, )
 from optparse import Values
 from typing import (
-    Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, )
+    Any, Callable, Dict, Iterable, List, Literal,
+    Optional, Tuple, Union, )
 
 
 try:
@@ -60,6 +61,7 @@ __all__ = (
     "ChannelInfo",
     "ChecksumType",
     "CGInfo",
+    "DecoratedBuildInfo",
     "DecoratedHostInfo",
     "DecoratedHostInfos",
     "DecoratedTagExtra",
@@ -368,6 +370,7 @@ class BuildInfo(TypedDict):
 
 
 class DecoratedBuildInfo(BuildInfo):
+
     archive_btype_names: List[str]
     archive_btype_ids: List[int]
 
@@ -497,7 +500,15 @@ class DecoratedRPMInfo(RPMInfo):
     preferred signature (if any) was available.
     """
 
+    btype: Literal["rpm"]
+    btype_id: Literal[1]
+
+    filepath: str
+
     sigkey: str
+
+    type_id: Literal[0]
+    type_name: Literal["rpm"]
 
 
 DecoratedRPMInfos = Iterable[DecoratedRPMInfo]
@@ -614,7 +625,8 @@ class UserInfo(TypedDict):
     """ the username """
 
     status: UserStatus
-    """ status of the account """
+    """ status of the account. not present for members from the
+    ``getGroupMembers`` call. """
 
     usertype: UserType
     """ type of the account """
@@ -693,7 +705,7 @@ class DecoratedUserInfo(UserInfo):
     content_generators: List[NamedCGInfo]
     """ names of granted content generators """
 
-    members: List[str]
+    members: List[UserInfo]
     """ membership if user is a group """
 
 

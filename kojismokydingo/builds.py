@@ -276,8 +276,8 @@ def iter_bulk_move_builds(
                 bid = build["id"]
                 session.tagBuildBypass(stagid, bid, force, notify)
                 session.untagBuildBypass(dtagid, bid, force, notify)
-            _results = session.multiCall(strict=True)
-            yield list(zip(build_infos, repeat(None)))
+            session.multiCall(strict=True)
+        yield list(zip(build_infos, repeat(None)))
 
     else:
         for chunk in iter_bulk_tag_builds(session, dsttag, build_infos,
