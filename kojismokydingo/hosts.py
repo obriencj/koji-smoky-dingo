@@ -22,11 +22,11 @@ Functions for working with Koji hosts
 """
 
 from koji import ClientSession
-from typing import Iterable, Optional
+from typing import Dict, Iterable, List, Optional, cast
 
 from . import NoSuchChannel, iter_bulk_load
 from .common import globfilter, parse_datetime
-from .types import DecoratedHostInfos
+from .types import DecoratedHostInfo, HostInfo
 
 
 __all__ = (
@@ -36,9 +36,9 @@ __all__ = (
 
 def gather_hosts_checkins(
         session: ClientSession,
-        arches: Optional[Iterable[str]] = None,
+        arches: Optional[List[str]] = None,
         channel: Optional[str] = None,
-        skiplist: Optional[Iterable[str]] = None) -> DecoratedHostInfos:
+        skiplist: Optional[List[str]] = None) -> List[DecoratedHostInfo]:
     """
     Similar to session.listHosts, but results are decorated with a new
     "last_update" entry, which is the timestamp for the host's most
@@ -70,6 +70,7 @@ def gather_hosts_checkins(
     else:
         chan_id = None
 
+    loaded: Iterable[HostInfo]
     loaded = session.listHosts(arches, chan_id, None, True, None, None)
     loaded = filter(None, loaded)
 
@@ -77,7 +78,8 @@ def gather_hosts_checkins(
         loaded = globfilter(loaded, skiplist, key="name", invert=True)
 
     # collect a mapping of builder ids to builder info
-    bldrs = {b["id"]: b for b in loaded}
+    bldrs: Dict[int, DecoratedHostInfo]
+    bldrs = {b["id"]: cast(DecoratedHostInfo, b) for b in loaded}
 
     updates = iter_bulk_load(session, session.getLastHostUpdate, bldrs)
 

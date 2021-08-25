@@ -18,13 +18,12 @@ Typing annotations for the koji XMLRPC API
 
 
 from typing import (
-    Any, Dict, List, Optional, Tuple, Union, )
+    Any, Dict, List, Optional, TypedDict, Tuple, Union, )
 
 from kojismokydingo.types import (
-    ArchiveInfo, BuildInfo, ImageBuildInfo, ImageArchiveInfo,
-    MavenArchiveInfo,
-    MavenBuildInfo, RPMInfo, TagInfo, WindowsArchiveInfo,
-    WindowsBuildInfo, )
+    ArchiveInfo, BuildInfo, BuildrootInfo, ChannelInfo,
+    CGInfo, HostInfo, PermInfo, RPMInfo, TagInfo, TagInheritance,
+    TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
 
 
 BUILD_STATES: Dict[str, int]
@@ -42,6 +41,11 @@ class Fault:
             faultString: str,
             **extra: Any):
         ...
+
+
+class FaultInfo(TypedDict):
+    faultCode: int
+    faultString: str
 
 
 class GenericError(Exception):
@@ -76,22 +80,19 @@ class PathInfo:
             volume: str = None) -> str:
         ...
 
-    def filepath(
-            self,
-
     def imagebuild(
             self,
-            build: ImageBuildInfo) -> str:
+            build: BuildInfo) -> str:
         ...
 
     def mavenbuild(
             self,
-            build: MavenBuildInfo) -> str:
+            build: BuildInfo) -> str:
         ...
 
     def mavenfile(
             self,
-            maveninfo: MavenArchiveInfo) -> str:
+            maveninfo: ArchiveInfo) -> str:
         ...
 
     def rpm(
@@ -113,12 +114,12 @@ class PathInfo:
 
     def winbuild(
             self,
-            build: WindowsBuildInfo) -> str:
+            build: BuildInfo) -> str:
         ...
 
     def winfile(
             self,
-            wininfo: WindowsArchiveInfo) -> str:
+            wininfo: ArchiveInfo) -> str:
         ...
 
 
@@ -140,10 +141,41 @@ class ClientSession:
             sinfo: Optional[Dict[str, Any]] = None):
         ...
 
+    def createTag(
+            self,
+            name: str,
+            parent: Optional[Union[int, str]] = None,
+            arches: Optional[str] = None,
+            perm: Optional[str] = None,
+            locked: bool = False,
+            maven_support: bool = False,
+            maven_include_all: bool = False,
+            extra: Optional[Dict[str, str]] = None) -> int:
+        pass
+
+    def getAllPerms(self) -> List[PermInfo]:
+        ...
+
     def getBuild(
             self,
             buildInfo: Union[int, str],
             strict: bool = False) -> BuildInfo:
+        ...
+
+    def getBuildTarget(
+            self,
+            info: Union[int, str],
+            event: Optional[int] = None,
+            strict: bool = False) -> TargetInfo:
+        ...
+
+    def getBuildTargets(
+            self,
+            info: Optional[Union[int, str]] = None,
+            event: Optional[int] = None,
+            buildTagID: Optional[int] = None,
+            destTagID: Optional[int] = None,
+            queryOpts: Optional[Dict[str, Any]] = None) -> List[TargetInfo]:
         ...
 
     def getBuildType(
@@ -158,12 +190,49 @@ class ClientSession:
             strict: bool = False) -> BuildrootInfo:
         ...
 
+    def getChannel(
+            self,
+            channelInfo: Union[int, str],
+            strict: bool = False) -> ChannelInfo:
+        ...
+
+    def getFullInheritance(
+            self,
+            tag: Union[int, str],
+            event: Optional[int] = None,
+            reverse: bool = False) -> TagInheritance:
+        ...
+
+    def getHost(
+            self,
+            hostInfo: Union[int, str],
+            strict: bool = False,
+            event: Optional[int] = None) -> HostInfo:
+        ...
+
+    def getKojiVersion(self) -> str:
+        ...
+
+    def getLastHostUpdate(
+            self,
+            hostID: int,
+            ts: bool = False) -> Union[str, float, None]:
+        ...
+
     def getLatestBuilds(
             self,
             tag: Union[int, str],
             event: Optional[int] = None,
             package: Optional[Union[int, str]] = None,
             type: Optional[str] = None) -> List[BuildInfo]:
+        ...
+
+    def getPerms(self) -> List[str]:
+        ...
+
+    def getUserPerms(
+            self,
+            userID: Optional[Union[int, str]] = None) -> List[str]:
         ...
 
     def getTag(
@@ -181,6 +250,16 @@ class ClientSession:
             strict: bool = False) -> TaskInfo:
         ...
 
+    def getUser(
+            self,
+            userInfo: Optional[Union[int, str]] = None,
+            strict: bool = False,
+            krb_brincs: bool = True) -> UserInfo:
+        ...
+
+    def getLoggedInUser(self) -> UserInfo:
+        ...
+
     def listArchives(
             self,
             buildID: Optional[int] = None,
@@ -191,21 +270,87 @@ class ClientSession:
             filename: Optional[str] = None,
             size: Optional[int] = None,
             checksum: Optional[str] = None,
-            typeInfo: TODO = None,
+            typeInfo: Optional[dict] = None,
             queryOpts: Optional[Dict] = None,
             imageID: Optional[int] = None,
             archiveID: Optional[int] = None,
-            strict: bool = False) -> Union[List[ArchiveInfo],
-                                           List[ImageArchiveInfo],
-                                           List[MavenArchiveInfo],
-                                           List[WindowsArchiveInfo]]:
+            strict: bool = False) -> List[ArchiveInfo]:
         ...
 
+    def listCGs(self) -> Dict[str, CGInfo]:
+        ...
+
+    def listHosts(
+            self,
+            arches: Optional[List[str]] = None,
+            channelID: Optional[int] = None,
+            ready: Optional[bool] = None,
+            enabled: Optional[bool] = None,
+            userID: Optional[int] = None,
+            queryOpts: Optional[dict] = None) -> List[HostInfo]:
+        ...
+
+    def listPackages(
+            self,
+            tagID: Optional[int] = None,
+            userID: Optional[int] = None,
+            pkgID: Optional[int] = None,
+            prefix: Optional[str] = None,
+            inherited: bool = False,
+            with_dups: bool = False,
+            event: Optional[int] = None,
+            quertOpts: Optional[dict] = None,
+            with_owners: bool = True) -> List[TagPackageInfo]:
+        ...
+
+    def listTagged(
+            self,
+            tag: Union[int, str],
+            event: Optional[int] = None,
+            inherit: bool = False,
+            prefix: Optional[str] = None,
+            latest: bool = False,
+            package: Optional[Union[int, str]] = None,
+            owner: Optional[Union[int, str]] = None,
+            type: Optional[str] = None) -> List[BuildInfo]:
+        ...
+
+    def listTags(
+            self,
+            build: Optional[Union[int, str]] = None,
+            package: Optional[Union[int, str]] = None,
+            perms: bool = True,
+            queryOpts: Optional[dict] = None,
+            pattern: Optional[str] = None) -> List[TagInfo]:
+        ...
+
+    def massTag(
+            self,
+            tag: Union[int, str],
+            builds: List[str]) -> None:
+        ...
 
     def multiCall(
             self,
             strict: bool = False,
-            batch: Optional[int] = None) -> List:
+            batch: Optional[int] = None) -> List[Union[FaultInfo, List[Any]]]:
+        ...
+
+    def tagBuildBypass(
+            self,
+            tag: Union[int, str],
+            build: Union[int, str],
+            force: bool = False,
+            notify: bool = False) -> None:
+        ...
+
+    def untagBuildBypass(
+            self,
+            tag: Union[int, str],
+            build: Union[int, str],
+            strict: bool = True,
+            force: bool = False,
+            notify: bool = False) -> None:
         ...
 
 

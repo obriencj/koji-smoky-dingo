@@ -22,7 +22,7 @@ Koji Smoky Dingo - tags and targets
 
 from functools import partial
 from itertools import chain
-from koji import ClientSession
+from koji import ClientSession, GenericError
 from typing import Dict, Iterable, List, Optional, Set, Union
 
 from . import (
@@ -33,7 +33,7 @@ from .common import unique
 from .types import (
     DecoratedTagExtras,
     TagInfo, TagInfos, TagInheritance, TagInheritanceEntry,
-    TagSpec, TargetInfos, )
+    TagSpec, TargetInfo, )
 
 
 __all__ = (
@@ -76,17 +76,11 @@ def ensure_tag(
     """
 
     try:
-        info = as_taginfo(session, name)
-    except NoSuchTag:
-        info = None  # type: ignore
-
-    # we do it this way so we don't get a nested exception if
-    # createTag fails
-    if info is None:
         tag_id = session.createTag(name)
-        info = as_taginfo(session, tag_id)
+    except GenericError:
+        pass
 
-    return info
+    return as_taginfo(session, name)
 
 
 def resolve_tag(
@@ -124,7 +118,7 @@ def resolve_tag(
 
 def gather_affected_targets(
         session: ClientSession,
-        tagnames: Iterable[TagSpec]) -> TargetInfos:
+        tagnames: Iterable[TagSpec]) -> List[TargetInfo]:
     """
     Returns the list of target info dicts representing the targets
     which inherit any of the given named tags. That is to say, the
@@ -141,19 +135,18 @@ def gather_affected_targets(
 
     tags = [as_taginfo(session, t) for t in set(tagnames)]
 
-    session.multicall = True
-    for tag in tags:
-        session.getFullInheritance(tag['id'], reverse=True)
-    parents = [p[0] for p in session.multiCall() if p]
+    ifn = lambda tag: session.getFullInheritance(tag['id'], reverse=True)
+    loaded = bulk_load(session, ifn, tags)
+    parents = filter(None, loaded.values())
 
     tagids = set(chain(*((ch['tag_id'] for ch in ti) for ti in parents)))
     tagids.update(tag['id'] for tag in tags)
 
-    session.multicall = True
-    for ti in tagids:
-        session.getBuildTargets(buildTagID=ti)
+    tfn = lambda ti: session.getBuildTargets(buildTagID=ti)
+    loaded = bulk_load(session, tfn, tagids)
+    targets = chain(*filter(None, loaded.values()))
 
-    return list(chain(*(t[0] for t in session.multiCall() if t)))
+    return list(targets)
 
 
 def renum_inheritance(

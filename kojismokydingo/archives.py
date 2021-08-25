@@ -23,15 +23,15 @@ representing RPMs and build archives
 
 from koji import ClientSession, PathInfo
 from os.path import join
-from typing import Any, Iterable, List, Optional, Set, Union, cast
+from typing import (
+    Any, Container, Iterable, List, Optional, Set, Union, cast, )
 
-from . import as_buildinfo, as_taginfo, bulk_load_rpm_sigs
+from . import as_buildinfo, as_taginfo, bulk_load, bulk_load_rpm_sigs
 from .types import (
     ArchiveInfo, ArchiveInfos, BuildInfo, DecoratedArchiveInfo,
     DecoratedArchiveInfos, DecoratedBuildInfo,
     DecoratedRPMInfo, DecoratedRPMInfos,
-    ImageArchiveInfos, MavenArchiveInfos, PathSpec, RPMInfos,
-    WindowsArchiveInfos, )
+    PathSpec, RPMInfos, )
 
 
 __all__ = (
@@ -90,11 +90,8 @@ def filter_archives(
 
     # convert the list of string extensions from atypes into a set of
     # archive type IDs
-    session.multicall = True
-    for t in archive_types:
-        session.getArchiveType(t)
-    atypes = session.multiCall()
-    atypes = set(t[0]["id"] for t in atypes if t and t[0])
+    loaded = bulk_load(session, session.getArchiveType, archive_types)
+    atypes = set(t['id'] for t in loaded.values())
 
     # RPM is a special type, which isn't considered an archive but
     # rather its own first-class type. However, we want to pretend
@@ -157,7 +154,7 @@ def gather_build_rpms(
         session: ClientSession,
         binfo: BuildInfo,
         rpmkeys: Iterable[str] = (),
-        path: Optional[PathSpec] = None) -> DecoratedRPMInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedRPMInfo]:
     """
     Gathers a list of rpm dicts matching the given signature keys from
     the specified build, and augments them with a filepath
@@ -198,7 +195,7 @@ def gather_build_rpms(
 def gather_build_maven_archives(
         session: ClientSession,
         binfo: BuildInfo,
-        path: Optional[PathSpec] = None) -> MavenArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Gathers a list of maven archives for a given build_info. The
     archive records are augmented with an additional "filepath" entry,
@@ -216,15 +213,16 @@ def gather_build_maven_archives(
     build_path = path.mavenbuild(binfo)
     found = session.listArchives(buildID=bid, type="maven")
     for f in found:
-        f["filepath"] = join(build_path, path.mavenfile(f))
+        d = cast(DecoratedArchiveInfo, f)
+        d["filepath"] = join(build_path, path.mavenfile(f))
 
-    return found
+    return cast(List[DecoratedArchiveInfo], found)
 
 
 def gather_build_win_archives(
         session: ClientSession,
         binfo: BuildInfo,
-        path: Optional[PathSpec] = None) -> WindowsArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Gathers a list of Windows archives for a given build_info. The
     archive records are augmented with an additional "filepath" entry,
@@ -242,15 +240,16 @@ def gather_build_win_archives(
     build_path = path.winbuild(binfo)
     found = session.listArchives(buildID=bid, type="win")
     for f in found:
-        f["filepath"] = join(build_path, path.winfile(f))
+        d = cast(DecoratedArchiveInfo, f)
+        d["filepath"] = join(build_path, path.winfile(f))
 
-    return found
+    return cast(List[DecoratedArchiveInfo], found)
 
 
 def gather_build_image_archives(
         session: ClientSession,
         binfo: BuildInfo,
-        path: Optional[PathSpec] = None) -> ImageArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Gathers a list of image archives for a given build_info. The
     archive records are augmented with an additional "filepath" entry,
@@ -268,9 +267,10 @@ def gather_build_image_archives(
     build_path = path.imagebuild(binfo)
     found = session.listArchives(buildID=bid, type="image")
     for f in found:
-        f["filepath"] = join(build_path, f["filename"])
+        d = cast(DecoratedArchiveInfo, f)
+        d["filepath"] = join(build_path, f["filename"])
 
-    return found
+    return cast(List[DecoratedArchiveInfo], found)
 
 
 def gather_build_archives(
@@ -278,7 +278,7 @@ def gather_build_archives(
         binfo: BuildInfo,
         btype: Optional[str] = None,
         rpmkeys: Iterable[str] = (),
-        path: Optional[PathSpec] = None) -> DecoratedArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Produce a list of archive dicts associated with a build info,
     optionally filtered by build-type and signing keys (for RPMs). The
@@ -311,7 +311,7 @@ def gather_build_archives(
     # get it from koji directly. Having this allows us to avoid
     # querying koji for archives of a btype that the build doesn't
     # have.
-    build_types: List[str] = binfo.get("archive_btype_names", None)
+    build_types: Container[str] = binfo.get("archive_btype_names", None)
     if build_types is None:
         build_types = session.getBuildType(binfo["id"])
 
@@ -350,9 +350,10 @@ def gather_build_archives(
             continue
 
         build_path = path.typedir(binfo, abtype)
-        f["filepath"] = join(build_path, f["filename"])
+        d = cast(DecoratedArchiveInfo, f)
+        d["filepath"] = join(build_path, f["filename"])
 
-        found.append(f)
+        found.append(d)
 
     return found
 
@@ -441,7 +442,7 @@ def gather_latest_maven_archives(
         session: ClientSession,
         tagname: str,
         inherit: bool = True,
-        path: Optional[PathSpec] = None) -> MavenArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Similar to session.getLatestMavenArchives(tagname) but augments
     the results to include a new "filepath" entry which will point to
@@ -462,16 +463,17 @@ def gather_latest_maven_archives(
         # in the archive itself. Since we're only using it to
         # determine paths, the missing fields shouldn't be a problem
         bld = _fake_maven_build(f, path)
-        f["filepath"] = join(bld["build_path"], path.mavenfile(f))
+        d = cast(DecoratedArchiveInfo, f)
+        d["filepath"] = join(bld["build_path"], path.mavenfile(f))
 
-    return found
+    return cast(List[DecoratedArchiveInfo], found)
 
 
 def gather_latest_win_archives(
         session: ClientSession,
         tagname: str,
         inherit: bool = True,
-        path: Optional[PathSpec] = None) -> WindowsArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Similar to session.listTaggedArchives(tagname, type="win") but
     augments the results to include a new "filepath" entry which will
@@ -503,8 +505,9 @@ def gather_latest_win_archives(
         build_path = bld["build_path"]
 
         # build an archive filepath from that
-        archive["filepath"] = join(build_path, path.winfile(archive))
-        found.append(archive)
+        decor = cast(DecoratedArchiveInfo, archive)
+        decor["filepath"] = join(build_path, path.winfile(archive))
+        found.append(decor)
 
     return found
 
@@ -513,7 +516,7 @@ def gather_latest_image_archives(
         session: ClientSession,
         tagname: str,
         inherit: bool = True,
-        path: Optional[PathSpec] = None) -> ImageArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     :param inherit: Follow tag inheritance, default True
     """
@@ -532,7 +535,8 @@ def gather_latest_image_archives(
 
     for bld in builds:
         build_path = path.imagebuild(bld)
-        archives = session.listArchives(buildID=bld["id"], type="image")
+        loaded = session.listArchives(buildID=bld["id"], type="image")
+        archives = cast(List[DecoratedArchiveInfo], loaded)
         for archive in archives:
             archive["filepath"] = join(build_path, archive["filename"])
         found.extend(archives)
@@ -546,7 +550,7 @@ def gather_latest_archives(
         btype: Optional[str] = None,
         rpmkeys: Iterable[str] = (),
         inherit: bool = True,
-        path: Optional[PathSpec] = None) -> ArchiveInfos:
+        path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Gather the latest archives from a tag heirarchy. Rules for what
     constitutes "latest" may change slightly depending on the archive
@@ -601,7 +605,7 @@ def gather_latest_archives(
                                                   inherit, path))
 
     if btype in known_types:
-        return found
+        return cast(List[DecoratedArchiveInfo], found)
 
     if btype is None:
         # listTaggedArchives is very convenient, but only works with
@@ -629,8 +633,9 @@ def gather_latest_archives(
             build_path = path.typedir(bld, abtype)
 
             # build an archive filepath from that
-            archive["filepath"] = join(build_path, archive["filename"])
-            found.append(archive)
+            decor = cast(DecoratedArchiveInfo, archive)
+            decor["filepath"] = join(build_path, archive["filename"])
+            found.append(decor)
 
     else:
         # btype is not one of the known ones, and it's also not None.
@@ -643,10 +648,11 @@ def gather_latest_archives(
             build_path = path.typedir(bld, btype)
             archives = session.listArchives(buildID=bld["id"], type=btype)
             for archive in archives:
-                archive["filepath"] = join(build_path, archive["filename"])
-            found.extend(archives)
+                decor = cast(DecoratedArchiveInfo, archive)
+                decor["filepath"] = join(build_path, archive["filename"])
+                found.append(decor)
 
-    return found
+    return cast(List[DecoratedArchiveInfo], found)
 
 
 #

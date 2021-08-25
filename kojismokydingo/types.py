@@ -31,7 +31,7 @@ from koji import (
     PathInfo, )
 from optparse import Values
 from typing import (
-    Any, Callable, Dict, Iterable, List, Tuple, Union, )
+    Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, )
 
 
 try:
@@ -55,7 +55,9 @@ __all__ = (
     "BuildrootInfo",
     "BuildSpec",
     "BuildState",
+    "ChannelInfo",
     "ChecksumType",
+    "CGInfo",
     "DecoratedHostInfo",
     "DecoratedHostInfos",
     "DecoratedTagExtra",
@@ -64,7 +66,7 @@ __all__ = (
     "HostInfo",
     "HubVersionSpec",
     "KeySpec",
-    "MavenArchiveInfo",
+    "NamedCGInfo",
     "PathSpec",
     "PermInfo",
     "PermSpec",
@@ -79,10 +81,8 @@ __all__ = (
     "TagInheritance",
     "TagInheritanceEntry",
     "TagGroup",
-    "TagGroups",
     "TagGroupPackage",
-    "TagPackageList",
-    "TagPackageListEntry",
+    "TagPackageInfo",
     "TagSpec",
     "TargetInfo",
     "TargetInfos",
@@ -168,9 +168,37 @@ class ArchiveInfo(TypedDict):
     type_name: str
     """ name of the archive's type. eg. 'zip' or 'pom' """
 
+    artifact_id: str
+    """ Only present on maven archives. The maven artifact's name """
+
+    group_id: str
+    """ Only present on maven archives. The maven artifact's group """
+
+    version: str
+    """ Only present on maven archives. The maven artifact's version """
+
+    platforms: List[str]
+    """ Only present on Windows archives """
+
+    relpath: str
+    """ Only present on Windows archives """
+
+    flags: str
+    """ Only present on Windows archives """
+
+    arch: str
+    """ Only present on Image archives """
+
 
 ArchiveInfos = Iterable[ArchiveInfo]
 """ An Iterable of ArchiveInfo dicts """
+
+
+class DecoratedArchiveInfo(ArchiveInfo):
+    filepath: str
+
+
+DecoratedArchiveInfos = Iterable[DecoratedArchiveInfo]
 
 
 ArchiveSpec = Union[int, str, ArchiveInfo]
@@ -305,19 +333,21 @@ class BuildInfo(TypedDict):
     """ name of the storage that the archives for this build will be
     stored on """
 
+    maven_group_id: Optional[str]
+    """ only present on Maven builds which have been loaded with type
+    information """
 
-class ImageBuildInfo(BuildInfo):
-    pass
+    maven_artifact_id: Optional[str]
+    """ only present on Maven builds which have been loaded with type
+    information """
 
+    maven_version: Optional[str]
+    """ only present on Maven builds which have been loaded with type
+    information """
 
-class MavenBuildInfo(BuildInfo):
-    maven_group_id: str
-    maven_artifact_id: str
-    maven_version: str
-
-
-class WindowsBuildInfo(BuildInfo):
-    platform: str
+    platform: Optional[str]
+    """ only present on Windows builds which have been loaded with type
+    information """
 
 
 class DecoratedBuildInfo(BuildInfo):
@@ -326,12 +356,6 @@ class DecoratedBuildInfo(BuildInfo):
 
     archive_cg_names: List[str]
     archive_cg_ids: List[int]
-
-    maven_group_id: str
-    maven_artifact_id: str
-    maven_version: str
-
-    platform: str
 
 
 BuildInfos = Iterable[BuildInfo]
@@ -454,48 +478,6 @@ class DecoratedRPMInfo(RPMInfo):
 DecoratedRPMInfos = Iterable[DecoratedRPMInfo]
 
 
-class DecoratedArchiveInfo(ArchiveInfo):
-    filepath: str
-
-
-DecoratedArchiveInfos = Iterable[DecoratedArchiveInfo]
-
-
-class MavenArchiveInfo(ArchiveInfo):
-    """
-    An ArchiveInfo with additional fields representing the maven GAV
-    (Group, Artifact, Version)
-    """
-
-    artifact_id: str
-    """ The maven artifact's name """
-
-    group_id: str
-    """ The maven artifact's group """
-
-    version: str
-    """ The maven artifact's version """
-
-
-MavenArchiveInfos = Iterable[MavenArchiveInfo]
-
-
-class WindowsArchiveInfo(ArchiveInfo):
-    platforms: List[str]
-    relpath: str
-    flags: str
-
-
-WindowsArchiveInfos = Iterable[WindowsArchiveInfo]
-
-
-class ImageArchiveInfo(ArchiveInfo):
-    arch: str
-
-
-ImageArchiveInfos = Iterable[ImageArchiveInfo]
-
-
 class HostInfo(TypedDict):
     """
     Data representing a koji host. These are typically obtained via the
@@ -585,16 +567,19 @@ class UserType(IntEnum):
 class UserInfo(TypedDict):
     """
     Data representing a koji user account. These are typically
-    obtained via the ``getUser`` XMLRPC call, or the
-    ``kojismokydingo.as_userinfo`` function.
+    obtained via the ``getUser`` or ``getLoggedInUser`` XMLRPC calls,
+    or the ``kojismokydingo.as_userinfo`` function.
     """
+
+    authtype: int
+    """ Only present from the ``getLoggedInUser`` call """
 
     id: int
     """ internal identifer """
 
     krb_principal: str
     """ kerberos principal associated with the user. Only used in koji
-    before 1.19 """
+    before 1.19 or when using the ``getLoggedInUser`` call. """
 
     krb_principals: List[str]
     """ list of kerberos principals associated with the user. Used in koji
@@ -652,6 +637,15 @@ class PermUser(TypedDict):
 class PermInfo(TypedDict):
     id: int
     name: str
+
+
+class DecoratedPermInfo(PermInfo):
+    """
+    A `PermInfo` decorated with the list of users that have been
+    granted the permission. Obtained via
+    `kojismokydingo.users.collect_perminfo`
+    """
+
     users: List[PermUser]
 
 
@@ -662,12 +656,20 @@ a permission's ID or name
 
 
 class DecoratedUserInfo(UserInfo):
+    """
+    A `UserInfo` decorated with additional fields that merge more data
+    together from other calls. Obtained via
+    `kojismokydingo.users.collect_userinfo`
+    """
 
-    permissions: List[PermInfo]
+    permissions: List[str]
+    """ names of granted permissions """
 
     content_generators: List[NamedCGInfo]
+    """ names of granted content generators """
 
     members: List[str]
+    """ membership if user is a group """
 
 
 class RepoState(IntEnum):
@@ -884,7 +886,7 @@ class DecoratedTagExtra(TypedDict):
 DecoratedTagExtras = Dict[str, DecoratedTagExtra]
 
 
-class TagPackageListEntry(TypedDict):
+class TagPackageInfo(TypedDict):
     """
     ``listPackages`` XMLRPC call.
     """
@@ -914,9 +916,6 @@ class TagPackageListEntry(TypedDict):
     """ name of the package listing's tag """
 
 
-TagPackageList = List[TagPackageListEntry]
-
-
 class TagGroupPackage(TypedDict):
     basearchonly: str
     blocked: bool
@@ -941,9 +940,6 @@ class TagGroup(TypedDict):
     packagelist: List[TagGroupPackage]
     tag_id: int
     uservisible: bool
-
-
-TagGroups = List[TagGroup]
 
 
 class TaskState(IntEnum):
@@ -1038,6 +1034,14 @@ TaskSpec = Union[int, TaskInfo]
 """
 task ID or TaskInfo dict
 """
+
+
+class ChannelInfo(TypedDict):
+    id: int
+    """ internal channel ID """
+
+    name: str
+    """ channel name """
 
 
 HubVersionSpec = Union[str, Tuple[int, ...]]

@@ -27,8 +27,8 @@ from typing import List, Optional, Union, cast
 
 from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
 from .types import (
-    CGInfo, DecoratedUserInfo, NamedCGInfo,
-    PermInfo, PermSpec, UserInfo, UserSpec, UserType, )
+    CGInfo, DecoratedPermInfo, DecoratedUserInfo, NamedCGInfo,
+    PermSpec, UserInfo, UserSpec, UserType, )
 
 
 __all__ = (
@@ -104,8 +104,9 @@ def collect_cg_access(
     found = []
     for cgname, val in session.listCGs().items():
         if username in val.get("users", ()):
-            val["name"] = cgname
-            found.append(val)
+            nval = cast(NamedCGInfo, val)
+            nval["name"] = cgname
+            found.append(nval)
     return found
 
 
@@ -133,15 +134,16 @@ def collect_cgs(
     # convert the cgs dict into a list, augmenting the cg data with
     # its own name
     for name, cg in cgs.items():
-        cg["name"] = name
-        result.append(cg)
+        ncg = cast(NamedCGInfo, cg)
+        ncg["name"] = name
+        result.append(ncg)
 
     return result
 
 
 def collect_perminfo(
         session: ClientSession,
-        permission: PermSpec) -> PermInfo:
+        permission: PermSpec) -> DecoratedPermInfo:
     """
     Gather information about a named permission, including the list of
     users granted the permission, as well as the date that the
@@ -161,7 +163,7 @@ def collect_perminfo(
 
     for p in session.getAllPerms():
         if field(p) == permission:
-            pinfo = p
+            pinfo = cast(DecoratedPermInfo, p)
             break
     else:
         raise NoSuchPermission(permission)

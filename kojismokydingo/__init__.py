@@ -28,7 +28,7 @@ from koji import (
 from koji_cli.lib import activate_session, ensure_connection
 from typing import (
     Any, Callable, Dict, Iterator, Iterable, List,
-    Optional, Sequence, Tuple, Union, cast)
+    Optional, Sequence, TypeVar, Tuple, Union, cast)
 
 from .common import chunkseq
 from .types import (
@@ -292,12 +292,15 @@ class FeatureUnavailable(BadDingo):
     complaint = "The koji hub version doesn't support this feature"
 
 
+KT = TypeVar('KT')
+
+
 def iter_bulk_load(
         session: ClientSession,
         loadfn: Callable[[Any], Any],
-        keys: Iterable[Any],
+        keys: Iterable[KT],
         err: bool = True,
-        size: int = 100) -> Iterator[Tuple[Any, Any]]:
+        size: int = 100) -> Iterator[Tuple[KT, Any]]:
     """
     Generic bulk loading generator. Invokes the given loadfn on each
     key in keys using chunking multicalls limited to the specified
@@ -336,11 +339,11 @@ def iter_bulk_load(
             if info:
                 if "faultCode" in info:
                     if err:
-                        raise convertFault(Fault(**info))
+                        raise convertFault(Fault(**info))  # type: ignore
                     else:
                         yield key, None
                 else:
-                    yield key, info[0]
+                    yield key, info[0]  # type: ignore
             else:
                 yield key, None
 
@@ -488,7 +491,7 @@ def bulk_load_tags(
     if version_check(session, (1, 23)):
         fn = partial(session.getTag, blocked=True)
     else:
-        fn = session.getTag
+        fn = session.getTag  # type: ignore
 
     for key, info in iter_bulk_load(session, fn, tags, False, size):
         if err and not info:

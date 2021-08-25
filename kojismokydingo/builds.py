@@ -42,7 +42,7 @@ from .common import (
 from .rpm import evr_compare
 from .types import (
     BuildInfo, BuildInfos, BuildState, DecoratedBuildInfo,
-    DecoratedBuildInfos, MavenBuildInfo, TagSpec, )
+    DecoratedBuildInfos, TagSpec, )
 
 
 __all__ = (
@@ -276,7 +276,7 @@ def iter_bulk_move_builds(
                 bid = build["id"]
                 session.tagBuildBypass(stagid, bid, force, notify)
                 session.untagBuildBypass(dtagid, bid, force, notify)
-            results = session.multiCall(strict=True)
+            _results = session.multiCall(strict=True)
             yield list(zip(build_infos, repeat(None)))
 
     else:
@@ -284,12 +284,12 @@ def iter_bulk_move_builds(
                                           force=force, notify=notify,
                                           size=size, strict=False):
 
-            results = []
+            results: List[Tuple[BuildInfo, Any]] = []
             good = []
 
             for bld, res in chunk:
                 if res and "faultCode" in res:
-                    results.append((bld, res))
+                    results.append((bld, res))  # type: ignore
                 else:
                     good.append(bld)
 
@@ -690,7 +690,7 @@ def iter_latest_maven_builds(
         session: ClientSession,
         tag: TagSpec,
         pkg_names: Optional[Iterable[str]] = None,
-        inherit: bool = True) -> Iterator[Tuple[GAV, MavenBuildInfo]]:
+        inherit: bool = True) -> Iterator[Tuple[GAV, BuildInfo]]:
     """
     Yields ``((G, A, V), build_info)`` representing the latest build for
     each GAV in the tag.
@@ -726,7 +726,7 @@ def latest_maven_builds(
         session: ClientSession,
         tag: TagSpec,
         pkg_names: Optional[Iterable[str]] = None,
-        inherit: bool = True) -> Dict[GAV, MavenBuildInfo]:
+        inherit: bool = True) -> Dict[GAV, BuildInfo]:
     """
     Returns a dict mapping each (G, A, V) to a build_info dict,
     representing the latest build for each GAV in the tag.

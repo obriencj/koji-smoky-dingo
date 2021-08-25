@@ -31,7 +31,7 @@ from . import SifterError, Sieve
 from .. import iter_bulk_load
 from ..builds import GAV, latest_maven_builds
 from ..types import (
-    BuildInfo, MavenBuildInfo, TagGroups, TagPackageList, )
+    BuildInfo, TagGroup, TagPackageInfo, )
 
 
 __all__ = ("CacheMixin", "ensure_comparison", )
@@ -145,7 +145,7 @@ class CacheMixin(Sieve):
             self,
             session: ClientSession,
             tag_id: int,
-            inherit: bool = True) -> Dict[GAV, MavenBuildInfo]:
+            inherit: bool = True) -> Dict[GAV, BuildInfo]:
         """
         a caching wrapper for `kojismokydingo.builds.latest_maven_builds`
 
@@ -190,7 +190,7 @@ class CacheMixin(Sieve):
             self,
             session: ClientSession,
             tag_ids: Iterable[int],
-            inherited: bool = True) -> Dict[int, TagPackageList]:
+            inherited: bool = True) -> Dict[int, List[TagPackageInfo]]:
         """
         a multicall caching wrapper for session.listPackages
 
@@ -198,10 +198,10 @@ class CacheMixin(Sieve):
         `allowed_packages` and `blocked_packages`)
         """
 
-        cache = cast(Dict[Tuple[int, bool], TagPackageList],
+        cache = cast(Dict[Tuple[int, bool], List[TagPackageInfo]],
                      self._mixin_cache("list_packages"))
 
-        result: Dict[int, TagPackageList] = {}
+        result: Dict[int, List[TagPackageInfo]] = {}
         needed = []
 
         for tid in tag_ids:
@@ -221,7 +221,7 @@ class CacheMixin(Sieve):
             self,
             session: ClientSession,
             tag_id: int,
-            inherited: bool = True) -> TagPackageList:
+            inherited: bool = True) -> List[TagPackageInfo]:
         """
         a caching wrapper for ``session.listPackages``
         """
@@ -291,7 +291,7 @@ class CacheMixin(Sieve):
     def get_tag_groups(
             self,
             session: ClientSession,
-            tag_id: int) -> TagGroups:
+            tag_id: int) -> List[TagGroup]:
         """
         a caching wrapper for ``session.getTagGroups``
         """
@@ -308,7 +308,7 @@ class CacheMixin(Sieve):
     def bulk_get_tag_groups(
             self,
             session: ClientSession,
-            tag_ids: Iterable[int]) -> Dict[int, TagGroups]:
+            tag_ids: Iterable[int]) -> Dict[int, List[TagGroup]]:
         """
         a multicall caching wrapper for ``session.getTagGroups``. Shares a
         cache with `get_tag_groups`

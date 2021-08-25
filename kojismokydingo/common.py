@@ -38,7 +38,7 @@ from operator import itemgetter
 from os.path import expanduser, isdir, join
 from typing import (
     Any, Callable, Dict, Iterable, Iterator, List,
-    Optional, Sequence, Tuple, Union, )
+    Optional, Sequence, Tuple, TypeVar, Union, )
 
 from .types import IterList, KeySpec
 
@@ -210,12 +210,15 @@ def merge_extend(
     return update_extend({}, *dict_additions)
 
 
+T = TypeVar('T')
+
+
 def globfilter(
-        seq: Iterable,
+        seq: Iterable[T],
         patterns: Iterable[str],
         key: Optional[KeySpec] = None,
         invert: bool = False,
-        ignore_case: bool = False) -> Iterable:
+        ignore_case: bool = False) -> Iterable[T]:
     """
     Generator yielding members of sequence seq which match any of the
     glob patterns specified.
