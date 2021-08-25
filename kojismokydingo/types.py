@@ -31,7 +31,7 @@ from koji import (
     PathInfo, )
 from optparse import Values
 from typing import (
-    Any, Callable, Dict, Iterable, List, Literal,
+    Any, Callable, Dict, Iterable, List,
     Optional, Tuple, Union, )
 
 
@@ -500,15 +500,15 @@ class DecoratedRPMInfo(RPMInfo):
     preferred signature (if any) was available.
     """
 
-    btype: Literal["rpm"]
-    btype_id: Literal[1]
+    btype: str
+    btype_id: int
 
     filepath: str
 
     sigkey: str
 
-    type_id: Literal[0]
-    type_name: Literal["rpm"]
+    type_id: int
+    type_name: str
 
 
 DecoratedRPMInfos = Iterable[DecoratedRPMInfo]
