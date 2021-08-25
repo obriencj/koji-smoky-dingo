@@ -52,7 +52,7 @@ def get_usertype_str(userinfo):
     :rtype: str
     """
 
-    val = userinfo.get("usertype") or UserType.Normal
+    val = userinfo.get("usertype") or UserType.NORMAL
 
     if val == UserType.NORMAL:
         return "NORMAL (user)"
