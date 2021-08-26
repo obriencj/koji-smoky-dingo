@@ -44,9 +44,6 @@ except ImportError:
     from typing_extensions import TypedDict
 
 
-IterList = Union[Iterable, List]
-
-
 __all__ = (
     "ArchiveInfo",
     "ArchiveInfos",
@@ -114,6 +111,63 @@ __all__ = (
 #     SSL = AUTHTYPE_SSL
 
 
+class BuildrootState(IntEnum):
+    """
+    Values for a BuildrootInfo's br_state
+
+    See `koji.BR_STATES`
+    """
+
+    INIT = BR_STATES['INIT']
+    WAITING = BR_STATES['WAITING']
+    BUILDING = BR_STATES['BUILDING']
+    EXPIRED = BR_STATES['EXPIRED']
+
+
+class BuildrootType(IntEnum):
+    """
+    Values for a BuildrootInfo's br_type
+
+    See `koji.BR_TYPES`
+    """
+
+    STANDARD = BR_TYPES['STANDARD']
+    EXTERNAL = BR_TYPES['EXTERNAL']
+
+
+class BuildState(IntEnum):
+    """
+    Values for a BuildInfo's state.
+
+    See `koji.BUILD_STATES`
+    """
+
+    BUILDING = BUILD_STATES["BUILDING"]
+    """
+    The build is still in-progress
+    """
+
+    COMPLETE = BUILD_STATES["COMPLETE"]
+    """
+    The build has been completed successfully
+    """
+
+    DELETED = BUILD_STATES["DELETED"]
+    """
+    The build has been deleted
+    """
+
+    FAILED = BUILD_STATES["FAILED"]
+    """
+    The build did not complete successfully due to an error
+    """
+
+    CANCELED = BUILD_STATES["CANCELED"]
+    """
+    The build did not complete successfully due to cancelation
+    """
+
+
 class ChecksumType(IntEnum):
     """
     Supported checksum types
@@ -122,6 +176,52 @@ class ChecksumType(IntEnum):
     MD5 = CHECKSUM_TYPES['md5']
     SHA1 = CHECKSUM_TYPES['sha1']
     SHA256 = CHECKSUM_TYPES['sha256']
+
+
+class RepoState(IntEnum):
+    INIT = REPO_STATES['INIT']
+    READY = REPO_STATES['READY']
+    EXPIRED = REPO_STATES['DELETED']
+    PROBLEM = REPO_STATES['PROBLEM']
+
+
+class TaskState(IntEnum):
+    FREE = TASK_STATES['FREE']
+    OPEN = TASK_STATES['OPEN']
+    CLOSED = TASK_STATES['CLOSED']
+    CANCELED = TASK_STATES['CANCELED']
+    ASSIGNED = TASK_STATES['ASSIGNED']
+    FAILED = TASK_STATES['FAILED']
+
+
+class UserStatus(IntEnum):
+    """
+    Valid values for the ``'status'`` item of a `UserInfo` dict
+    """
+
+    NORMAL = USER_STATUS['NORMAL']
+    """ account is enabled """
+
+    BLOCKED = USER_STATUS['BLOCKED']
+    """
+    account is blocked. May not call XMLRPC endpoints requiring
+    authentication
+    """
+
+
+class UserType(IntEnum):
+    """
+    Valid values for the ``'usertype'`` item of a `UserInfo` dict
+    """
+
+    NORMAL = USERTYPES['NORMAL']
+    """ Account is a normal user """
+
+    HOST = USERTYPES['HOST']
+    """ Account is a build host """
+
+    GROUP = USERTYPES['GROUP']
+    """ Account is a group """
 
 
 class ArchiveInfo(TypedDict):
@@ -229,18 +329,6 @@ class ArchiveTypeInfo(TypedDict):
     """ the name of the archive type """
 
 
-class BuildrootState(IntEnum):
-    INIT = BR_STATES['INIT']
-    WAITING = BR_STATES['WAITING']
-    BUILDING = BR_STATES['BUILDING']
-    EXPIRED = BR_STATES['EXPIRED']
-
-
-class BuildrootType(IntEnum):
-    STANDARD = BR_TYPES['STANDARD']
-    EXTERNAL = BR_TYPES['EXTERNAL']
-
-
 class BuildrootInfo(TypedDict):
     arch: str
     br_type: BuildrootType
@@ -269,7 +357,7 @@ class BuildrootInfo(TypedDict):
     repo_create_event_time: str
 
     repo_id: int
-    repo_state: 'RepoState'
+    repo_state: RepoState
 
     reture_event_id: int
     retire_event_time: str
@@ -281,39 +369,6 @@ class BuildrootInfo(TypedDict):
     tag_name: str
 
     task_id: int
-
-
-class BuildState(IntEnum):
-    """
-    Values for a BuildInfo's state.
-
-    See `koji.BUILD_STATES`
-    """
-
-    BUILDING = BUILD_STATES["BUILDING"]
-    """
-    The build is still in-progress
-    """
-
-    COMPLETE = BUILD_STATES["COMPLETE"]
-    """
-    The build has been completed successfully
-    """
-
-    DELETED = BUILD_STATES["DELETED"]
-    """
-    The build has been deleted
-    """
-
-    FAILED = BUILD_STATES["FAILED"]
-    """
-    The build did not complete successfully due to an error
-    """
-
-    CANCELED = BUILD_STATES["CANCELED"]
-    """
-    The build did not complete successfully due to cancelation
-    """
 
 
 class BuildInfo(TypedDict):
@@ -623,36 +678,6 @@ class DecoratedHostInfo(HostInfo):
 DecoratedHostInfos = Iterable[DecoratedHostInfo]
 
 
-class UserStatus(IntEnum):
-    """
-    Valid values for the ``'status'`` item of a `UserInfo` dict
-    """
-
-    NORMAL = USER_STATUS['NORMAL']
-    """ account is enabled """
-
-    BLOCKED = USER_STATUS['BLOCKED']
-    """
-    account is blocked. May not call XMLRPC endpoints requiring
-    authentication
-    """
-
-
-class UserType(IntEnum):
-    """
-    Valid values for the ``'usertype'`` item of a `UserInfo` dict
-    """
-
-    NORMAL = USERTYPES['NORMAL']
-    """ Account is a normal user """
-
-    HOST = USERTYPES['HOST']
-    """ Account is a build host """
-
-    GROUP = USERTYPES['GROUP']
-    """ Account is a group """
-
-
 class UserInfo(TypedDict):
     """
     Data representing a koji user account. These are typically
@@ -760,13 +785,6 @@ class DecoratedUserInfo(UserInfo):
 
     members: List[UserInfo]
     """ membership if user is a group """
-
-
-class RepoState(IntEnum):
-    INIT = REPO_STATES['INIT']
-    READY = REPO_STATES['READY']
-    EXPIRED = REPO_STATES['DELETED']
-    PROBLEM = REPO_STATES['PROBLEM']
 
 
 class RepoInfo(TypedDict):
@@ -1030,15 +1048,6 @@ class TagGroup(TypedDict):
     packagelist: List[TagGroupPackage]
     tag_id: int
     uservisible: bool
-
-
-class TaskState(IntEnum):
-    FREE = TASK_STATES['FREE']
-    OPEN = TASK_STATES['OPEN']
-    CLOSED = TASK_STATES['CLOSED']
-    CANCELED = TASK_STATES['CANCELED']
-    ASSIGNED = TASK_STATES['ASSIGNED']
-    FAILED = TASK_STATES['FAILED']
 
 
 class TaskInfo(TypedDict):

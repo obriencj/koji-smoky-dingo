@@ -40,7 +40,7 @@ from typing import (
     Any, Callable, Dict, Iterable, Iterator, List,
     Optional, Sequence, Tuple, TypeVar, Union, )
 
-from .types import IterList, KeySpec
+from .types import KeySpec
 
 
 try:
