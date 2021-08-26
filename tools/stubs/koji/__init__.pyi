@@ -226,6 +226,12 @@ class ClientSession:
             reverse: bool = False) -> TagInheritance:
         ...
 
+    def getInheritanceData(
+            self,
+            tag: Union[int, str],
+            event: Optional[int] = None) -> TagInheritance:
+        ...
+
     def getGroupMembers(
             self,
             group: Union[int, str]) -> List[UserInfo]:
@@ -452,6 +458,13 @@ class ClientSession:
             self,
             repo_id: int,
             struct: bool = False) -> RepoInfo:
+        ...
+
+    def setInheritanceData(
+            self,
+            tag: Union[int, str],
+            data: TagInheritance,
+            clear: bool = False):
         ...
 
     def tagBuildBypass(

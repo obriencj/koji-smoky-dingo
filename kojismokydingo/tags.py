@@ -178,7 +178,7 @@ def renum_inheritance(
 
 def find_inheritance_parent(
         inheritance: TagInheritance,
-        parent_id: int) -> Optional[TagInheritanceEntry]:
+        parent_id: int) -> TagInheritanceEntry:
     """
     Find the parent link in the inheritance list with the given tag ID.
 

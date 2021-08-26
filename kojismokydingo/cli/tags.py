@@ -23,8 +23,10 @@ Koji Smoky Dingo - CLI Tag and Target Commands
 import sys
 
 from json import dumps
+from koji import ClientSession
 from koji_cli.lib import arg_filter
 from operator import itemgetter
+from typing import List, Union
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
@@ -32,11 +34,12 @@ from . import (
 from .sift import TagSifting, output_sifted
 from .. import (
     BadDingo, FeatureUnavailable, NoSuchTag,
-    bulk_load_tags, version_require, )
+    as_taginfo, bulk_load_tags, version_require, )
 from ..common import unique
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
+from ..types import TagInheritance, TagInheritanceEntry, TagSpec
 
 
 SORT_BY_ID = "sort-by-id"
@@ -63,9 +66,12 @@ class NoSuchEnvVar(NoSuchTagExtra):
     complaint = "Environment variable is not defined at this tag"
 
 
-def cli_affected_targets(session, tag_list,
-                         build_tags=False, info=False,
-                         quiet=None):
+def cli_affected_targets(
+        session: ClientSession,
+        tag_list: List[Union[int, str]],
+        build_tags: bool =False,
+        info: bool = False,
+        quiet: bool = None):
 
     if quiet is None:
         quiet = not sys.stdout.isatty()
@@ -84,7 +90,7 @@ def cli_affected_targets(session, tag_list,
         # get a unique sorted list of either the target names or the
         # build tag names for the targets
         attr = 'build_tag_name' if build_tags else 'name'
-        output = sorted(set(targ[attr] for targ in targets))
+        output = sorted(set(targ[attr] for targ in targets))  # type: ignore
 
     if build_tags:
         debug("Found %i affected build tags inheriting:" % len(output))
@@ -133,11 +139,12 @@ class AffectedTargets(AnonSmokyDingo):
                                     options.quiet)
 
 
-def cli_renum_tag(session, tagname, begin=10, step=10,
+def cli_renum_tag(
+        session: ClientSession,
+        tagname, begin=10, step=10,
                   verbose=False, test=False):
 
-    if not session.getTag(tagname):
-        raise NoSuchTag(tagname)
+    as_taginfo(session, tagname)
 
     original = session.getInheritanceData(tagname)
     renumbered = renum_inheritance(original, begin, step)
@@ -212,8 +219,13 @@ class RenumTagInheritance(TagSmokyDingo):
                              options.verbose, options.test)
 
 
-def cli_swap_inheritance(session, tagname, old_parent, new_parent,
-                         verbose=False, test=False):
+def cli_swap_inheritance(
+        session: ClientSession,
+        tagname: Union[int, str],
+        old_parent: TagSpec,
+        new_parent: TagSpec,
+        verbose: bool = False,
+        test: bool = False):
 
     if tagname in (old_parent, new_parent) or old_parent == new_parent:
         raise BadSwap(tagname, old_parent, new_parent)
@@ -222,16 +234,11 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
     if original is None:
         raise NoSuchTag(tagname)
 
-    old_p = session.getTag(old_parent)
-    if old_p is None:
-        raise NoSuchTag(old_parent)
-
-    new_p = session.getTag(new_parent)
-    if new_p is None:
-        raise NoSuchTag(new_parent)
+    old_p = as_taginfo(session, old_parent)
+    new_p = as_taginfo(session, new_parent)
 
     # deep copy of original inheritance
-    swapped = [dict(i) for i in original]
+    swapped: TagInheritance = [TagInheritanceEntry.copy(i) for i in original]
 
     found_old = find_inheritance_parent(swapped, old_p["id"])
     found_new = find_inheritance_parent(swapped, new_p["id"])
@@ -244,13 +251,15 @@ def cli_swap_inheritance(session, tagname, old_parent, new_parent,
     # so we can show what's changed. Second, we're collecting the
     # changes as either two edits, or a delete and an addition.
 
+    changes: TagInheritance
+
     if found_new is None:
         # the new inheritance isn't in the current inheritance
         # structure, therefore duplicate the old inheritance link and
         # mark it as a deletion, and then modify the old inheritance
         # link later.
-        changed_old = dict(found_old)
-        changed_old['delete link'] = True
+        changed_old = TagInheritanceEntry.copy(found_old)
+        changed_old['delete link'] = True  # type: ignore
         changes = [changed_old, found_old]
 
     else:
