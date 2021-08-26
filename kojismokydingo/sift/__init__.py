@@ -123,7 +123,7 @@ def ensure_all_symbol(
       Symbols
     """
 
-    result = []
+    result: List[Symbol] = []
 
     for val in values:
         if isinstance(val, Symbol):

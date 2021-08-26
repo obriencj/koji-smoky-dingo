@@ -27,7 +27,7 @@ from abc import abstractmethod
 from collections import defaultdict
 from itertools import islice
 from koji import BUILD_STATES, ClientSession
-from typing import Dict, Iterable, List, Type
+from typing import Dict, Iterable, List, Type, Union
 from operator import itemgetter
 
 from . import (
@@ -1039,7 +1039,7 @@ def sift_builds(
 def sift_nvrs(
         session: ClientSession,
         src_str: str,
-        nvrs: Iterable[str],
+        nvrs: Iterable[Union[int, str]],
         params: Dict[str, str] = None) -> Dict[str, List[BuildInfo]]:
     """
     Load a group of NVRs as build infos and filter them with a sieve

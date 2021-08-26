@@ -24,7 +24,9 @@ dicts.
 
 
 from abc import abstractmethod
+from koji import ClientSession
 from operator import itemgetter
+from typing import Dict, Iterable, Optional, List, Type, Union
 
 from . import (
     DEFAULT_SIEVES,
@@ -38,6 +40,7 @@ from ..builds import build_dedup
 from ..rpm import evr_compare
 from ..tags import (
     gather_tag_ids, tag_dedup, )
+from ..types import TagInfo, TagInfos
 
 
 __all__ = (
@@ -774,7 +777,7 @@ class GroupPkgSieve(SymbolSieve, CacheMixin):
                 return False
 
 
-DEFAULT_TAG_INFO_SIEVES = [
+DEFAULT_TAG_INFO_SIEVES: List[Type[Sieve]] = [
     ArchSieve,
     BuildTagSieve,
     CompareLatestSieve,
@@ -797,61 +800,72 @@ DEFAULT_TAG_INFO_SIEVES = [
 ]
 
 
-def tag_info_sieves():
+def tag_info_sieves() -> List[Type[Sieve]]:
     """
     A new list containing the default tag-info sieve classes.
 
     This function is used by `tag_info_sifter` when creating its
     `Sifter` instance.
-
-    :rtype: list[type[Sieve]]
     """
 
-    sieves = []
+    sieves: List[Type[Sieve]] = []
     sieves.extend(DEFAULT_SIEVES)
     sieves.extend(DEFAULT_TAG_INFO_SIEVES)
 
     return sieves
 
 
-def tag_info_sifter(source, params=None):
+def tag_info_sifter(
+        source: str,
+        params: Dict[str, str] = None) -> Sifter:
     """
     Create a Sifter from the source using the default tag-info
     Sieves.
 
     :param source: sieve expressions source
-    :type source: stream or str
 
-    :rtype: Sifter
+    :param params: sieve parameters
     """
 
     return Sifter(tag_info_sieves(), source, "id", params)
 
 
-def sift_tags(session, src_str, tag_infos, params=None):
+def sift_tags(
+        session: ClientSession,
+        src_str: str,
+        tag_infos: TagInfos,
+        params: Dict[str, str] = None) -> Dict[str, List[TagInfo]]:
     """
+    :param session: an active koji client session
+
     :param src_str: sieve expressions source
-    :type src_str: src
 
     :param build_infos: list of tag info dicts to filter
-    :type build_infos: list[dict]
 
-    :rtype: dict[str,list[dict]]
+    :param params: sieve parameters
+
+    :returns: mapping of flags to matching tag info dicts
     """
 
     sifter = tag_info_sifter(src_str, params)
     return sifter(session, tag_infos)
 
 
-def sift_tagnames(session, src_str, names, params=None):
+def sift_tagnames(
+        session: ClientSession,
+        src_str: str,
+        names: Iterable[Union[int, str]],
+        params: Dict[str, str] = None) -> Dict[str, List[TagInfo]]:
     """
+    :param session: an active koji client session
+
     :param src_str: sieve expressions source
-    :type src_str: src
 
-    :param nvrs: list of tag names to load and filter
-    :type nvrs: list[str]
+    :param names: list of tag names to load and filter
 
-    :rtype: dict[str,list[dict]]
+    :param params: sieve parameters
+
+    :returns: mapping of flags to matching tag info dicts
     """
 
     loaded = bulk_load_tags(session, names, err=False)
