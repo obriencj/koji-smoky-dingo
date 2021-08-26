@@ -35,6 +35,8 @@ from kojismokydingo.types import (
     TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
 
 
+BR_STATES: Dict[str, int]
+BR_TYPES: Dict[str, int]
 BUILD_STATES: Dict[str, int]
 CHECKSUM_TYPES: Dict[str, int]
 REPO_STATES: Dict[str, int]

@@ -26,8 +26,8 @@ enumerations
 from datetime import datetime
 from enum import IntEnum
 from koji import (
-    BUILD_STATES, CHECKSUM_TYPES, REPO_STATES, TASK_STATES,
-    USERTYPES, USER_STATUS,
+    BR_STATES, BR_TYPES, BUILD_STATES, CHECKSUM_TYPES, REPO_STATES,
+    TASK_STATES, USERTYPES, USER_STATUS,
     PathInfo, )
 from optparse import Values
 from typing import (
@@ -55,6 +55,8 @@ __all__ = (
     "BuildInfo",
     "BuildInfos",
     "BuildrootInfo",
+    "BuildrootState",
+    "BuildrootType",
     "BuildSpec",
     "BuildState",
     "BTypeInfo",
@@ -96,6 +98,7 @@ __all__ = (
     "TaskState",
     "UserInfo",
     "UserSpec",
+    "UserStatus",
     "UserType",
 )
 
@@ -226,8 +229,58 @@ class ArchiveTypeInfo(TypedDict):
     """ the name of the archive type """
 
 
+class BuildrootState(IntEnum):
+    INIT = BR_STATES['INIT']
+    WAITING = BR_STATES['WAITING']
+    BUILDING = BR_STATES['BUILDING']
+    EXPIRED = BR_STATES['EXPIRED']
+
+
+class BuildrootType(IntEnum):
+    STANDARD = BR_TYPES['STANDARD']
+    EXTERNAL = BR_TYPES['EXTERNAL']
+
+
 class BuildrootInfo(TypedDict):
-    pass
+    arch: str
+    br_type: BuildrootType
+
+    cg_id: Optional[int]
+    cg_name: Optional[str]
+    cg_version: Optional[str]
+
+    container_arch: str
+    container_type: str
+
+    create_event_id: int
+    create_event_time: str
+    create_ts: float
+
+    extra: Optional[dict]
+
+    host_arch: Optional[str]
+    host_id: int
+    host_name: str
+    host_os: Optional[str]
+
+    id: int
+
+    repo_create_event_id: int
+    repo_create_event_time: str
+
+    repo_id: int
+    repo_state: 'RepoState'
+
+    reture_event_id: int
+    retire_event_time: str
+    reture_ts: float
+
+    state: BuildrootState
+
+    tag_id: int
+    tag_name: str
+
+    task_id: int
 
 
 class BuildState(IntEnum):
@@ -285,7 +338,7 @@ class BuildInfo(TypedDict):
     """ ISO-8601 formatted UTC datetime stamp indicating when this build
     was completed """
 
-    completion_ts: Union[int, float]
+    completion_ts: float
     """ UTC timestamp indicating when this build was completed """
 
     creation_event_id: int
@@ -295,7 +348,7 @@ class BuildInfo(TypedDict):
     """ ISO-8601 formatted UTC datetime stamp indicating when this build
     record was created """
 
-    creation_ts: Union[int, float]
+    creation_ts: float
     """ UTC timestamp indicating when this build record was created """
 
     epoch: str
@@ -334,7 +387,7 @@ class BuildInfo(TypedDict):
     release: str
     source: str
     start_time: str
-    start_ts: Union[int, float]
+    start_ts: float
 
     state: int
     """ state of the build, see `BuildState` """
@@ -667,7 +720,7 @@ class NamedCGInfo(CGInfo):
 class PermUser(TypedDict):
     user_name: str
     permission_name: str
-    create_ts: Union[int, float]
+    create_ts: float
     create_date: datetime
 
 
@@ -729,7 +782,7 @@ class RepoInfo(TypedDict):
     correlate to the creation time of the repo -- koji has the ability to
     generate a repository based on older events """
 
-    create_ts: Union[int, float]
+    create_ts: float
     """ UTC timestamp indicating when this repo was created """
 
     creation_time: str
@@ -1009,7 +1062,7 @@ class TaskInfo(TypedDict):
     """ ISO-8601 formatted UTC datetime stamp indicating when this task
     was completed, or None if not completed """
 
-    completion_ts: Union[int, float]
+    completion_ts: float
     """ UTC timestamp indicating when this task was completed, or None if
     not completed """
 
@@ -1017,7 +1070,7 @@ class TaskInfo(TypedDict):
     """ ISO-8601 formatted UTC datetime stamp indicating when this task
     was created """
 
-    create_ts: Union[int, float]
+    create_ts: float
     """ UTC timestamp indicating when this task was created """
 
     host_id: int
@@ -1044,7 +1097,7 @@ class TaskInfo(TypedDict):
     """ ISO-8601 formatted UTC datetime stamp indicating when this task
     was started by a host, or None if not yet started """
 
-    start_ts: Union[int, float]
+    start_ts: float
     """ UTC timestamp indicating when this task was started by a host, or
     None if not yet started """
 
