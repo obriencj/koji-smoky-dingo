@@ -5,7 +5,7 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
-    'sphinx_autodoc_typehints'
+    # 'sphinx_autodoc_typehints'
     # 'numpydoc',
 ]
 
@@ -17,6 +17,8 @@ intersphinx_mapping = {
     # "koji": ('https://docs.pagure.io/koji', None),
 }
 
+
+autodoc_typehints = 'description'
 
 autoclass_content = 'both'
 
