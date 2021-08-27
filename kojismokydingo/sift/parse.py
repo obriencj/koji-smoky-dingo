@@ -510,7 +510,8 @@ def parse_exprs(
     else:
         unterminated = False
 
-    token_breaks = "".join((start, stop, ' [;#|/\"\'\n\r\t'))
+    # token_breaks = "".join((start, stop, ' [;#|/\"\'\n\r\t'))
+    token_breaks = f"{start}{stop} [;#|/\"\'\n\r\t"
 
     token: StringIO = None
     esc: str = None
@@ -553,7 +554,8 @@ def parse_exprs(
             token.write(c)
             continue
 
-        # c is in token_breaks
+        # if we get this far, then c is in token_breaks
+
         if c in ';#':
             # comments run to end of line
             reader.readline()
@@ -606,14 +608,14 @@ NUMBER_RE = Regex(r"^-?\d+$")
 
 def convert_token(val: str) -> Union[Matcher, str, bool]:
     """
-    Converts unquoted values to a Matcher instance.
+    Converts unquoted values to a `Matcher` instance.
 
-    * An all-digit value will become Number
-    * None, null, nil become a Null
-    * True becomes the boolean True
-    * False becomes the boolean False
-    * Use of {} may become a SymbolGroup or Symbol
-    * Everything else becomes a Symbol.
+    * An all-digit value will become `Number`
+    * None, null, nil become a `Null`
+    * True becomes the boolean `True`
+    * False becomes the boolean `False`
+    * Use of ``{}`` may become a `SymbolGroup` or `Symbol`
+    * Everything else becomes a `Symbol`
 
     :param val: token value to be converted
     """
