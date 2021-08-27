@@ -26,13 +26,15 @@ from collections import defaultdict
 from functools import partial
 from operator import itemgetter
 from os.path import basename
-from pkg_resources import iter_entry_points
+from pkg_resources import EntryPoint, iter_entry_points
+from typing import Callable, Dict, Iterable, List, Optional, Type
 
 from . import open_output, printerr, resplit
 from ..common import escapable_replace
 from ..sift import DEFAULT_SIEVES, Sieve, Sifter, SifterError
 from ..sift.builds import build_info_sieves
 from ..sift.tags import tag_info_sieves
+from ..types import KeySpec
 
 
 __all__ = (
@@ -44,7 +46,12 @@ __all__ = (
 )
 
 
-def _entry_point_sieves(key, on_err=None):
+OnErr = Callable[[EntryPoint, Exception], None]
+
+
+def _entry_point_sieves(
+        key: str,
+        on_err: Optional[OnErr] = None) -> List[Type[Sieve]]:
     """
     Load all Sieve instances from entry points using the given
     key. Returns a list of Sieve subclasses that can be used to
@@ -301,7 +308,11 @@ class TagSifting(Sifting):
         return sieves
 
 
-def output_sifted(results, key="id", outputs=None, sort=None):
+def output_sifted(
+        results: Dict[str, List[dict]],
+        key: KeySpec = "id",
+        outputs: Optional[Dict[str, str]] = None,
+        sort: Optional[KeySpec] = None):
     """
     Records the results of a sifter to output. As sifter results are
     dicts, the `key` parameter can be either a unary callable or an

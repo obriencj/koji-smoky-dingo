@@ -24,6 +24,8 @@ enabled but which are not checking in.
 
 
 from datetime import datetime, timedelta
+from koji import ClientSession
+from typing import List, Optional, Union
 
 from . import AnonSmokyDingo
 from ..hosts import gather_hosts_checkins
@@ -36,13 +38,19 @@ __all__ = (
 )
 
 
-def cli_check_hosts(session, timeout=60, arches=(), channel=None,
-                    ignore=(), quiet=False, shush=False):
+def cli_check_hosts(
+        session: ClientSession,
+        timeout: int = 60,
+        arches: Optional[List[str]] = None,
+        channel: Optional[str] = None,
+        ignore: Optional[List[str]] = None,
+        quiet: bool = False,
+        shush: bool = False) -> int:
     """
     Implements the ``koji check-hosts`` command
     """
 
-    timeout = datetime.utcnow() - timedelta(seconds=(timeout * 60))
+    dtimeout = datetime.utcnow() - timedelta(seconds=(timeout * 60))
 
     bldr_data = gather_hosts_checkins(session,
                                       arches=arches,
@@ -52,18 +60,18 @@ def cli_check_hosts(session, timeout=60, arches=(), channel=None,
     collected = []
 
     for bldr in bldr_data:
-        lup = bldr["last_update"]
-        if lup and lup.tzinfo is not None:
-            lup = lup.replace(tzinfo=None)
+        lupd = bldr["last_update"]
+        if lupd and lupd.tzinfo is not None:
+            lupd = lupd.replace(tzinfo=None)
 
-        if lup:
-            if lup < timeout:
-                collected.append((bldr["name"], lup))
+        if lupd:
+            if lupd < dtimeout:
+                collected.append((bldr["name"], str(lupd)))
         else:
             collected.append((bldr["name"], " --"))
 
     if quiet:
-        for host, _lup in sorted(collected):
+        for host, lup in sorted(collected):
             print(host)
 
     else:

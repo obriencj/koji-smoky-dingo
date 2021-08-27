@@ -20,18 +20,20 @@ Koji Smoky Dingo - CLI User Commands
 """
 
 
+from koji import ClientSession
 from operator import itemgetter
+from typing import Optional, Union
 
 from . import AnonSmokyDingo, int_or_str, pretty_json
-from ..types import UserStatus, UserType
+from ..types import UserInfo, UserStatus, UserType
 from ..users import (
     collect_cgs, collect_perminfo, collect_userinfo, )
 
 
 __all__ = (
-    "CGInfo",
-    "PermissionInfo",
-    "UserInfo",
+    "ShowCGInfo",
+    "ShowPermissionInfo",
+    "ShowUserInfo",
 
     "cli_cginfo",
     "cli_perminfo",
@@ -64,15 +66,12 @@ def get_usertype_str(userinfo):
         return "Unknown (%i)" % val
 
 
-def get_userstatus_str(userinfo):
+def get_userstatus_str(userinfo: UserInfo) -> str:
     """
     Provide a human-readable label for the koji user status enum value
     in a koji user info dict.
 
     :param userinfo: user info
-    :type userinfo: dict
-
-    :rtype: str
     """
 
     val = userinfo.get("status") or UserStatus.NORMAL
@@ -84,7 +83,10 @@ def get_userstatus_str(userinfo):
         return "Unknown (%i)" % val
 
 
-def cli_userinfo(session, user, json=False):
+def cli_userinfo(
+        session: ClientSession,
+        user: Union[int, str],
+        json: bool = False):
     """
     Implements the ``koji userinfo`` command
     """
@@ -95,7 +97,7 @@ def cli_userinfo(session, user, json=False):
         pretty_json(userinfo)
         return
 
-    print("User: {name} [{id}]".format(**userinfo))
+    print(f"User: {userinfo['name']} [{userinfo['id']}]")
 
     krb_princs = userinfo.get("krb_principals", None)
     if krb_princs:
@@ -109,8 +111,8 @@ def cli_userinfo(session, user, json=False):
     cgs = userinfo.get("content_generators", None)
     if cgs:
         print("Content generators:")
-        for cg in sorted(cgs):
-            print(" {name} [{id}]".format(**cg))
+        for cg in sorted(cgs, key=itemgetter("name")):
+            print(f"{cg['name']} [{cg['id']}]")
 
     perms = userinfo.get("permissions", None)
     if perms:
@@ -122,10 +124,10 @@ def cli_userinfo(session, user, json=False):
     if members:
         print("Members:")
         for member in sorted(members, key=lambda m: m.get("name")):
-            print(" {name} [{id}]".format(**member))
+            print(f"{member['name']} [{member['id']}]")
 
 
-class UserInfo(AnonSmokyDingo):
+class ShowUserInfo(AnonSmokyDingo):
 
     group = "info"
     description = "Show information about a user"
@@ -148,9 +150,12 @@ class UserInfo(AnonSmokyDingo):
                             json=options.json)
 
 
-def cli_perminfo(session, permission,
-                 verbose=False, by_date=False,
-                 json=False):
+def cli_perminfo(
+        session: ClientSession,
+        permission: str,
+        verbose: bool = False,
+        by_date: bool = False,
+        json: bool = False):
     """
     Implements the ``koji perminfo`` command
     """
@@ -176,7 +181,7 @@ def cli_perminfo(session, permission,
             print(fmt.format(**user))
 
 
-class PermissionInfo(AnonSmokyDingo):
+class ShowPermissionInfo(AnonSmokyDingo):
 
     description = "Show information about a permission"
 
@@ -207,7 +212,10 @@ class PermissionInfo(AnonSmokyDingo):
                             json=options.json)
 
 
-def cli_cginfo(session, name=None, json=False):
+def cli_cginfo(
+        session: ClientSession,
+        name: Optional[str] = None,
+        json: bool = False):
     """
     Implements the ``koji cginfo`` command
     """
@@ -230,7 +238,7 @@ def cli_cginfo(session, name=None, json=False):
         print()
 
 
-class CGInfo(AnonSmokyDingo):
+class ShowCGInfo(AnonSmokyDingo):
 
     description = "List content generators and their users"
 

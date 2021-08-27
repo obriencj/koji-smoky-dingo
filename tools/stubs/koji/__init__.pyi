@@ -31,8 +31,8 @@ from typing import (
 from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
     ChannelInfo, CGInfo, HostInfo, PermInfo, RepoInfo, RepoState,
-    RPMInfo, RPMSignature, TagInfo, TagGroup, TagInheritance,
-    TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
+    RPMInfo, RPMSignature, SearchResult, TagInfo, TagGroup,
+    TagInheritance, TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
 
 
 BR_STATES: Dict[str, int]
@@ -158,6 +158,12 @@ class ClientSession:
             maven_include_all: bool = False,
             extra: Optional[Dict[str, str]] = None) -> int:
         pass
+
+    def editTag2(
+            self,
+            taginfo: Union[int, str],
+            **kwargs):
+        ...
 
     def getAllPerms(self) -> List[PermInfo]:
         ...
@@ -441,6 +447,17 @@ class ClientSession:
             batch: Optional[int] = None) -> List[Union[FaultInfo, List[Any]]]:
         ...
 
+    def packageListAdd(
+            self,
+            taginfo: Union[int, str],
+            pkginfo: str,
+            owner: Optional[Union[int, str]] = None,
+            block: Optional[bool] = None,
+            exta_arches: Optional[str] = None,
+            force: bool = False,
+            update: bool = False):
+        ...
+
     def queryHistory(
             self,
             tables: Optional[List[str]] = None,
@@ -458,6 +475,14 @@ class ClientSession:
             self,
             repo_id: int,
             struct: bool = False) -> RepoInfo:
+        ...
+
+    def search(
+            self,
+            terms: str,
+            type: str,
+            matchType: str,
+            queryOpts: Optional[dict] = None) -> List[SearchResult]:
         ...
 
     def setInheritanceData(

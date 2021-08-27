@@ -79,6 +79,7 @@ __all__ = (
     "RPMInfos",
     "RPMSignature",
     "RPMSpec",
+    "SearchResult",
     "TagInfo",
     "TagInfos",
     "TagInheritance",
@@ -1141,6 +1142,16 @@ class ChannelInfo(TypedDict):
 
     name: str
     """ channel name """
+
+
+class SearchResult(TypedDict):
+    """ as returned by the ``search`` XMLRPC call """
+
+    id: int
+    """ result ID """
+
+    name: str
+    """ result name """
 
 
 HubVersionSpec = Union[str, Tuple[int, ...]]

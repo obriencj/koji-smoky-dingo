@@ -155,7 +155,7 @@ class BuildNEVRCompare(NEVRCompare):
 def build_nvr_sort(
         build_infos: BuildInfos,
         dedup: bool = True,
-        reverse: bool = False) -> BuildInfos:
+        reverse: bool = False) -> List[BuildInfo]:
     """
     Given a sequence of build info dictionaries, sort them by Name,
     Epoch, Version, and Release using RPM's variation of comparison
@@ -183,7 +183,7 @@ def build_nvr_sort(
 def build_id_sort(
         build_infos: BuildInfos,
         dedup: bool = True,
-        reverse: bool = False) -> BuildInfos:
+        reverse: bool = False) -> List[BuildInfo]:
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, sorted by the build ID
@@ -206,7 +206,7 @@ def build_id_sort(
 
 
 def build_dedup(
-        build_infos: BuildInfos) -> BuildInfos:
+        build_infos: BuildInfos) -> List[BuildInfo]:
     """
     Given a sequence of build info dictionaries, return a de-duplicated
     list of same, with order preserved.

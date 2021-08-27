@@ -23,8 +23,10 @@ Koji Smoky Dingo - CLI Build Commands
 import sys
 
 from functools import partial
+from koji import ClientSession
 from itertools import chain
 from operator import itemgetter
+from typing import Iterable, List, Optional, Sequence, Union
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
@@ -32,8 +34,7 @@ from . import (
     printerr, read_clean_lines, resplit, )
 from .sift import BuildSifting, output_sifted
 from .. import (
-    NoSuchUser,
-    as_buildinfo, as_taginfo,
+    as_buildinfo, as_taginfo, as_userinfo,
     bulk_load, bulk_load_builds, bulk_load_tags, iter_bulk_load,
     version_check, )
 from ..builds import (
@@ -71,12 +72,18 @@ SORT_BY_ID = "sort-by-id"
 SORT_BY_NVR = "sort-by-nvr"
 
 
-def cli_bulk_tag_builds(session, tagname, nvrs,
-                        sorting=None,
-                        owner=None, inherit=False,
-                        force=False, notify=False,
-                        create=False,
-                        verbose=False, strict=False):
+def cli_bulk_tag_builds(
+        session: ClientSession,
+        tagname: str,
+        nvrs: Sequence[Union[int, str]],
+        sorting: Optional[str] = None,
+        owner: Optional[Union[int, str]] = None,
+        inherit: bool = False,
+        force: bool = False,
+        notify: bool = False,
+        create: bool = False,
+        verbose: bool = False,
+        strict: bool = False):
 
     """
     Implements the ``koji bulk-tag-builds`` command
@@ -101,9 +108,7 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
     # have a matching pkg entry already. Someone needs to own them...
     ownerid = None
     if owner:
-        ownerinfo = session.getUser(owner)
-        if not ownerinfo:
-            raise NoSuchUser(owner)
+        ownerinfo = as_userinfo(session, owner)
         ownerid = ownerinfo["id"]
 
     # load the buildinfo for all of the NVRs
@@ -111,18 +116,17 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
 
     # validate our list of NVRs first by attempting to load them
     loaded = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = loaded.values()
 
     # sort/dedup as requested
     if sorting == SORT_BY_NVR:
         debug("NVR sorting specified")
-        builds = build_nvr_sort(builds)
+        builds = build_nvr_sort(loaded.values())
     elif sorting == SORT_BY_ID:
         debug("ID sorting specified")
-        builds = build_id_sort(builds)
+        builds = build_id_sort(loaded.values())
     else:
         debug("No sorting specified, preserving feed order")
-        builds = build_dedup(builds)
+        builds = build_dedup(loaded.values())
 
     # at this point builds is a list of build info dicts
     if verbose:
@@ -146,14 +150,14 @@ def cli_bulk_tag_builds(session, tagname, nvrs,
         packages = session.listPackages(tagID=tagid,
                                         inherited=inherit)
 
-    packages = set(pkg["package_id"] for pkg in packages)
+    package_ids = set(pkg["package_id"] for pkg in packages)
 
     package_todo = []
 
     for build in builds:
         pkgid = build["package_id"]
-        if pkgid not in packages:
-            packages.add(pkgid)
+        if pkgid not in package_ids:
+            package_ids.add(pkgid)
             package_todo.append((pkgid, ownerid or build["owner_id"]))
 
     if package_todo:
@@ -426,9 +430,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
     # have a matching pkg entry already. Someone needs to own them...
     ownerid = None
     if owner:
-        ownerinfo = session.getUser(owner)
-        if not ownerinfo:
-            raise NoSuchUser(owner)
+        ownerinfo = as_userinfo(session, owner)
         ownerid = ownerinfo["id"]
 
     # load the buildinfo for all of the NVRs

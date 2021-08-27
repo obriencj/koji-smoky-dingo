@@ -28,7 +28,7 @@ ENTRY_POINTS = {
     "bulk-move-builds": "kojismokydingo.cli.builds:BulkMoveBuilds",
     "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
     "bulk-untag-builds": "kojismokydingo.cli.builds:BulkUntagBuilds",
-    "cginfo": "kojismokydingo.cli.users:CGInfo",
+    "cginfo": "kojismokydingo.cli.users:ShowCGInfo",
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
     "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",
@@ -42,14 +42,14 @@ ENTRY_POINTS = {
     "list-rpm-macros": "kojismokydingo.cli.tags:ListRPMMacros",
     "list-tag-extras": "kojismokydingo.cli.tags:ListTagExtras",
     "open": "kojismokydingo.cli.clients:ClientOpen",
-    "perminfo": "kojismokydingo.cli.users:PermissionInfo",
+    "perminfo": "kojismokydingo.cli.users:ShowPermissionInfo",
     "remove-env-var": "kojismokydingo.cli.tags:RemoveEnvVar",
     "remove-rpm-macro": "kojismokydingo.cli.tags:RemoveRPMMacro",
     "renum-tag-inheritance": "kojismokydingo.cli.tags:RenumTagInheritance",
     "set-env-var": "kojismokydingo.cli.tags:SetEnvVar",
     "set-rpm-macro": "kojismokydingo.cli.tags:SetRPMMacro",
     "swap-tag-inheritance": "kojismokydingo.cli.tags:SwapTagInheritance",
-    "userinfo": "kojismokydingo.cli.users:UserInfo",
+    "userinfo": "kojismokydingo.cli.users:ShowUserInfo",
 }
 
 

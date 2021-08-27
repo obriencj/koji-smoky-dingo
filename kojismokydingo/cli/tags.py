@@ -26,7 +26,7 @@ from json import dumps
 from koji import ClientSession
 from koji_cli.lib import arg_filter
 from operator import itemgetter
-from typing import List, Union
+from typing import List, Optional, Tuple, Union
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
@@ -39,6 +39,7 @@ from ..common import unique
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
+from ..sift import Sifter
 from ..types import TagInheritance, TagInheritanceEntry, TagSpec
 
 
@@ -69,7 +70,7 @@ class NoSuchEnvVar(NoSuchTagExtra):
 def cli_affected_targets(
         session: ClientSession,
         tag_list: List[Union[int, str]],
-        build_tags: bool =False,
+        build_tags: bool = False,
         info: bool = False,
         quiet: bool = None):
 
@@ -141,8 +142,11 @@ class AffectedTargets(AnonSmokyDingo):
 
 def cli_renum_tag(
         session: ClientSession,
-        tagname, begin=10, step=10,
-                  verbose=False, test=False):
+        tagname: Union[int, str],
+        begin: int = 10,
+        step: int = 10,
+        verbose: bool = False,
+        test: bool = False):
 
     as_taginfo(session, tagname)
 
@@ -332,14 +336,19 @@ class SwapTagInheritance(TagSmokyDingo):
                                     options.verbose, options.test)
 
 
-def cli_list_rpm_macros(session, tagname, target=False,
-                        quiet=None, defn=False, json=False):
+def cli_list_rpm_macros(
+        session: ClientSession,
+        tagname: Union[int, str],
+        target: bool = False,
+        quiet: Optional[bool] = None,
+        defn: bool = False,
+        json: bool = False):
 
     taginfo = resolve_tag(session, tagname, target)
 
     extras = collect_tag_extras(session, taginfo, prefix="rpm.macro.")
     for name, extra in extras.items():
-        extra["macro"] = name[10:]
+        extra["macro"] = name[10:]  # type: ignore
 
     if json:
         pretty_json(extras)
@@ -398,9 +407,14 @@ class ListRPMMacros(AnonSmokyDingo):
                                    json=options.json)
 
 
-def cli_set_rpm_macro(session, tagname, macro,
-                      value=None, remove=False, block=False,
-                      target=False):
+def cli_set_rpm_macro(
+        session: ClientSession,
+        tagname: Union[int, str],
+        macro: str,
+        value: Optional[str] = None,
+        remove: bool = False,
+        block: bool = False,
+        target: bool = False):
 
     """
     If remove is True, value and block are ignored. The setting will
@@ -552,9 +566,14 @@ class BlockRPMMacro(TagSmokyDingo):
                                  target=options.target)
 
 
-def cli_set_env_var(session, tagname, var,
-                    value=None, remove=False, block=False,
-                    target=False):
+def cli_set_env_var(
+        session: ClientSession,
+        tagname: Union[int, str],
+        var: str,
+        value: Optional[str] = None,
+        remove: bool = False,
+        block: bool = False,
+        target: bool = False):
     """
     If remove is True, value and block are ignored. The setting will
     be removed from the tag's extra settings.
@@ -708,14 +727,19 @@ class BlockEnvVar(TagSmokyDingo):
                                target=options.target)
 
 
-def cli_list_env_vars(session, tagname, target=False,
-                      quiet=None, defn=False, json=False):
+def cli_list_env_vars(
+        session: ClientSession,
+        tagname: Union[int, str],
+        target: bool = False,
+        quiet: bool = None,
+        defn: bool = False,
+        json: bool = False):
 
     taginfo = resolve_tag(session, tagname, target)
 
     extras = collect_tag_extras(session, taginfo, prefix="rpm.env.")
     for name, extra in extras.items():
-        extra["var"] = name[8:]
+        extra["var"] = name[8:]  # type: ignore
 
     if json:
         pretty_json(extras)
@@ -780,9 +804,13 @@ class ListEnvVars(AnonSmokyDingo):
                                  json=options.json)
 
 
-def cli_list_tag_extras(session, tagname, target=False,
-                        blocked=False,
-                        quiet=None, json=False):
+def cli_list_tag_extras(
+        session: ClientSession,
+        tagname: Union[int, str],
+        target: bool = False,
+        blocked: bool = False,
+        quiet: Optional[bool] = None,
+        json: bool = False):
 
     taginfo = resolve_tag(session, tagname, target)
     extras = collect_tag_extras(session, taginfo)
@@ -790,6 +818,8 @@ def cli_list_tag_extras(session, tagname, target=False,
     if json:
         pretty_json(extras)
         return
+
+    headings: Tuple[str, ...]
 
     if blocked:
         headings = ("Setting", "Value", "Tag", "Block")
@@ -848,11 +878,15 @@ class ListTagExtras(AnonSmokyDingo):
                                    json=options.json)
 
 
-def cli_filter_tags(session, tag_list,
-                    search=None, regex=None,
-                    tag_sifter=None,
-                    sorting=None, outputs=None,
-                    strict=False):
+def cli_filter_tags(
+        session: ClientSession,
+        tag_list: List[Union[int, str]],
+        search: Optional[str] = None,
+        regex: Optional[str] = None,
+        tag_sifter: Optional[Sifter] = None,
+        sorting: Optional[str] = None,
+        outputs: Optional[dict] = None,
+        strict: bool = False):
 
     if search:
         tag_list.extend(t["id"] for t in

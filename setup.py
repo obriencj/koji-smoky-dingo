@@ -35,7 +35,7 @@ COMMANDS = {
     "bulk-untag-builds": "kojismokydingo.cli.builds:BulkUntagBuilds",
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
-    "cginfo": "kojismokydingo.cli.users:CGInfo",
+    "cginfo": "kojismokydingo.cli.users:ShowCGInfo",
     "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",
     "filter-tags": "kojismokydingo.cli.tags:FilterTags",
     "latest-archives": "kojismokydingo.cli.archives:LatestArchives",
@@ -47,14 +47,14 @@ COMMANDS = {
     "list-rpm-macros": "kojismokydingo.cli.tags:ListRPMMacros",
     "list-tag-extras": "kojismokydingo.cli.tags:ListTagExtras",
     "open": "kojismokydingo.cli.clients:ClientOpen",
-    "perminfo": "kojismokydingo.cli.users:PermissionInfo",
+    "perminfo": "kojismokydingo.cli.users:ShowPermissionInfo",
     "remove-env-var": "kojismokydingo.cli.tags:RemoveEnvVar",
     "remove-rpm-macro": "kojismokydingo.cli.tags:RemoveRPMMacro",
     "renum-tag-inheritance": "kojismokydingo.cli.tags:RenumTagInheritance",
     "set-env-var": "kojismokydingo.cli.tags:SetEnvVar",
     "set-rpm-macro": "kojismokydingo.cli.tags:SetRPMMacro",
     "swap-tag-inheritance": "kojismokydingo.cli.tags:SwapTagInheritance",
-    "userinfo": "kojismokydingo.cli.users:UserInfo",
+    "userinfo": "kojismokydingo.cli.users:ShowUserInfo",
 }
 
 

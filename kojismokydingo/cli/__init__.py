@@ -78,7 +78,7 @@ JSON_PRETTY_OPTIONS = {
 
 
 def pretty_json(
-        data: Union[dict, int, str, list, tuple],
+        data: Any,
         output: Optional[TextIO] = None,
         **pretty):
     """
@@ -308,7 +308,7 @@ def tabulate(
         data: Any,
         key: Callable = None,
         sorting: int = 0,
-        quiet: Union[bool, None] = None,
+        quiet: Optional[bool] = None,
         out: TextIO = None):
     """
     Prints tabulated data, with the given headings.

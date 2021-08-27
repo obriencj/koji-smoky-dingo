@@ -85,7 +85,7 @@ def ensure_tag(
 
 def resolve_tag(
         session: ClientSession,
-        name: str,
+        name: Union[int, str],
         target: bool = False) -> TagInfo:
     """
     Given a name, resolve it to a taginfo.
