@@ -23,9 +23,6 @@ advanced users.
 """
 
 
-VERSION = "2.0.0"
-
-
 COMMANDS = {
     "affected-targets": "kojismokydingo.cli.tags:AffectedTargets",
     "block-env-var": "kojismokydingo.cli.tags:BlockEnvVar",
@@ -66,8 +63,6 @@ STANDALONE = {
 
 def config():
     return {
-        "version": VERSION,
-
         "packages": [
             "koji_cli_plugins",
             "kojismokydingo",
