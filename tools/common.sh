@@ -13,11 +13,7 @@ function whichever() {
 
 function ksd_version() {
     local PYTHON=$(whichever python3 python)
-    read -r -d'\0' SCRIPT <<EOF
-import setup
-print(setup.VERSION)
-EOF
-    "$PYTHON" -B -c "$SCRIPT"
+    "$PYTHON" -B setup.py --version
 }
 
 
