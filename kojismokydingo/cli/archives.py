@@ -21,13 +21,16 @@ Koji Smoky Dingo - CLI Archive and RPM Commands
 
 
 from argparse import SUPPRESS
+from koji import ClientSession
+from typing import Iterable, List, Optional, Sequence, Union, cast
 
 from . import AnonSmokyDingo, pretty_json, resplit
 from .. import bulk_load_builds
 from ..archives import (
     filter_archives, gather_build_archives, gather_latest_archives, )
 from ..builds import build_dedup
-from ..types import BuildState
+from ..types import (
+    BuildState, PathSpec, )
 
 
 __all__ = (
@@ -40,10 +43,16 @@ __all__ = (
 )
 
 
-def cli_list_build_archives(session, nvrs, btype,
-                            atypes=(), arches=(), rpmkeys=(),
-                            deleted=False,
-                            path=None, json=False):
+def cli_list_build_archives(
+        session: ClientSession,
+        nvrs: Iterable[Union[int, str]],
+        btype: Optional[str] = None,
+        atypes: Sequence[str] = (),
+        arches: Sequence[str] = (),
+        rpmkeys: Sequence[str] = (),
+        deleted: bool = False,
+        path: Optional[PathSpec] = None,
+        json: bool = False):
     """
     Implements the ``koji list-build-archives`` command
     """
@@ -71,10 +80,16 @@ def cli_list_build_archives(session, nvrs, btype,
         print(f["filepath"])
 
 
-def cli_latest_tag_archives(session, tagname, btype,
-                            atypes=(), arches=(), rpmkeys=(),
-                            inherit=True, path=None,
-                            json=False):
+def cli_latest_tag_archives(
+        session: ClientSession,
+        tagname: str,
+        btype: Optional[str] = None,
+        atypes: Sequence[str] = (),
+        arches: Sequence[str] = (),
+        rpmkeys: Sequence[str] = (),
+        inherit: bool = True,
+        path: Optional[PathSpec] = None,
+        json: bool = False):
     """
     Implements the ``koji latest-archives`` command
     """

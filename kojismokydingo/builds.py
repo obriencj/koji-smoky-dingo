@@ -1261,8 +1261,8 @@ def gather_component_build_ids(
         cids: Set[int] = set()
         for archive in archive_list:
             broot_id = archive["buildroot_id"]
-            archives = components.get(broot_id, ())  # type: ignore
-            cids.update(c["build_id"] for c in archives)
+            carchives: Iterable[dict] = components.get(broot_id, ())
+            cids.update(c["build_id"] for c in carchives)
 
         results[build_id] = list(cids)
 

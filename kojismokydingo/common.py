@@ -156,9 +156,12 @@ def fnmatches(
         return False
 
 
+KT = TypeVar('KT')
+
+
 def update_extend(
-        dict_orig: Dict[Any, list],
-        *dict_additions: Dict[Any, List]) -> Dict[Any, list]:
+        dict_orig: Dict[KT, List[Any]],
+        *dict_additions: Dict[KT, List[Any]]) -> Dict[KT, List[Any]]:
     """
     Extend the list values of the original dict with the list values of
     the additions dict.
@@ -196,7 +199,7 @@ def update_extend(
 
 
 def merge_extend(
-        *dict_additions: Dict[Any, List]) -> Dict[Any, list]:
+        *dict_additions: Dict[KT, List[Any]]) -> Dict[KT, List[Any]]:
     """
     Similar to `update_extend` but creates a new dict to hold results,
     and new initial lists to be extended, leaving all the arguments
@@ -210,15 +213,15 @@ def merge_extend(
     return update_extend({}, *dict_additions)
 
 
-T = TypeVar('T')
+GFT = TypeVar('GFT')
 
 
 def globfilter(
-        seq: Iterable[T],
+        seq: Iterable[GFT],
         patterns: Iterable[str],
         key: Optional[KeySpec] = None,
         invert: bool = False,
-        ignore_case: bool = False) -> Iterable[T]:
+        ignore_case: bool = False) -> Iterable[GFT]:
     """
     Generator yielding members of sequence seq which match any of the
     glob patterns specified.
@@ -269,9 +272,12 @@ def globfilter(
     return filterfalse(test, seq) if invert else filter(test, seq)
 
 
+UT = TypeVar('UT')
+
+
 def unique(
-        sequence: Iterable[Any],
-        key: Optional[KeySpec] = None) -> List[Any]:
+        sequence: Iterable[UT],
+        key: Optional[KeySpec] = None) -> List[UT]:
     """
     Given a sequence, de-duplicate it into a new list, preserving
     order.

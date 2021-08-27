@@ -25,7 +25,7 @@ from koji import ClientSession, PathInfo
 from os.path import join
 from typing import (
     Any, Container, Dict, Iterable, List, Optional,
-    Set, Sequence, Union, cast, )
+    Set, Sequence, TypeVar, Union, cast, )
 
 from . import as_buildinfo, as_taginfo, bulk_load, bulk_load_rpm_sigs
 from .types import (
@@ -69,11 +69,14 @@ def as_pathinfo(
         return PathInfo(path or "")
 
 
+AIT = TypeVar('AIT', ArchiveInfos, DecoratedArchiveInfos)
+
+
 def filter_archives(
         session: ClientSession,
-        archives: ArchiveInfos,
+        archives: AIT,
         archive_types: Iterable[str] = (),
-        arches: Iterable[str] = ()) -> ArchiveInfos:
+        arches: Iterable[str] = ()) -> AIT:
     """
     Given a list of archives (or RPMs dressed up like archives),
     return a new list of those archives which are of the given archive
