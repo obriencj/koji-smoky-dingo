@@ -147,6 +147,13 @@ class ClientSession:
             sinfo: Optional[Dict[str, Any]] = None):
         ...
 
+    def count(
+            self,
+            methodName: str,
+            *args: Any,
+            **kw: Any) -> int:
+        ...
+
     def createTag(
             self,
             name: str,
@@ -157,12 +164,12 @@ class ClientSession:
             maven_support: bool = False,
             maven_include_all: bool = False,
             extra: Optional[Dict[str, str]] = None) -> int:
-        pass
+        ...
 
     def editTag2(
             self,
             taginfo: Union[int, str],
-            **kwargs):
+            **kwargs) -> None:
         ...
 
     def getAllPerms(self) -> List[PermInfo]:
@@ -489,7 +496,7 @@ class ClientSession:
             self,
             tag: Union[int, str],
             data: TagInheritance,
-            clear: bool = False):
+            clear: bool = False) -> None:
         ...
 
     def tagBuildBypass(
