@@ -212,8 +212,7 @@ class Sifting():
                 if key in env_params:
                     params[key] = env_params[key]
                 else:
-                    msg = "param %s is not defined" % key
-                    raise SifterError(msg)
+                    raise SifterError(f"param {key} is not defined")
 
         return params
 
@@ -278,7 +277,8 @@ class Sifting():
 
 
 def _report_problem(msg, entry_point, exc):
-    printerr(msg % (entry_point, exc))
+    # printerr(msg % (entry_point, exc))
+    printerr(msg.format(entry_point, exc))
     return True
 
 
@@ -288,7 +288,7 @@ class BuildSifting(Sifting):
         sieves = build_info_sieves()
 
         if entry_points:
-            msg = "Error loading build sieve from entry_point %r : %r"
+            msg = "Error loading build sieve from entry_point {} : {}"
             err = partial(_report_problem, msg)
             sieves.extend(entry_point_tag_info_sieves(on_err=err))
 
@@ -301,7 +301,7 @@ class TagSifting(Sifting):
         sieves = tag_info_sieves()
 
         if entry_points:
-            msg = "Error loading tag sieve from entry_point %r : %r"
+            msg = "Error loading tag sieve from entry_point {} : {}"
             err = partial(_report_problem, msg)
             sieves.extend(entry_point_tag_info_sieves(on_err=err))
 
@@ -324,24 +324,16 @@ def output_sifted(
 
     :param results: results of invoking a Sifter on a set of data
 
-    :type results: dict[str, list[dict]]
-
     :param key: transformation to apply to the individual data
       elements prior to recording. Default, lookup the ``"id"`` index
       from the element.
-
-    :type key: callable or str
 
     :param outputs: mapping of flags to destination filenames. If
       unspecified, the default flag will be written to stdout and the
       rest will be discarded.
 
-    :type outputs: dict[str, str]
-
     :param sort: sorting to apply to the results in each flag. If
       unspecified, order is preserved.
-
-    :type sort: callable or str
     """
 
     if not callable(key):

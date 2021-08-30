@@ -165,9 +165,7 @@ def cli_renum_tag(
         print("Changes not committed in test mode.")
 
     else:
-        results = session.setInheritanceData(tagname, renumbered)
-        if verbose and results:
-            print(results)
+        session.setInheritanceData(tagname, renumbered)
 
 
 class RenumTagInheritance(TagSmokyDingo):
@@ -298,9 +296,7 @@ def cli_swap_inheritance(
     if test:
         print("Changes not committed in test mode.")
     else:
-        results = session.setInheritanceData(tagname, changes)
-        if verbose and results:
-            print(results)
+        session.setInheritanceData(tagname, changes)
 
 
 class SwapTagInheritance(TagSmokyDingo):
@@ -903,7 +899,7 @@ def cli_filter_tags(
     if tag_sifter:
         results = tag_sifter(session, tags)
     else:
-        results = {"default": tags}
+        results = {"default": list(tags)}
 
     if sorting == SORT_BY_NAME:
         sortkey = "name"
@@ -912,7 +908,8 @@ def cli_filter_tags(
     else:
         sortkey = None
 
-    output_sifted(results, "name", outputs, sort=sortkey)
+    # unsure why
+    output_sifted(results, "name", outputs, sort=sortkey)  # type: ignore
 
 
 class FilterTags(AnonSmokyDingo, TagSifting):

@@ -40,7 +40,7 @@ from koji import ClientSession
 from operator import itemgetter
 from typing import (
     Any, Iterable, Callable, Dict, List, Sequence, Set,
-    Tuple, Type, Union, )
+    Tuple, Type, TypeVar, Union, )
 
 from .. import BadDingo
 from ..types import KeySpec
@@ -301,6 +301,9 @@ def gather_args(
     return args, kwds
 
 
+ST = TypeVar('ST')
+
+
 class Sifter():
     """
     A flagging data filter, compiled from an s-expression syntax.
@@ -486,7 +489,7 @@ class Sifter():
 
     def run(self,
             session: ClientSession,
-            info_dicts: Iterable[dict]) -> Dict[str, List[dict]]:
+            info_dicts: Iterable[ST]) -> Dict[str, List[ST]]:
         """
         Clears existing flags and runs contained sieves on the given
         info_dicts.
@@ -511,7 +514,9 @@ class Sifter():
         return results
 
 
-    def __call__(self, session, info_dicts):
+    def __call__(self,
+                 session: ClientSession,
+                 info_dicts: Iterable[ST]) -> Dict[str, List[ST]]:
         """
         Invokes run if there are any elements in info_dicts sequence. If
         there are not any elements, returns an empty dict.
@@ -536,7 +541,7 @@ class Sifter():
     def is_flagged(
             self,
             flagname: str,
-            data: dict) -> bool:
+            data: ST) -> bool:
         """
         True if the data has been flagged with the given flagname, either
         via a ``(flag ...)`` sieve expression, or via `set_flag`
@@ -549,7 +554,7 @@ class Sifter():
     def set_flag(
             self,
             flagname: str,
-            data: dict):
+            data: ST):
         """
         Records the given data as having been flagged with the given
         flagname.
@@ -563,7 +568,7 @@ class Sifter():
         bfl[self.key(data)] = True
 
 
-    def get_cache(self, cachename, key):
+    def get_cache(self, cachename, key) -> dict:
         """
         Flexible storage for caching data in a sifter. Sieves can use this
         to record data about individual info dicts, or to cache results
@@ -579,7 +584,7 @@ class Sifter():
         return cch
 
 
-    def get_info_cache(self, cachename, data):
+    def get_info_cache(self, cachename, data) -> dict:
         """
         Cache associated with a particular info dict.
 
@@ -634,7 +639,11 @@ class Sieve(metaclass=ABCMeta):
         self.options = options
 
 
-    def __call__(self, session, info_dicts):
+    def __call__(
+            self,
+            session: ClientSession,
+            info_dicts: Iterable[ST]) -> Iterable[ST]:
+
         work = tuple(info_dicts)
         return tuple(self.run(session, work)) if work else work
 
@@ -654,7 +663,7 @@ class Sieve(metaclass=ABCMeta):
 
     def check(self,
               session: ClientSession,
-              info: dict) -> bool:
+              info: ST) -> bool:
         """
         Override to return True if the predicate matches the given
         info dict.
@@ -671,7 +680,7 @@ class Sieve(metaclass=ABCMeta):
 
     def prep(self,
              session: ClientSession,
-             info_dicts: Iterable[dict]):
+             info_dicts: Iterable[ST]):
         """
         Override if some bulk pre-loading operations are necessary.
 
@@ -686,7 +695,7 @@ class Sieve(metaclass=ABCMeta):
 
     def run(self,
             session: ClientSession,
-            info_dicts: Iterable[dict]) -> Iterable[dict]:
+            info_dicts: Iterable[ST]) -> Iterable[ST]:
         """
         Use this Sieve instance to select and return a subset of the
         info_dicts sequence.
@@ -708,7 +717,7 @@ class Sieve(metaclass=ABCMeta):
         return self.sifter.get_cache(self.name, key)
 
 
-    def get_info_cache(self, info: dict) -> dict:
+    def get_info_cache(self, info: ST) -> dict:
         """
         Gets a cache dict from the sifter using the name of this sieve and
         the sifter's designated key for the given info dict. The default
@@ -905,7 +914,7 @@ class Flagged(VariadicSieve):
         super().__init__(sifter, ensure_symbol(name))
 
 
-    def check(self, _session, info):
+    def check(self, session, info):
         return self.sifter.is_flagged(self.token, info)
 
 
@@ -972,7 +981,7 @@ class ItemPathSieve(Sieve):
         self.path = path
 
 
-    def check(self, _session, data):
+    def check(self, session, data):
         work = self.path.get(data)
 
         if self.tokens:
