@@ -91,10 +91,9 @@ def cli_bulk_tag_builds(
 
     # set up the verbose debugging output function
     if verbose:
-        def debug(message, *args):
-            printerr(message % args)
+        debug = printerr
     else:
-        def debug(message, *args):
+        def debug(message):  # type: ignore
             pass
 
     # fetch the destination tag info (and make sure it actually
@@ -112,7 +111,7 @@ def cli_bulk_tag_builds(
         ownerid = ownerinfo["id"]
 
     # load the buildinfo for all of the NVRs
-    debug("Fed with %i builds", len(nvrs))
+    debug(f"Fed with {len(nvrs)} builds")
 
     # validate our list of NVRs first by attempting to load them
     loaded = bulk_load_builds(session, unique(nvrs), err=strict)
@@ -130,9 +129,9 @@ def cli_bulk_tag_builds(
 
     # at this point builds is a list of build info dicts
     if verbose:
-        debug("Sorted and trimmed duplicates to %i builds", len(builds))
+        debug(f"Sorted and trimmed duplicates to {len(builds)} builds")
         for build in builds:
-            debug(" %s %i", build["nvr"], build["id"])
+            debug(f" {build['nvr']} {build['id']}")
 
     if not builds:
         debug("Nothing to do!")
@@ -196,7 +195,7 @@ def cli_bulk_tag_builds(
         # and of course display the courtesy counter so the user
         # knows we're actually doing something
         counter += len(done)
-        debug(" tagged %i/%i", counter, len(builds))
+        debug(f" tagged {counter}/{len(builds)}")
 
     debug("All done!")
 
@@ -295,25 +294,24 @@ def cli_bulk_untag_builds(session, tagname, nvrs,
 
     # set up the verbose debugging output function
     if verbose:
-        def debug(message, *args):
-            printerr(message % args)
+        debug = printerr
     else:
-        def debug(message, *args):
+        def debug(message):  # type: ignore
             pass
 
     taginfo = as_taginfo(session, tagname)
 
     # load the buildinfo for all of the NVRs
-    debug("Fed with %i builds", len(nvrs))
+    debug(f"Fed with {len(nvrs)} builds")
 
     # validate our list of NVRs first by attempting to load them
     loaded = bulk_load_builds(session, unique(nvrs), err=strict)
     builds = build_dedup(loaded.values())
 
     if verbose:
-        debug("Trimmed duplicates to %i builds", len(builds))
+        debug(f"Trimmed duplicates to {len(builds)} builds")
         for build in builds:
-            debug(" %s %i", build["nvr"], build["id"])
+            debug(f" {build['nvr']} {build['id']}")
 
     if not builds:
         debug("Nothing to do!")
@@ -334,7 +332,7 @@ def cli_bulk_untag_builds(session, tagname, nvrs,
         # and of course display the courtesy counter so the user
         # knows we're actually doing something
         counter += len(done)
-        debug(" untagged %i/%i", counter, len(builds))
+        debug(f" untagged {counter}/{len(builds)}")
 
     debug("All done!")
 
@@ -407,10 +405,9 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
 
     # set up the verbose debugging output function
     if verbose:
-        def debug(message, *args):
-            printerr(message % args)
+        debug = printerr
     else:
-        def debug(message, *args):
+        def debug(message):  # type: ignore
             pass
 
     # fetch the source tag info
@@ -434,7 +431,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         ownerid = ownerinfo["id"]
 
     # load the buildinfo for all of the NVRs
-    debug("Fed with %i builds", len(nvrs))
+    debug(f"Fed with {len(nvrs)} builds")
 
     # validate our list of NVRs first by attempting to load them
     loaded = bulk_load_builds(session, unique(nvrs), err=strict)
@@ -453,9 +450,9 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
 
     # at this point builds is a list of build info dicts
     if verbose:
-        debug("Sorted and trimmed duplicates to %i builds", len(builds))
+        debug(f"Sorted and trimmed duplicates to {len(builds)} builds")
         for build in builds:
-            debug(" %s %i", build["nvr"], build["id"])
+            debug(f" {build['nvr']} {build['id']}")
 
     if not builds:
         debug("Nothing to do!")
@@ -519,7 +516,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         # and of course display the courtesy counter so the user
         # knows we're actually doing something
         counter += len(done)
-        debug(" moved %i/%i", counter, len(builds))
+        debug(f" moved {counter}/{len(builds)}")
 
     debug("All done!")
 
