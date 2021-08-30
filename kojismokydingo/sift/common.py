@@ -61,8 +61,7 @@ def ensure_comparison(value: str) -> Callable:
         return _OPMAP[value]
 
     else:
-        msg = "Invalid comparison operator: %r" % value
-        raise SifterError(msg)
+        raise SifterError(f"Invalid comparison operator: {value!r}")
 
 
 class CacheMixin(Sieve):

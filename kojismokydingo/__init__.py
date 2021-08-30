@@ -1235,7 +1235,7 @@ def version_require(
     if message is None:
         if isinstance(minimum, (list, tuple)):
             minimum = ".".join(str(m) for m in minimum)
-        message = "requires >= %s" % minimum
+        message = f"requires >= {minimum}"
 
     raise FeatureUnavailable(message)
 
