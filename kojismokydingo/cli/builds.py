@@ -26,13 +26,14 @@ from functools import partial
 from koji import ClientSession
 from itertools import chain
 from operator import itemgetter
-from typing import Iterable, List, Optional, Sequence, Union
+from typing import (
+    Callable, Dict, Iterable, List, Optional, Sequence, Union, )
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
     int_or_str, pretty_json, open_output,
     printerr, read_clean_lines, resplit, )
-from .sift import BuildSifting, output_sifted
+from .sift import BuildSifting, Sifter, output_sifted
 from .. import (
     as_buildinfo, as_taginfo, as_userinfo,
     bulk_load, bulk_load_builds, bulk_load_tags, iter_bulk_load,
@@ -44,7 +45,7 @@ from ..builds import (
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_move_builds, iter_bulk_tag_builds, iter_bulk_untag_builds, )
 from ..tags import ensure_tag, gather_tag_ids
-from ..types import BuildInfo, BuildInfos, BuildState
+from ..types import BuildInfo, BuildInfos, BuildState, TagSpec
 from ..common import chunkseq, unique
 
 
@@ -83,7 +84,7 @@ def cli_bulk_tag_builds(
         notify: bool = False,
         create: bool = False,
         verbose: bool = False,
-        strict: bool = False):
+        strict: bool = False) -> None:
 
     """
     Implements the ``koji bulk-tag-builds`` command
@@ -284,9 +285,14 @@ class BulkTagBuilds(TagSmokyDingo):
                                    strict=options.strict)
 
 
-def cli_bulk_untag_builds(session, tagname, nvrs,
-                          force=False, notify=False,
-                          verbose=False, strict=False):
+def cli_bulk_untag_builds(
+        session: ClientSession,
+        tagname: TagSpec,
+        nvrs: Sequence[Union[int, str]],
+        force: bool = False,
+        notify: bool = False,
+        verbose: bool = False,
+        strict: bool = False) -> None:
 
     """
     Implements the ``koji bulk-untag-builds`` command
@@ -392,12 +398,19 @@ class BulkUntagBuilds(TagSmokyDingo):
                                      strict=options.strict)
 
 
-def cli_bulk_move_builds(session, srctag, desttag, nvrs,
-                         sorting=None,
-                         owner=None, inherit=False,
-                         force=False, notify=False,
-                         create=False,
-                         verbose=False, strict=False):
+def cli_bulk_move_builds(
+        session: ClientSession,
+        srctag: TagSpec,
+        desttag: str,
+        nvrs: Sequence[Union[int, str]],
+        sorting: Optional[str] = None,
+        owner: Optional[Union[int, str]] = None,
+        inherit: bool = False,
+        force: bool = False,
+        notify: bool = False,
+        create: bool = False,
+        verbose: bool = False,
+        strict: bool = False) -> None:
 
     """
     Implements the ``koji bulk-move-builds`` command
@@ -415,9 +428,9 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
 
     # fetch the destination tag info (and make sure it actually
     # exists)
-    desttag = ensure_tag(session, desttag) if create \
+    dtag = ensure_tag(session, desttag) if create \
         else as_taginfo(session, desttag)
-    tagid = desttag["id"]
+    tagid = dtag["id"]
 
     if srctag["id"] == tagid:
         debug("Source and destination tags are the same, nothing to do!")
@@ -435,18 +448,19 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
 
     # validate our list of NVRs first by attempting to load them
     loaded = bulk_load_builds(session, unique(nvrs), err=strict)
-    builds = loaded.values()
+
+    builds: List[BuildInfo]
 
     # sort/dedup as requested
     if sorting == SORT_BY_NVR:
         debug("NVR sorting specified")
-        builds = build_nvr_sort(builds)
+        builds = build_nvr_sort(loaded.values())
     elif sorting == SORT_BY_ID:
         debug("ID sorting specified")
-        builds = build_id_sort(builds)
+        builds = build_id_sort(loaded.values())
     else:
         debug("No sorting specified, preserving feed order")
-        builds = build_dedup(builds)
+        builds = build_dedup(loaded.values())
 
     # at this point builds is a list of build info dicts
     if verbose:
@@ -470,14 +484,14 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
         packages = session.listPackages(tagID=tagid,
                                         inherited=inherit)
 
-    packages = set(pkg["package_id"] for pkg in packages)
+    package_ids = set(pkg["package_id"] for pkg in packages)
 
     package_todo = []
 
     for build in builds:
         pkgid = build["package_id"]
-        if pkgid not in packages:
-            packages.add(pkgid)
+        if pkgid not in package_ids:
+            package_ids.add(pkgid)
             package_todo.append((pkgid, ownerid or build["owner_id"]))
 
     if package_todo:
@@ -501,7 +515,7 @@ def cli_bulk_move_builds(session, srctag, desttag, nvrs,
     # and finally, move the builds themselves in chunks of 100
     debug("Begining build moving")
     counter = 0
-    for done in iter_bulk_move_builds(session, srctag, desttag, builds,
+    for done in iter_bulk_move_builds(session, srctag, dtag, builds,
                                       force=force, notify=notify,
                                       size=100, strict=strict):
 
@@ -716,10 +730,16 @@ class BuildFiltering(BuildSifting):
                            state=options.state)
 
 
-def cli_list_components(session, nvr_list,
-                        tags=(), inherit=False, latest=False,
-                        build_filter=None, build_sifter=None,
-                        sorting=None, outputs=None):
+def cli_list_components(
+        session: ClientSession,
+        nvr_list: Sequence[Union[int, str]],
+        tags: Sequence[TagSpec] = (),
+        inherit: bool = False,
+        latest: bool = False,
+        build_filter: Optional[BuildFilter] = None,
+        build_sifter: Optional[Sifter] = None,
+        sorting: Optional[str] = None,
+        outputs: Optional[Dict[str, str]] = None) -> None:
 
     """
     Implements the ``koji list-component-builds`` command
@@ -738,8 +758,8 @@ def cli_list_components(session, nvr_list,
     for tag in tags:
         # mix in any tagged builds
         tag = as_taginfo(session, tag)
-        found = session.listTagged(tag["id"], inherit=inherit, latest=latest)
-        loaded.update((b["id"], b) for b in found)
+        tagged = session.listTagged(tag["id"], inherit=inherit, latest=latest)
+        loaded.update((b["id"], b) for b in tagged)
 
     # the build IDs of all the builds we've loaded, combined from the
     # initial nvr_list, plus the builds from tag
@@ -763,13 +783,14 @@ def cli_list_components(session, nvr_list,
     builds.extend(wrapped.values())
 
     if build_filter:
-        builds = build_filter(builds)
+        builds = list(build_filter(builds))
 
     if build_sifter:
         results = build_sifter(session, builds)
     else:
         results = {"default": builds}
 
+    sortfn: Callable
     if sorting == SORT_BY_NVR:
         sortfn = build_nvr_sort
     elif sorting == SORT_BY_ID:
@@ -779,7 +800,7 @@ def cli_list_components(session, nvr_list,
     else:
         sortfn = None
 
-    output_sifted(results, "nvr", outputs, sort=sortfn)
+    output_sifted(results, "nvr", outputs, sort=sortfn)  # type: ignore
 
 
 class ListComponents(AnonSmokyDingo, BuildFiltering):
