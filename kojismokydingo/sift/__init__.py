@@ -185,6 +185,10 @@ def ensure_int_or_str(
     Checks that value is either a int, Number, str, or Symbol. Returns
     an int or str as appropriate. If value is not an int, Number, str,
     nor Symbol, raises a SifterError.
+
+    :param value: the value to coerce into an int or str
+
+    :param msg: optional error message if value cannot be coerced
     """
 
     if isinstance(value, int):
@@ -209,7 +213,10 @@ def ensure_all_int_or_str(
     value is not an int, Number, str, nor Symbol, raises a
     SifterError.
 
-    :type values: list
+    :param values: sequence of values to ensure or convert
+
+    :param msg: optional error message for exception raised if a portion
+      of values could not be coerced to an int or str
     """
 
     return [ensure_int_or_str(v, msg) for v in values]

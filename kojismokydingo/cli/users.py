@@ -43,15 +43,12 @@ __all__ = (
 )
 
 
-def get_usertype_str(userinfo):
+def get_usertype_str(userinfo: UserInfo) -> str:
     """
     Provide a human-readable label for the koji user type enum value
     in a koji user info dict.
 
     :param userinfo: user info
-    :type userinfo: dict
-
-    :rtype: str
     """
 
     val = userinfo.get("usertype") or UserType.NORMAL

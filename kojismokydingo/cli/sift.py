@@ -77,12 +77,8 @@ def _entry_point_sieves(
     entry points will be loaded.
 
     :param key: entry point key to load
-    :type key: str
 
     :param on_err: error handling function
-    :type on_err: callable, optional
-
-    :rtype: list[type]
     """
 
     points = sorted(iter_entry_points(key),
