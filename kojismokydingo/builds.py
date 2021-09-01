@@ -741,28 +741,29 @@ def latest_maven_builds(
 
 def decorate_builds_maven(
         session: ClientSession,
-        build_infos: BuildInfos) -> DecoratedBuildInfos:
+        build_infos: BuildInfos) -> List[DecoratedBuildInfo]:
     """
     For any build info which does not have a maven_group_id and hasn't
     already been checked for additional btype data, augment the btype
     data.
     """
 
-    build_infos = cast(DecoratedBuildInfos, tuple(build_infos))
+    if not isinstance(build_infos, list):
+        build_infos = list(build_infos)
 
     wanted = tuple(bld for bld in build_infos if
                    ("maven_group_id" not in bld))
 
     if wanted:
-        decorate_builds_btypes(session, wanted, with_fields=True)
-
-    return build_infos
+        return decorate_builds_btypes(session, wanted, with_fields=True)
+    else:
+        return cast(List[DecoratedBuildInfo], build_infos)
 
 
 def decorate_builds_btypes(
         session: ClientSession,
         build_infos: BuildInfos,
-        with_fields: bool = True) -> DecoratedBuildInfos:
+        with_fields: bool = True) -> List[DecoratedBuildInfo]:
     """
     Augments a list of build_info dicts with two new keys:
 
@@ -785,7 +786,10 @@ def decorate_builds_btypes(
       True
     """
 
-    build_infos = cast(DecoratedBuildInfos, tuple(build_infos))
+    build_infos = cast(List[DecoratedBuildInfo], build_infos)
+
+    if not isinstance(build_infos, list):
+        build_infos = list(build_infos)
 
     wanted = {bld["id"]: bld for bld in build_infos if
               "archive_btype_names" not in bld}
@@ -796,7 +800,7 @@ def decorate_builds_btypes(
     btypes = {bt["name"]: bt["id"] for bt in session.listBTypes()}
 
     for bid, bts in iter_bulk_load(session, session.getBuildType, wanted):
-        bld = wanted[bid]
+        bld: DecoratedBuildInfo = wanted[bid]
 
         bld["archive_btype_names"] = btype_names = list(bts)
         bld["archive_btype_ids"] = [btypes[b] for b in btype_names]
@@ -824,7 +828,7 @@ def decorate_builds_btypes(
 
 def decorate_builds_cg_list(
         session: ClientSession,
-        build_infos: BuildInfos) -> DecoratedBuildInfos:
+        build_infos: BuildInfos) -> List[DecoratedBuildInfo]:
     """
     Augments a list of build_info dicts with two or four new keys:
 
@@ -853,8 +857,10 @@ def decorate_builds_cg_list(
     # the decoration process such that it as polite to koji as
     # possible while farming all the data, and we also make it so that
     # we do not re-decorate builds which have already been decorated.
+    build_infos = cast(List[DecoratedBuildInfo], build_infos)
 
-    build_infos = cast(DecoratedBuildInfos, tuple(build_infos))
+    if not isinstance(build_infos, list):
+        build_infos = list(build_infos)
 
     wanted = {bld["id"]: bld for bld in build_infos if
               "archive_cg_names" not in bld}
@@ -888,7 +894,7 @@ def decorate_builds_cg_list(
     buildroots = bulk_load_buildroots(session, root_ids)
 
     for build_id, archive_list in archives.items():
-        bld = cast(DecoratedBuildInfo, wanted[build_id])
+        bld: DecoratedBuildInfo = wanted[build_id]
 
         cg_ids: List[int] = []
         cg_names: List[str] = []

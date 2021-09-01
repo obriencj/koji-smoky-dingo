@@ -20,7 +20,7 @@ Koji Smoky Dingo - CLI Archive and RPM Commands
 """
 
 
-from argparse import SUPPRESS
+from argparse import SUPPRESS, ArgumentParser, Namespace
 from koji import ClientSession
 from typing import Iterable, List, Optional, Sequence, Union, cast
 
@@ -108,9 +108,11 @@ def cli_latest_tag_archives(
 
 
 class ArchiveFiltering():
+    """ Mixin for SmokyDingos which need archive-filtering arguments """
 
-
-    def archive_arguments(self, parser):
+    def archive_arguments(
+            self,
+            parser: ArgumentParser) -> ArgumentParser:
 
         addarg = parser.add_argument
         addarg("--json", action="store_true", default=False,
@@ -183,7 +185,11 @@ class ArchiveFiltering():
         return parser
 
 
-    def validate_archive_options(self, parser, options):
+    def validate_archive_options(
+            self,
+            parser: ArgumentParser,
+            options: Namespace) -> None:
+
         options.atypes = resplit(options.atypes)
         options.arches = resplit(options.arches)
 

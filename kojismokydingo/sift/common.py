@@ -147,8 +147,6 @@ class CacheMixin(Sieve):
             inherit: bool = True) -> Dict[GAV, BuildInfo]:
         """
         a caching wrapper for `kojismokydingo.builds.latest_maven_builds`
-
-        :rtype: dict[tuple[str], dict]
         """
 
         cache = self._mixin_cache("latest_maven_builds")

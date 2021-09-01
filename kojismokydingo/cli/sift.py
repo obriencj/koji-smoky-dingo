@@ -22,6 +22,7 @@ Some CLI adapters for working with Sifty Dingo filtering
 
 import os
 
+from argparse import ArgumentParser, Namespace
 from collections import defaultdict
 from functools import partial
 from operator import itemgetter
@@ -117,11 +118,13 @@ def _entry_point_sieves(
     return collected
 
 
-def entry_point_tag_info_sieves(on_err=None):
+def entry_point_tag_info_sieves(
+        on_err: Optional[OnErr] = None) -> List[Type[Sieve]]:
     return _entry_point_sieves("koji_smoky_dingo_tag_sieves", on_err)
 
 
-def entry_point_build_info_sieves(on_err=None):
+def entry_point_build_info_sieves(
+        on_err: Optional[OnErr] = None) -> List[Type[Sieve]]:
     return _entry_point_sieves("koji_smoky_dingo_build_sieves", on_err)
 
 
@@ -130,7 +133,9 @@ class Sifting():
     A mixin for SmokyDingo instances that wish to offer a sifter.
     """
 
-    def sifter_arguments(self, parser):
+    def sifter_arguments(
+            self,
+            parser: ArgumentParser) -> ArgumentParser:
         """
         Adds an argument group for for loading a Sifter from either an
         text argument or a filename, and specifying output files for
@@ -179,20 +184,27 @@ class Sifting():
         return parser
 
 
-    def default_params(self):
+    def default_params(self) -> Dict[str, str]:
+        params: Dict[str, str]
         params = getattr(self, "_sifter_params", None)
         if params is None:
-            params = self._sifter_params = {}
+            self._sifter_params = params = {}  # type: ignore
         return params
 
 
-    def get_params(self, options):
+    def get_params(
+            self,
+            options: Namespace) -> Dict[str, str]:
+
+        cli_params: Dict[str, str]
+        env_params: Dict[str, str]
+        params: Dict[str, str]
 
         # build up a params dict based on command-line options, param
         # definitions from the filter file, and finally the
         # environment if the --env flag was set.
         cli_params = options.params
-        env_params = os.environ if options.use_env else {}
+        env_params = os.environ if options.use_env else {}  # type: ignore
         params = self.default_params()
 
         for opt in resplit(cli_params):
@@ -213,18 +225,19 @@ class Sifting():
         return params
 
 
-    def get_outputs(self, options):
+    def get_outputs(
+            self,
+            options: Namespace) -> Dict[str, str]:
         """
         Produces a dict mapping flag names to output files based on the
         accumulated results of the ``--output FLAG:FILENAME`` argument.
 
         This dict can be used with `output_sifted` to record the results
         of a sifter to a collection of files.
-
-        :rtype: dict[str, str]
         """
 
-        result = {}
+        result: Dict[str, str] = {}
+        newresult: Dict[str, str]
 
         for opt in resplit(options.outputs):
             if ":" in opt:
@@ -235,6 +248,11 @@ class Sifting():
             result[flag] = dest or None
 
         if "*" in result:
+            # the * output means that all otherwise-undefined flag
+            # outputs should be directed there, but we don't actually
+            # know all the flags at this point. So we'll create a
+            # defaultdict that produces that value for misses,
+            # pre-populate it with the output mappings we know of
             overall = result.pop("*")
             newresult = defaultdict(lambda: overall)
             newresult.update(result)
@@ -246,17 +264,19 @@ class Sifting():
         return result
 
 
-    def get_sieves(self, entry_points=True):
+    def get_sieves(
+            self,
+            entry_points: bool = True) -> List[Type[Sieve]]:
         return DEFAULT_SIEVES
 
 
-    def get_sifter(self, options):
+    def get_sifter(
+            self,
+            options: Namespace) -> Sifter:
         """
         Produces a Sifter instances constructed from values in options.
         These options should have been generated from a parser that
         has had the `Sifting.sifter_arguments` invoked on it.
-
-        :rtype: `kojismokydingo.sift.Sifter`
         """
 
         if options.filter:

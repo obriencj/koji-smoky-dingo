@@ -22,6 +22,7 @@ Koji Smoky Dingo - CLI Build Commands
 
 import sys
 
+from argparse import ArgumentParser, Namespace
 from functools import partial
 from koji import ClientSession
 from itertools import chain
@@ -43,9 +44,12 @@ from ..builds import (
     build_dedup, build_id_sort, build_nvr_sort,
     decorate_builds_btypes, decorate_builds_cg_list,
     gather_component_build_ids, gather_wrapped_builds,
-    iter_bulk_move_builds, iter_bulk_tag_builds, iter_bulk_untag_builds, )
+    iter_bulk_move_builds, iter_bulk_tag_builds,
+    iter_bulk_untag_builds, )
 from ..tags import ensure_tag, gather_tag_ids
-from ..types import BuildInfo, BuildInfos, BuildState, TagSpec
+from ..types import (
+    BTypeInfo, BuildInfo, BuildInfos, BuildSpec,
+    BuildState, DecoratedBuildInfo, TagSpec, )
 from ..common import chunkseq, unique
 
 
@@ -629,8 +633,9 @@ class BuildFiltering(BuildSifting):
     Base class for commands which use build filtering options
     """
 
-
-    def filtering_arguments(self, parser):
+    def filtering_arguments(
+            self,
+            parser: ArgumentParser) -> ArgumentParser:
 
         grp = parser.add_argument_group("Filtering by tag")
         addarg = grp.add_argument
@@ -710,7 +715,10 @@ class BuildFiltering(BuildSifting):
         return parser
 
 
-    def get_filter(self, session, options):
+    def get_filter(
+            self,
+            session: ClientSession,
+            options: Namespace) -> BuildFilter:
         # setup the limit as a set of IDs for each tag named in the
         # options.
         limit_ids = gather_tag_ids(session, deep=options.limit,
@@ -1014,23 +1022,29 @@ class FilterBuilds(AnonSmokyDingo, BuildFiltering):
                                  strict=options.strict)
 
 
-def cli_list_btypes(session, nvr=None, json=False, quiet=False):
+def cli_list_btypes(
+        session: ClientSession,
+        nvr: Optional[BuildSpec] = None,
+        json: bool = False,
+        quiet: bool = False) -> None:
     """
     Implements ``koji list-btypes`` command
     """
 
-    btypes = {bt["id"]: bt for bt in session.listBTypes()}
+    btypes_ids: Dict[int, BTypeInfo]
+    btypes_ids = {bt["id"]: bt for bt in session.listBTypes()}
 
     if nvr:
         build = as_buildinfo(session, nvr)
-        decorate_builds_btypes(session, [build])
-        build_bts = build["archive_btype_ids"]
+        dbuild = decorate_builds_btypes(session, [build])[0]
+        build_bts = dbuild["archive_btype_ids"]
 
-        for btid in list(btypes):
+        for btid in list(btypes_ids):
             if btid not in build_bts:
-                btypes.pop(btid)
+                btypes_ids.pop(btid)
 
-    btypes = sorted(btypes.values(), key=itemgetter("id"))
+    btypes: List[BTypeInfo]
+    btypes = sorted(btypes_ids.values(), key=itemgetter("id"))
 
     if json:
         pretty_json(btypes)
@@ -1042,7 +1056,7 @@ def cli_list_btypes(session, nvr=None, json=False, quiet=False):
     else:
         fmt = "  {name} [{id}]".format
         if nvr:
-            print("Build Types for {nvr} [{id}]".format(**build))
+            print(f"Build Types for {build['nvr']} [{build['id']}]")
         else:
             print("Build Types")
 
