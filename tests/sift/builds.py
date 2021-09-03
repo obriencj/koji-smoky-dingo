@@ -302,6 +302,20 @@ class SifterTest(TestCase):
                          [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
 
         src = """
+        (state complete)
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        src = """
+        (state "complete")
+        """
+        res = sift_builds(None, src, BUILD_SAMPLES)
+        self.assertEqual(res["default"],
+                         [BUILD_SAMPLE_3, BUILD_SAMPLE_4, BUILD_SAMPLE_5])
+
+        src = """
         (state 2)
         """
         res = sift_builds(None, src, BUILD_SAMPLES)
