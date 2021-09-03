@@ -62,7 +62,7 @@ def __plugin__(glbls):
             # function that the entry point provided. We just announce
             # than an error happened and continue with the next
             # plugin.
-            message = "Error loading plugin %r: %r" % (entry_point, ex)
+            message = f"Error loading plugin {entry_point!r}: {ex!r}"
             print(message, file=sys.stderr)
 
         else:
