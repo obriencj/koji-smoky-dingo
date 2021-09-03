@@ -46,11 +46,12 @@ from ..builds import (
     gather_component_build_ids, gather_wrapped_builds,
     iter_bulk_move_builds, iter_bulk_tag_builds,
     iter_bulk_untag_builds, )
+from ..common import chunkseq, unique
 from ..tags import ensure_tag, gather_tag_ids
 from ..types import (
     BTypeInfo, BuildInfo, BuildInfos, BuildSpec,
     BuildState, DecoratedBuildInfo, TagSpec, )
-from ..common import chunkseq, unique
+from ..users import collect_cgs
 
 
 __all__ = (
@@ -885,11 +886,17 @@ class ListComponents(AnonSmokyDingo, BuildFiltering):
                                    outputs=outputs)
 
 
-def cli_filter_builds(session, nvr_list,
-                      tags=(), inherit=False, latest=False,
-                      build_filter=None, build_sifter=None,
-                      sorting=None, outputs=None,
-                      strict=False):
+def cli_filter_builds(
+        session: ClientSession,
+        nvr_list: Iterable[Union[int, str]],
+        tags: Iterable[TagSpec] = (),
+        inherit: bool = False,
+        latest: bool = False,
+        build_filter: Optional[BuildFilter] = None,
+        build_sifter: Optional[Sifter] = None,
+        sorting: Optional[str] = None,
+        outputs: Optional[Dict[str, str]] = None,
+        strict: bool = False) -> None:
 
     """
     Implements the ``koji filter-builds`` command
@@ -897,6 +904,7 @@ def cli_filter_builds(session, nvr_list,
 
     nvr_list = unique(map(int_or_str, nvr_list))
 
+    builds: Iterable[BuildInfo]
     if nvr_list:
         loaded = bulk_load_builds(session, nvr_list, err=strict)
         builds = filter(None, loaded.values())
@@ -930,8 +938,9 @@ def cli_filter_builds(session, nvr_list,
     if build_sifter:
         results = build_sifter(session, builds)
     else:
-        results = {"default": builds}
+        results = {"default": list(builds)}
 
+    sortfn: Callable
     if sorting == SORT_BY_NVR:
         sortfn = build_nvr_sort
     elif sorting == SORT_BY_ID:
@@ -941,7 +950,7 @@ def cli_filter_builds(session, nvr_list,
     else:
         sortfn = None
 
-    output_sifted(results, "nvr", outputs, sort=sortfn)
+    output_sifted(results, "nvr", outputs, sort=sortfn)  # type: ignore
 
 
 class FilterBuilds(AnonSmokyDingo, BuildFiltering):
@@ -1094,30 +1103,30 @@ class ListBTypes(AnonSmokyDingo):
                                quiet=options.quiet)
 
 
-def cli_list_cgs(session, nvr=None, json=False, quiet=False):
+def cli_list_cgs(
+        session: ClientSession,
+        nvr: Optional[BuildSpec] = None,
+        json: bool = False,
+        quiet: bool = False) -> None:
     """
     Implements the ``koji list-cgs`` command
     """
 
-    cgs = {}
-    for name, cg in session.listCGs().items():
-        cg["name"] = name
-        cg.pop("users")
-        cgs[cg["id"]] = cg
+    cgs = {cg['id']: cg for cg in collect_cgs(session)}
 
     if nvr:
         build = as_buildinfo(session, nvr)
-        decorate_builds_cg_list(session, [build])
-        build_cgs = build["archive_cg_ids"]
+        dbuild = decorate_builds_cg_list(session, [build])[0]
+        build_cgs = dbuild["archive_cg_ids"]
 
-        for cgid in list(cgs):
+        for cgid in cgs:
             if cgid not in build_cgs:
                 cgs.pop(cgid)
 
-    cgs = sorted(cgs.values(), key=itemgetter("id"))
+    keep_cgs = sorted(cgs.values(), key=itemgetter("id"))
 
     if json:
-        pretty_json(cgs)
+        pretty_json(keep_cgs)
         return
 
     if quiet:
@@ -1130,7 +1139,7 @@ def cli_list_cgs(session, nvr=None, json=False, quiet=False):
         else:
             print("Content Generators")
 
-    for cg in cgs:
+    for cg in keep_cgs:
         print(fmt(**cg))
 
 
