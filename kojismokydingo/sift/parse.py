@@ -97,7 +97,7 @@ class Symbol(str, Matcher):
     """
 
     def __repr__(self):
-        return "Symbol(%r)" % str(self)
+        return f"Symbol({str(self)!r})"
 
 
 class SymbolGroup(Matcher):
@@ -129,7 +129,7 @@ class SymbolGroup(Matcher):
 
 
     def __repr__(self):
-        return "SymbolGroup(%r)" % self.src
+        return f"SymbolGroup({self.src!r})"
 
 
 class FormattedSeries(Sequence[str]):
@@ -177,7 +177,7 @@ class Number(int, Matcher):
 
 
     def __repr__(self):
-        return "Number(%i)" % self
+        return f"Number({int(self)})"
 
 
 class Regex(Matcher):
@@ -215,9 +215,9 @@ class Regex(Matcher):
 
     def __repr__(self):
         if self._flagstr:
-            return "Regex(%r, flags=%r)" % (self._src, self._flagstr)
+            return f"Regex({self._src!r}, flags={self._flagstr!r})"
         else:
-            return "Regex(%r)" % self._src
+            return f"Regex({self._src!r})"
 
 
 class Glob(Matcher):
@@ -249,9 +249,9 @@ class Glob(Matcher):
 
     def __repr__(self):
         if self._ignorecase:
-            return "Glob(%r, ignorecase=True)" % self._src
+            return f"Glob({self._src!r}, ignorecase=True)"
         else:
-            return "Glob(%r)" % self._src
+            return f"Glob({self._src!r})"
 
 
 class Item():
@@ -283,7 +283,7 @@ class Item():
 
 
     def __repr__(self):
-        return "%s(%r)" % (type(self).__name__, self.key)
+        return f"{type(self).__name__}({self.key!r})"
 
 
 class ItemMatch(Item):
@@ -345,7 +345,7 @@ class ItemPath():
             elif isinstance(p, Matcher):
                 ipaths.append(ItemMatch(p))
             else:
-                msg = "Unexpected path element in ItemPath: %r" % p
+                msg = f"Unexpected path element in ItemPath: {p!r}"
                 raise ParserError(msg)
 
 
@@ -357,7 +357,8 @@ class ItemPath():
 
 
     def __repr__(self):
-        return "ItemPath(%s)" % ", ".join(map(str, self.paths))
+        paths = ", ".join(map(str, self.paths))
+        return f"ItemPath({paths})"
 
 
 class Reader(StringIO):
@@ -565,7 +566,7 @@ def parse_exprs(
 
         elif c == stop:
             if unterminated:
-                raise ParserError("Unexpected closing %r" % c)
+                raise ParserError(f"Unexpected closing {c!r}")
             else:
                 return
 
@@ -578,7 +579,7 @@ def parse_exprs(
             yield convert_token(token.getvalue())
     else:
         # we shouldn't have reached this
-        raise ParserError("Unexpected EOF, missing closing %r" % stop)
+        raise ParserError(f"Unexpected EOF, missing closing {stop!r}")
 
 
 ESCAPE_SEQUENCE_RE = re.compile(r'''
@@ -699,10 +700,12 @@ def parse_itempath(
                 token = None
 
             if c == "[":
-                paths.append(parse_index(reader, reader.read(1)))
+                c = reader.read(1)
+                paths.append(parse_index(reader, c))
                 continue
             elif c == "]":
-                raise ParserError("Unexpected closer: %r" % reader.read(1))
+                c = reader.read(1)
+                raise ParserError(f"Unexpected closer: {c!r}")
             elif c == ".":
                 pass
             else:
@@ -761,7 +764,7 @@ def parse_index(
         msg = "Unterminated item index, missing closing ']'"
         raise ParserError(msg)
     elif start != '[':
-        msg = "Unknown item index start: %r" % start
+        msg = f"Unknown item index start: {start!r}"
         raise ParserError(msg)
 
     val = list(parse_exprs(reader, '[', ']'))
@@ -778,7 +781,7 @@ def parse_index(
             return sval
 
     else:
-        msg = "Too many arguments in item index: %r" % val
+        msg = f"Too many arguments in item index: {val!r}"
         raise ParserError(msg)
 
 
@@ -811,7 +814,7 @@ def parse_quoted(
     if not quotec:
         quotec = reader.read(1)
         if not quotec:
-            msg = "Unterminated matcher: missing closing %r" % quotec
+            msg = f"Unterminated matcher: missing closing {quotec!r}"
             raise ParserError(msg)
 
     token = StringIO()
@@ -832,7 +835,7 @@ def parse_quoted(
             token.write(c)
 
     else:
-        msg = "Unterminated matcher: missing closing %r" % quotec
+        msg = f"Unterminated matcher: missing closing {quotec!r}"
         raise ParserError(msg)
 
     val = token.getvalue()

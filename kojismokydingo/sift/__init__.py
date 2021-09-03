@@ -103,8 +103,8 @@ def ensure_symbol(
     if not msg:
         msg = "Value must be a symbol"
 
-    raise SifterError("%s: %r (type %s)" %
-                      (msg, value, type(value).__name__))
+    raise SifterError(f"{msg}: {value!r}"
+                      f" (type {type(value).__name__})")
 
 
 def ensure_all_symbol(
@@ -135,8 +135,8 @@ def ensure_all_symbol(
         else:
             if not msg:
                 msg = "Value must be a symbol"
-            raise SifterError("%s: %r (type %s)" %
-                              (msg, val, type(val).__name__))
+            raise SifterError(f"{msg}: {val!r}"
+                              f" (type {type(val).__name__})")
 
     return result
 
@@ -156,8 +156,8 @@ def ensure_str(
     if not msg:
         msg = "Value must be a string"
 
-    raise SifterError("%s: %r (type %s)" %
-                      (msg, value, type(value).__name__))
+    raise SifterError(f"{msg}: {value!r}"
+                      f" (type {type(value).__name__})")
 
 
 def ensure_int(
@@ -174,8 +174,8 @@ def ensure_int(
     if not msg:
         msg = "Value must be an int"
 
-    raise SifterError("%s: %r (type %s)" %
-                      (msg, value, type(value).__name__))
+    raise SifterError(f"{msg}: {value!r}"
+                      f" (type {type(value).__name__})")
 
 
 def ensure_int_or_str(
@@ -200,8 +200,8 @@ def ensure_int_or_str(
     if not msg:
         msg = "Value must be an int, Number, str, or Symbol"
 
-    raise SifterError("%s: %r (type %s)" %
-                      (msg, value, type(value).__name__))
+    raise SifterError(f"{msg}: {value!r}"
+                      f" (type {type(value).__name__})")
 
 
 def ensure_all_int_or_str(
@@ -236,8 +236,8 @@ def ensure_matcher(
     if not msg:
         msg = "Value must be a string, regex, or glob"
 
-    raise SifterError("%s: %r (type %s)" %
-                      (msg, value, type(value).__name__))
+    raise SifterError(f"{msg}: {value!r}"
+                      f" (type {type(value).__name__})")
 
 
 def ensure_all_matcher(
@@ -266,8 +266,8 @@ def ensure_sieve(
     if not msg:
         msg = "Value must be a sieve expression"
 
-    raise SifterError("%s: %r (type %s)" %
-                      (msg, value, type(value).__name__))
+    raise SifterError(f"{msg}: {value!r}"
+                      f" (type {type(value).__name__})")
 
 
 def ensure_all_sieve(
@@ -298,7 +298,7 @@ def gather_args(
             key = val.rstrip(":")
             val = next(ivals, missing)  # type: ignore
             if val is missing:
-                msg = "Missing value for keyword argument %s" % key
+                msg = f"Missing value for keyword argument {key}"
                 raise SifterError(msg)
             else:
                 kwds[key] = val
@@ -458,7 +458,7 @@ class Sifter():
             if cls is None:
                 # even after converting for aliases we have no match, so
                 # we cannot compile the sieve.
-                raise SifterError("No such sieve: %s" % name)
+                raise SifterError(f"No such sieve: {name}")
 
             # looks for positional and option parameters from the tail
             # of the list.
@@ -468,8 +468,7 @@ class Sifter():
                 result = cls(self, *args, **kwds)
 
             except TypeError as te:
-                msg = "Error creating Sieve %s: %s" % (name, te)
-                raise SifterError(msg)
+                raise SifterError(f"Error creating Sieve {name}: {te}")
 
         elif isinstance(parsed, Symbol):
             if parsed.startswith("$") and parsed[1:] in self.params:

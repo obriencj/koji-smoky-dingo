@@ -374,7 +374,7 @@ def tabulate(
 
     # now we create the format string based on the max width of each
     # column plus some spacing.
-    fmt = "  ".join("{!s:<%i}" % w for w in widths)
+    fmt = "  ".join(f"{{!s:<{w}}}" for w in widths)
 
     if headings and not quiet:
         print(fmt.format(*headings), file=out)
@@ -482,11 +482,11 @@ class SmokyDingo(metaclass=ABCMeta):
         # let's set it based on the group and description.
         if getattr(self, "__doc__", None) is None:
             desc = space_normalize(self.description)
-            self.__doc__ = "[%s] %s" % (self.group, desc)
+            self.__doc__ = f"[{self.group}] {desc}"
         else:
             desc = space_normalize(self.__doc__)
             if not desc.startswith("["):
-                desc = "[%s] %s" % (self.group, desc)
+                desc = f"[{self.group}] {desc}"
             self.__doc__ = desc
 
         # populated by the get_plugin_config method
@@ -554,7 +554,7 @@ class SmokyDingo(metaclass=ABCMeta):
             userperms = session.getUserPerms(userinfo["id"]) or ()
 
             if not (self.permission in userperms or "admin" in userperms):
-                msg = "Insufficient permissions for command %s" % self.name
+                msg = f"Insufficient permissions for command {self.name}"
                 raise NotPermitted(msg)
 
 

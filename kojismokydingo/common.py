@@ -384,7 +384,7 @@ def parse_datetime(
             return parser(mtch.string)
     else:
         if strict:
-            raise ValueError("Invalid date-time format, %r" % src)
+            raise ValueError(f"Invalid date-time format, {src!r}")
         else:
             return None
 

@@ -60,7 +60,7 @@ def get_usertype_str(userinfo: UserInfo) -> str:
     elif val == UserType.GROUP:
         return "GROUP"
     else:
-        return "Unknown (%i)" % val
+        return f"Unknown ({val})"
 
 
 def get_userstatus_str(userinfo: UserInfo) -> str:
@@ -77,7 +77,7 @@ def get_userstatus_str(userinfo: UserInfo) -> str:
     elif val == UserStatus.BLOCKED:
         return "BLOCKED (disabled)"
     else:
-        return "Unknown (%i)" % val
+        return f"Unknown ({val})"
 
 
 def cli_userinfo(

@@ -1126,7 +1126,7 @@ def cli_list_cgs(session, nvr=None, json=False, quiet=False):
     else:
         fmt = "  {name} [{id}]".format
         if nvr:
-            print("Content Generators for {nvr} [{id}]".format(**build))
+            print(f"Content Generators for {build['nvr']} [{build['id']}]")
         else:
             print("Content Generators")
 

@@ -168,10 +168,12 @@ class StateSieve(Sieve):
         states = []
         for pattern in self.tokens:
             state = ensure_int_or_str(pattern)
+            if isinstance(state, str):
+                state = state.upper()
 
             found = BUILD_STATES.get(state)
             if found is None:
-                raise SifterError("Unknown build state: %r" % pattern)
+                raise SifterError(f"Unknown build state: {pattern!r}")
 
             if isinstance(state, str):
                 state = found
