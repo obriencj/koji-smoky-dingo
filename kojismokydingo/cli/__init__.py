@@ -450,15 +450,30 @@ class SmokyDingo(metaclass=ABCMeta):
     """
 
     group: str = "misc"
+    """
+    The koji CLI group that this command will be displayed under in
+    the help output
+    """
+
     description: str = "A CLI Plugin"
+    """
+    Short description of this command, for use in the help output
+    """
 
     # permission name required for use of this command. A value of
     # None indicates anonymous access. Checked in the pre_handle
     # method.
     permission: str = None
-
+    """
+    permission name required for use of this command. A value of None
+    indicates anonymous access.
+    """
 
     def __init__(self, name: str = None):
+        """
+        :param name: The name that this command is being represented as
+        """
+
         if name is not None:
             self.name: str = name
 
@@ -498,7 +513,15 @@ class SmokyDingo(metaclass=ABCMeta):
         self.session: ClientSession = None
 
 
-    def get_plugin_config(self, key: str, default=None):
+    def get_plugin_config(self, key: str, default: Any = None) -> Any:
+        """
+        fetch a configuration value for this command under the given key. If
+        no configuration is found, returns the default.
+
+        :param key: the configuration key name
+        :param default: value to return if no configuration is found
+        """
+
         if self.config is None:
             profile = self.goptions.profile if self.goptions else None
             self.config = load_plugin_config(self.name, profile)
@@ -517,7 +540,9 @@ class SmokyDingo(metaclass=ABCMeta):
         return self.arguments(argp) or argp
 
 
-    def arguments(self, parser: ArgumentParser):
+    def arguments(
+            self,
+            parser: ArgumentParser) -> Optional[ArgumentParser]:
         """
         Override to add relevant arguments to the given parser instance.
         May return an alternative parser instance or None.

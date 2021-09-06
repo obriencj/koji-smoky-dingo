@@ -25,7 +25,7 @@ from operator import itemgetter
 from typing import Optional, Union
 
 from . import AnonSmokyDingo, int_or_str, pretty_json
-from ..types import UserInfo, UserStatus, UserType
+from ..types import UserInfo, UserSpec, UserStatus, UserType
 from ..users import (
     collect_cgs, collect_perminfo, collect_userinfo, )
 
@@ -82,10 +82,19 @@ def get_userstatus_str(userinfo: UserInfo) -> str:
 
 def cli_userinfo(
         session: ClientSession,
-        user: Union[int, str],
+        user: UserSpec,
         json: bool = False):
     """
     Implements the ``koji userinfo`` command
+
+    :param session: an active koji client session
+
+    :param user: user specification to output information about
+
+    :param json: produce JSON output
+
+    :raises NoSuchUser: if the user specification doesn't correlate to
+      a known user
     """
 
     userinfo = collect_userinfo(session, user)
@@ -155,6 +164,17 @@ def cli_perminfo(
         json: bool = False):
     """
     Implements the ``koji perminfo`` command
+
+    :param session: an active koji client session
+
+    :param permission: the permission name to display information about
+
+    :param verbose: also display who granted the permission and when
+
+    :param by_date: sort the user list by the date they were granted the
+      permission
+
+    :param json: output the data as JSON
     """
 
     perminfo = collect_perminfo(session, permission)
@@ -215,6 +235,13 @@ def cli_cginfo(
         json: bool = False):
     """
     Implements the ``koji cginfo`` command
+
+    :param session: an active koji client session
+
+    :param name: only display information about the content generator with
+      this name
+
+    :param json: output the data as JSON
     """
 
     cgs = collect_cgs(session, name=name)

@@ -18,6 +18,11 @@ intersphinx_mapping = {
 }
 
 
+autodoc_default_options = {
+    "inherited-members": False,
+}
+autodoc_inherit_docstrings = True
+
 autodoc_typehints = 'description'
 
 autoclass_content = 'both'
