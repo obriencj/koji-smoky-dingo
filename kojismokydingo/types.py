@@ -1164,6 +1164,13 @@ a koji version requirement, specified as either a string or tuple of ints
 
 
 KeySpec = Union[Callable[[Any], Any], Any]
+"""
+a key specifier, used as either an index/item lookup on objects, or a
+unary callable which returns the desired field.
+
+Typically non callable keyspec values are converted into an itemgetter
+using that value.
+"""
 
 
 class GOptions(Values):

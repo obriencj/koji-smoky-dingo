@@ -556,7 +556,7 @@ class SmokyDingo(metaclass=ABCMeta):
     def validate(
             self,
             parser: ArgumentParser,
-            options: Namespace):
+            options: Namespace) -> None:
         """
         Override to perform validation on options values. Return value is
         ignored, use `parser.error` if needed.
@@ -567,7 +567,7 @@ class SmokyDingo(metaclass=ABCMeta):
 
     def pre_handle(
             self,
-            options: Namespace):
+            options: Namespace) -> None:
         """
         Verify necessary permissions are in place before attempting any
         further calls.
@@ -593,7 +593,7 @@ class SmokyDingo(metaclass=ABCMeta):
         pass
 
 
-    def activate(self):
+    def activate(self) -> None:
         """
         Activate our session. This is triggered after validate, before
         pre_handle and handle
@@ -606,7 +606,7 @@ class SmokyDingo(metaclass=ABCMeta):
             return activate_session(self.session, self.goptions)
 
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         """
         Deactivate our session. This is triggered after handle has
         completed, either normally or by raising an exception.

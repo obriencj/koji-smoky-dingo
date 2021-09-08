@@ -442,6 +442,9 @@ class ClientSession:
             pattern: Optional[str] = None) -> List[TagInfo]:
         ...
 
+    def logout(self) -> None:
+        ...
+
     def massTag(
             self,
             tag: Union[int, str],
