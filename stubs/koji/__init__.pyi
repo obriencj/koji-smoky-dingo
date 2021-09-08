@@ -44,6 +44,10 @@ TASK_STATES: Dict[str, int]
 USERTYPES: Dict[str, int]
 USER_STATUS: Dict[str, int]
 
+AUTHTYPE_NORMAL: int
+AUTHTYPE_KERB: int
+AUTHTYPE_SSL: int
+AUTHTYPE_GSSAPI: int
 
 class Fault:
     def __init__(
@@ -63,8 +67,23 @@ class GenericError(Exception):
     faultCode: int
     fromFault: bool
 
+class ActionNotAllowed(GenericError):
+    ...
+
 
 class ParameterError(GenericError):
+    ...
+
+
+class LockError(GenericError):
+    ...
+
+
+class AuthError(GenericError):
+    ...
+
+
+class ConfigurationError(GenericError):
     ...
 
 
@@ -526,6 +545,11 @@ def read_config(
         user_config: Optional[str] = None) -> Dict[str, Any]:
     ...
 
+
+def read_config_files(
+        config_files: List[Union[str, Tuple[str, bool]]],
+        raw: bool = False) -> Any:
+    ...
 
 #
 # The end.
