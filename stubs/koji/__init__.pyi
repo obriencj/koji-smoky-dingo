@@ -25,6 +25,7 @@ calls are being used correctly.
 """
 
 
+from configparser import ConfigParser, RawConfigParser
 from typing import (
     Any, Dict, List, Optional, TypedDict, Tuple, Union, )
 
@@ -49,6 +50,7 @@ AUTHTYPE_KERB: int
 AUTHTYPE_SSL: int
 AUTHTYPE_GSSAPI: int
 
+
 class Fault:
     def __init__(
             self,
@@ -66,6 +68,7 @@ class FaultInfo(TypedDict):
 class GenericError(Exception):
     faultCode: int
     fromFault: bool
+
 
 class ActionNotAllowed(GenericError):
     ...
@@ -551,8 +554,9 @@ def read_config(
 
 def read_config_files(
         config_files: List[Union[str, Tuple[str, bool]]],
-        raw: bool = False) -> Any:
+        raw: bool = False) -> Union[ConfigParser, RawConfigParser]:
     ...
+
 
 #
 # The end.
