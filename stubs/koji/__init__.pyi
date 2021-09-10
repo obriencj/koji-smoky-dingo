@@ -75,7 +75,11 @@ class ActionNotAllowed(GenericError):
     ...
 
 
-class ParameterError(GenericError):
+class AuthError(GenericError):
+    ...
+
+
+class ConfigurationError(GenericError):
     ...
 
 
@@ -83,11 +87,7 @@ class LockError(GenericError):
     ...
 
 
-class AuthError(GenericError):
-    ...
-
-
-class ConfigurationError(GenericError):
+class ParameterError(GenericError):
     ...
 
 
