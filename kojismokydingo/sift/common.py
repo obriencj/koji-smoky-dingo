@@ -31,7 +31,7 @@ from . import SifterError, Sieve
 from .. import iter_bulk_load
 from ..builds import GAV, latest_maven_builds
 from ..types import (
-    BuildInfo, TagGroup, TagPackageInfo, )
+    BuildInfo, TagGroupInfo, TagPackageInfo, )
 
 
 __all__ = ("CacheMixin", "ensure_comparison", )
@@ -288,7 +288,7 @@ class CacheMixin(Sieve):
     def get_tag_groups(
             self,
             session: ClientSession,
-            tag_id: int) -> List[TagGroup]:
+            tag_id: int) -> List[TagGroupInfo]:
         """
         a caching wrapper for ``session.getTagGroups``
         """
@@ -305,7 +305,7 @@ class CacheMixin(Sieve):
     def bulk_get_tag_groups(
             self,
             session: ClientSession,
-            tag_ids: Iterable[int]) -> Dict[int, List[TagGroup]]:
+            tag_ids: Iterable[int]) -> Dict[int, List[TagGroupInfo]]:
         """
         a multicall caching wrapper for ``session.getTagGroups``. Shares a
         cache with `get_tag_groups`

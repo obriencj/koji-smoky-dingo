@@ -89,8 +89,9 @@ __all__ = (
     "TagInfos",
     "TagInheritance",
     "TagInheritanceEntry",
-    "TagGroup",
+    "TagGroupInfo",
     "TagGroupPackage",
+    "TagGroupReq",
     "TagPackageInfo",
     "TagSpec",
     "TargetInfo",
@@ -1065,14 +1066,28 @@ class TagGroupPackage(TypedDict):
     type: str
 
 
-class TagGroup(TypedDict):
+class TagGroupReq(TypedDict):
+    blocked: bool
+    group_id: int
+    is_metapkg: bool
+    name: str
+    req_id: int
+    tag_id: int
+    type: str
+
+
+class TagGroupInfo(TypedDict):
+    """
+    ``getTagGroups`` XMLRPC call
+    """
+
     biarchonly: bool
     blocked: bool
     description: str
     display_name: str
     exported: bool
     group_id: int
-    grouplist: List
+    grouplist: List[TagGroupReq]
     is_default: bool
     langonly: str
     name: str

@@ -33,7 +33,7 @@ from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
     ChannelInfo, CGInfo, HostInfo, PackageInfo, PermInfo,
     RepoInfo, RepoState, RPMInfo, RPMSignature, SearchResult,
-    TagInfo, TagGroup, TagInheritance, TagPackageInfo, TargetInfo,
+    TagInfo, TagGroupInfo, TagInheritance, TagPackageInfo, TargetInfo,
     TaskInfo, UserInfo, )
 
 
@@ -360,7 +360,7 @@ class ClientSession:
             inherit: bool = True,
             incl_pkgs: bool = True,
             incl_reqs: bool = True,
-            incl_blocked: bool = False) -> List[TagGroup]:
+            incl_blocked: bool = False) -> List[TagGroupInfo]:
         ...
 
     def getTaskInfo(
