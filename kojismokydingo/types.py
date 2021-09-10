@@ -26,6 +26,7 @@ enumerations
 from datetime import datetime
 from enum import IntEnum
 from koji import (
+    AUTHTYPE_NORMAL, AUTHTYPE_KERB, AUTHTYPE_SSL, AUTHTYPE_GSSAPI,
     BR_STATES, BR_TYPES, BUILD_STATES, CHECKSUM_TYPES, REPO_STATES,
     TASK_STATES, USERTYPES, USER_STATUS,
     PathInfo, )
@@ -49,6 +50,7 @@ __all__ = (
     "ArchiveInfos",
     "ArchiveSpec",
     "ArchiveTypeInfo",
+    "AuthType",
     "BuildInfo",
     "BuildInfos",
     "BuildrootInfo",
@@ -58,6 +60,7 @@ __all__ = (
     "BuildState",
     "BTypeInfo",
     "ChannelInfo",
+    "ChannelSpec",
     "ChecksumType",
     "CGInfo",
     "DecoratedBuildInfo",
@@ -70,6 +73,8 @@ __all__ = (
     "HubVersionSpec",
     "KeySpec",
     "NamedCGInfo",
+    "PackageInfo",
+    "PackageSpec",
     "PathSpec",
     "PermInfo",
     "PermSpec",
@@ -101,15 +106,15 @@ __all__ = (
 )
 
 
-# class AuthType(IntEnum):
-#     """
-#     Authentication methods
-#     """
-#
-#     GSSAPI = AUTHTYPE_GSSAPI
-#     KERB = AUTHTYPE_KERB
-#     NORMAL = AUTHTYPE_NORMAL
-#     SSL = AUTHTYPE_SSL
+class AuthType(IntEnum):
+    """
+    Authentication method types
+    """
+
+    GSSAPI = AUTHTYPE_GSSAPI
+    KERB = AUTHTYPE_KERB
+    NORMAL = AUTHTYPE_NORMAL
+    SSL = AUTHTYPE_SSL
 
 
 class BuildrootState(IntEnum):
@@ -360,9 +365,9 @@ class BuildrootInfo(TypedDict):
     repo_id: int
     repo_state: RepoState
 
-    reture_event_id: int
+    retire_event_id: int
     retire_event_time: str
-    reture_ts: float
+    retire_ts: float
 
     state: BuildrootState
 
@@ -832,6 +837,9 @@ class RepoInfo(TypedDict):
 
 
 RepoSpec = Union[int, RepoInfo, str, 'TagInfo']
+"""
+`kojismokydingo.as_repoinfo`
+"""
 
 
 class TargetInfo(TypedDict):
@@ -995,6 +1003,28 @@ class DecoratedTagExtra(TypedDict):
 DecoratedTagExtras = Dict[str, DecoratedTagExtra]
 
 
+class PackageInfo(TypedDict):
+    """
+    ``getPackage`` XMLRPC call.
+    """
+
+    id: int
+    """
+    the internal ID for this package
+    """
+
+    name: str
+    """
+    the package name
+    """
+
+
+PackageSpec = Union[int, str, PackageInfo]
+"""
+`kojismokydingo.as_packageinfo`
+"""
+
+
 class TagPackageInfo(TypedDict):
     """
     ``listPackages`` XMLRPC call.
@@ -1142,6 +1172,9 @@ class ChannelInfo(TypedDict):
 
     name: str
     """ channel name """
+
+
+ChannelSpec = Union[int, str, ChannelInfo]
 
 
 class SearchResult(TypedDict):

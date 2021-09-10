@@ -34,8 +34,10 @@ from .common import chunkseq
 from .types import (
     ArchiveInfo, ArchiveInfos, ArchiveSpec,
     BuildInfo, BuildSpec,
+    ChannelInfo, ChannelSpec,
     HostInfo, HostSpec,
     HubVersionSpec,
+    PackageInfo, PackageSpec,
     RepoInfo, RepoSpec,
     RPMInfo, RPMInfos, RPMSignature, RPMSpec,
     TagInfo, TagSpec,
@@ -762,7 +764,9 @@ def as_buildinfo(
     return info
 
 
-def as_channelinfo(session, channel):
+def as_channelinfo(
+        session: ClientSession,
+        channel: ChannelSpec) -> ChannelInfo:
     """
     Coerces a channel value into a koji channel info dict.
 
@@ -927,7 +931,9 @@ def as_hostinfo(
     return info
 
 
-def as_packageinfo(session, pkg):
+def as_packageinfo(
+        session: ClientSession,
+        pkg: PackageSpec) -> PackageInfo:
     """
     Coerces a host value into a host info dict.
 

@@ -31,9 +31,10 @@ from typing import (
 
 from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
-    ChannelInfo, CGInfo, HostInfo, PermInfo, RepoInfo, RepoState,
-    RPMInfo, RPMSignature, SearchResult, TagInfo, TagGroup,
-    TagInheritance, TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
+    ChannelInfo, CGInfo, HostInfo, PackageInfo, PermInfo,
+    RepoInfo, RepoState, RPMInfo, RPMSignature, SearchResult,
+    TagInfo, TagGroup, TagInheritance, TagPackageInfo, TargetInfo,
+    TaskInfo, UserInfo, )
 
 
 BR_STATES: Dict[str, int]
@@ -312,6 +313,13 @@ class ClientSession:
             rpmsigs: bool = False,
             type: Optional[str] = None) -> Tuple[List[RPMInfo],
                                                  List[BuildInfo]]:
+        ...
+
+    def getPackage(
+            self,
+            info: Union[int, str],
+            strict: bool = False,
+            create: bool = False) -> PackageInfo:
         ...
 
     def getPerms(self) -> List[str]:
