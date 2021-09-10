@@ -189,7 +189,7 @@ class CacheMixin(Sieve):
             tag_ids: Iterable[int],
             inherited: bool = True) -> Dict[int, List[TagPackageInfo]]:
         """
-        a multicall caching wrapper for session.listPackages
+        a multicall caching wrapper for ``session.listPackages``
 
         shares the same cache as `list_packages` (and therefore
         `allowed_packages` and `blocked_packages`)
@@ -241,7 +241,7 @@ class CacheMixin(Sieve):
             tag_id: int,
             inherited: bool = True) -> Set[str]:
         """
-        a caching wrapper for session.listPackages which returns a set
+        a caching wrapper for ``session.listPackages`` which returns a set
         containing only the package names which are not blocked.
         """
 
@@ -266,7 +266,7 @@ class CacheMixin(Sieve):
             tag_id: int,
             inherited: bool = True) -> Set[str]:
         """
-        a caching wrapper for session.listPackages which returns a set
+        a caching wrapper for ``session.listPackages`` which returns a set
         containing only the package names which are blocked.
         """
 
