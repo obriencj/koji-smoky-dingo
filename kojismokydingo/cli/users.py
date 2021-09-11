@@ -101,11 +101,11 @@ def get_userauth_str(userinfo: UserInfo) -> Optional[str]:
     elif val == AuthType.GSSAPI:
         return "GSSAPI"
     elif val == AuthType.KERB:
-        return "Kerberos Ticket"
+        return "Kerberos ticket"
     elif val == AuthType.NORMAL:
         return "Password"
     elif val == AuthType.SSL:
-        return "SSL Certificate"
+        return "SSL certificate"
     else:
         return f"Unknown ({val})"
 
