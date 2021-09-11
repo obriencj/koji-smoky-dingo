@@ -110,12 +110,22 @@ __all__ = (
 class AuthType(IntEnum):
     """
     Authentication method types
+
+    Normally only used in the `kojismokydingo.types.UserInfo` dict
+    when obtained via the ``getLoggedInUser`` XMLRPC call.
     """
 
     GSSAPI = AUTHTYPE_GSSAPI
+    """ user authenticated via GSSAPI """
+
     KERB = AUTHTYPE_KERB
+    """ user authenticated via a Kerberos ticket """
+
     NORMAL = AUTHTYPE_NORMAL
+    """ user authenticated via password """
+
     SSL = AUTHTYPE_SSL
+    """ user authenticated via an SSL certificate """
 
 
 class BuildrootState(IntEnum):
@@ -692,7 +702,7 @@ class UserInfo(TypedDict):
     or the ``kojismokydingo.as_userinfo`` function.
     """
 
-    authtype: int
+    authtype: AuthType
     """ Only present from the ``getLoggedInUser`` call """
 
     id: int

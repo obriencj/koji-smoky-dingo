@@ -25,7 +25,7 @@ from operator import itemgetter
 from typing import Optional, Union
 
 from . import AnonSmokyDingo, int_or_str, pretty_json
-from ..types import UserInfo, UserSpec, UserStatus, UserType
+from ..types import AuthType, UserInfo, UserSpec, UserStatus, UserType
 from ..users import (
     collect_cgs, collect_perminfo, collect_userinfo, )
 
@@ -38,6 +38,7 @@ __all__ = (
     "cli_cginfo",
     "cli_perminfo",
     "cli_userinfo",
+    "get_userauth_str",
     "get_userstatus_str",
     "get_usertype_str",
 )
@@ -49,6 +50,8 @@ def get_usertype_str(userinfo: UserInfo) -> str:
     in a koji user info dict.
 
     :param userinfo: user info
+
+    :since: 1.0
     """
 
     val = userinfo.get("usertype") or UserType.NORMAL
@@ -69,6 +72,8 @@ def get_userstatus_str(userinfo: UserInfo) -> str:
     in a koji user info dict.
 
     :param userinfo: user info
+
+    :since: 1.0
     """
 
     val = userinfo.get("status") or UserStatus.NORMAL
@@ -76,6 +81,31 @@ def get_userstatus_str(userinfo: UserInfo) -> str:
         return "NORMAL (enabled)"
     elif val == UserStatus.BLOCKED:
         return "BLOCKED (disabled)"
+    else:
+        return f"Unknown ({val})"
+
+
+def get_userauth_str(userinfo: UserInfo) -> Optional[str]:
+    """
+    Provide a human-readable label for the koji auth type enum value
+    in a koji user info dict. Returns None if the auth
+
+    :param userinfo: user info
+
+    :since: 2.0
+    """
+
+    val = userinfo.get("authtype")
+    if val is None:
+        return None
+    elif val == AuthType.GSSAPI:
+        return "GSSAPI"
+    elif val == AuthType.KERB:
+        return "Kerberos Ticket"
+    elif val == AuthType.NORMAL:
+        return "Password"
+    elif val == AuthType.SSL:
+        return "SSL Certificate"
     else:
         return f"Unknown ({val})"
 
@@ -95,6 +125,8 @@ def cli_userinfo(
 
     :raises NoSuchUser: if the user specification doesn't correlate to
       a known user
+
+    :since: 1.0
     """
 
     userinfo = collect_userinfo(session, user)
@@ -104,6 +136,10 @@ def cli_userinfo(
         return
 
     print(f"User: {userinfo['name']} [{userinfo['id']}]")
+
+    auth = get_userauth_str(userinfo)
+    if auth:
+        print("Authentication method:", auth)
 
     krb_princs = userinfo.get("krb_principals", None)
     if krb_princs:
@@ -175,6 +211,8 @@ def cli_perminfo(
       permission
 
     :param json: output the data as JSON
+
+    :since: 1.0
     """
 
     perminfo = collect_perminfo(session, permission)
@@ -242,6 +280,8 @@ def cli_cginfo(
       this name
 
     :param json: output the data as JSON
+
+    :since: 1.0
     """
 
     cgs = collect_cgs(session, name=name)
