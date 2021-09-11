@@ -315,6 +315,9 @@ class ClientSession:
                                                  List[BuildInfo]]:
         ...
 
+    def getLoggedInUser(self) -> UserInfo:
+        ...
+
     def getPackage(
             self,
             info: Union[int, str],
@@ -338,11 +341,6 @@ class ClientSession:
             rpminfo: Union[int, str],
             strict: bool = False,
             multi: bool = False) -> Union[RPMInfo, List[RPMInfo]]:
-        ...
-
-    def getUserPerms(
-            self,
-            userID: Optional[Union[int, str]] = None) -> List[str]:
         ...
 
     def getTag(
@@ -374,10 +372,12 @@ class ClientSession:
             self,
             userInfo: Optional[Union[int, str]] = None,
             strict: bool = False,
-            krb_brincs: bool = True) -> UserInfo:
+            krb_princs: bool = True) -> UserInfo:
         ...
 
-    def getLoggedInUser(self) -> UserInfo:
+    def getUserPerms(
+            self,
+            userID: Optional[Union[int, str]] = None) -> List[str]:
         ...
 
     def listArchives(
