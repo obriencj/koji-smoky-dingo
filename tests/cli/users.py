@@ -17,11 +17,13 @@ from textwrap import dedent
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from kojismokydingo.cli.users import cli_userinfo
+from kojismokydingo.cli.users import (
+    cli_userinfo, get_userauth_str,
+    get_userstatus_str, get_usertype_str, )
 from kojismokydingo.types import AuthType, UserStatus, UserType
 
 
-class TestUserInfo(TestCase):
+class ShowUserInfoTest(TestCase):
 
 
     def userinfo(self):
@@ -77,6 +79,63 @@ class TestUserInfo(TestCase):
             """)
         print("testing", expected)
         self.assertEqual(expected, res)
+
+
+class EnumTextTest(TestCase):
+
+
+    def test_usertype_str(self):
+
+        def check(val):
+            info = {"usertype": val}
+            return get_usertype_str(info)
+
+        pairs = (
+            (0, "NORMAL (user)"),
+            (1, "HOST (builder)"),
+            (2, "GROUP"),
+            (3, "Unknown (3)"),
+            (99, "Unknown (99)"),
+        )
+
+        for val, exp in pairs:
+            self.assertEqual(check(val), exp)
+
+
+    def test_userstatus_str(self):
+
+        def check(val):
+            info = {"status": val}
+            return get_userstatus_str(info)
+
+        pairs = (
+            (0, "NORMAL (enabled)"),
+            (1, "BLOCKED (disabled)"),
+            (2, "Unknown (2)"),
+            (99, "Unknown (99)"),
+        )
+
+        for val, exp in pairs:
+            self.assertEqual(check(val), exp)
+
+
+    def test_userauth_str(self):
+
+        def check(val):
+            info = {"authtype": val}
+            return get_userauth_str(info)
+
+        pairs = (
+            (0, "Password"),
+            (1, "Kerberos ticket"),
+            (2, "SSL certificate"),
+            (3, "GSSAPI"),
+            (4, "Unknown (4)"),
+            (99, "Unknown (99)"),
+        )
+
+        for val, exp in pairs:
+            self.assertEqual(check(val), exp)
 
 
 #
