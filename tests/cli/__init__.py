@@ -42,7 +42,7 @@ ENTRY_POINTS = {
     "list-env-vars": "kojismokydingo.cli.tags:ListEnvVars",
     "list-rpm-macros": "kojismokydingo.cli.tags:ListRPMMacros",
     "list-tag-extras": "kojismokydingo.cli.tags:ListTagExtras",
-    "open": "kojismokydingo.cli.clients:ClientOpen",
+    #"open": "kojismokydingo.cli.clients:ClientOpen",
     "perminfo": "kojismokydingo.cli.users:PermissionInfo",
     "remove-env-var": "kojismokydingo.cli.tags:RemoveEnvVar",
     "remove-rpm-macro": "kojismokydingo.cli.tags:RemoveRPMMacro",

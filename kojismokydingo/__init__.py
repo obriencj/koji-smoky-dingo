@@ -41,7 +41,9 @@ __all__ = (
     "NoSuchBuild",
     "NoSuchChannel",
     "NoSuchContentGenerator",
+    "NoSuchPackage",
     "NoSuchPermission",
+    "NoSuchRepo",
     "NoSuchRPM",
     "NoSuchTag",
     "NoSuchTarget",
@@ -52,7 +54,10 @@ __all__ = (
 
     "as_archiveinfo",
     "as_buildinfo",
+    "as_channelinfo",
     "as_hostinfo",
+    "as_packageinfo",
+    "as_repoinfo",
     "as_rpminfo",
     "as_taginfo",
     "as_targetinfo",
@@ -81,6 +86,8 @@ class ManagedClientSession(ClientSession):
     A `koji.ClientSession` that can be used as via the ``with``
     keyword to provide a managed session that will handle
     authenticated login and logout.
+
+    :since: 1.0
     """
 
     def __enter__(self):
@@ -99,6 +106,8 @@ class ProfileClientSession(ManagedClientSession):
     """
     A `koji.ClientSession` which loads profile config information and
     which can be used via tha ``with`` keyword.
+
+    :since: 1.0
     """
 
     def __init__(self, profile="koji"):
@@ -115,6 +124,8 @@ class AnonClientSession(ProfileClientSession):
     Suitable for working with anonymous commands which do not require
     authentication. Does not authenticate, and will only connect
     lazily.
+
+    :since: 1.0
     """
 
     def __enter__(self):
@@ -135,6 +146,8 @@ class BadDingo(Exception):
     more detailed situations where a requested data type wasn't
     present on the koji hub, rather than just working with
     `koji.GenericError`
+
+    :since: 1.0
     """
 
     complaint = "Something bad happened"
@@ -147,6 +160,8 @@ class BadDingo(Exception):
 class NoSuchBuild(BadDingo):
     """
     A build was not found
+
+    :since: 1.0
     """
 
     complaint = "No such build"
@@ -155,6 +170,8 @@ class NoSuchBuild(BadDingo):
 class NoSuchHost(BadDingo):
     """
     A host was not found
+
+    :since: 1.0
     """
 
     complaint = "No such host"
@@ -163,6 +180,8 @@ class NoSuchHost(BadDingo):
 class NoSuchChannel(BadDingo):
     """
     A channel was not found
+
+    :since: 1.0
     """
 
     complaint = "No such builder channel"
@@ -171,14 +190,28 @@ class NoSuchChannel(BadDingo):
 class NoSuchContentGenerator(BadDingo):
     """
     A content generator was not found
+
+    :since: 1.0
     """
 
     complaint = "No such content generator"
 
 
+class NoSuchPackage(BadDingo):
+    """
+    A package was not found
+
+    :since: 1.1
+    """
+
+    complaint = "No such package"
+
+
 class NoSuchTag(BadDingo):
     """
     A tag was not found
+
+    :since: 1.0
     """
 
     complaint = "No such tag"
@@ -187,6 +220,8 @@ class NoSuchTag(BadDingo):
 class NoSuchTarget(BadDingo):
     """
     A target was not found
+
+    :since: 1.0
     """
 
     complaint = "No such target"
@@ -195,6 +230,8 @@ class NoSuchTarget(BadDingo):
 class NoSuchTask(BadDingo):
     """
     A task was not found
+
+    :since: 1.0
     """
 
     complaint = "No such task"
@@ -203,6 +240,8 @@ class NoSuchTask(BadDingo):
 class NoSuchUser(BadDingo):
     """
     A user was not found
+
+    :since: 1.0
     """
 
     complaint = "No such user"
@@ -211,6 +250,8 @@ class NoSuchUser(BadDingo):
 class NoSuchPermission(BadDingo):
     """
     A permission was not found
+
+    :since: 1.0
     """
 
     complaint = "No such permission"
@@ -219,14 +260,28 @@ class NoSuchPermission(BadDingo):
 class NoSuchArchive(BadDingo):
     """
     An archive was not found
+
+    :since: 1.0
     """
 
     complaint = "No such archive"
 
 
+class NoSuchRepo(BadDingo):
+    """
+    A repository was not found
+
+    :since: 1.1
+    """
+
+    complaint = "No such repo"
+
+
 class NoSuchRPM(BadDingo):
     """
     An RPM was not found
+
+    :since: 1.0
     """
 
     complaint = "No such RPM"
@@ -236,6 +291,8 @@ class NotPermitted(BadDingo):
     """
     A required permission was not associated with the currently logged
     in user account.
+
+    :since: 1.0
     """
 
     complaint = "Insufficient permissions"
@@ -621,6 +678,10 @@ def bulk_load_users(session, users, err=True, size=100, results=None):
       OrderedDict
 
     :type results: dict, optional
+
+    :rtype: dict
+
+    :since: 1.0
     """
 
     users = tuple(users)
@@ -685,14 +746,18 @@ def as_buildinfo(session, build):
      * str, will attempt to load as an NVR
      * dict, will presume already a build info
 
+    :param session: an active koji client session
+
     :param build: value to lookup
 
     :type build: int or str or dict
 
+    :rtype: dict
+
     :raises NoSuchBuild: if the build value could not be resolved
       into a build info dict
 
-    :rtype: dict
+    :since: 1.0
     """
 
     if isinstance(build, (str, int)):
@@ -708,6 +773,39 @@ def as_buildinfo(session, build):
     return info
 
 
+def as_channelinfo(session, channel):
+    """
+    Coerces a channel value into a koji channel info dict.
+
+    If channel is an
+     * int, will attempt to load as a channel ID
+     * str, will attempt to load as a channel name
+     * dict, will presume already a channel info
+
+    :param session: an active koji client session
+
+    :param channel: value to lookup
+
+    :rtype: dict
+
+    :raises NoSuchChannel: if the channel could not be resolved
+
+    :since: 1.1
+    """
+
+    if isinstance(channel, (str, int)):
+        info = session.getChannel(channel)
+    elif isinstance(channel, dict):
+        info = channel
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchChannel(channel)
+
+    return info
+
+
 def as_taginfo(session, tag):
     """
     Coerces a tag value into a koji tag info dict.
@@ -717,19 +815,18 @@ def as_taginfo(session, tag):
      * str, will attempt to load as a tag name
      * dict, will presume already a tag info
 
+    :param session: an active koji client session
+
     :param tag: value to lookup
 
     :type tag: int or str or dict
 
-    :param blocked: attempts to load blocked tag extra values. Default,
-      only loads
-
-    :type blocked: bool, optional
+    :rtype: dict
 
     :raises NoSuchTag: if the tag value could not be resolved into a
       tag info dict
 
-    :rtype: dict
+    :since: 1.0
     """
 
     if isinstance(tag, (str, int)):
@@ -750,6 +847,40 @@ def as_taginfo(session, tag):
     return info
 
 
+def as_packageinfo(session, pkg):
+    """
+    Coerces a host value into a host info dict.
+
+    If pkg is an:
+     * int, will attempt to load as a package ID
+     * str, will attempt to load as a package name
+     * dict, will presume already a package info
+
+    :param session: an active koji client session
+
+    :param pkg: value to lookup
+
+    :rtype: dict
+
+    :raises NoSuchPackage: if the pkg value could not be resolved into
+      a package info dict
+
+    :since: 1.1
+    """
+
+    if isinstance(pkg, (str, int)):
+        info = session.getPackage(pkg)
+    elif isinstance(pkg, dict):
+        info = pkg
+    else:
+        info = None
+
+    if not info:
+        raise NoSuchPackage(pkg)
+
+    return info
+
+
 def as_taskinfo(session, task):
     """
     Coerces a task value into a koji task info dict.
@@ -758,14 +889,18 @@ def as_taskinfo(session, task):
      * int, will attempt to load as a task ID
      * dict, will presume already a task info
 
+    :param session: an active koji client session
+
     :param task: value to lookup
 
     :type task: int or dict
 
+    :rtype: dict
+
     :raises NoSuchTask: if the task value could not be resolved
       into a task info dict
 
-    :rtype: dict
+    :since: 1.0
     """
 
     if isinstance(task, int):
@@ -790,14 +925,18 @@ def as_targetinfo(session, target):
      * str, will attempt to load as a target name
      * dict, will presume already a target info
 
+    :param session: an active koji client session
+
     :param target: value to lookup
 
     :type target: int or str or dict
 
+    :rtype: dict
+
     :raises NoSuchTarget: if the target value could not be resolved
       into a target info dict
 
-    :rtype: dict
+    :since: 1.0
     """
 
     if isinstance(target, (str, int)):
@@ -822,14 +961,18 @@ def as_hostinfo(session, host):
      * str, will attempt to load as a host name
      * dict, will presume already a host info
 
+    :param session: an active koji client session
+
     :param host: value to lookup
 
     :type host: int or str or dict
 
+    :rtype: dict
+
     :raises NoSuchHost: if the host value could not be resolved
       into a host info dict
 
-    :rtype: dict
+    :since: 1.0
     """
 
     if isinstance(host, (str, int)):
@@ -854,14 +997,18 @@ def as_archiveinfo(session, archive):
      * str, will attempt to load as an archive filename
      * dict, will presume already an archive info
 
+    :param session: an active koji client session
+
     :param archive: value to lookup
 
     :type archive: int or str or dict
 
+    :rtype: dict
+
     :raises NoSuchArchive: if the archive value could not be resolved
       into an archive info dict
 
-    :rtype dict:
+    :since: 1.0
     """
 
     if isinstance(archive, int):
@@ -883,6 +1030,52 @@ def as_archiveinfo(session, archive):
     return info
 
 
+def as_repoinfo(session, repo):
+    """
+    Coerces a repo value into a Repo info dict.
+
+    If repo is an:
+     * dict with name, will attempt to load the current repo from a
+       tag by that name
+     * str, will attempt to load the current repo from a tag by name
+     * int, will attempt to load the repo by ID
+     * dict, will presume already a repo info
+
+    :param session: an active koji client session
+
+    :param repo: repo to resolve
+
+    :rtype: dict
+
+    :raises NoSuchRepo: if the repo value could not be resolved to a
+      repo info dict
+
+    :since: 1.1
+    """
+
+    info = None
+
+    if isinstance(repo, dict):
+        if "name" in repo:
+            repo = repo["name"]
+        else:
+            info = repo
+
+    if isinstance(repo, str):
+        repotag = session.getRepo(repo)
+        if repotag is None:
+            raise NoSuchRepo(repo)
+        repo = repotag["id"]
+
+    if isinstance(repo, int):
+        info = session.repoInfo(repo)
+
+    if not info:
+        raise NoSuchRepo(repo)
+
+    return info
+
+
 def as_rpminfo(session, rpm):
     """
     Coerces a host value into a RPM info dict.
@@ -892,14 +1085,18 @@ def as_rpminfo(session, rpm):
      * str, will attempt to load as a RPM NVR
      * dict, will presume already an RPM info
 
+    :param session: an active koji client session
+
     :param rpm: value to lookup
 
     :type rpm: int or str or dict
 
+    :rtype: dict
+
     :raises NoSuchRPM: if the rpm value could not be resolved
       into a RPM info dict
 
-    :rtype: dict
+    :since: 1.0
     """
 
     if isinstance(rpm, (str, int)):
@@ -923,6 +1120,8 @@ def as_userinfo(session, user):
     already a dict, it's presumed to be a userinfo already and it's
     returned unaltered.
 
+    :param session: an active koji client session
+
     :param user: Name, ID, or User Info describing a koji user
 
     :type user: str or int or dict
@@ -930,6 +1129,8 @@ def as_userinfo(session, user):
     :rtype: dict
 
     :raises NoSuchUser: when user cannot be found
+
+    :since: 1.0
     """
 
     if isinstance(user, (str, int)):
@@ -986,7 +1187,11 @@ def hub_version(session):
     presume that we're version 1.22 ``(1, 22)`` which is the last
     version before getKojiVersion was added.
 
+    :param session: an active koji client session
+
     :rtype: tuple[int]
+
+    :since: 1.0
     """
 
     # we need to use this instead of getattr as koji sessions will
@@ -1025,11 +1230,15 @@ def version_check(session, minimum=(1, 23)):
     Version is specified as a tuple of integers, eg. 1.23 is ``(1,
     23)``
 
+    :param session: an active koji client session
+
     :param minimum: Minimum version required. Default, ``(1, 23)``
 
     :type minimum: tuple[int]
 
     :rtype: bool
+
+    :since: 1.0
     """
 
     if isinstance(minimum, str):
@@ -1057,6 +1266,8 @@ def version_require(session, minimum=(1, 23), message=None):
     exception is raised, with the given message. If message is not
     provided, a simple one is constructed based on the minimum value.
 
+    :param session: an active koji client session
+
     :param minimum: Minimum version required. Default, ``(1, 23)``
 
     :type minimum: tuple[int]
@@ -1070,6 +1281,8 @@ def version_require(session, minimum=(1, 23), message=None):
     :raises FeatureUnavailable: If the minimum version is not met
 
     :rtype: bool
+
+    :since: 1.0
     """
 
     if version_check(session, minimum=minimum):
