@@ -329,6 +329,8 @@ def iter_bulk_load(
 
     :raises koji.GenericError: if err is True and an issue
       occurrs while invoking the loadfn
+
+    :since 1.0:
     """
 
     for key_chunk in chunkseq(keys, size):
@@ -390,6 +392,8 @@ def bulk_load(
 
     :raises koji.GenericError: if `err` is `True` and an issue
       occurrs while invoking the `loadfn`
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -412,7 +416,7 @@ def bulk_load_builds(
     resulting buildinfo.
 
     If err is True (default) then any missing build info will raise a
-    NoSuchBuild exception. If err is False, then a None will be
+    `NoSuchBuild` exception. If err is False, then a None will be
     substituted into the ordered dict for the result.
 
     If results is non-None, it must support dict assignment, and will
@@ -429,6 +433,11 @@ def bulk_load_builds(
 
     :param results: mapping to store the results in. Default, produce
       a new dict
+
+    :raises NoSuchBuild: if err is True and any of the given builds
+      could not be loaded
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -456,6 +465,26 @@ def bulk_load_tasks(
 
     Returns a dict associating the individual IDs with their resulting
     taskinfo.
+
+    :param session: an active koji client session
+
+    :param task_ids: IDs of tasks to be loaded
+
+    :param request: if True then load the task's request data as
+      well. Default, False
+
+    :param err: raise an exception if a task fails to load. Default,
+      True
+
+    :param size: count of tasks to load in a single
+      multicall. Default, 100
+
+    :param results: mapping to store the results in. Default, produce
+      a new dict
+
+    :raises NoSuchTask: if err is True and a task couldn'tb e loaded
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -481,11 +510,22 @@ def bulk_load_tags(
     """
     Load many taginfo dicts from tag names or IDs.
 
+    :param session: an active koji client session
+
+    :param tags: tag IDs or names to load
+
     :param err: Raise an exception if a tag fails to load. Default,
       True.
 
     :param size: Count of tags to load in a single multicall. Default,
       100
+
+    :param results: mapping to store the results in. Default, produce
+      a new dict
+
+    :raises NoSuchTag: if err is True and a tag couldn't be loaded
+
+    :since 1.0:
     """
 
     results = {} if results is None else results
@@ -677,6 +717,10 @@ def bulk_load_users(
 
     :param results: dict to store results in. Default, allocate a new
       dict
+
+    :raises NoSuchUser: if err is True and a user could not be loaded
+
+    :since: 1.0
     """
 
     users = tuple(users)
@@ -749,6 +793,8 @@ def as_buildinfo(
 
     :raises NoSuchBuild: if the build value could not be resolved
       into a build info dict
+
+    :since: 1.0
     """
 
     if isinstance(build, (str, int)):
@@ -778,6 +824,9 @@ def as_channelinfo(
     :param session: an active koji client session
 
     :param channel: value to lookup
+
+    :raises NoSuchChannel: if the channel value could not be resolved
+      into a channel info dict
 
     :since: 2.0
     """
@@ -813,6 +862,8 @@ def as_taginfo(
 
     :raises NoSuchTag: if the tag value could not be resolved into a
       tag info dict
+
+    :since: 1.0
     """
 
     if isinstance(tag, (str, int)):
@@ -852,6 +903,8 @@ def as_taskinfo(
 
     :raises NoSuchTask: if the task value could not be resolved
       into a task info dict
+
+    :since: 1.0
     """
 
     if isinstance(task, int):
@@ -884,6 +937,8 @@ def as_targetinfo(
 
     :raises NoSuchTarget: if the target value could not be resolved
       into a target info dict
+
+    :since: 1.0
     """
 
     if isinstance(target, (str, int)):
@@ -916,6 +971,8 @@ def as_hostinfo(
 
     :raises NoSuchHost: if the host value could not be resolved
       into a host info dict
+
+    :since: 1.0
     """
 
     if isinstance(host, (str, int)):
@@ -983,6 +1040,8 @@ def as_archiveinfo(
 
     :raises NoSuchArchive: if the archive value could not be resolved
       into an archive info dict
+∑
+    :since: 1.0
     """
 
     if isinstance(archive, int):
@@ -1017,6 +1076,13 @@ def as_repoinfo(
      * int, will attempt to load the repo by ID
      * dict, will presume already a repo info
 
+    :param session: active koji session
+
+    :param repo: value to lookup
+
+    :raises NoSuchRepo: if the repo value could not be resolved
+      into a repo info dict
+∑
     :since: 2.0
     """
 
@@ -1061,6 +1127,8 @@ def as_rpminfo(
 
     :raises NoSuchRPM: if the rpm value could not be resolved
       into a RPM info dict
+
+    :since: 1.0
     """
 
     info: RPMInfo
@@ -1093,6 +1161,8 @@ def as_userinfo(
     :param user: Name, ID, or User Info describing a koji user
 
     :raises NoSuchUser: when user cannot be found
+
+    :since: 1.0
     """
 
     if isinstance(user, (str, int)):
@@ -1151,6 +1221,8 @@ def hub_version(
     version before the getKojiVersion API was added.
 
     :param session: active koji session
+
+    :since: 1.0
     """
 
     # we need to use this instead of getattr as koji sessions will
@@ -1194,6 +1266,8 @@ def version_check(
     :param session: active koji session
 
     :param minimum: Minimum version required. Default, ``(1, 23)``
+
+    :since: 1.0
     """
 
     if isinstance(minimum, str):
@@ -1233,6 +1307,8 @@ def version_require(
       1.23"``
 
     :raises FeatureUnavailable: If the minimum version is not met
+
+    :since: 1.0
     """
 
     if version_check(session, minimum=minimum):
