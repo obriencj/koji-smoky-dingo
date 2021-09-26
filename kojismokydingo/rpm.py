@@ -19,18 +19,19 @@ Koji Smoky Dingo - RPM NEVRA Utils
 :license: GPL v3
 """
 
+
+import re
+
+from itertools import zip_longest
+from typing import Tuple
+
+
 __all__ = (
     "evr_compare",
     "evr_split",
     "nevr_split",
     "nevra_split",
 )
-
-
-import re
-
-from itertools import zip_longest
-from typing import Tuple
 
 
 def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):

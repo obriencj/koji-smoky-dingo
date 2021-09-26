@@ -76,6 +76,8 @@ def chunkseq(
     :param seq: a sequence to chunk up
 
     :param chunksize: max length for chunks
+
+    :since: 1.0
     """
 
     if not isinstance(seq, (tuple, list)):
@@ -106,6 +108,8 @@ def escapable_replace(
     :param character: Single-character token.
 
     :param replacement: Replacement text
+
+    :since: 1.0
     """
 
     assert len(character) == 1, "escapable_replace requires single characters"
@@ -143,6 +147,8 @@ def fnmatches(
     :param patterns: list of glob-style pattern strings
 
     :param ignore_case: if True case is normalized, Default False
+
+    :since: 1.0
     """
 
     if ignore_case:
@@ -184,6 +190,8 @@ def update_extend(
     :param dict_additions: The additions dict. Will not be altered.
 
     :returns: The original dict instance
+
+    :since: 1.0
     """
 
     # oddity here, really *dict_additions should be Dict[Any,
@@ -208,6 +216,8 @@ def merge_extend(
     :param dict_additions: The additions dict. Will not be altered.
 
     :returns: A new dict, whose values are new lists
+
+    :since: 1.0
     """
 
     return update_extend({}, *dict_additions)
@@ -251,6 +261,8 @@ def globfilter(
 
     :param ignore_case: pattern comparison is case normalized if
       True. Default, False
+
+    :since: 1.0
     """
 
     if ignore_case:
@@ -293,6 +305,8 @@ def unique(
     :param key: unary callable that produces a hashable identifying
       value. Default, use each object in sequence as its own
       identifier.
+
+    :since: 1.0
     """
 
     if key:
@@ -376,6 +390,8 @@ def parse_datetime(
 
     :raises ValueError: if strict and no src matches none of the
       pre-defined formats
+
+    :since: 1.0
     """
 
     for pattern, parser in DATETIME_FORMATS:
@@ -393,6 +409,8 @@ def find_config_dirs() -> Tuple[str, str]:
     """
     The site and user configuration dirs for koji-smoky-dingo, as a
     tuple. Attempts to use the ``appdirs`` package if it is available.
+
+    :since: 1.0
     """
 
     if appdirs is None:
@@ -419,6 +437,8 @@ def find_config_files(
     in alphabetical order from within each directory.
 
     :param dirs: list of directories to look for config files within
+
+    :since: 1.0
     """
 
     if dirs is None:
@@ -449,6 +469,8 @@ def load_full_config(
 
     :returns: a configuration representing a merged view of all config
       files
+
+    :since: 1.0
     """
 
     if config_files is None:
@@ -473,6 +495,8 @@ def get_plugin_config(
     :param plugin: plugin name
 
     :param profile: profile name, optional
+
+    :since: 1.0
     """
 
     plugin_conf: Dict[str, Any] = {}
@@ -511,6 +535,8 @@ def load_plugin_config(
     :param plugin: plugin name
 
     :param profile: profile name
+
+    :since: 1.0
     """
 
     conf = load_full_config()

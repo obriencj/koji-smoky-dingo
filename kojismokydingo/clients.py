@@ -40,6 +40,12 @@ def rebuild_client_config(
     Reconstructs a koji client configuration based on the fields of a
     session and a session's goptions. Returns a tuple containing the
     active profile's name, and the configuration as a dict.
+
+    :param session: a koji client session
+
+    :param goptions: the koji CLI's options
+
+    :since: 1.0
     """
 
     opts = {

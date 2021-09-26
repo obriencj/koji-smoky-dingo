@@ -142,7 +142,6 @@ class BuildNEVRCompare(NEVRCompare):
     of a build info dictionary. Used by the `build_nvr_sort` function.
     """
 
-
     build: BuildInfo
 
 
@@ -260,7 +259,8 @@ def iter_bulk_move_builds(
     :param strict: Raise an exception and discontinue execution at the
         first error. Default, False
 
-    :raises NoSuchTag: If tag does not exist
+    :raises NoSuchTag: If either the source or destination tag do not
+      exist
     """
 
     srctag = as_taginfo(session, srctag)
@@ -697,6 +697,17 @@ def iter_latest_maven_builds(
 
     If pkg_names is given, then only those builds matching the given
     package names are yielded.
+
+    :param session: an active koji client session
+
+    :param tag: the tag to load latest maven builds from
+
+    :param pkg_names: optional filter for build with the given package name
+
+    :param inherit: if True also yield information for builds in the
+      tag's parents
+
+    :raises NoSuchTag: if tag could not be resolved
     """
 
     taginfo = as_taginfo(session, tag)
@@ -733,6 +744,17 @@ def latest_maven_builds(
 
     If pkg_names is given, then only those builds matching the given
     package names are returned.
+
+    :param session: an active koji client session
+
+    :param tag: the tag to load latest maven builds from
+
+    :param pkg_names: optional filter for build with the given package name
+
+    :param inherit: if True also yield information for builds in the
+      tag's parents
+
+    :raises NoSuchTag: if tag could not be resolved
     """
 
     builds = iter_latest_maven_builds(session, tag, pkg_names, inherit)
@@ -746,6 +768,11 @@ def decorate_builds_maven(
     For any build info which does not have a maven_group_id and hasn't
     already been checked for additional btype data, augment the btype
     data.
+
+    :param session: an active koji client session
+
+    :param build_infos: build info dicts to decorate with maven GAV
+      info
     """
 
     if not isinstance(build_infos, list):

@@ -29,10 +29,10 @@ from typing import (
 
 from . import as_buildinfo, as_taginfo, bulk_load, bulk_load_rpm_sigs
 from .types import (
-    ArchiveInfo, ArchiveInfos, ArchiveTypeInfo, BuildInfo,
+    ArchiveInfo, ArchiveInfos, ArchiveTypeInfo, BuildInfo, BuildSpec,
     DecoratedArchiveInfo, DecoratedArchiveInfos, DecoratedBuildInfo,
     DecoratedRPMInfo, DecoratedRPMInfos,
-    PathSpec, RPMInfos, )
+    PathSpec, RPMInfos, TagSpec, )
 
 
 __all__ = (
@@ -82,6 +82,8 @@ def filter_archives(
     return a new list of those archives which are of the given archive
     types.
 
+    :param session: an active koji client session
+
     :param archives: Archive infos to be filtered
 
     :param archive_types: Desired archive type extensions
@@ -125,6 +127,8 @@ def gather_signed_rpms(
     will allow an unsigned copy to be included if no signed copies
     match.
 
+    :param session: an active koji client session
+
     :param archives: list of RPM archive dicts
 
     :param sigkeys: list of signature fingerprints, in order of
@@ -158,7 +162,7 @@ def gather_signed_rpms(
 
 def gather_build_rpms(
         session: ClientSession,
-        binfo: BuildInfo,
+        binfo: BuildSpec,
         rpmkeys: Sequence[str] = (),
         path: Optional[PathSpec] = None) -> List[DecoratedRPMInfo]:
     """
@@ -173,6 +177,8 @@ def gather_build_rpms(
 
     :param path: base path to prepend to the build RPM's new filepath
       value
+
+    :raises NoSuchBuild: if binfo could not be resolved
     """
 
     binfo = as_buildinfo(session, binfo)
@@ -200,16 +206,20 @@ def gather_build_rpms(
 
 def gather_build_maven_archives(
         session: ClientSession,
-        binfo: BuildInfo,
+        binfo: BuildSpec,
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Gathers a list of maven archives for a given build_info. The
     archive records are augmented with an additional "filepath" entry,
     the value of which is an expanded path to the file itself.
 
+    :param session: an active koji client session
+
     :param binfo: Build info to fetch archives for
 
     :param path: The root dir for the archive file paths, default None
+
+    :raises NoSuchBuild: if binfo could not be resolved
     """
 
     binfo = as_buildinfo(session, binfo)
@@ -234,9 +244,13 @@ def gather_build_win_archives(
     archive records are augmented with an additional "filepath" entry,
     the value of which is an expanded path to the file itself.
 
+    :param session: an active koji client session
+
     :param binfo: Build info to fetch archives for
 
     :param path: The root dir for the archive file paths, default None
+
+    :raises NoSuchBuild: if binfo could not be resolved
     """
 
     binfo = as_buildinfo(session, binfo)
@@ -254,16 +268,20 @@ def gather_build_win_archives(
 
 def gather_build_image_archives(
         session: ClientSession,
-        binfo: BuildInfo,
+        binfo: BuildSpec,
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
     Gathers a list of image archives for a given build_info. The
     archive records are augmented with an additional "filepath" entry,
     the value of which is an expanded path to the file itself.
 
+    :param session: an active koji client session
+
     :param binfo: Build info to fetch archives for
 
     :param path: The root dir for the archive file paths, default None
+
+    :raises NoSuchBuild: if binfo could not be resolved
     """
 
     binfo = as_buildinfo(session, binfo)
@@ -281,7 +299,7 @@ def gather_build_image_archives(
 
 def gather_build_archives(
         session: ClientSession,
-        binfo: BuildInfo,
+        binfo: BuildSpec,
         btype: Optional[str] = None,
         rpmkeys: Sequence[str] = (),
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
@@ -297,6 +315,8 @@ def gather_build_archives(
     Koji does not normally consider RPMs to be archives, but we will
     attempt to homogenize them together.
 
+    :param session: an active koji client session
+
     :param binfo: Build info to fetch archives for
 
     :param btype: BType to filter for. Default None for all types.
@@ -306,6 +326,8 @@ def gather_build_archives(
         () for no signature filtering.
 
     :param path: The root dir for the archive file paths, default None
+
+    :raises NoSuchBuild: if binfo could not be resolved
     """
 
     binfo = cast(DecoratedBuildInfo, as_buildinfo(session, binfo))
@@ -366,7 +388,7 @@ def gather_build_archives(
 
 def gather_latest_rpms(
         session: ClientSession,
-        tagname: str,
+        tagname: TagSpec,
         rpmkeys: Sequence[str] = (),
         inherit: bool = True,
         path: Optional[PathSpec] = None) -> List[DecoratedRPMInfo]:
@@ -375,6 +397,8 @@ def gather_latest_rpms(
     available signatures, and augments the results to include a new
     "filepath" entry which will point to the matching RPM file
     location.
+
+    :param session: an active koji client session
 
     :param tagname: Name of the tag to search in for RPMs
 
@@ -385,11 +409,14 @@ def gather_latest_rpms(
     :param inherit: Follow tag inheritance, default True
 
     :param path: The root dir for the archive file paths, default None
+
+    :raises NoSuchTag: if tagname could not be resolved to a tag info
     """
 
+    tag = as_taginfo(session, tagname)
     path = as_pathinfo(path)
 
-    lfound, lbuilds = session.getLatestRPMS(tagname)
+    lfound, lbuilds = session.getLatestRPMS(tag['id'])
     bpaths = {bld["id"]: path.build(bld) for bld in lbuilds}
 
     if rpmkeys:
@@ -442,7 +469,7 @@ def _fake_maven_build(archive, path=None, btype="maven", cache={}):
 
 def gather_latest_maven_archives(
         session: ClientSession,
-        tagname: str,
+        tagname: TagSpec,
         inherit: bool = True,
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
@@ -450,14 +477,19 @@ def gather_latest_maven_archives(
     the results to include a new "filepath" entry which will point to
     the matching maven artifact's file location.
 
+    :param session: an active koji client session
+
     :param tagname: Name of the tag to search in for maven artifacts
 
     :param inherit: Follow tag inheritance, default True
+
+    :raises NoSuchTag: if specified tag doesn't exist
     """
 
+    tag = as_taginfo(session, tagname)
     path = as_pathinfo(path)
 
-    found = session.getLatestMavenArchives(tagname, inherit=inherit)
+    found = session.getLatestMavenArchives(tag['id'], inherit=inherit)
     for f in found:
         # unlike getLatestRPMs, getLatestMavenArchives only provides
         # the archives themselves. We don't want to have to do a bulk
@@ -473,7 +505,7 @@ def gather_latest_maven_archives(
 
 def gather_latest_win_archives(
         session: ClientSession,
-        tagname: str,
+        tagname: TagSpec,
         inherit: bool = True,
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
@@ -481,16 +513,21 @@ def gather_latest_win_archives(
     augments the results to include a new "filepath" entry which will
     point to the matching maven artifact's file location.
 
+    :param session: an active koji client session
+
     :param tagname: Name of the tag to search in for maven artifacts
 
     :param inherit: Follow tag inheritance, default True
+
+    :raises NoSuchTag: if specified tag doesn't exist
     """
 
+    tag = as_taginfo(session, tagname)
     path = as_pathinfo(path)
 
     found = []
 
-    archives, lbuilds = session.listTaggedArchives(tagname,
+    archives, lbuilds = session.listTaggedArchives(tag['id'],
                                                    inherit=inherit,
                                                    latest=True,
                                                    type="win")
@@ -511,7 +548,7 @@ def gather_latest_win_archives(
 
 def gather_latest_image_archives(
         session: ClientSession,
-        tagname: Union[int, str],
+        tagname: TagSpec,
         inherit: bool = True,
         path: Optional[PathSpec] = None) -> List[DecoratedArchiveInfo]:
     """
@@ -520,8 +557,13 @@ def gather_latest_image_archives(
     :param tagname: Name of the tag to gather archives from
 
     :param inherit: Follow tag inheritance, default True
+
+    :param path: Path prefix for archive filepaths
+
+    :raises NoSuchTag: if the specified tag doesn't exist
     """
 
+    tag = as_taginfo(session, tagname)
     path = as_pathinfo(path)
 
     found = []
@@ -530,9 +572,9 @@ def gather_latest_image_archives(
     # of win and maven. I should submit a patch to upstream.
 
     if inherit:
-        builds = session.getLatestBuilds(tagname, type="image")
+        builds = session.getLatestBuilds(tag['id'], type="image")
     else:
-        builds = session.listTagged(tagname, latest=True, type="image")
+        builds = session.listTagged(tag['id'], latest=True, type="image")
 
     for bld in builds:
         build_path = path.imagebuild(bld)
@@ -547,7 +589,7 @@ def gather_latest_image_archives(
 
 def gather_latest_archives(
         session: ClientSession,
-        tagname: Union[int, str],
+        tagname: TagSpec,
         btype: Optional[str] = None,
         rpmkeys: Sequence[str] = (),
         inherit: bool = True,
@@ -577,8 +619,7 @@ def gather_latest_archives(
     # exists -- it will raise a NoSuchTag for us if necessary. We
     # aren't doing any such checking in the lower-level per-type
     # gather functions.
-    taginfo = as_taginfo(session, tagname)
-    tagname = taginfo["name"]
+    tag = as_taginfo(session, tagname)
 
     known_types = ("rpm", "maven", "win", "image")
     found: List[DecoratedArchiveInfo] = []
@@ -590,19 +631,19 @@ def gather_latest_archives(
     path = as_pathinfo(path)
 
     if btype in (None, "rpm"):
-        found.extend(gather_latest_rpms(session, tagname, rpmkeys,
+        found.extend(gather_latest_rpms(session, tag, rpmkeys,
                                         inherit, path))  # type: ignore
 
     if btype in (None, "maven"):
-        found.extend(gather_latest_maven_archives(session, tagname,
+        found.extend(gather_latest_maven_archives(session, tag,
                                                   inherit, path))
 
     if btype in (None, "win"):
-        found.extend(gather_latest_win_archives(session, tagname,
+        found.extend(gather_latest_win_archives(session, tag,
                                                 inherit, path))
 
     if btype in (None, "image"):
-        found.extend(gather_latest_image_archives(session, tagname,
+        found.extend(gather_latest_image_archives(session, tag,
                                                   inherit, path))
 
     if btype in known_types:
@@ -611,7 +652,7 @@ def gather_latest_archives(
     if btype is None:
         # listTaggedArchives is very convenient, but only works with
         # win, maven, and None
-        archives, lbuilds = session.listTaggedArchives(tagname,
+        archives, lbuilds = session.listTaggedArchives(tag['id'],
                                                        inherit=inherit,
                                                        latest=True,
                                                        type=None)
@@ -641,9 +682,9 @@ def gather_latest_archives(
     else:
         # btype is not one of the known ones, and it's also not None.
         if inherit:
-            ibuilds = session.getLatestBuilds(tagname, type=btype)
+            ibuilds = session.getLatestBuilds(tag['id'], type=btype)
         else:
-            ibuilds = session.listTagged(tagname, latest=True, type=btype)
+            ibuilds = session.listTagged(tag['id'], latest=True, type=btype)
 
         for bld in ibuilds:
             build_path = path.typedir(bld, btype)
