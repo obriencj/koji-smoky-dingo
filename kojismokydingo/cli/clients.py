@@ -46,6 +46,7 @@ __all__ = (
     "cli_client_config",
     "cli_open",
     "get_open_command",
+    "get_open_url",
 )
 
 
@@ -61,6 +62,11 @@ class CannotOpenURL(BadDingo):
 
 def cli_client_config(session, goptions,
                       only=(), quiet=False, config=False, json=False):
+    """
+    Implements the ``koji client-config`` command
+
+    :since: 1.0
+    """
 
     profile, opts = rebuild_client_config(session, goptions)
 
@@ -172,7 +178,7 @@ def _get_tag_repo_dir_url(session, goptions, tagid):
     tag = as_taginfo(session, tagid)
     repo = as_repoinfo(session, tag)
 
-    return "/".join((topurl, "repos", tag['name'], repo['id']))
+    return "/".join((topurl, "repos", tag['name'], str(repo['id'])))
 
 
 def _get_tag_latest_dir_url(session, goptions, tagid):
@@ -307,7 +313,7 @@ def get_open_command(profile=None, err=True):
     command = conf.get("command", default_command)
 
     if err and command is None:
-        raise BadDingo("Unable to determine command for launching browser")
+        raise BadDingo("Unable to determine default open command")
 
     return command
 
@@ -316,6 +322,7 @@ def cli_open(session, goptions, datatype, element,
              command=None):
     """
     Implements the ``koji open`` command
+
     :since: 1.0
     """
 
@@ -330,7 +337,7 @@ def cli_open(session, goptions, datatype, element,
     # to stdout
     if command == "-":
         print(url)
-        return
+        return 0
 
     # if the configured open command has a {url} marker in it, then we
     # want to swap that in. Otherwise we'll just append it quoted
@@ -357,6 +364,9 @@ class ClientOpen(AnonSmokyDingo):
 
         addarg("element", type=int_or_str, metavar="KEY",
                help="The key for the given element type.")
+
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
 
         addarg("--command", "-c", default=None, metavar="COMMAND",
                help="Command to exec with the discovered koji web URL")

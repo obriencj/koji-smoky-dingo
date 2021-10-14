@@ -5,7 +5,7 @@ koji open
 
 ::
 
- usage: koji open [-h] [--command COMMAND] [--print] TYPE KEY
+ usage: koji open [-h] [--command COMMAND | --print] TYPE KEY
 
  Launch web UI for koji data elements
 
