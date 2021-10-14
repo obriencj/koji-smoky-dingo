@@ -1,7 +1,7 @@
 
 %global srcname kojismokydingo
 %global srcver 1.1.0
-%global srcrel 0
+%global srcrel 1
 
 
 Summary: Koji Smoky Dingo
@@ -230,7 +230,7 @@ Koji Smoky Dingo
 
 
 %changelog
-* Fri Jun 11 2021 Christopher O'Brien <obriencj@gmail.com> - 1.1.0-0
+* Fri Oct 15 2021 Christopher O'Brien <obriencj@gmail.com> - 1.1.0-1
 - See the v1.1.0 release notes for a full list of changes
 
 * Thu Apr 1 2021 Christopher O'Brien <obriencj@gmail.com> - 1.0.0-1
