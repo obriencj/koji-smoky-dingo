@@ -54,13 +54,13 @@ compatability, etc. As a totally separate entity, KSD can iterate very
 fast to try and match my ever-changing vision of what an ideal
 "helper" layer should look like.
 
-When KSD finally reaches version 1.0.0, I will at that point have to
-begin worrying about API stability. However even then I will still
-have more flexibility than a project that has to worry about being a
-critical component in the build infrastructure for so many
-organizations. Therefore it's extremely likely that KSD will always
-remain separate... but hopefully popular enough one day that any
-advanced Koji user will also be a Koji Smoky Dingo user.
+Since KSD finally reached version 1.0, I do have to worry about API
+stability. However even then I will still have more flexibility than a
+project that has to worry about being a critical component in the
+build infrastructure for so many organizations. Therefore it's
+extremely likely that KSD will always remain separate... but hopefully
+popular enough one day that any advanced Koji user will also be a Koji
+Smoky Dingo user.
 
 
 Why Is There An Entire Mini Language In Here?
@@ -112,38 +112,15 @@ backwards compatibility for a pretty long time. The only feature I
 truly yearn for is syntactic changes in Python 3 where keyword-only
 arguments can be expressed after variadic positionals. I'd really
 prefer to use that in the Sieve API instead of the `set_options`
-method. Once everything is RHEL 8 and above I'll probably consider
-dropping Python 2 support just for that.
+method.
 
 Honestly, the biggest struggle has been in working with multiple
 versions of Koji. Or working with multiple versions of libraries under
 Python 3 to dodge the deprecation churn.
 
-Once KSD achieves a version 1.0.0 I will begin work on 2.0.0 which
-will drop Python 2 support. I'm not sure how long I'll provide
-backports to the 1.0 line after that... it likely depends on how long
-I have to use a RHEL 6 machine.
-
-
-Why Version 0.9?
-----------------
-
-I like to use a major version of 0 and a minor version of 9 to
-indicate an unstable API. I use the micro version value to indicate
-the individual snapshots along the way.
-
-There's no good reasoning behind the minor version of 9, it just
-happened. I picked up the habit of using 0.9 for projects where I'd be
-fine with people using it but where I wanted to caution them against
-relying on it too heavily. I never spent too much time analyzing any
-deeper meaning behind the numbers. Fear of commitment maybe? Dunno.
-
-When I do finally decide it's time to become stable (when all the
-features I want are present, I've got more code coverage in my unit
-tests, and there's been more exposure for the project via daily use by
-more people) I will cut a version 1.0.0 and adopt semantic versioning
-from there on out. Until then I will try to exercise some restraint
-but all API is fair game to get tweaked and scrambled.
+KSD version 2.0 will drop Python 2 support. I'm not sure how long
+I'll provide backports to the 1.0 line after that... it likely depends
+on how long I have to use a RHEL 6 machine.
 
 
 Can I Write My Own Tools On Top of Koji Smoky Dingo?
@@ -151,9 +128,7 @@ Can I Write My Own Tools On Top of Koji Smoky Dingo?
 
 You absolutely can. There's an examples directory which highlights how
 to use it to create your own scripts, commands, and custom sieve
-predicates. But be forewarned by the answer to the previous question
--- until version 1.0.0 is released there will likely be some level of
-API churn that could introduce compatibility issues for you.
+predicates.
 
 
 Can I Get Involved?

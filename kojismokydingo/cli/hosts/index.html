@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.cli.hosts &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.cli.hosts &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="kojismokydingo.cli.tags" href="../tags/" />
@@ -39,8 +39,9 @@
         <li class="right" >
           <a href="../clients/" title="kojismokydingo.cli.clients"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" accesskey="U">CLI API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">CLI API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli.hosts</a></li> 
       </ul>
     </div>  
 
@@ -62,39 +63,40 @@ enabled but which are not checking in.</p>
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
-<dl class="class">
-<dt id="kojismokydingo.cli.hosts.CheckHosts">
-<em class="property">class </em><code class="sig-name descname">CheckHosts</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/hosts/#CheckHosts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.hosts.CheckHosts" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.hosts.CheckHosts">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">CheckHosts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/hosts/#CheckHosts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.hosts.CheckHosts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.AnonSmokyDingo" title="kojismokydingo.cli.AnonSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.AnonSmokyDingo</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.hosts.CheckHosts.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/hosts/#CheckHosts.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.hosts.CheckHosts.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.hosts.CheckHosts.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/hosts/#CheckHosts.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.hosts.CheckHosts.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.hosts.CheckHosts.description">
-<code class="sig-name descname">description</code><em class="property"> = &quot;Show enabled builders which aren't checking in&quot;</em><a class="headerlink" href="#kojismokydingo.cli.hosts.CheckHosts.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.hosts.CheckHosts.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&quot;Show</span> <span class="pre">enabled</span> <span class="pre">builders</span> <span class="pre">which</span> <span class="pre">aren't</span> <span class="pre">checking</span> <span class="pre">in&quot;</span></em><a class="headerlink" href="#kojismokydingo.cli.hosts.CheckHosts.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.hosts.CheckHosts.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/hosts/#CheckHosts.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.hosts.CheckHosts.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.hosts.CheckHosts.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/hosts/#CheckHosts.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.hosts.CheckHosts.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.hosts.cli_check_hosts">
-<code class="sig-name descname">cli_check_hosts</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">timeout=60</em>, <em class="sig-param">arches=()</em>, <em class="sig-param">channel=None</em>, <em class="sig-param">ignore=()</em>, <em class="sig-param">quiet=False</em>, <em class="sig-param">shush=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/hosts/#cli_check_hosts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.hosts.cli_check_hosts" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.hosts.cli_check_hosts">
+<span class="sig-name descname"><span class="pre">cli_check_hosts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shush</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/hosts/#cli_check_hosts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.hosts.cli_check_hosts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">check-hosts</span></code> command</p>
 </dd></dl>
 
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -122,7 +124,7 @@ May return an alternative parser instance or None.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -142,14 +144,15 @@ May return an alternative parser instance or None.</p>
         <li class="right" >
           <a href="../clients/" title="kojismokydingo.cli.clients"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" >CLI API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >CLI API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli.hosts</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

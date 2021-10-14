@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.common &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.common &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
     <link rel="next" title="kojismokydingo.hosts" href="../hosts/" />
@@ -39,8 +39,9 @@
         <li class="right" >
           <a href="../clients/" title="kojismokydingo.clients"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Core API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Core API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.common</a></li> 
       </ul>
     </div>  
 
@@ -61,94 +62,94 @@
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
-<dl class="function">
-<dt id="kojismokydingo.common.chunkseq">
-<code class="sig-name descname">chunkseq</code><span class="sig-paren">(</span><em class="sig-param">seq</em>, <em class="sig-param">chunksize</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#chunkseq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.chunkseq" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.chunkseq">
+<span class="sig-name descname"><span class="pre">chunkseq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#chunkseq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.chunkseq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Chop up a sequence into sub-sequences, each up to chunksize in
 length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>seq</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) -- a sequence to chunk up</p></li>
-<li><p><strong>chunksize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) -- max length for chunks</p></li>
+<li><p><strong>seq</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) -- a sequence to chunk up</p></li>
+<li><p><strong>chunksize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- max length for chunks</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Generator[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>]</p>
+<dd class="field-even"><p>Generator[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.fnmatches">
-<code class="sig-name descname">fnmatches</code><span class="sig-paren">(</span><em class="sig-param">value</em>, <em class="sig-param">patterns</em>, <em class="sig-param">ignore_case=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#fnmatches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.fnmatches" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks value against multiple glob patterns. Returns True if any
-match.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- string to be matched</p></li>
-<li><p><strong>patterns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) -- list of glob-style pattern strings</p></li>
-<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- if True case is normalized, Default False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="kojismokydingo.common.find_config_dirs">
-<code class="sig-name descname">find_config_dirs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#find_config_dirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.find_config_dirs" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.find_config_dirs">
+<span class="sig-name descname"><span class="pre">find_config_dirs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#find_config_dirs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.find_config_dirs" title="Permalink to this definition">¶</a></dt>
 <dd><p>The site and user configuration dirs, as a tuple. Attempts to use
 the <code class="docutils literal notranslate"><span class="pre">appdirs</span></code> package if it is available.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.find_config_files">
-<code class="sig-name descname">find_config_files</code><span class="sig-paren">(</span><em class="sig-param">dirs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#find_config_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.find_config_files" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.find_config_files">
+<span class="sig-name descname"><span class="pre">find_config_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#find_config_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.find_config_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>The ordered list of configuration files to be loaded.</p>
 <p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">dirs</span></code> is specified, it must be a sequence of directory names,
 from which conf files will be loaded in order. If unspecified,
 defaults to the result of <a class="reference internal" href="#kojismokydingo.common.find_config_dirs" title="kojismokydingo.common.find_config_dirs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_config_dirs</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dirs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) -- list of directories to look for config files within</p>
+<dd class="field-odd"><p><strong>dirs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) -- list of directories to look for config files within</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.get_plugin_config">
-<code class="sig-name descname">get_plugin_config</code><span class="sig-paren">(</span><em class="sig-param">conf</em>, <em class="sig-param">plugin</em>, <em class="sig-param">profile=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#get_plugin_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.get_plugin_config" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.fnmatches">
+<span class="sig-name descname"><span class="pre">fnmatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#fnmatches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.fnmatches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks value against multiple glob patterns. Returns True if any
+match.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- string to be matched</p></li>
+<li><p><strong>patterns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) -- list of glob-style pattern strings</p></li>
+<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- if True case is normalized, Default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.get_plugin_config">
+<span class="sig-name descname"><span class="pre">get_plugin_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#get_plugin_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.get_plugin_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a loaded configuration, return the section specific to the
 given plugin, and optionally profile</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>conf</strong> (<em>ConfigParser</em>) -- Full configuration</p></li>
-<li><p><strong>plugin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- Plugin name</p></li>
-<li><p><strong>profile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- Profile name</p></li>
+<li><p><strong>plugin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Plugin name</p></li>
+<li><p><strong>profile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- Profile name</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>,<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>,<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.globfilter">
-<code class="sig-name descname">globfilter</code><span class="sig-paren">(</span><em class="sig-param">seq</em>, <em class="sig-param">patterns</em>, <em class="sig-param">key=None</em>, <em class="sig-param">invert=False</em>, <em class="sig-param">ignore_case=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#globfilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.globfilter" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.globfilter">
+<span class="sig-name descname"><span class="pre">globfilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#globfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.globfilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator yielding members of sequence seq which match any of the
 glob patterns specified.</p>
 <p>Patterns must be a list of glob-style pattern strings.</p>
@@ -159,29 +160,29 @@ given sequence item into a string for comparison with the patterns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>seq</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) -- series of objects to be filtered. Normally strings,
+<li><p><strong>seq</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) -- series of objects to be filtered. Normally strings,
 but may be any type provided the key parameter is specified to
 provide a string for matching based on the given object.</p></li>
-<li><p><strong>patterns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) -- list of glob-style pattern strings. Members of
+<li><p><strong>patterns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) -- list of glob-style pattern strings. Members of
 seq which match any of these patterns are yielded.</p></li>
-<li><p><strong>key</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) -- A unary callable which translates individual items on
+<li><p><strong>key</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) -- A unary callable which translates individual items on
 seq into the value to be matched against the patterns. Default,
 match against values in seq directly.</p></li>
-<li><p><strong>invert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Invert the logic, yielding the non-matches rather
+<li><p><strong>invert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Invert the logic, yielding the non-matches rather
 than the matches. Default, yields matches</p></li>
-<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- pattern comparison is case normalized if
+<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- pattern comparison is case normalized if
 True. Default, False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Iterable[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>]</p>
+<dd class="field-even"><p>Iterable[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.load_full_config">
-<code class="sig-name descname">load_full_config</code><span class="sig-paren">(</span><em class="sig-param">config_files=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#load_full_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.load_full_config" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.load_full_config">
+<span class="sig-name descname"><span class="pre">load_full_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#load_full_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.load_full_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Configuration object representing the full merged view of config
 files.</p>
 <p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">config_files</span></code> is None, use the results of <a class="reference internal" href="#kojismokydingo.common.find_config_files" title="kojismokydingo.common.find_config_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_config_files</span></code></a>.
@@ -193,45 +194,45 @@ Otherwise, <code class="xref py py-obj docutils literal notranslate"><span class
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.load_plugin_config">
-<code class="sig-name descname">load_plugin_config</code><span class="sig-paren">(</span><em class="sig-param">plugin</em>, <em class="sig-param">profile=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#load_plugin_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.load_plugin_config" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.load_plugin_config">
+<span class="sig-name descname"><span class="pre">load_plugin_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#load_plugin_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.load_plugin_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Configuration specific to a given plugin, and optionally profile</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>plugin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- Plugin name</p></li>
-<li><p><strong>profile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- Profile name</p></li>
+<li><p><strong>plugin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Plugin name</p></li>
+<li><p><strong>profile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- Profile name</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>,<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>,<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.merge_extend">
-<code class="sig-name descname">merge_extend</code><span class="sig-paren">(</span><em class="sig-param">*dict_additions</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#merge_extend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.merge_extend" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.merge_extend">
+<span class="sig-name descname"><span class="pre">merge_extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">dict_additions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#merge_extend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.merge_extend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similar to <a class="reference internal" href="#kojismokydingo.common.update_extend" title="kojismokydingo.common.update_extend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_extend</span></code></a> but creates a new dict to hold results,
 and new initial lists to be extended, leaving all the arguments
 unaltered.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dict_additions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>]</em>) -- The additions dict. Will not be altered.</p>
+<dd class="field-odd"><p><strong>dict_additions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>]</em>) -- The additions dict. Will not be altered.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A new dict, whose values are new lists</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.parse_datetime">
-<code class="sig-name descname">parse_datetime</code><span class="sig-paren">(</span><em class="sig-param">src</em>, <em class="sig-param">strict=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#parse_datetime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.parse_datetime" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.parse_datetime">
+<span class="sig-name descname"><span class="pre">parse_datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#parse_datetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.parse_datetime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attempts to parse a datetime string in numerous ways based on
 pre-defined regex mappings</p>
 <dl class="simple">
@@ -253,25 +254,25 @@ or +HH:MM (the : will be removed)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>src</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- Date-time text to be parsed</p></li>
-<li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Raise an exception if no matching format is known
+<li><p><strong>src</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Date-time text to be parsed</p></li>
+<li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Raise an exception if no matching format is known
 and the date-time text cannot be parsed. If False, simply return
-<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p></li>
+<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><strong>Exception</strong></a> -- if strict and no src matches none of the
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><strong>Exception</strong></a> -- if strict and no src matches none of the
 pre-defined formats</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#module-datetime" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#module-datetime" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.rpm_evr_compare">
-<code class="sig-name descname">rpm_evr_compare</code><span class="sig-paren">(</span><em class="sig-param">left_evr</em>, <em class="sig-param">right_evr</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#rpm_evr_compare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.rpm_evr_compare" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.rpm_evr_compare">
+<span class="sig-name descname"><span class="pre">rpm_evr_compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_evr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_evr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#rpm_evr_compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.rpm_evr_compare" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compare two (Epoch, Version, Release) tuples.</p>
 <p>This is an alternative implementation of the rpm lib's
 labelCompare function.</p>
@@ -284,19 +285,19 @@ labelCompare function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>left_evr</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>)</em>) -- The left Epoch, Version, Release for comparison</p></li>
-<li><p><strong>right_evr</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>)</em>) -- The right Epoch, Version, Release for comparison</p></li>
+<li><p><strong>left_evr</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>)</em>) -- The left Epoch, Version, Release for comparison</p></li>
+<li><p><strong>right_evr</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>)</em>) -- The right Epoch, Version, Release for comparison</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.unique">
-<code class="sig-name descname">unique</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">key=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#unique"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.unique" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.unique">
+<span class="sig-name descname"><span class="pre">unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#unique"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.unique" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a sequence, de-duplicate it into a new list, preserving
 order.</p>
 <p>In the event that the sequence contains non-hashable objects,
@@ -307,21 +308,21 @@ de-duplication.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sequence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) -- series of hashable objects</p></li>
-<li><p><strong>key</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em><em>,</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em><em>, </em><em>optional</em>) -- unary callable that produces a hashable identifying
+<li><p><strong>sequence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) -- series of hashable objects</p></li>
+<li><p><strong>key</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em><em>,</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em><em>, </em><em>optional</em>) -- unary callable that produces a hashable identifying
 value. Default, use each object in sequence as its own
 identifier.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.common.update_extend">
-<code class="sig-name descname">update_extend</code><span class="sig-paren">(</span><em class="sig-param">dict_orig</em>, <em class="sig-param">*dict_additions</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#update_extend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.common.update_extend" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.common.update_extend">
+<span class="sig-name descname"><span class="pre">update_extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_orig</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">dict_additions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/common/#update_extend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.common.update_extend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extend the list values of the original dict with the list values of
 the additions dict.</p>
 <p>eg.</p>
@@ -337,16 +338,16 @@ the additions dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dict_orig</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>]</em>) -- The original dict, which may be mutated and whose
+<li><p><strong>dict_orig</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>]</em>) -- The original dict, which may be mutated and whose
 values may be extended</p></li>
-<li><p><strong>dict_additions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>]</em>) -- The additions dict. Will not be altered.</p></li>
+<li><p><strong>dict_additions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>]</em>) -- The additions dict. Will not be altered.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The original dict instance</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -354,6 +355,7 @@ values may be extended</p></li>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -381,7 +383,7 @@ values may be extended</p></li>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -401,14 +403,15 @@ values may be extended</p></li>
         <li class="right" >
           <a href="../clients/" title="kojismokydingo.clients"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" >Core API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Core API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.common</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

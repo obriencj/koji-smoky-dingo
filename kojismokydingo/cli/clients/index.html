@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.cli.clients &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.cli.clients &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="kojismokydingo.cli.hosts" href="../hosts/" />
@@ -39,8 +39,9 @@
         <li class="right" >
           <a href="../builds/" title="kojismokydingo.cli.builds"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" accesskey="U">CLI API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">CLI API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli.clients</a></li> 
       </ul>
     </div>  
 
@@ -60,93 +61,122 @@
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
-<dl class="class">
-<dt id="kojismokydingo.cli.clients.ClientConfig">
-<em class="property">class </em><code class="sig-name descname">ClientConfig</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.CannotOpenURL">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">CannotOpenURL</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#CannotOpenURL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.CannotOpenURL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
+<p>A problem occured opening a URL</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.1</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.CannotOpenURL.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Cannot</span> <span class="pre">open</span> <span class="pre">URL'</span></em><a class="headerlink" href="#kojismokydingo.cli.clients.CannotOpenURL.complaint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientConfig">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ClientConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.AnonSmokyDingo" title="kojismokydingo.cli.AnonSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.AnonSmokyDingo</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.clients.ClientConfig.activate">
-<code class="sig-name descname">activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientConfig.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.activate" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientConfig.activate">
+<span class="sig-name descname"><span class="pre">activate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientConfig.activate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.activate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Activate our session. This is triggered after validate, before
 pre_handle and handle</p>
 <p>The session and goptions attributes will have been set just
 prior.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.clients.ClientConfig.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientConfig.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientConfig.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientConfig.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.clients.ClientConfig.description">
-<code class="sig-name descname">description</code><em class="property"> = 'Show client profile settings'</em><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientConfig.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Show</span> <span class="pre">client</span> <span class="pre">profile</span> <span class="pre">settings'</span></em><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.clients.ClientConfig.group">
-<code class="sig-name descname">group</code><em class="property"> = 'info'</em><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.group" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientConfig.group">
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'info'</span></em><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.group" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.clients.ClientConfig.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientConfig.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientConfig.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientConfig.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientConfig.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.cli.clients.ClientOpen">
-<em class="property">class </em><code class="sig-name descname">ClientOpen</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientOpen">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ClientOpen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientOpen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.AnonSmokyDingo" title="kojismokydingo.cli.AnonSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.AnonSmokyDingo</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.clients.ClientOpen.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientOpen.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientOpen.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientOpen.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.clients.ClientOpen.description">
-<code class="sig-name descname">description</code><em class="property"> = 'Launch web UI for koji data elements'</em><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientOpen.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Launch</span> <span class="pre">web</span> <span class="pre">UI</span> <span class="pre">for</span> <span class="pre">koji</span> <span class="pre">data</span> <span class="pre">elements'</span></em><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.clients.ClientOpen.group">
-<code class="sig-name descname">group</code><em class="property"> = 'info'</em><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.group" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientOpen.group">
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'info'</span></em><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.group" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.clients.ClientOpen.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientOpen.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientOpen.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientOpen.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.clients.ClientOpen.validate">
-<code class="sig-name descname">validate</code><span class="sig-paren">(</span><em class="sig-param">parser</em>, <em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientOpen.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.validate" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.ClientOpen.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#ClientOpen.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.ClientOpen.validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to perform validation on options values. Return value is
 ignored, use <code class="xref py py-obj docutils literal notranslate"><span class="pre">parser.error</span></code> if needed.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.clients.cli_client_config">
-<code class="sig-name descname">cli_client_config</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">goptions</em>, <em class="sig-param">only=()</em>, <em class="sig-param">quiet=False</em>, <em class="sig-param">config=False</em>, <em class="sig-param">json=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#cli_client_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.cli_client_config" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.cli_client_config">
+<span class="sig-name descname"><span class="pre">cli_client_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goptions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#cli_client_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.cli_client_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">client-config</span></code> command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.clients.cli_open">
-<code class="sig-name descname">cli_open</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">goptions</em>, <em class="sig-param">datatype</em>, <em class="sig-param">element</em>, <em class="sig-param">command=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#cli_open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.cli_open" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.cli_open">
+<span class="sig-name descname"><span class="pre">cli_open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goptions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datatype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#cli_open"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.cli_open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">open</span></code> command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.clients.get_open_command">
-<code class="sig-name descname">get_open_command</code><span class="sig-paren">(</span><em class="sig-param">profile=None</em>, <em class="sig-param">err=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#get_open_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.clients.get_open_command" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.get_open_command">
+<span class="sig-name descname"><span class="pre">get_open_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#get_open_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.get_open_command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine the command used to open URLs. Attempts to load
 profile-specific plugin configuration under the heading 'open' and
 the key 'command' first. If that doesn't find a command, then fall
@@ -154,13 +184,13 @@ back to the per-platform mappings in the <code class="xref py py-obj docutils li
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>profile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- name of koji profile</p></li>
-<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- raise an exception if no command is discovered. If False
+<li><p><strong>profile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- name of koji profile</p></li>
+<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- raise an exception if no command is discovered. If False
 then will return None instead</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><strong>BadDingo</strong></a> -- when <code class="xref py py-obj docutils literal notranslate"><span class="pre">err</span></code> is True and no command could be found</p>
@@ -168,9 +198,30 @@ then will return None instead</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.clients.get_open_url">
+<span class="sig-name descname"><span class="pre">get_open_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goptions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datatype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/clients/#get_open_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.clients.get_open_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a client configuration, datatype, and element identifier,
+produce a URL referencing the hub or topdir path for that record.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>goptions</strong> -- koji client options</p></li>
+<li><p><strong>datatype</strong> -- name of the data type</p></li>
+<li><p><strong>element</strong> -- identifier for an element of the given data type</p></li>
+</ul>
+</dd>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.1</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -198,7 +249,7 @@ then will return None instead</p></li>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -218,14 +269,15 @@ then will return None instead</p></li>
         <li class="right" >
           <a href="../builds/" title="kojismokydingo.cli.builds"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" >CLI API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >CLI API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli.clients</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.cli.archives &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.cli.archives &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,10 +31,11 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.cli</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.cli</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli.archives</a></li> 
       </ul>
     </div>  
 
@@ -66,17 +67,17 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
-<span class="kn">from</span> <span class="nn">argparse</span> <span class="k">import</span> <span class="n">SUPPRESS</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">itervalues</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">SUPPRESS</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">itervalues</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">pretty_json</span><span class="p">,</span> <span class="n">resplit</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">bulk_load_builds</span>
-<span class="kn">from</span> <span class="nn">..archives</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">pretty_json</span><span class="p">,</span> <span class="n">resplit</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">bulk_load_builds</span>
+<span class="kn">from</span> <span class="nn">..archives</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">filter_archives</span><span class="p">,</span> <span class="n">gather_build_archives</span><span class="p">,</span> <span class="n">gather_latest_archives</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..builds</span> <span class="k">import</span> <span class="n">BUILD_COMPLETE</span><span class="p">,</span> <span class="n">build_dedup</span>
+<span class="kn">from</span> <span class="nn">..builds</span> <span class="kn">import</span> <span class="n">BUILD_COMPLETE</span><span class="p">,</span> <span class="n">build_dedup</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -289,6 +290,13 @@
 
 
 <div class="viewcode-block" id="LatestArchives.validate"><a class="viewcode-back" href="../../../../kojismokydingo/cli/archives/#kojismokydingo.cli.archives.LatestArchives.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+
+        <span class="n">goptions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">goptions</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">as_url</span><span class="p">:</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">topurl</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">topdir</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_archive_options</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span></div>
 
 
@@ -307,6 +315,7 @@
 <span class="c1"># The end.</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -321,7 +330,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -335,16 +344,17 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.cli</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.cli</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli.archives</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

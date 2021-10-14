@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>Frequently Asked Questions &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frequently Asked Questions &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="prev" title="Koji Smoky Dingo preview 0.9.0 Release Notes" href="../release_notes/v0.9.0/" />
@@ -35,7 +35,8 @@
         <li class="right" >
           <a href="../release_notes/v0.9.0/" title="Koji Smoky Dingo preview 0.9.0 Release Notes"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Frequently Asked Questions</a></li> 
       </ul>
     </div>  
 
@@ -86,13 +87,13 @@ developers have to worry about feature creep, stale code, API
 compatability, etc. As a totally separate entity, KSD can iterate very
 fast to try and match my ever-changing vision of what an ideal
 &quot;helper&quot; layer should look like.</p>
-<p>When KSD finally reaches version 1.0.0, I will at that point have to
-begin worrying about API stability. However even then I will still
-have more flexibility than a project that has to worry about being a
-critical component in the build infrastructure for so many
-organizations. Therefore it's extremely likely that KSD will always
-remain separate... but hopefully popular enough one day that any
-advanced Koji user will also be a Koji Smoky Dingo user.</p>
+<p>Since KSD finally reached version 1.0, I do have to worry about API
+stability. However even then I will still have more flexibility than a
+project that has to worry about being a critical component in the
+build infrastructure for so many organizations. Therefore it's
+extremely likely that KSD will always remain separate... but hopefully
+popular enough one day that any advanced Koji user will also be a Koji
+Smoky Dingo user.</p>
 </div>
 <div class="section" id="why-is-there-an-entire-mini-language-in-here">
 <h2>Why Is There An Entire Mini Language In Here?<a class="headerlink" href="#why-is-there-an-entire-mini-language-in-here" title="Permalink to this headline">¶</a></h2>
@@ -137,40 +138,19 @@ backwards compatibility for a pretty long time. The only feature I
 truly yearn for is syntactic changes in Python 3 where keyword-only
 arguments can be expressed after variadic positionals. I'd really
 prefer to use that in the Sieve API instead of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options</span></code>
-method. Once everything is RHEL 8 and above I'll probably consider
-dropping Python 2 support just for that.</p>
+method.</p>
 <p>Honestly, the biggest struggle has been in working with multiple
 versions of Koji. Or working with multiple versions of libraries under
 Python 3 to dodge the deprecation churn.</p>
-<p>Once KSD achieves a version 1.0.0 I will begin work on 2.0.0 which
-will drop Python 2 support. I'm not sure how long I'll provide
-backports to the 1.0 line after that... it likely depends on how long
-I have to use a RHEL 6 machine.</p>
-</div>
-<div class="section" id="why-version-0-9">
-<h2>Why Version 0.9?<a class="headerlink" href="#why-version-0-9" title="Permalink to this headline">¶</a></h2>
-<p>I like to use a major version of 0 and a minor version of 9 to
-indicate an unstable API. I use the micro version value to indicate
-the individual snapshots along the way.</p>
-<p>There's no good reasoning behind the minor version of 9, it just
-happened. I picked up the habit of using 0.9 for projects where I'd be
-fine with people using it but where I wanted to caution them against
-relying on it too heavily. I never spent too much time analyzing any
-deeper meaning behind the numbers. Fear of commitment maybe? Dunno.</p>
-<p>When I do finally decide it's time to become stable (when all the
-features I want are present, I've got more code coverage in my unit
-tests, and there's been more exposure for the project via daily use by
-more people) I will cut a version 1.0.0 and adopt semantic versioning
-from there on out. Until then I will try to exercise some restraint
-but all API is fair game to get tweaked and scrambled.</p>
+<p>KSD version 2.0 will drop Python 2 support. I'm not sure how long
+I'll provide backports to the 1.0 line after that... it likely depends
+on how long I have to use a RHEL 6 machine.</p>
 </div>
 <div class="section" id="can-i-write-my-own-tools-on-top-of-koji-smoky-dingo">
 <h2>Can I Write My Own Tools On Top of Koji Smoky Dingo?<a class="headerlink" href="#can-i-write-my-own-tools-on-top-of-koji-smoky-dingo" title="Permalink to this headline">¶</a></h2>
 <p>You absolutely can. There's an examples directory which highlights how
 to use it to create your own scripts, commands, and custom sieve
-predicates. But be forewarned by the answer to the previous question
--- until version 1.0.0 is released there will likely be some level of
-API churn that could introduce compatibility issues for you.</p>
+predicates.</p>
 </div>
 <div class="section" id="can-i-get-involved">
 <h2>Can I Get Involved?<a class="headerlink" href="#can-i-get-involved" title="Permalink to this headline">¶</a></h2>
@@ -185,6 +165,7 @@ documentation and unit tests.</p>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -198,7 +179,6 @@ documentation and unit tests.</p>
 <li><a class="reference internal" href="#why-not-contribute-directly-to-koji">Why Not Contribute Directly to Koji?</a></li>
 <li><a class="reference internal" href="#why-is-there-an-entire-mini-language-in-here">Why Is There An Entire Mini Language In Here?</a></li>
 <li><a class="reference internal" href="#why-do-you-still-support-python-2-6">Why Do You Still Support Python 2.6?</a></li>
-<li><a class="reference internal" href="#why-version-0-9">Why Version 0.9?</a></li>
 <li><a class="reference internal" href="#can-i-write-my-own-tools-on-top-of-koji-smoky-dingo">Can I Write My Own Tools On Top of Koji Smoky Dingo?</a></li>
 <li><a class="reference internal" href="#can-i-get-involved">Can I Get Involved?</a></li>
 </ul>
@@ -224,7 +204,7 @@ documentation and unit tests.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -241,13 +221,14 @@ documentation and unit tests.</p>
         <li class="right" >
           <a href="../release_notes/v0.9.0/" title="Koji Smoky Dingo preview 0.9.0 Release Notes"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Frequently Asked Questions</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

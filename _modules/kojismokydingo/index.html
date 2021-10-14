@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,8 +31,9 @@
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Module code</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo</a></li> 
       </ul>
     </div>  
 
@@ -65,15 +66,15 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">koji</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">ClientSession</span><span class="p">,</span> <span class="n">Fault</span><span class="p">,</span> <span class="n">GenericError</span><span class="p">,</span> <span class="n">ParameterError</span><span class="p">,</span>
     <span class="n">convertFault</span><span class="p">,</span> <span class="n">read_config</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">koji_cli.lib</span> <span class="k">import</span> <span class="n">activate_session</span><span class="p">,</span> <span class="n">ensure_connection</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">zip</span>
+<span class="kn">from</span> <span class="nn">koji_cli.lib</span> <span class="kn">import</span> <span class="n">activate_session</span><span class="p">,</span> <span class="n">ensure_connection</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">zip</span>
 
-<span class="kn">from</span> <span class="nn">.common</span> <span class="k">import</span> <span class="n">chunkseq</span>
+<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">chunkseq</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -85,7 +86,9 @@
     <span class="s2">&quot;NoSuchBuild&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchChannel&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchContentGenerator&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NoSuchPackage&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchPermission&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NoSuchRepo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchRPM&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchTag&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchTarget&quot;</span><span class="p">,</span>
@@ -96,7 +99,10 @@
 
     <span class="s2">&quot;as_archiveinfo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;as_buildinfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;as_channelinfo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;as_hostinfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;as_packageinfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;as_repoinfo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;as_rpminfo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;as_taginfo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;as_targetinfo&quot;</span><span class="p">,</span>
@@ -125,13 +131,15 @@
 <span class="sd">    A `koji.ClientSession` that can be used as via the ``with``</span>
 <span class="sd">    keyword to provide a managed session that will handle</span>
 <span class="sd">    authenticated login and logout.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">activate_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">_exc_val</span><span class="p">,</span> <span class="n">_exc_tb</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">_exc_val</span><span class="p">,</span> <span class="n">_exc_tb</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rsession</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rsession</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -143,9 +151,11 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A `koji.ClientSession` which loads profile config information and</span>
 <span class="sd">    which can be used via tha ``with`` keyword.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="s2">&quot;koji&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="s2">&quot;koji&quot;</span><span class="p">):</span>
         <span class="n">conf</span> <span class="o">=</span> <span class="n">read_config</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
         <span class="n">server</span> <span class="o">=</span> <span class="n">conf</span><span class="p">[</span><span class="s2">&quot;server&quot;</span><span class="p">]</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ProfileClientSession</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">opts</span><span class="o">=</span><span class="n">conf</span><span class="p">)</span></div>
@@ -159,9 +169,11 @@
 <span class="sd">    Suitable for working with anonymous commands which do not require</span>
 <span class="sd">    authentication. Does not authenticate, and will only connect</span>
 <span class="sd">    lazily.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># we could always set up a connection ahead of time,</span>
         <span class="c1"># but... the connection will be created when we make our first</span>
         <span class="c1"># call, so let&#39;s be lazy instead.</span>
@@ -179,11 +191,13 @@
 <span class="sd">    more detailed situations where a requested data type wasn&#39;t</span>
 <span class="sd">    present on the koji hub, rather than just working with</span>
 <span class="sd">    `koji.GenericError`</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;Something bad happened&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">orig</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
         <span class="k">return</span> <span class="s2">&quot;: &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">complaint</span><span class="p">,</span> <span class="n">orig</span><span class="p">])</span></div>
 
@@ -191,6 +205,8 @@
 <div class="viewcode-block" id="NoSuchBuild"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchBuild">[docs]</a><span class="k">class</span> <span class="nc">NoSuchBuild</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A build was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such build&quot;</span></div>
@@ -199,6 +215,8 @@
 <span class="k">class</span> <span class="nc">NoSuchHost</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A host was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such host&quot;</span>
@@ -207,6 +225,8 @@
 <div class="viewcode-block" id="NoSuchChannel"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchChannel">[docs]</a><span class="k">class</span> <span class="nc">NoSuchChannel</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A channel was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such builder channel&quot;</span></div>
@@ -215,14 +235,28 @@
 <div class="viewcode-block" id="NoSuchContentGenerator"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchContentGenerator">[docs]</a><span class="k">class</span> <span class="nc">NoSuchContentGenerator</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A content generator was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such content generator&quot;</span></div>
 
 
+<div class="viewcode-block" id="NoSuchPackage"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchPackage">[docs]</a><span class="k">class</span> <span class="nc">NoSuchPackage</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A package was not found</span>
+
+<span class="sd">    :since: 1.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such package&quot;</span></div>
+
+
 <div class="viewcode-block" id="NoSuchTag"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchTag">[docs]</a><span class="k">class</span> <span class="nc">NoSuchTag</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A tag was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such tag&quot;</span></div>
@@ -231,6 +265,8 @@
 <div class="viewcode-block" id="NoSuchTarget"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchTarget">[docs]</a><span class="k">class</span> <span class="nc">NoSuchTarget</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A target was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such target&quot;</span></div>
@@ -239,6 +275,8 @@
 <div class="viewcode-block" id="NoSuchTask"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchTask">[docs]</a><span class="k">class</span> <span class="nc">NoSuchTask</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A task was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such task&quot;</span></div>
@@ -247,6 +285,8 @@
 <div class="viewcode-block" id="NoSuchUser"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchUser">[docs]</a><span class="k">class</span> <span class="nc">NoSuchUser</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A user was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such user&quot;</span></div>
@@ -255,6 +295,8 @@
 <div class="viewcode-block" id="NoSuchPermission"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchPermission">[docs]</a><span class="k">class</span> <span class="nc">NoSuchPermission</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A permission was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such permission&quot;</span></div>
@@ -263,14 +305,28 @@
 <div class="viewcode-block" id="NoSuchArchive"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchArchive">[docs]</a><span class="k">class</span> <span class="nc">NoSuchArchive</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An archive was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such archive&quot;</span></div>
 
 
+<div class="viewcode-block" id="NoSuchRepo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchRepo">[docs]</a><span class="k">class</span> <span class="nc">NoSuchRepo</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A repository was not found</span>
+
+<span class="sd">    :since: 1.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such repo&quot;</span></div>
+
+
 <div class="viewcode-block" id="NoSuchRPM"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchRPM">[docs]</a><span class="k">class</span> <span class="nc">NoSuchRPM</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An RPM was not found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such RPM&quot;</span></div>
@@ -280,6 +336,8 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A required permission was not associated with the currently logged</span>
 <span class="sd">    in user account.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;Insufficient permissions&quot;</span></div>
@@ -665,6 +723,10 @@
 <span class="sd">      OrderedDict</span>
 
 <span class="sd">    :type results: dict, optional</span>
+
+<span class="sd">    :rtype: dict</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">users</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">users</span><span class="p">)</span>
@@ -729,14 +791,18 @@
 <span class="sd">     * str, will attempt to load as an NVR</span>
 <span class="sd">     * dict, will presume already a build info</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param build: value to lookup</span>
 
 <span class="sd">    :type build: int or str or dict</span>
 
+<span class="sd">    :rtype: dict</span>
+
 <span class="sd">    :raises NoSuchBuild: if the build value could not be resolved</span>
 <span class="sd">      into a build info dict</span>
 
-<span class="sd">    :rtype: dict</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">build</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
@@ -752,6 +818,39 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
+<div class="viewcode-block" id="as_channelinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_channelinfo">[docs]</a><span class="k">def</span> <span class="nf">as_channelinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coerces a channel value into a koji channel info dict.</span>
+
+<span class="sd">    If channel is an</span>
+<span class="sd">     * int, will attempt to load as a channel ID</span>
+<span class="sd">     * str, will attempt to load as a channel name</span>
+<span class="sd">     * dict, will presume already a channel info</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param channel: value to lookup</span>
+
+<span class="sd">    :rtype: dict</span>
+
+<span class="sd">    :raises NoSuchChannel: if the channel could not be resolved</span>
+
+<span class="sd">    :since: 1.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getChannel</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">channel</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">info</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NoSuchChannel</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">info</span></div>
+
+
 <div class="viewcode-block" id="as_taginfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_taginfo">[docs]</a><span class="k">def</span> <span class="nf">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a tag value into a koji tag info dict.</span>
@@ -761,19 +860,18 @@
 <span class="sd">     * str, will attempt to load as a tag name</span>
 <span class="sd">     * dict, will presume already a tag info</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param tag: value to lookup</span>
 
 <span class="sd">    :type tag: int or str or dict</span>
 
-<span class="sd">    :param blocked: attempts to load blocked tag extra values. Default,</span>
-<span class="sd">      only loads</span>
-
-<span class="sd">    :type blocked: bool, optional</span>
+<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchTag: if the tag value could not be resolved into a</span>
 <span class="sd">      tag info dict</span>
 
-<span class="sd">    :rtype: dict</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
@@ -794,6 +892,40 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
+<div class="viewcode-block" id="as_packageinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_packageinfo">[docs]</a><span class="k">def</span> <span class="nf">as_packageinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">pkg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coerces a host value into a host info dict.</span>
+
+<span class="sd">    If pkg is an:</span>
+<span class="sd">     * int, will attempt to load as a package ID</span>
+<span class="sd">     * str, will attempt to load as a package name</span>
+<span class="sd">     * dict, will presume already a package info</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param pkg: value to lookup</span>
+
+<span class="sd">    :rtype: dict</span>
+
+<span class="sd">    :raises NoSuchPackage: if the pkg value could not be resolved into</span>
+<span class="sd">      a package info dict</span>
+
+<span class="sd">    :since: 1.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getPackage</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">pkg</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">info</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NoSuchPackage</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">info</span></div>
+
+
 <div class="viewcode-block" id="as_taskinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_taskinfo">[docs]</a><span class="k">def</span> <span class="nf">as_taskinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a task value into a koji task info dict.</span>
@@ -802,14 +934,18 @@
 <span class="sd">     * int, will attempt to load as a task ID</span>
 <span class="sd">     * dict, will presume already a task info</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param task: value to lookup</span>
 
 <span class="sd">    :type task: int or dict</span>
 
+<span class="sd">    :rtype: dict</span>
+
 <span class="sd">    :raises NoSuchTask: if the task value could not be resolved</span>
 <span class="sd">      into a task info dict</span>
 
-<span class="sd">    :rtype: dict</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -834,14 +970,18 @@
 <span class="sd">     * str, will attempt to load as a target name</span>
 <span class="sd">     * dict, will presume already a target info</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param target: value to lookup</span>
 
 <span class="sd">    :type target: int or str or dict</span>
 
+<span class="sd">    :rtype: dict</span>
+
 <span class="sd">    :raises NoSuchTarget: if the target value could not be resolved</span>
 <span class="sd">      into a target info dict</span>
 
-<span class="sd">    :rtype: dict</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
@@ -866,14 +1006,18 @@
 <span class="sd">     * str, will attempt to load as a host name</span>
 <span class="sd">     * dict, will presume already a host info</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param host: value to lookup</span>
 
 <span class="sd">    :type host: int or str or dict</span>
 
+<span class="sd">    :rtype: dict</span>
+
 <span class="sd">    :raises NoSuchHost: if the host value could not be resolved</span>
 <span class="sd">      into a host info dict</span>
 
-<span class="sd">    :rtype: dict</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
@@ -898,14 +1042,18 @@
 <span class="sd">     * str, will attempt to load as an archive filename</span>
 <span class="sd">     * dict, will presume already an archive info</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param archive: value to lookup</span>
 
 <span class="sd">    :type archive: int or str or dict</span>
 
+<span class="sd">    :rtype: dict</span>
+
 <span class="sd">    :raises NoSuchArchive: if the archive value could not be resolved</span>
 <span class="sd">      into an archive info dict</span>
 
-<span class="sd">    :rtype dict:</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -927,6 +1075,52 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
+<div class="viewcode-block" id="as_repoinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_repoinfo">[docs]</a><span class="k">def</span> <span class="nf">as_repoinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">repo</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coerces a repo value into a Repo info dict.</span>
+
+<span class="sd">    If repo is an:</span>
+<span class="sd">     * dict with name, will attempt to load the current repo from a</span>
+<span class="sd">       tag by that name</span>
+<span class="sd">     * str, will attempt to load the current repo from a tag by name</span>
+<span class="sd">     * int, will attempt to load the repo by ID</span>
+<span class="sd">     * dict, will presume already a repo info</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param repo: repo to resolve</span>
+
+<span class="sd">    :rtype: dict</span>
+
+<span class="sd">    :raises NoSuchRepo: if the repo value could not be resolved to a</span>
+<span class="sd">      repo info dict</span>
+
+<span class="sd">    :since: 1.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">repo</span><span class="p">:</span>
+            <span class="n">repo</span> <span class="o">=</span> <span class="n">repo</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">repo</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">repotag</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getRepo</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">repotag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoSuchRepo</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="n">repotag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">repoInfo</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">info</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NoSuchRepo</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">info</span></div>
+
+
 <div class="viewcode-block" id="as_rpminfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_rpminfo">[docs]</a><span class="k">def</span> <span class="nf">as_rpminfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rpm</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a host value into a RPM info dict.</span>
@@ -936,14 +1130,18 @@
 <span class="sd">     * str, will attempt to load as a RPM NVR</span>
 <span class="sd">     * dict, will presume already an RPM info</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param rpm: value to lookup</span>
 
 <span class="sd">    :type rpm: int or str or dict</span>
 
+<span class="sd">    :rtype: dict</span>
+
 <span class="sd">    :raises NoSuchRPM: if the rpm value could not be resolved</span>
 <span class="sd">      into a RPM info dict</span>
 
-<span class="sd">    :rtype: dict</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rpm</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
@@ -967,6 +1165,8 @@
 <span class="sd">    already a dict, it&#39;s presumed to be a userinfo already and it&#39;s</span>
 <span class="sd">    returned unaltered.</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param user: Name, ID, or User Info describing a koji user</span>
 
 <span class="sd">    :type user: str or int or dict</span>
@@ -974,6 +1174,8 @@
 <span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchUser: when user cannot be found</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
@@ -1030,7 +1232,11 @@
 <span class="sd">    presume that we&#39;re version 1.22 ``(1, 22)`` which is the last</span>
 <span class="sd">    version before getKojiVersion was added.</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :rtype: tuple[int]</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># we need to use this instead of getattr as koji sessions will</span>
@@ -1069,11 +1275,15 @@
 <span class="sd">    Version is specified as a tuple of integers, eg. 1.23 is ``(1,</span>
 <span class="sd">    23)``</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param minimum: Minimum version required. Default, ``(1, 23)``</span>
 
 <span class="sd">    :type minimum: tuple[int]</span>
 
 <span class="sd">    :rtype: bool</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">minimum</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -1101,6 +1311,8 @@
 <span class="sd">    exception is raised, with the given message. If message is not</span>
 <span class="sd">    provided, a simple one is constructed based on the minimum value.</span>
 
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param minimum: Minimum version required. Default, ``(1, 23)``</span>
 
 <span class="sd">    :type minimum: tuple[int]</span>
@@ -1114,6 +1326,8 @@
 <span class="sd">    :raises FeatureUnavailable: If the minimum version is not met</span>
 
 <span class="sd">    :rtype: bool</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">version_check</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="n">minimum</span><span class="p">):</span>
@@ -1131,6 +1345,7 @@
 <span class="c1"># The end.</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -1145,7 +1360,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1159,14 +1374,15 @@
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" >Module code</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>Core API Reference &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Core API Reference &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="next" title="kojismokydingo.archives" href="archives/" />
@@ -39,7 +39,8 @@
         <li class="right" >
           <a href="../siftylang/" title="Sifty Dingo Filtering Language"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Core API Reference</a></li> 
       </ul>
     </div>  
 
@@ -60,21 +61,26 @@ build system</p>
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
-<dl class="class">
-<dt id="kojismokydingo.AnonClientSession">
-<em class="property">class </em><code class="sig-name descname">AnonClientSession</code><span class="sig-paren">(</span><em class="sig-param">profile='koji'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#AnonClientSession"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.AnonClientSession" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.AnonClientSession">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">AnonClientSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'koji'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#AnonClientSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.AnonClientSession" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.ProfileClientSession" title="kojismokydingo.ProfileClientSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.ProfileClientSession</span></code></a></p>
 <p>A <code class="xref py py-obj docutils literal notranslate"><span class="pre">koji.ClientSession</span></code> which loads profile config information and
 which can be used via the <code class="docutils literal notranslate"><span class="pre">with</span></code> keyword.</p>
 <p>Suitable for working with anonymous commands which do not require
 authentication. Does not authenticate, and will only connect
 lazily.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.BadDingo">
-<em class="property">exception </em><code class="sig-name descname">BadDingo</code><a class="reference internal" href="../_modules/kojismokydingo/#BadDingo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.BadDingo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.BadDingo">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">BadDingo</span></span><a class="reference internal" href="../_modules/kojismokydingo/#BadDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.BadDingo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Generalized base class for exceptions raised from kojismokydingo.
 This class and its subclasses are used to combine a fixed
 complaint string with some specific information. This is a
@@ -82,178 +88,282 @@ convenience primarily for the CLI, but can also be used to track
 more detailed situations where a requested data type wasn't
 present on the koji hub, rather than just working with
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">koji.GenericError</span></code></p>
-<dl class="attribute">
-<dt id="kojismokydingo.BadDingo.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'Something bad happened'</em><a class="headerlink" href="#kojismokydingo.BadDingo.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.BadDingo.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Something</span> <span class="pre">bad</span> <span class="pre">happened'</span></em><a class="headerlink" href="#kojismokydingo.BadDingo.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.FeatureUnavailable">
-<em class="property">exception </em><code class="sig-name descname">FeatureUnavailable</code><a class="reference internal" href="../_modules/kojismokydingo/#FeatureUnavailable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.FeatureUnavailable" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.FeatureUnavailable">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">FeatureUnavailable</span></span><a class="reference internal" href="../_modules/kojismokydingo/#FeatureUnavailable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.FeatureUnavailable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A given feature isn't available due to the version on the koji hub</p>
-<dl class="attribute">
-<dt id="kojismokydingo.FeatureUnavailable.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = &quot;The koji hub version doesn't support this feature&quot;</em><a class="headerlink" href="#kojismokydingo.FeatureUnavailable.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.FeatureUnavailable.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&quot;The</span> <span class="pre">koji</span> <span class="pre">hub</span> <span class="pre">version</span> <span class="pre">doesn't</span> <span class="pre">support</span> <span class="pre">this</span> <span class="pre">feature&quot;</span></em><a class="headerlink" href="#kojismokydingo.FeatureUnavailable.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.ManagedClientSession">
-<em class="property">class </em><code class="sig-name descname">ManagedClientSession</code><span class="sig-paren">(</span><em class="sig-param">baseurl</em>, <em class="sig-param">opts=None</em>, <em class="sig-param">sinfo=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#ManagedClientSession"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.ManagedClientSession" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.ManagedClientSession">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ManagedClientSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">baseurl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sinfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#ManagedClientSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.ManagedClientSession" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">koji.ClientSession</span></code></p>
 <p>A <code class="xref py py-obj docutils literal notranslate"><span class="pre">koji.ClientSession</span></code> that can be used as via the <code class="docutils literal notranslate"><span class="pre">with</span></code>
 keyword to provide a managed session that will handle
 authenticated login and logout.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchArchive">
-<em class="property">exception </em><code class="sig-name descname">NoSuchArchive</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchArchive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchArchive" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchArchive">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchArchive</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchArchive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchArchive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>An archive was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchArchive.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such archive'</em><a class="headerlink" href="#kojismokydingo.NoSuchArchive.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchArchive.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">archive'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchArchive.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchBuild">
-<em class="property">exception </em><code class="sig-name descname">NoSuchBuild</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchBuild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchBuild" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchBuild">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchBuild</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchBuild"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchBuild" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A build was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchBuild.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such build'</em><a class="headerlink" href="#kojismokydingo.NoSuchBuild.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchBuild.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">build'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchBuild.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchChannel">
-<em class="property">exception </em><code class="sig-name descname">NoSuchChannel</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchChannel" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchChannel">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchChannel</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchChannel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchChannel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A channel was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchChannel.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such builder channel'</em><a class="headerlink" href="#kojismokydingo.NoSuchChannel.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchChannel.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">builder</span> <span class="pre">channel'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchChannel.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchContentGenerator">
-<em class="property">exception </em><code class="sig-name descname">NoSuchContentGenerator</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchContentGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchContentGenerator" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchContentGenerator">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchContentGenerator</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchContentGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchContentGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A content generator was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchContentGenerator.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such content generator'</em><a class="headerlink" href="#kojismokydingo.NoSuchContentGenerator.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchContentGenerator.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">content</span> <span class="pre">generator'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchContentGenerator.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchPermission">
-<em class="property">exception </em><code class="sig-name descname">NoSuchPermission</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchPermission"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchPermission" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchPackage">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchPackage</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchPackage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchPackage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
+<p>A package was not found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.1</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchPackage.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">package'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchPackage.complaint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchPermission">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchPermission</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchPermission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchPermission" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A permission was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchPermission.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such permission'</em><a class="headerlink" href="#kojismokydingo.NoSuchPermission.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchPermission.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">permission'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchPermission.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchRPM">
-<em class="property">exception </em><code class="sig-name descname">NoSuchRPM</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchRPM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchRPM" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchRPM">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchRPM</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchRPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchRPM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>An RPM was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchRPM.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such RPM'</em><a class="headerlink" href="#kojismokydingo.NoSuchRPM.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchRPM.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">RPM'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchRPM.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchTag">
-<em class="property">exception </em><code class="sig-name descname">NoSuchTag</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchTag" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchRepo">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchRepo</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchRepo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchRepo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
+<p>A repository was not found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.1</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchRepo.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">repo'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchRepo.complaint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchTag">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchTag</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchTag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchTag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A tag was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchTag.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such tag'</em><a class="headerlink" href="#kojismokydingo.NoSuchTag.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchTag.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">tag'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchTag.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchTarget">
-<em class="property">exception </em><code class="sig-name descname">NoSuchTarget</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchTarget" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchTarget">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchTarget</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchTarget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A target was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchTarget.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such target'</em><a class="headerlink" href="#kojismokydingo.NoSuchTarget.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchTarget.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">target'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchTarget.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchTask">
-<em class="property">exception </em><code class="sig-name descname">NoSuchTask</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchTask" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchTask">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchTask</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchTask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchTask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A task was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchTask.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such task'</em><a class="headerlink" href="#kojismokydingo.NoSuchTask.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchTask.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">task'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchTask.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NoSuchUser">
-<em class="property">exception </em><code class="sig-name descname">NoSuchUser</code><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchUser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NoSuchUser" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchUser">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NoSuchUser</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NoSuchUser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NoSuchUser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A user was not found</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NoSuchUser.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'No such user'</em><a class="headerlink" href="#kojismokydingo.NoSuchUser.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NoSuchUser.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'No</span> <span class="pre">such</span> <span class="pre">user'</span></em><a class="headerlink" href="#kojismokydingo.NoSuchUser.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="kojismokydingo.NotPermitted">
-<em class="property">exception </em><code class="sig-name descname">NotPermitted</code><a class="reference internal" href="../_modules/kojismokydingo/#NotPermitted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.NotPermitted" title="Permalink to this definition">¶</a></dt>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kojismokydingo.NotPermitted">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">NotPermitted</span></span><a class="reference internal" href="../_modules/kojismokydingo/#NotPermitted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.NotPermitted" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.BadDingo" title="kojismokydingo.BadDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.BadDingo</span></code></a></p>
 <p>A required permission was not associated with the currently logged
 in user account.</p>
-<dl class="attribute">
-<dt id="kojismokydingo.NotPermitted.complaint">
-<code class="sig-name descname">complaint</code><em class="property"> = 'Insufficient permissions'</em><a class="headerlink" href="#kojismokydingo.NotPermitted.complaint" title="Permalink to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.NotPermitted.complaint">
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Insufficient</span> <span class="pre">permissions'</span></em><a class="headerlink" href="#kojismokydingo.NotPermitted.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.ProfileClientSession">
-<em class="property">class </em><code class="sig-name descname">ProfileClientSession</code><span class="sig-paren">(</span><em class="sig-param">profile='koji'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#ProfileClientSession"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.ProfileClientSession" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.ProfileClientSession">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ProfileClientSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'koji'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#ProfileClientSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.ProfileClientSession" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kojismokydingo.ManagedClientSession" title="kojismokydingo.ManagedClientSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.ManagedClientSession</span></code></a></p>
 <p>A <code class="xref py py-obj docutils literal notranslate"><span class="pre">koji.ClientSession</span></code> which loads profile config information and
 which can be used via tha <code class="docutils literal notranslate"><span class="pre">with</span></code> keyword.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.as_archiveinfo">
-<code class="sig-name descname">as_archiveinfo</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">archive</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_archiveinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.as_archiveinfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_archiveinfo">
+<span class="sig-name descname"><span class="pre">as_archiveinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archive</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_archiveinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_archiveinfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coerces an archive value into an archive info dict.</p>
 <dl class="simple">
 <dt>If archive is an:</dt><dd><ul class="simple">
@@ -265,20 +375,27 @@ which can be used via tha <code class="docutils literal notranslate"><span class
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>archive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- value to lookup</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>archive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- value to lookup</p></li>
+</ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.NoSuchArchive" title="kojismokydingo.NoSuchArchive"><strong>NoSuchArchive</strong></a> -- if the archive value could not be resolved
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchArchive" title="kojismokydingo.NoSuchArchive"><strong>NoSuchArchive</strong></a> -- if the archive value could not be resolved
 into an archive info dict</p>
 </dd>
-<dt class="field-odd">Rtype dict</dt>
-<dd class="field-odd"><p></p></dd>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.as_buildinfo">
-<code class="sig-name descname">as_buildinfo</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">build</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_buildinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.as_buildinfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_buildinfo">
+<span class="sig-name descname"><span class="pre">as_buildinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_buildinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_buildinfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coerces a build value into a koji build info dict.</p>
 <dl class="simple">
 <dt>If build is an</dt><dd><ul class="simple">
@@ -290,21 +407,58 @@ into an archive info dict</p>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>build</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- value to lookup</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>build</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- value to lookup</p></li>
+</ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.NoSuchBuild" title="kojismokydingo.NoSuchBuild"><strong>NoSuchBuild</strong></a> -- if the build value could not be resolved
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchBuild" title="kojismokydingo.NoSuchBuild"><strong>NoSuchBuild</strong></a> -- if the build value could not be resolved
 into a build info dict</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.as_hostinfo">
-<code class="sig-name descname">as_hostinfo</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">host</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_hostinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.as_hostinfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_channelinfo">
+<span class="sig-name descname"><span class="pre">as_channelinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_channelinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_channelinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coerces a channel value into a koji channel info dict.</p>
+<dl class="simple">
+<dt>If channel is an</dt><dd><ul class="simple">
+<li><p>int, will attempt to load as a channel ID</p></li>
+<li><p>str, will attempt to load as a channel name</p></li>
+<li><p>dict, will presume already a channel info</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>channel</strong> -- value to lookup</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchChannel" title="kojismokydingo.NoSuchChannel"><strong>NoSuchChannel</strong></a> -- if the channel could not be resolved</p>
+</dd>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_hostinfo">
+<span class="sig-name descname"><span class="pre">as_hostinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_hostinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_hostinfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coerces a host value into a host info dict.</p>
 <dl class="simple">
 <dt>If target is an:</dt><dd><ul class="simple">
@@ -316,21 +470,93 @@ into a build info dict</p>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- value to lookup</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- value to lookup</p></li>
+</ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>NoSuchHost</strong> -- if the host value could not be resolved
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>NoSuchHost</strong> -- if the host value could not be resolved
 into a host info dict</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.as_rpminfo">
-<code class="sig-name descname">as_rpminfo</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">rpm</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_rpminfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.as_rpminfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_packageinfo">
+<span class="sig-name descname"><span class="pre">as_packageinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_packageinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_packageinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coerces a host value into a host info dict.</p>
+<dl class="simple">
+<dt>If pkg is an:</dt><dd><ul class="simple">
+<li><p>int, will attempt to load as a package ID</p></li>
+<li><p>str, will attempt to load as a package name</p></li>
+<li><p>dict, will presume already a package info</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>pkg</strong> -- value to lookup</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchPackage" title="kojismokydingo.NoSuchPackage"><strong>NoSuchPackage</strong></a> -- if the pkg value could not be resolved into
+a package info dict</p>
+</dd>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_repoinfo">
+<span class="sig-name descname"><span class="pre">as_repoinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_repoinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_repoinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coerces a repo value into a Repo info dict.</p>
+<dl class="simple">
+<dt>If repo is an:</dt><dd><ul class="simple">
+<li><p>dict with name, will attempt to load the current repo from a
+tag by that name</p></li>
+<li><p>str, will attempt to load the current repo from a tag by name</p></li>
+<li><p>int, will attempt to load the repo by ID</p></li>
+<li><p>dict, will presume already a repo info</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>repo</strong> -- repo to resolve</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchRepo" title="kojismokydingo.NoSuchRepo"><strong>NoSuchRepo</strong></a> -- if the repo value could not be resolved to a
+repo info dict</p>
+</dd>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_rpminfo">
+<span class="sig-name descname"><span class="pre">as_rpminfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rpm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_rpminfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_rpminfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coerces a host value into a RPM info dict.</p>
 <dl class="simple">
 <dt>If rpm is an:</dt><dd><ul class="simple">
@@ -342,21 +568,27 @@ into a host info dict</p>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>rpm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- value to lookup</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>rpm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- value to lookup</p></li>
+</ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.NoSuchRPM" title="kojismokydingo.NoSuchRPM"><strong>NoSuchRPM</strong></a> -- if the rpm value could not be resolved
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchRPM" title="kojismokydingo.NoSuchRPM"><strong>NoSuchRPM</strong></a> -- if the rpm value could not be resolved
 into a RPM info dict</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.as_taginfo">
-<code class="sig-name descname">as_taginfo</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tag</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_taginfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.as_taginfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_taginfo">
+<span class="sig-name descname"><span class="pre">as_taginfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_taginfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_taginfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coerces a tag value into a koji tag info dict.</p>
 <dl class="simple">
 <dt>If tag is an</dt><dd><ul class="simple">
@@ -369,24 +601,26 @@ into a RPM info dict</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- value to lookup</p></li>
-<li><p><strong>blocked</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- attempts to load blocked tag extra values. Default,
-only loads</p></li>
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- value to lookup</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.NoSuchTag" title="kojismokydingo.NoSuchTag"><strong>NoSuchTag</strong></a> -- if the tag value could not be resolved into a
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchTag" title="kojismokydingo.NoSuchTag"><strong>NoSuchTag</strong></a> -- if the tag value could not be resolved into a
 tag info dict</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.as_targetinfo">
-<code class="sig-name descname">as_targetinfo</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_targetinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.as_targetinfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_targetinfo">
+<span class="sig-name descname"><span class="pre">as_targetinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_targetinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_targetinfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coerces a target value into a koji target info dict.</p>
 <dl class="simple">
 <dt>If target is an</dt><dd><ul class="simple">
@@ -398,21 +632,27 @@ tag info dict</p>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- value to lookup</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- value to lookup</p></li>
+</ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.NoSuchTarget" title="kojismokydingo.NoSuchTarget"><strong>NoSuchTarget</strong></a> -- if the target value could not be resolved
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchTarget" title="kojismokydingo.NoSuchTarget"><strong>NoSuchTarget</strong></a> -- if the target value could not be resolved
 into a target info dict</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.as_taskinfo">
-<code class="sig-name descname">as_taskinfo</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">task</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_taskinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.as_taskinfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_taskinfo">
+<span class="sig-name descname"><span class="pre">as_taskinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_taskinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_taskinfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coerces a task value into a koji task info dict.</p>
 <dl class="simple">
 <dt>If task is an</dt><dd><ul class="simple">
@@ -423,41 +663,53 @@ into a target info dict</p>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- value to lookup</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>task</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- value to lookup</p></li>
+</ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.NoSuchTask" title="kojismokydingo.NoSuchTask"><strong>NoSuchTask</strong></a> -- if the task value could not be resolved
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchTask" title="kojismokydingo.NoSuchTask"><strong>NoSuchTask</strong></a> -- if the task value could not be resolved
 into a task info dict</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.as_userinfo">
-<code class="sig-name descname">as_userinfo</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">user</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_userinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.as_userinfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.as_userinfo">
+<span class="sig-name descname"><span class="pre">as_userinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#as_userinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.as_userinfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resolves user to a userinfo dict.</p>
 <p>If user is a str or int, then getUser will be invoked. If user is
 already a dict, it's presumed to be a userinfo already and it's
 returned unaltered.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>user</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- Name, ID, or User Info describing a koji user</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>user</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- Name, ID, or User Info describing a koji user</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
 </dd>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#kojismokydingo.NoSuchUser" title="kojismokydingo.NoSuchUser"><strong>NoSuchUser</strong></a> -- when user cannot be found</p>
 </dd>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.bulk_load">
-<code class="sig-name descname">bulk_load</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">loadfn</em>, <em class="sig-param">keys</em>, <em class="sig-param">err=True</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load">
+<span class="sig-name descname"><span class="pre">bulk_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadfn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generic bulk loading function. Invokes the given <code class="xref py py-obj docutils literal notranslate"><span class="pre">loadfn</span></code> on each
 key in <code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code> using chunking multicalls limited to the specified
 size.</p>
@@ -470,35 +722,35 @@ return the results.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>session</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">koji.ClientSession</span></code>) -- The koji session</p></li>
-<li><p><strong>loadfn</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em>) -- The loading function, to be invoked in a multicall
+<li><p><strong>loadfn</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em>) -- The loading function, to be invoked in a multicall
 arrangement. Will be called once with each given key from <code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code></p></li>
-<li><p><strong>keys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em>) -- The sequence of keys to be used to invoke <code class="xref py py-obj docutils literal notranslate"><span class="pre">loadfn</span></code>.
+<li><p><strong>keys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em>) -- The sequence of keys to be used to invoke <code class="xref py py-obj docutils literal notranslate"><span class="pre">loadfn</span></code>.
 These keys need to be individually hashable, or the <code class="xref py py-obj docutils literal notranslate"><span class="pre">results</span></code>
 value needs to be specified with an instance that accepts
 assignmnet using these values as the key.</p></li>
-<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Whether to raise any underlying fault returns as
+<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Whether to raise any underlying fault returns as
 exceptions. Default, True</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) -- How many calls to <code class="xref py py-obj docutils literal notranslate"><span class="pre">loadfn</span></code> to chunk up for each
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) -- How many calls to <code class="xref py py-obj docutils literal notranslate"><span class="pre">loadfn</span></code> to chunk up for each
 multicall. Default, 100</p></li>
-<li><p><strong>results</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>, </em><em>optional</em>) -- storage for <code class="xref py py-obj docutils literal notranslate"><span class="pre">loadfn</span></code> results. If specified, must
+<li><p><strong>results</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>optional</em>) -- storage for <code class="xref py py-obj docutils literal notranslate"><span class="pre">loadfn</span></code> results. If specified, must
 support item assignment (like a dict) via an update method, and
 it will be populated and then used as the return value for this
 function. Default, a new <code class="xref py py-obj docutils literal notranslate"><span class="pre">OrderedDict</span></code> will be allocated.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>koji.GenericError</strong> -- if <code class="xref py py-obj docutils literal notranslate"><span class="pre">err</span></code> is <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> and an issue
+<dd class="field-even"><p><strong>koji.GenericError</strong> -- if <code class="xref py py-obj docutils literal notranslate"><span class="pre">err</span></code> is <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> and an issue
 occurrs while invoking the <code class="xref py py-obj docutils literal notranslate"><span class="pre">loadfn</span></code></p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_build_archives">
-<code class="sig-name descname">bulk_load_build_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">build_ids</em>, <em class="sig-param">btype=None</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_build_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_build_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_build_archives">
+<span class="sig-name descname"><span class="pre">bulk_load_build_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">btype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_build_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_build_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up a chunking multicall to fetch the archives of builds
 via <code class="xref py py-obj docutils literal notranslate"><span class="pre">session.listArchives</span></code> for each build ID in build_ids.</p>
 <p>Returns an OrderedDict associating the individual build IDs with
@@ -508,9 +760,9 @@ and will be used in place of a newly allocated OrderedDict to
 store and return the results.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_build_rpms">
-<code class="sig-name descname">bulk_load_build_rpms</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">build_ids</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_build_rpms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_build_rpms" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_build_rpms">
+<span class="sig-name descname"><span class="pre">bulk_load_build_rpms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_build_rpms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_build_rpms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up a chunking multicall to fetch the RPMs of builds via
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">session.listRPMS</span></code> for each build ID in build_ids.</p>
 <p>Returns an OrderedDict associating the individual build IDs with
@@ -520,9 +772,45 @@ and will be used in place of a newly allocated OrderedDict to
 store and return the results.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_builds">
-<code class="sig-name descname">bulk_load_builds</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">nvrs</em>, <em class="sig-param">err=True</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_builds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_builds" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_buildroot_archives">
+<span class="sig-name descname"><span class="pre">bulk_load_buildroot_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buildroot_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">btype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_buildroot_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_buildroot_archives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a chunking multicall to fetch the archives of buildroots
+via <code class="xref py py-obj docutils literal notranslate"><span class="pre">session.listArchives</span></code> for each buildroot ID in buildrood_ids.</p>
+<p>Returns an OrderedDict associating the individual buildroot IDs with
+their resulting archive lists.</p>
+<p>If results is non-None, it must support dict-like update method,
+and will be used in place of a newly allocated OrderedDict to
+store and return the results.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_buildroot_rpms">
+<span class="sig-name descname"><span class="pre">bulk_load_buildroot_rpms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buildroot_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_buildroot_rpms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_buildroot_rpms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a chunking multicall to fetch the RPMs of buildroots via
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">session.listRPMs</span></code> for each buildroot ID in buildrood_ids.</p>
+<p>Returns an OrderedDict associating the individual buildroot IDs with
+their resulting RPM lists.</p>
+<p>If results is non-None, it must support dict-like update method,
+and will be used in place of a newly allocated OrderedDict to
+store and return the results.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_buildroots">
+<span class="sig-name descname"><span class="pre">bulk_load_buildroots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broot_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_buildroots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_buildroots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a chunking multicall to fetch the buildroot data via
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">session.getBuildroot</span></code> for each ID in broot_ids.</p>
+<p>Returns an OrderedDict associating the individual buildroot IDs
+with their resulting buildroot info dicts.</p>
+<p>If results is non-None, it must support a dict-like update method,
+and will be used in place of a newly allocated OrderedDict to
+store and return the results.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_builds">
+<span class="sig-name descname"><span class="pre">bulk_load_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nvrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_builds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_builds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load many buildinfo dicts from a koji client session and a
 sequence of NVRs.</p>
 <p>Returns an OrderedDict associating the individual NVRs with their
@@ -536,10 +824,10 @@ return the results.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nvrs</strong> (<em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>] or </em><em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) -- Sequence of build NVRs or build IDs to load</p></li>
-<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Raise an exception if an NVR fails to load. Default,
+<li><p><strong>nvrs</strong> (<em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>] or </em><em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) -- Sequence of build NVRs or build IDs to load</p></li>
+<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Raise an exception if an NVR fails to load. Default,
 True.</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) -- Count of NVRs to load in a single multicall. Default,
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) -- Count of NVRs to load in a single multicall. Default,
 100</p></li>
 <li><p><strong>results</strong> (<em>Mapping</em><em>, </em><em>optional</em>) -- mapping to store the results in. Default, produce
 a new OrderedDict</p></li>
@@ -551,45 +839,9 @@ a new OrderedDict</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_buildroot_archives">
-<code class="sig-name descname">bulk_load_buildroot_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">buildroot_ids</em>, <em class="sig-param">btype=None</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_buildroot_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_buildroot_archives" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set up a chunking multicall to fetch the archives of buildroots
-via <code class="xref py py-obj docutils literal notranslate"><span class="pre">session.listArchives</span></code> for each buildroot ID in buildrood_ids.</p>
-<p>Returns an OrderedDict associating the individual buildroot IDs with
-their resulting archive lists.</p>
-<p>If results is non-None, it must support dict-like update method,
-and will be used in place of a newly allocated OrderedDict to
-store and return the results.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_buildroot_rpms">
-<code class="sig-name descname">bulk_load_buildroot_rpms</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">buildroot_ids</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_buildroot_rpms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_buildroot_rpms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set up a chunking multicall to fetch the RPMs of buildroots via
-<code class="xref py py-obj docutils literal notranslate"><span class="pre">session.listRPMs</span></code> for each buildroot ID in buildrood_ids.</p>
-<p>Returns an OrderedDict associating the individual buildroot IDs with
-their resulting RPM lists.</p>
-<p>If results is non-None, it must support dict-like update method,
-and will be used in place of a newly allocated OrderedDict to
-store and return the results.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_buildroots">
-<code class="sig-name descname">bulk_load_buildroots</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">broot_ids</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_buildroots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_buildroots" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set up a chunking multicall to fetch the buildroot data via
-<code class="xref py py-obj docutils literal notranslate"><span class="pre">session.getBuildroot</span></code> for each ID in broot_ids.</p>
-<p>Returns an OrderedDict associating the individual buildroot IDs
-with their resulting buildroot info dicts.</p>
-<p>If results is non-None, it must support a dict-like update method,
-and will be used in place of a newly allocated OrderedDict to
-store and return the results.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_rpm_sigs">
-<code class="sig-name descname">bulk_load_rpm_sigs</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">rpm_ids</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_rpm_sigs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_rpm_sigs" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_rpm_sigs">
+<span class="sig-name descname"><span class="pre">bulk_load_rpm_sigs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rpm_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_rpm_sigs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_rpm_sigs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up a chunking multicall to fetch the signatures for a list of
 RPM via <code class="xref py py-obj docutils literal notranslate"><span class="pre">session.queryRPMSigs</span></code> for each ID in rpm_ids.</p>
 <p>Returns an OrderedDict associating the individual RPM IDs with their
@@ -599,33 +851,33 @@ and will be used in place of a newly allocated OrderedDict to
 store and return the results.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_tags">
-<code class="sig-name descname">bulk_load_tags</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tags</em>, <em class="sig-param">err=True</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_tags" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_tags">
+<span class="sig-name descname"><span class="pre">bulk_load_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_tags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Raise an exception if a tag fails to load. Default,
+<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Raise an exception if a tag fails to load. Default,
 True.</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) -- Count of tags to load in a single multicall. Default,
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) -- Count of tags to load in a single multicall. Default,
 100</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_tasks">
-<code class="sig-name descname">bulk_load_tasks</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">task_ids</em>, <em class="sig-param">request=False</em>, <em class="sig-param">err=True</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_tasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_tasks" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_tasks">
+<span class="sig-name descname"><span class="pre">bulk_load_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_tasks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load many taskinfo dicts from a koji client session and a sequence
 of task IDs.</p>
 <p>Returns an OrderedDict associating the individual IDs with their
 resulting taskinfo.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.bulk_load_users">
-<code class="sig-name descname">bulk_load_users</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">users</em>, <em class="sig-param">err=True</em>, <em class="sig-param">size=100</em>, <em class="sig-param">results=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_users"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.bulk_load_users" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.bulk_load_users">
+<span class="sig-name descname"><span class="pre">bulk_load_users</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">users</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#bulk_load_users"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.bulk_load_users" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load many userinfo dicts from a koji client session and a sequence of
 user identifiers.</p>
 <p>Returns an OrderedDict associating the individual identifiers with
@@ -640,20 +892,26 @@ return the results.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>session</strong> (<em>koji.ClientSession</em>) -- active koji session</p></li>
-<li><p><strong>users</strong> (<em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>] or </em><em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) -- user names or IDs to load</p></li>
-<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- halt on problems and raise an exception. Default, True</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) -- number of users to load in a single
+<li><p><strong>users</strong> (<em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>] or </em><em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) -- user names or IDs to load</p></li>
+<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- halt on problems and raise an exception. Default, True</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) -- number of users to load in a single
 multicall. Default, 100</p></li>
-<li><p><strong>results</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>, </em><em>optional</em>) -- dict to store results in. Default, allocate a new
+<li><p><strong>results</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>optional</em>) -- dict to store results in. Default, allocate a new
 OrderedDict</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.hub_version">
-<code class="sig-name descname">hub_version</code><span class="sig-paren">(</span><em class="sig-param">session</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#hub_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.hub_version" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.hub_version">
+<span class="sig-name descname"><span class="pre">hub_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#hub_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.hub_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for <code class="docutils literal notranslate"><span class="pre">session.getKojiVersion</span></code> which caches the results on
 the session and splits the value into a tuple of ints for easy
 comparison.</p>
@@ -661,15 +919,21 @@ comparison.</p>
 presume that we're version 1.22 <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">22)</span></code> which is the last
 version before getKojiVersion was added.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>session</strong> -- an active koji client session</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>]</p>
+</dd>
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.iter_bulk_load">
-<code class="sig-name descname">iter_bulk_load</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">loadfn</em>, <em class="sig-param">keys</em>, <em class="sig-param">err=True</em>, <em class="sig-param">size=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#iter_bulk_load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.iter_bulk_load" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.iter_bulk_load">
+<span class="sig-name descname"><span class="pre">iter_bulk_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadfn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#iter_bulk_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.iter_bulk_load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generic bulk loading generator. Invokes the given loadfn on each
 key in keys using chunking multicalls limited to the specified
 size.</p>
@@ -681,12 +945,12 @@ the failing key.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>session</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">koji.ClientSession</span></code>) -- The koji session</p></li>
-<li><p><strong>loadfn</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em>) -- The loading function, to be invoked in a multicall
+<li><p><strong>loadfn</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em>) -- The loading function, to be invoked in a multicall
 arrangement. Will be called once with each given key from keys</p></li>
-<li><p><strong>keys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a><em>]</em>) -- The sequence of keys to be used to invoke loadfn.</p></li>
-<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Whether to raise any underlying fault returns as
+<li><p><strong>keys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em>) -- The sequence of keys to be used to invoke loadfn.</p></li>
+<li><p><strong>err</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Whether to raise any underlying fault returns as
 exceptions. Default, True</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) -- How many calls to loadfn to chunk up for each
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) -- How many calls to loadfn to chunk up for each
 multicall. Default, 100</p></li>
 </ul>
 </dd>
@@ -695,14 +959,14 @@ multicall. Default, 100</p></li>
 occurrs while invoking the loadfn</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Generator[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)">object</a>]]</p>
+<dd class="field-odd"><p>Generator[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)">object</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.version_check">
-<code class="sig-name descname">version_check</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">minimum=(1</em>, <em class="sig-param">23)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#version_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.version_check" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.version_check">
+<span class="sig-name descname"><span class="pre">version_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">23)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#version_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.version_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verifies that the requested minimum version is met compared
 against session.getKojiVersion.</p>
 <p>If the getKojiVersion method isn't implemented on the hub, we
@@ -713,17 +977,23 @@ versions lower than 1.23 will always return True.</p>
 <span class="pre">23)</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>minimum</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) -- Minimum version required. Default, <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">23)</span></code></p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>minimum</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) -- Minimum version required. Default, <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">23)</span></code></p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+</dd>
+<dt class="field-odd">Since</dt>
+<dd class="field-odd"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.version_require">
-<code class="sig-name descname">version_require</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">minimum=(1</em>, <em class="sig-param">23)</em>, <em class="sig-param">message=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#version_require"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.version_require" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.version_require">
+<span class="sig-name descname"><span class="pre">version_require</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">23)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#version_require"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.version_require" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verifies that the requested minimum version is met compared
 against <code class="docutils literal notranslate"><span class="pre">session.getKojiVersion()</span></code></p>
 <p>If the getKojiVersion method isn't implemented on the hub, we
@@ -738,8 +1008,9 @@ provided, a simple one is constructed based on the minimum value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>minimum</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) -- Minimum version required. Default, <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">23)</span></code></p></li>
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- Message to use in exception if version check
+<li><p><strong>session</strong> -- an active koji client session</p></li>
+<li><p><strong>minimum</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) -- Minimum version required. Default, <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">23)</span></code></p></li>
+<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- Message to use in exception if version check
 fails. Default, with a minimum of <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">23)</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;requires</span> <span class="pre">&gt;=</span>
 <span class="pre">1.23&quot;</span></code></p></li>
 </ul>
@@ -748,7 +1019,10 @@ fails. Default, with a minimum of <code class="docutils literal notranslate"><sp
 <dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.FeatureUnavailable" title="kojismokydingo.FeatureUnavailable"><strong>FeatureUnavailable</strong></a> -- If the minimum version is not met</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+</dd>
+<dt class="field-even">Since</dt>
+<dd class="field-even"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
@@ -770,6 +1044,7 @@ fails. Default, with a minimum of <code class="docutils literal notranslate"><sp
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -805,7 +1080,7 @@ fails. Default, with a minimum of <code class="docutils literal notranslate"><sp
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -825,13 +1100,14 @@ fails. Default, with a minimum of <code class="docutils literal notranslate"><sp
         <li class="right" >
           <a href="../siftylang/" title="Sifty Dingo Filtering Language"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Core API Reference</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>koji open &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>koji open &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
     <link rel="next" title="koji perminfo" href="../perminfo/" />
@@ -39,8 +39,9 @@
         <li class="right" >
           <a href="../list-tag-extras/" title="koji list-tag-extras"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Plugin Commands</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Plugin Commands</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">koji open</a></li> 
       </ul>
     </div>  
 
@@ -51,33 +52,55 @@
             
   <div class="section" id="koji-open">
 <h1>koji open<a class="headerlink" href="#koji-open" title="Permalink to this headline">¶</a></h1>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>usage: koji open [-h] [--command COMMAND] TYPE KEY
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>usage: koji open [-h] [--command COMMAND | --print] TYPE KEY
 
 Launch web UI for koji data elements
 
 positional arguments:
-  TYPE                  The koji data element type. build, tag, target, user,
-                        host, rpm, archive, task
+  TYPE                  The koji data element type. Supported types: archive,
+                        build, build-dir, channel, host, package, repo, rpm,
+                        tag, tag-latest-dir, tag-repo-dir, target, task, user
   KEY                   The key for the given element type.
 
 optional arguments:
   -h, --help            show this help message and exit
   --command COMMAND, -c COMMAND
                         Command to exec with the discovered koji web URL
+  --print, -p           Print URL to stdout rather than executing a command
 </pre></div>
 </div>
 <p>Launch local web browser to the informational page for a given koji data
 element.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--command=COMMAND</span></code> option can be specified to pass the relevant
+URL to an arbitrary executable rather than the platform-default URL
+opener.  On linux, the default command is <code class="docutils literal notranslate"><span class="pre">xdg-open</span></code>, on macOS it is
+<code class="docutils literal notranslate"><span class="pre">open</span></code> and on Microsoft Windows it is <code class="docutils literal notranslate"><span class="pre">start</span></code>. The default can
+also be set as a plugin configuration as the value <code class="docutils literal notranslate"><span class="pre">command</span></code> under
+the <code class="docutils literal notranslate"><span class="pre">[open]</span></code> section header. The return code of the executed command
+will become the return code of the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">open</span></code> invocation.</p>
+<p>The types <code class="docutils literal notranslate"><span class="pre">archive</span></code>, <code class="docutils literal notranslate"><span class="pre">build</span></code>, <code class="docutils literal notranslate"><span class="pre">channel</span></code>, <code class="docutils literal notranslate"><span class="pre">host</span></code>, <code class="docutils literal notranslate"><span class="pre">package</span></code>,
+<code class="docutils literal notranslate"><span class="pre">repo</span></code>, <code class="docutils literal notranslate"><span class="pre">rpm</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">target</span></code>, <code class="docutils literal notranslate"><span class="pre">task</span></code>, and <code class="docutils literal notranslate"><span class="pre">user</span></code> all
+open the relevant koji web info page if a matching element could be
+found.</p>
+<p>The type <code class="docutils literal notranslate"><span class="pre">tag-latest-dir</span></code> accepts a tag as the argument, and will
+open the tag's latest repository directory.</p>
+<p>The type <code class="docutils literal notranslate"><span class="pre">tag-repo-dir</span></code> works similar to <code class="docutils literal notranslate"><span class="pre">tag-latest-dir</span></code> but
+points to the actual repo ID path rather than the <code class="docutils literal notranslate"><span class="pre">latest</span></code> symlink.</p>
+<p>The type <code class="docutils literal notranslate"><span class="pre">build-dir</span></code> accepts a build as the argument, and will open
+the storage directory for that build's archives and logs.</p>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.ClientOpen" title="kojismokydingo.cli.clients.ClientOpen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.cli.clients.ClientOpen</span></code></a></p></li>
 <li><p><a class="reference internal" href="../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.cli_open" title="kojismokydingo.cli.clients.cli_open"><code class="xref py py-func docutils literal notranslate"><span class="pre">kojismokydingo.cli.clients.cli_open()</span></code></a></p></li>
+<li><p><a class="reference internal" href="../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.get_open_command" title="kojismokydingo.cli.clients.get_open_command"><code class="xref py py-func docutils literal notranslate"><span class="pre">kojismokydingo.cli.clients.get_open_command()</span></code></a></p></li>
+<li><p><a class="reference internal" href="../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.get_open_url" title="kojismokydingo.cli.clients.get_open_url"><code class="xref py py-func docutils literal notranslate"><span class="pre">kojismokydingo.cli.clients.get_open_url()</span></code></a></p></li>
 </ul>
 </div>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -113,7 +136,7 @@ element.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -133,14 +156,15 @@ element.</p>
         <li class="right" >
           <a href="../list-tag-extras/" title="koji list-tag-extras"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" >Plugin Commands</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Plugin Commands</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">koji open</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

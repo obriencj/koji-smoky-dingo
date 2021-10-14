@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.clients &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>Koji Smoky Dingo 1.1.0 Release Notes &#8212; kojismokydingo 1.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -14,8 +14,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
-    <link rel="next" title="kojismokydingo.common" href="../common/" />
-    <link rel="prev" title="kojismokydingo.builds" href="../builds/" />
+    <link rel="next" title="Koji Smoky Dingo 1.0.0 Release Notes" href="../v1.0.0/" />
+    <link rel="prev" title="Release Notes" href="../" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -34,14 +34,14 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../common/" title="kojismokydingo.common"
+          <a href="../v1.0.0/" title="Koji Smoky Dingo 1.0.0 Release Notes"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../builds/" title="kojismokydingo.builds"
+          <a href="../" title="Release Notes"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Core API Reference</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">kojismokydingo.clients</a></li> 
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Release Notes</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Koji Smoky Dingo 1.1.0 Release Notes</a></li> 
       </ul>
     </div>  
 
@@ -50,31 +50,27 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-kojismokydingo.clients">
-<span id="kojismokydingo-clients"></span><h1>kojismokydingo.clients<a class="headerlink" href="#module-kojismokydingo.clients" title="Permalink to this headline">¶</a></h1>
-<p>Koji Smoky Dingo - Client Utils</p>
-<p>Some simple functions for working with the local client configuration</p>
-<dl class="field-list simple">
-<dt class="field-odd">author</dt>
-<dd class="field-odd"><p>Christopher O'Brien &lt;<a class="reference external" href="mailto:obriencj&#37;&#52;&#48;gmail&#46;com">obriencj<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
-</dd>
-<dt class="field-even">license</dt>
-<dd class="field-even"><p>GPL v3</p>
-</dd>
-</dl>
-<dl class="py function">
-<dt class="sig sig-object py" id="kojismokydingo.clients.rebuild_client_config">
-<span class="sig-name descname"><span class="pre">rebuild_client_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goptions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/clients/#rebuild_client_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.clients.rebuild_client_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reconstructs a koji client configuration based on the fields of a
-session and a session's goptions. Returns a tuple containing the
-active profile's name, and the configuration as a dict.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>)</p>
-</dd>
-</dl>
-</dd></dl>
-
+  <div class="section" id="koji-smoky-dingo-1-1-0-release-notes">
+<h1>Koji Smoky Dingo 1.1.0 Release Notes<a class="headerlink" href="#koji-smoky-dingo-1-1-0-release-notes" title="Permalink to this headline">¶</a></h1>
+<p><em>October 15, 2021</em></p>
+<p>This release adds the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">evr-high</span></code> and <code class="docutils literal notranslate"><span class="pre">evr-low</span></code> build filtering sieves. Reduces builds
+of the same package name to a single build of either the highest or
+lowest EVR, respectively</p></li>
+<li><p>fixed backtrace in the <code class="docutils literal notranslate"><span class="pre">latest-archives</span></code> command where the
+validate function was incompletely decorating a path option</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">as_channelinfo</span></code>, <code class="docutils literal notranslate"><span class="pre">as_packageinfo</span></code>, <code class="docutils literal notranslate"><span class="pre">as_repoinfo</span></code>,
+<code class="docutils literal notranslate"><span class="pre">NoSuchPackage</span></code>, <code class="docutils literal notranslate"><span class="pre">NoSuchRepo</span></code> to the core API</p></li>
+<li><p>Added support for more types to the <code class="docutils literal notranslate"><span class="pre">open</span></code> command: <code class="docutils literal notranslate"><span class="pre">channel</span></code>,
+<code class="docutils literal notranslate"><span class="pre">package</span></code>, <code class="docutils literal notranslate"><span class="pre">repo</span></code>, <code class="docutils literal notranslate"><span class="pre">build-dir</span></code>, <code class="docutils literal notranslate"><span class="pre">tag-repo-dir</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">tag-latest-dir</span></code></p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">--print</span></code> option to the open command</p></li>
+<li><p>Made the <code class="docutils literal notranslate"><span class="pre">open</span></code> command return the return code of the URL opening
+executable</p></li>
+</ul>
+<p>Closed Issues:
+&lt;<a class="reference external" href="https://github.com/obriencj/koji-smoky-dingo/milestone/8?closed=1">https://github.com/obriencj/koji-smoky-dingo/milestone/8?closed=1</a>&gt;</p>
 </div>
 
 
@@ -85,15 +81,15 @@ active profile's name, and the configuration as a dict.</p>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../builds/"
-                        title="previous chapter">kojismokydingo.builds</a></p>
+  <p class="topless"><a href="../"
+                        title="previous chapter">Release Notes</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../common/"
-                        title="next chapter">kojismokydingo.common</a></p>
+  <p class="topless"><a href="../v1.0.0/"
+                        title="next chapter">Koji Smoky Dingo 1.0.0 Release Notes</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/kojismokydingo/clients.rst.txt"
+      <li><a href="../../_sources/release_notes/v1.1.0.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -121,14 +117,14 @@ active profile's name, and the configuration as a dict.</p>
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../common/" title="kojismokydingo.common"
+          <a href="../v1.0.0/" title="Koji Smoky Dingo 1.0.0 Release Notes"
              >next</a> |</li>
         <li class="right" >
-          <a href="../builds/" title="kojismokydingo.builds"
+          <a href="../" title="Release Notes"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" >Core API Reference</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">kojismokydingo.clients</a></li> 
+          <li class="nav-item nav-item-1"><a href="../" >Release Notes</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Koji Smoky Dingo 1.1.0 Release Notes</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.sift.builds &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.sift.builds &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,10 +31,11 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.sift</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.sift</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.sift.builds</a></li> 
       </ul>
     </div>  
 
@@ -69,27 +70,30 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">koji</span> <span class="k">import</span> <span class="n">BUILD_STATES</span>
-<span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">itemgetter</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="nb">filter</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">BUILD_STATES</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">filter</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_SIEVES</span><span class="p">,</span>
     <span class="n">IntStrSieve</span><span class="p">,</span> <span class="n">ItemSieve</span><span class="p">,</span> <span class="n">MatcherSieve</span><span class="p">,</span> <span class="n">Number</span><span class="p">,</span> <span class="n">Sieve</span><span class="p">,</span>
     <span class="n">Sifter</span><span class="p">,</span> <span class="n">SifterError</span><span class="p">,</span> <span class="n">VariadicSieve</span><span class="p">,</span>
-    <span class="n">ensure_int_or_str</span><span class="p">,</span> <span class="n">ensure_str</span><span class="p">,</span> <span class="n">ensure_symbol</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.common</span> <span class="k">import</span> <span class="n">ensure_comparison</span><span class="p">,</span> <span class="n">CacheMixin</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">ensure_int</span><span class="p">,</span> <span class="n">ensure_int_or_str</span><span class="p">,</span> <span class="n">ensure_str</span><span class="p">,</span> <span class="n">ensure_symbol</span><span class="p">,</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">ensure_comparison</span><span class="p">,</span> <span class="n">CacheMixin</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">as_taginfo</span><span class="p">,</span> <span class="n">bulk_load_builds</span><span class="p">,</span> <span class="n">bulk_load_tags</span><span class="p">,</span> <span class="n">bulk_load_users</span><span class="p">,</span>
     <span class="n">iter_bulk_load</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..builds</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">..builds</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BuildNEVRCompare</span><span class="p">,</span>
-    <span class="n">build_dedup</span><span class="p">,</span> <span class="n">decorate_builds_btypes</span><span class="p">,</span> <span class="n">decorate_builds_cg_list</span><span class="p">,</span>
+    <span class="n">build_dedup</span><span class="p">,</span> <span class="n">build_nvr_sort</span><span class="p">,</span>
+    <span class="n">decorate_builds_btypes</span><span class="p">,</span> <span class="n">decorate_builds_cg_list</span><span class="p">,</span>
     <span class="n">decorate_builds_maven</span><span class="p">,</span> <span class="n">gather_rpm_sigkeys</span><span class="p">,</span> <span class="n">gavgetter</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..common</span> <span class="k">import</span> <span class="n">rpm_evr_compare</span><span class="p">,</span> <span class="n">unique</span>
-<span class="kn">from</span> <span class="nn">..tags</span> <span class="k">import</span> <span class="n">gather_tag_ids</span>
+<span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">rpm_evr_compare</span><span class="p">,</span> <span class="n">unique</span>
+<span class="kn">from</span> <span class="nn">..tags</span> <span class="kn">import</span> <span class="n">gather_tag_ids</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -105,6 +109,8 @@
     <span class="s2">&quot;EVRCompareLE&quot;</span><span class="p">,</span>
     <span class="s2">&quot;EVRCompareGT&quot;</span><span class="p">,</span>
     <span class="s2">&quot;EVRCompareGE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EVRHigh&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EVRLow&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ImportedSieve&quot;</span><span class="p">,</span>
     <span class="s2">&quot;InheritedSieve&quot;</span><span class="p">,</span>
     <span class="s2">&quot;LatestSieve&quot;</span><span class="p">,</span>
@@ -202,7 +208,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">StateSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">)</span>
 
         <span class="n">states</span> <span class="o">=</span> <span class="p">[]</span>
@@ -239,7 +245,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;owner&quot;</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">*</span><span class="n">users</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">*</span><span class="n">users</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">OwnerSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">*</span><span class="n">users</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_user_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -280,7 +286,7 @@
 <span class="sd">    * ``&lt;=``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">ensure_str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">EVRCompare</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">version</span>
@@ -312,7 +318,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">relative</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># we don&#39;t want to auto-quote the token which the default</span>
         <span class="c1"># Sieve impl does.</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;(&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span><span class="p">))</span>
@@ -438,6 +444,72 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&lt;=&quot;</span></div>
 
 
+<span class="k">class</span> <span class="nc">EVRSorted</span><span class="p">(</span><span class="n">Sieve</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EVRSorted</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">set_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">ensure_int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SifterError</span><span class="p">(</span><span class="s2">&quot;count must be greater than zero&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">count</span>
+
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">binfos</span><span class="p">):</span>
+
+        <span class="n">collect</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">bld</span> <span class="ow">in</span> <span class="n">binfos</span><span class="p">:</span>
+            <span class="n">collect</span><span class="p">[</span><span class="n">bld</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bld</span><span class="p">)</span>
+
+        <span class="n">reverse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reverse</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span>
+
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">binfos</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">collect</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">build_nvr_sort</span><span class="p">(</span><span class="n">binfos</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">binfos</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">collect</span><span class="p">):</span>
+                <span class="n">blds</span> <span class="o">=</span> <span class="n">build_nvr_sort</span><span class="p">(</span><span class="n">binfos</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">bld</span> <span class="ow">in</span> <span class="n">islice</span><span class="p">(</span><span class="n">blds</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">bld</span>
+
+
+<div class="viewcode-block" id="EVRHigh"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRHigh">[docs]</a><span class="k">class</span> <span class="nc">EVRHigh</span><span class="p">(</span><span class="n">EVRSorted</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    usage: (evr-high [count: COUNT])</span>
+
+<span class="sd">    Filters to only the builds which are the higest EVR of their given</span>
+<span class="sd">    package name.</span>
+
+<span class="sd">    COUNT if specified is the number of highest EVR builds to</span>
+<span class="sd">    return. Default is 1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;evr-high&quot;</span>
+    <span class="n">_reverse</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="EVRLow"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRLow">[docs]</a><span class="k">class</span> <span class="nc">EVRLow</span><span class="p">(</span><span class="n">EVRSorted</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    usage: (evr-low [count: COUNT])</span>
+
+<span class="sd">    Filters to only the builds which are the lowest EVR of their given</span>
+<span class="sd">    package name.</span>
+
+<span class="sd">    COUNT if specified is the number of lowest EVR builds to</span>
+<span class="sd">    return. Default is 1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;evr-low&quot;</span>
+    <span class="n">_reverse</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
 <div class="viewcode-block" id="TaggedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.TaggedSieve">[docs]</a><span class="k">class</span> <span class="nc">TaggedSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: (tagged [TAG...])</span>
@@ -499,7 +571,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;inherited&quot;</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">InheritedSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -540,7 +612,7 @@
 
 <span class="k">class</span> <span class="nc">PkgListSieve</span><span class="p">(</span><span class="n">IntStrSieve</span><span class="p">,</span> <span class="n">CacheMixin</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -634,7 +706,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">btype</span><span class="p">,</span> <span class="o">*</span><span class="n">btypes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">btype</span><span class="p">,</span> <span class="o">*</span><span class="n">btypes</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">TypeSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">btype</span><span class="p">,</span> <span class="o">*</span><span class="n">btypes</span><span class="p">)</span>
 
 
@@ -694,7 +766,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LatestSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -732,7 +804,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;latest-maven&quot;</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LatestMavenSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -831,7 +903,7 @@
 <span class="sd">    `comparison_key` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">comparison</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">comparison</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
         <span class="n">op</span> <span class="o">=</span> <span class="n">ensure_comparison</span><span class="p">(</span><span class="n">comparison</span><span class="p">)</span>
         <span class="n">tag</span> <span class="o">=</span> <span class="n">ensure_int_or_str</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
 
@@ -946,6 +1018,8 @@
     <span class="n">EVRCompareGE</span><span class="p">,</span>
     <span class="n">EVRCompareLT</span><span class="p">,</span>
     <span class="n">EVRCompareLE</span><span class="p">,</span>
+    <span class="n">EVRHigh</span><span class="p">,</span>
+    <span class="n">EVRLow</span><span class="p">,</span>
     <span class="n">ImportedSieve</span><span class="p">,</span>
     <span class="n">InheritedSieve</span><span class="p">,</span>
     <span class="n">LatestSieve</span><span class="p">,</span>
@@ -1033,6 +1107,7 @@
 <span class="c1"># The end.</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -1047,7 +1122,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1061,16 +1136,17 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.sift</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.sift</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.sift.builds</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

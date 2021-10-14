@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.cli &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.cli &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,9 +31,10 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli</a></li> 
       </ul>
     </div>  
 
@@ -69,24 +70,24 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">argparse</span> <span class="k">import</span> <span class="n">ArgumentParser</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">contextmanager</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">json</span> <span class="k">import</span> <span class="n">dump</span>
-<span class="kn">from</span> <span class="nn">koji</span> <span class="k">import</span> <span class="n">GenericError</span>
-<span class="kn">from</span> <span class="nn">koji_cli.lib</span> <span class="k">import</span> <span class="n">activate_session</span><span class="p">,</span> <span class="n">ensure_connection</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">devnull</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">basename</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">add_metaclass</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="n">StringIO</span><span class="p">,</span> <span class="nb">filter</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="n">zip_longest</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dump</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">GenericError</span>
+<span class="kn">from</span> <span class="nn">koji_cli.lib</span> <span class="kn">import</span> <span class="n">activate_session</span><span class="p">,</span> <span class="n">ensure_connection</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">devnull</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">basename</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">add_metaclass</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="n">StringIO</span><span class="p">,</span> <span class="nb">filter</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="n">zip_longest</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">BadDingo</span><span class="p">,</span> <span class="n">NotPermitted</span>
-<span class="kn">from</span> <span class="nn">..common</span> <span class="k">import</span> <span class="n">load_plugin_config</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">BadDingo</span><span class="p">,</span> <span class="n">NotPermitted</span>
+<span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">load_plugin_config</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -481,7 +482,7 @@
     <span class="n">permission</span> <span class="o">=</span> <span class="kc">None</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
@@ -614,7 +615,7 @@
                 <span class="k">pass</span></div>
 
 
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the koji CLI handler interface. The global options, the</span>
 <span class="sd">        session, and the unparsed command arguments are provided.</span>
@@ -670,7 +671,7 @@
     <span class="n">permission</span> <span class="o">=</span> <span class="kc">None</span>
 
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
         <span class="c1"># koji won&#39;t even bother fully authenticating our session for</span>
@@ -735,6 +736,7 @@
 <span class="c1"># The end.</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -749,7 +751,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -763,15 +765,16 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

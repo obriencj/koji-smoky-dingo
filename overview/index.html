@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>Overview &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Overview &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="next" title="Plugin Commands" href="../commands/" />
@@ -39,7 +39,8 @@
         <li class="right" >
           <a href="../" title="Koji Smoky Dingo"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Overview</a></li> 
       </ul>
     </div>  
 
@@ -228,7 +229,7 @@ into the default site-packages for the python installation.</p>
 <p>If using an RPM-based distribution, this is easily achieved using the
 included spec to produce an RPM and install that.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-1.0.0-1.fc32.noarch.rpm
+dnf install dist/noarch/python3-kojismokydingo-1.1.0-1.fc32.noarch.rpm
 </pre></div>
 </div>
 </div>
@@ -238,11 +239,11 @@ dnf install dist/noarch/python3-kojismokydingo-1.0.0-1.fc32.noarch.rpm
 achieve this by specifying the specific root or prefix parameter</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Python 2.7 global install</span>
 python2 setup.py bdist_wheel
-pip2 install --prefix /usr -I dist/kojismokydingo-1.0.0-py2-none-any.whl
+pip2 install --prefix /usr -I dist/kojismokydingo-1.1.0-py2-none-any.whl
 
 <span class="c1"># Python 3 global install</span>
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-1.0.0-py3-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-1.1.0-py3-none-any.whl
 </pre></div>
 </div>
 </div>
@@ -253,7 +254,7 @@ install it anywhere and tell koji to look in that particular
 <code class="docutils literal notranslate"><span class="pre">site-package/koji_cli_plugins</span></code> instance</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Python 3 user install</span>
 python3 setup.py bdist_wheel
-pip3 install --user -I dist/kojismokydingo-1.0.0-py3-none-any.whl
+pip3 install --user -I dist/kojismokydingo-1.1.0-py3-none-any.whl
 </pre></div>
 </div>
 <p>And the following setting in ~/.koji/config assuming Python version 3.7
@@ -269,7 +270,7 @@ use the meta plugin with.</p>
 <a class="reference external" href="https://docs.pagure.org/koji/release_notes/release_notes_1.18/">1.18</a>,
 the meta plugin can also be symlinked into <code class="docutils literal notranslate"><span class="pre">~/.koji/plugins</span></code></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p ~/.koji/plugins
-ln -s ~/.local/lib/python3.7/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+ln -s ~/.local/lib/python<span class="k">$(</span>python3 -c <span class="s1">&#39;import sys; print(&quot;{}.{}&quot;.format(*sys.version_info))&#39;</span><span class="k">)</span>/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
 </pre></div>
 </div>
 </div>
@@ -296,6 +297,7 @@ with this library; if not, see <a class="reference external" href="http://www.gn
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -341,7 +343,7 @@ with this library; if not, see <a class="reference external" href="http://www.gn
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -361,13 +363,14 @@ with this library; if not, see <a class="reference external" href="http://www.gn
         <li class="right" >
           <a href="../" title="Koji Smoky Dingo"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Overview</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

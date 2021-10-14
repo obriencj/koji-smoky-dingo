@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>Sifty Dingo Filtering Language &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sifty Dingo Filtering Language &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="next" title="Core API Reference" href="../kojismokydingo/" />
@@ -39,7 +39,8 @@
         <li class="right" >
           <a href="../standalone/ksd-filter-tags/" title="ksd-filter-tags"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Sifty Dingo Filtering Language</a></li> 
       </ul>
     </div>  
 
@@ -167,7 +168,7 @@ possible product, it will become a simple Symbol.</p>
 <p>A string is quoted with matching <code class="docutils literal notranslate"><span class="pre">'&quot;'</span></code> characters. Normal escape
 sequences are honored.</p>
 <p>Strings may interpolate variables from the sifter at compile time
-using Python's <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str.format" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str.format</span></code></a> markup rules.</p>
+using Python's <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str.format" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str.format</span></code></a> markup rules.</p>
 </div>
 <div class="section" id="regex">
 <h3>Regex<a class="headerlink" href="#regex" title="Permalink to this headline">¶</a></h3>
@@ -384,6 +385,28 @@ result in a <a class="reference internal" href="../kojismokydingo/#kojismokyding
 </div>
 <p>Filters for builds whose epoch value matches any of the given <code class="docutils literal notranslate"><span class="pre">EPOCH</span></code>
 patterns.</p>
+</div>
+<div class="section" id="build-predicate-evr-high">
+<h3>Build Predicate <code class="docutils literal notranslate"><span class="pre">evr-high</span></code><a class="headerlink" href="#build-predicate-evr-high" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(evr-high [count: COUNT])
+</pre></div>
+</div>
+<p>Filters for builds with the highest EVR for each package name among
+the original series.</p>
+<p><code class="docutils literal notranslate"><span class="pre">COUNT</span></code> if specified must be a positive integer greater than zero,
+representing the maximum number of highest-EVR builds to match for
+each package name. Default behavior is a count of 1 (highest only).</p>
+</div>
+<div class="section" id="build-predicate-evr-low">
+<h3>Build Predicate <code class="docutils literal notranslate"><span class="pre">evr-low</span></code><a class="headerlink" href="#build-predicate-evr-low" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(evr-low [count: COUNT])
+</pre></div>
+</div>
+<p>Filters the builds to only the lowest EVR for each package name among
+the original series.</p>
+<p><code class="docutils literal notranslate"><span class="pre">COUNT</span></code> if specified must be a positive integer greater than zero,
+representing the maximum number of lowest-EVR builds to match for
+each package name. Default behavior is a count of 1 (lowest only).</p>
 </div>
 <div class="section" id="build-predicate-imported">
 <h3>Build Predicate <code class="docutils literal notranslate"><span class="pre">imported</span></code><a class="headerlink" href="#build-predicate-imported" title="Permalink to this headline">¶</a></h3>
@@ -768,6 +791,7 @@ of Sieve classes, under the group named
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -803,6 +827,8 @@ of Sieve classes, under the group named
 <li><a class="reference internal" href="#build-predicate-compare-latest-id">Build Predicate <code class="docutils literal notranslate"><span class="pre">compare-latest-id</span></code></a></li>
 <li><a class="reference internal" href="#build-predicate-compare-latest-nvr">Build Predicate <code class="docutils literal notranslate"><span class="pre">compare-latest-nvr</span></code></a></li>
 <li><a class="reference internal" href="#build-predicate-epoch">Build Predicate <code class="docutils literal notranslate"><span class="pre">epoch</span></code></a></li>
+<li><a class="reference internal" href="#build-predicate-evr-high">Build Predicate <code class="docutils literal notranslate"><span class="pre">evr-high</span></code></a></li>
+<li><a class="reference internal" href="#build-predicate-evr-low">Build Predicate <code class="docutils literal notranslate"><span class="pre">evr-low</span></code></a></li>
 <li><a class="reference internal" href="#build-predicate-imported">Build Predicate <code class="docutils literal notranslate"><span class="pre">imported</span></code></a></li>
 <li><a class="reference internal" href="#build-predicate-inherited">Build Predicate <code class="docutils literal notranslate"><span class="pre">inherited</span></code></a></li>
 <li><a class="reference internal" href="#build-predicate-latest">Build Predicate <code class="docutils literal notranslate"><span class="pre">latest</span></code></a></li>
@@ -869,7 +895,7 @@ of Sieve classes, under the group named
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -889,13 +915,14 @@ of Sieve classes, under the group named
         <li class="right" >
           <a href="../standalone/ksd-filter-tags/" title="ksd-filter-tags"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Sifty Dingo Filtering Language</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

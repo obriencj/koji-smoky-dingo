@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.sift.parse &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.sift.parse &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,10 +31,11 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.sift</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.sift</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.sift.parse</a></li> 
       </ul>
     </div>  
 
@@ -70,15 +71,15 @@
 
 <span class="kn">import</span> <span class="nn">re</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span>
-<span class="kn">from</span> <span class="nn">codecs</span> <span class="k">import</span> <span class="n">decode</span>
-<span class="kn">from</span> <span class="nn">fnmatch</span> <span class="k">import</span> <span class="n">translate</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">product</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">add_metaclass</span><span class="p">,</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="n">StringIO</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span>
+<span class="kn">from</span> <span class="nn">codecs</span> <span class="kn">import</span> <span class="n">decode</span>
+<span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">translate</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">add_metaclass</span><span class="p">,</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="n">StringIO</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">range</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">BadDingo</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">BadDingo</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -125,15 +126,15 @@
 <span class="sd">    ``None``. Matches only with the python None value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span>
 
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;null&quot;</span>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;Null()&quot;</span></div>
 
 
@@ -143,7 +144,7 @@
 <span class="sd">    with python str instances.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;Symbol(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
@@ -158,12 +159,12 @@
 <span class="sd">    * ``foo-{1..3}`` is equal to any of foo-1, foo-2, foo-3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="n">src</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span>
 
 
-    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">,</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">NUMBER_RE</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">Number</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
@@ -171,11 +172,11 @@
                 <span class="k">yield</span> <span class="n">Symbol</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="o">==</span> <span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;SymbolGroup(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">src</span></div>
 
 
@@ -185,7 +186,7 @@
 <span class="sd">    sequence.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">seq</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">seq</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param fmt: formatting to apply</span>
 <span class="sd">        :type fmt: str</span>
@@ -199,11 +200,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_seq</span> <span class="o">=</span> <span class="n">seq</span>
 
 
-    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fmt</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seq</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seq</span><span class="p">)</span>
 
 
@@ -213,7 +214,7 @@
 <span class="sd">    both the python int and str types.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">NUMBER_RE</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
@@ -221,7 +222,7 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;Number(</span><span class="si">%i</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span></div>
 
 
@@ -235,7 +236,7 @@
 <span class="sd">    * ``/.*foo$/i`` is a case-insensitive match for text ending in foo</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_src</span> <span class="o">=</span> <span class="n">src</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flagstr</span> <span class="o">=</span> <span class="n">flags</span>
 
@@ -247,18 +248,18 @@
             <span class="k">raise</span> <span class="n">RegexError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
 
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_src</span>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flagstr</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;Regex(</span><span class="si">%r</span><span class="s2">, flags=</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flagstr</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -275,24 +276,24 @@
 <span class="sd">    * ``|*foo|i`` is a case-insensitive match for text ending in foo</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">ignorecase</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">ignorecase</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_src</span> <span class="o">=</span> <span class="n">src</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ignorecase</span> <span class="o">=</span> <span class="n">ignorecase</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">translate</span><span class="p">(</span><span class="n">src</span><span class="p">),</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span> <span class="k">if</span> <span class="n">ignorecase</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_src</span>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ignorecase</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;Glob(</span><span class="si">%r</span><span class="s2">, ignorecase=True)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_src</span>
         <span class="k">else</span><span class="p">:</span>
@@ -304,7 +305,7 @@
 <span class="sd">    Seeks path members by an int or str key.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -327,7 +328,7 @@
             <span class="k">pass</span></div>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span></div>
 
 
@@ -354,7 +355,7 @@
 <span class="sd">    Seeks all path members</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
 
@@ -365,7 +366,7 @@
             <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;AllItems()&quot;</span></div>
 
 
@@ -375,7 +376,7 @@
 <span class="sd">    and dicts</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">paths</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
@@ -397,13 +398,13 @@
         <span class="k">return</span> <span class="n">work</span></div>
 
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;ItemPath(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Reader"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Reader">[docs]</a><span class="k">class</span> <span class="nc">Reader</span><span class="p">(</span><span class="n">StringIO</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
         <span class="c1"># overridden to mandate a source for read-mode. But we cannot</span>
         <span class="c1"># use super due to our py2 support, where StringIO is an</span>
         <span class="c1"># old-style class.</span>
@@ -905,6 +906,7 @@
 <span class="c1"># The end.</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -919,7 +921,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -933,16 +935,17 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.sift</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.sift</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.sift.parse</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

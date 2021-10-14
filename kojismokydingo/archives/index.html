@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.archives &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.archives &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
     <link rel="next" title="kojismokydingo.builds" href="../builds/" />
@@ -39,8 +39,9 @@
         <li class="right" >
           <a href="../" title="Core API Reference"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Core API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Core API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.archives</a></li> 
       </ul>
     </div>  
 
@@ -61,9 +62,9 @@ representing RPMs and build archives</p>
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
-<dl class="function">
-<dt id="kojismokydingo.archives.as_pathinfo">
-<code class="sig-name descname">as_pathinfo</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#as_pathinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.as_pathinfo" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.as_pathinfo">
+<span class="sig-name descname"><span class="pre">as_pathinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#as_pathinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.as_pathinfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts path into a PathInfo if it is not one already</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -72,29 +73,29 @@ representing RPMs and build archives</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.filter_archives">
-<code class="sig-name descname">filter_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">archives</em>, <em class="sig-param">archive_types=()</em>, <em class="sig-param">arches=()</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#filter_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.filter_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.filter_archives">
+<span class="sig-name descname"><span class="pre">filter_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archives</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archive_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#filter_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.filter_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of archives (or RPMs dressed up like archives),
 return a new list of those archives which are of the given archive
 types.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>archives</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>]</em>) -- Archive infos to be filtered</p></li>
-<li><p><strong>archive_types</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) -- Desired archive type extensions</p></li>
-<li><p><strong>arches</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) -- Desired architectures</p></li>
+<li><p><strong>archives</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>]</em>) -- Archive infos to be filtered</p></li>
+<li><p><strong>archive_types</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) -- Desired archive type extensions</p></li>
+<li><p><strong>arches</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) -- Desired architectures</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Iterator[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p>Iterator[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_build_archives">
-<code class="sig-name descname">gather_build_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">binfo</em>, <em class="sig-param">btype=None</em>, <em class="sig-param">rpmkeys=()</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_build_archives">
+<span class="sig-name descname"><span class="pre">gather_build_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binfo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">btype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rpmkeys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Produce a list of archive dicts associated with a build info,
 optionally filtered by build-type and signing keys (for RPMs). The
 archives will be decorated with an additional &quot;filepath&quot; entry,
@@ -106,140 +107,140 @@ attempt to homogenize them together.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>binfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- Build info to fetch archives for</p></li>
-<li><p><strong>btype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- BType to filter for. Default None for all types.</p></li>
-<li><p><strong>rpmkeys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) -- RPM signatures to filter for, in order of
+<li><p><strong>binfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- Build info to fetch archives for</p></li>
+<li><p><strong>btype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- BType to filter for. Default None for all types.</p></li>
+<li><p><strong>rpmkeys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) -- RPM signatures to filter for, in order of
 preference. An empty string matches the unsigned copy. Default
 () for no signature filtering.</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_build_image_archives">
-<code class="sig-name descname">gather_build_image_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">binfo</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_image_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_image_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_build_image_archives">
+<span class="sig-name descname"><span class="pre">gather_build_image_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binfo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_image_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_image_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gathers a list of image archives for a given build_info. The
 archive records are augmented with an additional &quot;filepath&quot; entry,
 the value of which is an expanded path to the file itself.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>binfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- Build info to fetch archives for</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
+<li><p><strong>binfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- Build info to fetch archives for</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_build_maven_archives">
-<code class="sig-name descname">gather_build_maven_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">binfo</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_maven_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_maven_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_build_maven_archives">
+<span class="sig-name descname"><span class="pre">gather_build_maven_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binfo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_maven_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_maven_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gathers a list of maven archives for a given build_info. The
 archive records are augmented with an additional &quot;filepath&quot; entry,
 the value of which is an expanded path to the file itself.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>binfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- Build info to fetch archives for</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
+<li><p><strong>binfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- Build info to fetch archives for</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_build_rpms">
-<code class="sig-name descname">gather_build_rpms</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">binfo</em>, <em class="sig-param">rpmkeys=()</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_rpms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_rpms" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_build_rpms">
+<span class="sig-name descname"><span class="pre">gather_build_rpms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binfo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rpmkeys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_rpms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_rpms" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_build_win_archives">
-<code class="sig-name descname">gather_build_win_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">binfo</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_win_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_win_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_build_win_archives">
+<span class="sig-name descname"><span class="pre">gather_build_win_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binfo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_build_win_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_build_win_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gathers a list of Windows archives for a given build_info. The
 archive records are augmented with an additional &quot;filepath&quot; entry,
 the value of which is an expanded path to the file itself.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>binfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) -- Build info to fetch archives for</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
+<li><p><strong>binfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- Build info to fetch archives for</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_latest_archives">
-<code class="sig-name descname">gather_latest_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tagname</em>, <em class="sig-param">btype=None</em>, <em class="sig-param">rpmkeys=()</em>, <em class="sig-param">inherit=True</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_latest_archives">
+<span class="sig-name descname"><span class="pre">gather_latest_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tagname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">btype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rpmkeys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gather the latest archives from a tag heirarchy. Rules for what
 constitutes &quot;latest&quot; may change slightly depending on the archive
 types -- specifically maven.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tagname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- Name of the tag to gather archives from</p></li>
-<li><p><strong>btype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- Name of the BType to gather. Default, gather all</p></li>
-<li><p><strong>rpmkeys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) -- List of RPM signatures to filter by. Only used when
+<li><p><strong>tagname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Name of the tag to gather archives from</p></li>
+<li><p><strong>btype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- Name of the BType to gather. Default, gather all</p></li>
+<li><p><strong>rpmkeys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) -- List of RPM signatures to filter by. Only used when
 fetching type of rpm or None (all).</p></li>
-<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- Path prefix for archive filepaths.</p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Path prefix for archive filepaths.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="../#kojismokydingo.NoSuchTag" title="kojismokydingo.NoSuchTag"><strong>NoSuchTag</strong></a> -- if specified tag doesn't exist</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_latest_image_archives">
-<code class="sig-name descname">gather_latest_image_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tagname</em>, <em class="sig-param">inherit=True</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_image_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_image_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_latest_image_archives">
+<span class="sig-name descname"><span class="pre">gather_latest_image_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tagname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_image_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_image_archives" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p>
+<dd class="field-odd"><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_latest_maven_archives">
-<code class="sig-name descname">gather_latest_maven_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tagname</em>, <em class="sig-param">inherit=True</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_maven_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_maven_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_latest_maven_archives">
+<span class="sig-name descname"><span class="pre">gather_latest_maven_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tagname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_maven_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_maven_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similar to session.getLatestMavenArchives(tagname) but augments
 the results to include a new &quot;filepath&quot; entry which will point to
 the matching maven artifact's file location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tagname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- Name of the tag to search in for maven artifacts</p></li>
-<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p></li>
+<li><p><strong>tagname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Name of the tag to search in for maven artifacts</p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_latest_rpms">
-<code class="sig-name descname">gather_latest_rpms</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tagname</em>, <em class="sig-param">rpmkeys=()</em>, <em class="sig-param">iherit=True</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_rpms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_rpms" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_latest_rpms">
+<span class="sig-name descname"><span class="pre">gather_latest_rpms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tagname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rpmkeys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_rpms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_rpms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similar to session.getLatestRPMS(tagname) but will filter by
 available signatures, and augments the results to include a new
 &quot;filepath&quot; entry which will point to the matching RPM file
@@ -247,42 +248,42 @@ location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tagname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- Name of the tag to search in for RPMs</p></li>
-<li><p><strong>rpmkeys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) -- RPM signatures to filter for, in order of
+<li><p><strong>tagname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Name of the tag to search in for RPMs</p></li>
+<li><p><strong>rpmkeys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) -- RPM signatures to filter for, in order of
 preference. An empty string matches the unsigned copy. Default
 () for no signature filtering.</p></li>
-<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- The root dir for the archive file paths, default None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_latest_win_archives">
-<code class="sig-name descname">gather_latest_win_archives</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tagname</em>, <em class="sig-param">inherit=True</em>, <em class="sig-param">path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_win_archives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_win_archives" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_latest_win_archives">
+<span class="sig-name descname"><span class="pre">gather_latest_win_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tagname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_latest_win_archives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_latest_win_archives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similar to session.listTaggedArchives(tagname, type=&quot;win&quot;) but
 augments the results to include a new &quot;filepath&quot; entry which will
 point to the matching maven artifact's file location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tagname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) -- Name of the tag to search in for maven artifacts</p></li>
-<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p></li>
+<li><p><strong>tagname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Name of the tag to search in for maven artifacts</p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Follow tag inheritance, default True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.archives.gather_signed_rpms">
-<code class="sig-name descname">gather_signed_rpms</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">archives</em>, <em class="sig-param">sigkeys</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_signed_rpms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.archives.gather_signed_rpms" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.archives.gather_signed_rpms">
+<span class="sig-name descname"><span class="pre">gather_signed_rpms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archives</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigkeys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/archives/#gather_signed_rpms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.archives.gather_signed_rpms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of RPM archive dicts, query the session for all the
 pertinent signature headers, then try and find the best matching
 signed copy of each RPM. An empty string at the end of sigkeys
@@ -291,13 +292,13 @@ match.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>archives</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>]</em>) -- list of RPM archive dicts</p></li>
-<li><p><strong>sigkeys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) -- list of signature fingerprints, in order of
+<li><p><strong>archives</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>]</em>) -- list of RPM archive dicts</p></li>
+<li><p><strong>sigkeys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) -- list of signature fingerprints, in order of
 precedence</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -305,6 +306,7 @@ precedence</p></li>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -332,7 +334,7 @@ precedence</p></li>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -352,14 +354,15 @@ precedence</p></li>
         <li class="right" >
           <a href="../" title="Core API Reference"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" >Core API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Core API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.archives</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

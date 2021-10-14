@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.builds &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.builds &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,9 +31,10 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.builds</a></li> 
       </ul>
     </div>  
 
@@ -67,21 +68,21 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">repeat</span>
-<span class="kn">from</span> <span class="nn">koji</span> <span class="k">import</span> <span class="n">BUILD_STATES</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">itemgetter</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="nb">filter</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">repeat</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">BUILD_STATES</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">filter</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">NoSuchBuild</span><span class="p">,</span>
     <span class="n">as_buildinfo</span><span class="p">,</span> <span class="n">as_taginfo</span><span class="p">,</span>
     <span class="n">bulk_load</span><span class="p">,</span> <span class="n">bulk_load_build_archives</span><span class="p">,</span> <span class="n">bulk_load_build_rpms</span><span class="p">,</span>
     <span class="n">bulk_load_builds</span><span class="p">,</span> <span class="n">bulk_load_buildroots</span><span class="p">,</span>
     <span class="n">bulk_load_buildroot_archives</span><span class="p">,</span> <span class="n">bulk_load_buildroot_rpms</span><span class="p">,</span>
     <span class="n">bulk_load_rpm_sigs</span><span class="p">,</span> <span class="n">bulk_load_tasks</span><span class="p">,</span> <span class="n">iter_bulk_load</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.common</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">chunkseq</span><span class="p">,</span> <span class="n">merge_extend</span><span class="p">,</span> <span class="n">rpm_evr_compare</span><span class="p">,</span>
     <span class="n">unique</span><span class="p">,</span> <span class="n">update_extend</span><span class="p">,</span> <span class="p">)</span>
 
@@ -137,7 +138,7 @@
 <span class="sd">    build info dictionary. Used by the nevr_sort_builds function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binfo</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binfo</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">build</span> <span class="o">=</span> <span class="n">binfo</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">binfo</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
 
@@ -160,31 +161,31 @@
             <span class="k">return</span> <span class="mi">1</span>
 
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cmp__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
 
 
-    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cmp__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
 
 
-    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cmp__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span>
 
 
-    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cmp__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span>
 
 
-    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cmp__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
 
-    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cmp__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="build_nvr_sort"><a class="viewcode-back" href="../../../kojismokydingo/builds/#kojismokydingo.builds.build_nvr_sort">[docs]</a><span class="k">def</span> <span class="nf">build_nvr_sort</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">dedup</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="build_nvr_sort"><a class="viewcode-back" href="../../../kojismokydingo/builds/#kojismokydingo.builds.build_nvr_sort">[docs]</a><span class="k">def</span> <span class="nf">build_nvr_sort</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">dedup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a sequence of build info dictionaries, sort them by Name,</span>
 <span class="sd">    Epoch, Version, and Release using RPM&#39;s variation of comparison</span>
@@ -200,6 +201,9 @@
 <span class="sd">    :param dedup: remove duplicate entries. Default, True</span>
 <span class="sd">    :type dedup: bool, optional</span>
 
+<span class="sd">    :param reverse: reverse the sorting. Default, False</span>
+<span class="sd">    :type reverse: bool, optional</span>
+
 <span class="sd">    :rtype: list[dict]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -208,10 +212,10 @@
     <span class="k">if</span> <span class="n">dedup</span><span class="p">:</span>
         <span class="n">build_infos</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">BuildNEVRCompare</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">BuildNEVRCompare</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="build_id_sort"><a class="viewcode-back" href="../../../kojismokydingo/builds/#kojismokydingo.builds.build_id_sort">[docs]</a><span class="k">def</span> <span class="nf">build_id_sort</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">dedup</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="build_id_sort"><a class="viewcode-back" href="../../../kojismokydingo/builds/#kojismokydingo.builds.build_id_sort">[docs]</a><span class="k">def</span> <span class="nf">build_id_sort</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">dedup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a sequence of build info dictionaries, return a de-duplicated</span>
 <span class="sd">    list of same, sorted by the build ID</span>
@@ -224,6 +228,9 @@
 <span class="sd">    :param dedup: remove duplicate entries. Default, True</span>
 <span class="sd">    :type dedup: bool, optional</span>
 
+<span class="sd">    :param reverse: reverse the sorting. Default, False</span>
+<span class="sd">    :type reverse: bool, optional</span>
+
 <span class="sd">    :rtype: list[dict]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -232,7 +239,7 @@
     <span class="k">if</span> <span class="n">dedup</span><span class="p">:</span>
         <span class="n">build_infos</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">build_infos</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="build_dedup"><a class="viewcode-back" href="../../../kojismokydingo/builds/#kojismokydingo.builds.build_dedup">[docs]</a><span class="k">def</span> <span class="nf">build_dedup</span><span class="p">(</span><span class="n">build_infos</span><span class="p">):</span>
@@ -1323,7 +1330,7 @@
 
 <div class="viewcode-block" id="BuildFilter"><a class="viewcode-back" href="../../../kojismokydingo/builds/#kojismokydingo.builds.BuildFilter">[docs]</a><span class="k">class</span> <span class="nc">BuildFilter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
                  <span class="n">limit_tag_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lookaside_tag_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">imported</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cg_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">btypes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1415,7 +1422,7 @@
         <span class="k">return</span> <span class="n">build_infos</span></div>
 
 
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">build_infos</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">build_infos</span><span class="p">):</span>
         <span class="c1"># TODO: could we add some caching to this, such that we</span>
         <span class="c1"># associate the build ID with a bool indicating whether it&#39;s</span>
         <span class="c1"># been filtered before and whether it was included (True) or</span>
@@ -1444,6 +1451,7 @@
 <span class="c1"># The end.</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -1458,7 +1466,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1472,15 +1480,16 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.builds</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>

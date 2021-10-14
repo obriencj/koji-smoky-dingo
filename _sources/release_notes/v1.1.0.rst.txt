@@ -1,0 +1,24 @@
+Koji Smoky Dingo 1.1.0 Release Notes
+====================================
+
+*October 15, 2021*
+
+This release adds the following:
+
+- ``evr-high`` and ``evr-low`` build filtering sieves. Reduces builds
+  of the same package name to a single build of either the highest or
+  lowest EVR, respectively
+- fixed backtrace in the ``latest-archives`` command where the
+  validate function was incompletely decorating a path option
+- Added ``as_channelinfo``, ``as_packageinfo``, ``as_repoinfo``,
+  ``NoSuchPackage``, ``NoSuchRepo`` to the core API
+- Added support for more types to the ``open`` command: ``channel``,
+  ``package``, ``repo``, ``build-dir``, ``tag-repo-dir``, and
+  ``tag-latest-dir``
+- Added ``--print`` option to the open command
+- Made the ``open`` command return the return code of the URL opening
+  executable
+
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/8?closed=1>

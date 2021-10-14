@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+<html lang="English">
   <head>
     <meta charset="utf-8" />
-    <title>kojismokydingo.cli.builds &#8212; kojismokydingo 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/pyramid.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.cli.builds &#8212; kojismokydingo 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="kojismokydingo.cli.clients" href="../clients/" />
@@ -39,8 +39,9 @@
         <li class="right" >
           <a href="../archives/" title="kojismokydingo.cli.archives"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" accesskey="U">CLI API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">CLI API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli.builds</a></li> 
       </ul>
     </div>  
 
@@ -60,252 +61,253 @@
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
-<dl class="class">
-<dt id="kojismokydingo.cli.builds.BuildFiltering">
-<em class="property">class </em><code class="sig-name descname">BuildFiltering</code><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BuildFiltering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BuildFiltering" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BuildFiltering">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">BuildFiltering</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BuildFiltering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BuildFiltering" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../sift/#kojismokydingo.cli.sift.BuildSifting" title="kojismokydingo.cli.sift.BuildSifting"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.sift.BuildSifting</span></code></a></p>
 <p>Base class for commands which use build filtering options</p>
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.BuildFiltering.filtering_arguments">
-<code class="sig-name descname">filtering_arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BuildFiltering.filtering_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BuildFiltering.filtering_arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BuildFiltering.filtering_arguments">
+<span class="sig-name descname"><span class="pre">filtering_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BuildFiltering.filtering_arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BuildFiltering.filtering_arguments" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.BuildFiltering.get_filter">
-<code class="sig-name descname">get_filter</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BuildFiltering.get_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BuildFiltering.get_filter" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BuildFiltering.get_filter">
+<span class="sig-name descname"><span class="pre">get_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BuildFiltering.get_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BuildFiltering.get_filter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.cli.builds.BulkMoveBuilds">
-<em class="property">class </em><code class="sig-name descname">BulkMoveBuilds</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkMoveBuilds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkMoveBuilds">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">BulkMoveBuilds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkMoveBuilds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.TagSmokyDingo" title="kojismokydingo.cli.TagSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.TagSmokyDingo</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.BulkMoveBuilds.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkMoveBuilds.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkMoveBuilds.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkMoveBuilds.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.BulkMoveBuilds.description">
-<code class="sig-name descname">description</code><em class="property"> = 'Move a large number of builds between tags'</em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkMoveBuilds.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Move</span> <span class="pre">a</span> <span class="pre">large</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">builds</span> <span class="pre">between</span> <span class="pre">tags'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.BulkMoveBuilds.group">
-<code class="sig-name descname">group</code><em class="property"> = 'bind'</em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds.group" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkMoveBuilds.group">
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'bind'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds.group" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.BulkMoveBuilds.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkMoveBuilds.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkMoveBuilds.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkMoveBuilds.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkMoveBuilds.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.cli.builds.BulkTagBuilds">
-<em class="property">class </em><code class="sig-name descname">BulkTagBuilds</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkTagBuilds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkTagBuilds">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">BulkTagBuilds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkTagBuilds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.TagSmokyDingo" title="kojismokydingo.cli.TagSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.TagSmokyDingo</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.BulkTagBuilds.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkTagBuilds.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkTagBuilds.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkTagBuilds.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.BulkTagBuilds.description">
-<code class="sig-name descname">description</code><em class="property"> = 'Tag a large number of builds'</em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkTagBuilds.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Tag</span> <span class="pre">a</span> <span class="pre">large</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">builds'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.BulkTagBuilds.group">
-<code class="sig-name descname">group</code><em class="property"> = 'bind'</em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds.group" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkTagBuilds.group">
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'bind'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds.group" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.BulkTagBuilds.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkTagBuilds.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkTagBuilds.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkTagBuilds.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkTagBuilds.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.cli.builds.BulkUntagBuilds">
-<em class="property">class </em><code class="sig-name descname">BulkUntagBuilds</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkUntagBuilds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkUntagBuilds">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">BulkUntagBuilds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkUntagBuilds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.TagSmokyDingo" title="kojismokydingo.cli.TagSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.TagSmokyDingo</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.BulkUntagBuilds.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkUntagBuilds.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkUntagBuilds.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkUntagBuilds.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.BulkUntagBuilds.description">
-<code class="sig-name descname">description</code><em class="property"> = 'Untag a large number of builds'</em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkUntagBuilds.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Untag</span> <span class="pre">a</span> <span class="pre">large</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">builds'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.BulkUntagBuilds.group">
-<code class="sig-name descname">group</code><em class="property"> = 'bind'</em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds.group" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkUntagBuilds.group">
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'bind'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds.group" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.BulkUntagBuilds.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkUntagBuilds.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.BulkUntagBuilds.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#BulkUntagBuilds.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.BulkUntagBuilds.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.cli.builds.FilterBuilds">
-<em class="property">class </em><code class="sig-name descname">FilterBuilds</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#FilterBuilds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.FilterBuilds" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.FilterBuilds">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">FilterBuilds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#FilterBuilds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.FilterBuilds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.AnonSmokyDingo" title="kojismokydingo.cli.AnonSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.AnonSmokyDingo</span></code></a>, <a class="reference internal" href="#kojismokydingo.cli.builds.BuildFiltering" title="kojismokydingo.cli.builds.BuildFiltering"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.builds.BuildFiltering</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.FilterBuilds.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#FilterBuilds.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.FilterBuilds.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.FilterBuilds.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#FilterBuilds.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.FilterBuilds.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.FilterBuilds.description">
-<code class="sig-name descname">description</code><em class="property"> = 'Filter a list of NVRs by various criteria'</em><a class="headerlink" href="#kojismokydingo.cli.builds.FilterBuilds.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.FilterBuilds.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Filter</span> <span class="pre">a</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">NVRs</span> <span class="pre">by</span> <span class="pre">various</span> <span class="pre">criteria'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.FilterBuilds.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.FilterBuilds.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#FilterBuilds.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.FilterBuilds.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.FilterBuilds.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#FilterBuilds.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.FilterBuilds.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.cli.builds.ListBTypes">
-<em class="property">class </em><code class="sig-name descname">ListBTypes</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListBTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListBTypes" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListBTypes">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ListBTypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListBTypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListBTypes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.AnonSmokyDingo" title="kojismokydingo.cli.AnonSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.AnonSmokyDingo</span></code></a></p>
 <p>Koji client command 'list-btypes'</p>
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.ListBTypes.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListBTypes.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListBTypes.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListBTypes.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListBTypes.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListBTypes.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.ListBTypes.description">
-<code class="sig-name descname">description</code><em class="property"> = 'List BTypes'</em><a class="headerlink" href="#kojismokydingo.cli.builds.ListBTypes.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListBTypes.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'List</span> <span class="pre">BTypes'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.ListBTypes.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.ListBTypes.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListBTypes.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListBTypes.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListBTypes.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListBTypes.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListBTypes.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.cli.builds.ListCGs">
-<em class="property">class </em><code class="sig-name descname">ListCGs</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListCGs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListCGs" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListCGs">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ListCGs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListCGs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListCGs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.AnonSmokyDingo" title="kojismokydingo.cli.AnonSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.AnonSmokyDingo</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.ListCGs.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListCGs.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListCGs.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListCGs.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListCGs.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListCGs.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.ListCGs.description">
-<code class="sig-name descname">description</code><em class="property"> = 'List Content Generators'</em><a class="headerlink" href="#kojismokydingo.cli.builds.ListCGs.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListCGs.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'List</span> <span class="pre">Content</span> <span class="pre">Generators'</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.ListCGs.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.ListCGs.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListCGs.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListCGs.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListCGs.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListCGs.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListCGs.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="kojismokydingo.cli.builds.ListComponents">
-<em class="property">class </em><code class="sig-name descname">ListComponents</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListComponents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListComponents" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListComponents">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ListComponents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListComponents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListComponents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.cli.AnonSmokyDingo" title="kojismokydingo.cli.AnonSmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.AnonSmokyDingo</span></code></a>, <a class="reference internal" href="#kojismokydingo.cli.builds.BuildFiltering" title="kojismokydingo.cli.builds.BuildFiltering"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.builds.BuildFiltering</span></code></a></p>
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.ListComponents.arguments">
-<code class="sig-name descname">arguments</code><span class="sig-paren">(</span><em class="sig-param">parser</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListComponents.arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListComponents.arguments" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListComponents.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListComponents.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListComponents.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="kojismokydingo.cli.builds.ListComponents.description">
-<code class="sig-name descname">description</code><em class="property"> = &quot;List a build's component dependencies&quot;</em><a class="headerlink" href="#kojismokydingo.cli.builds.ListComponents.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListComponents.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&quot;List</span> <span class="pre">a</span> <span class="pre">build's</span> <span class="pre">component</span> <span class="pre">dependencies&quot;</span></em><a class="headerlink" href="#kojismokydingo.cli.builds.ListComponents.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="kojismokydingo.cli.builds.ListComponents.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListComponents.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListComponents.handle" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.ListComponents.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#ListComponents.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.ListComponents.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.builds.cli_bulk_move_builds">
-<code class="sig-name descname">cli_bulk_move_builds</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">srctag</em>, <em class="sig-param">desttag</em>, <em class="sig-param">nvrs</em>, <em class="sig-param">sorting=None</em>, <em class="sig-param">owner=None</em>, <em class="sig-param">inherit=False</em>, <em class="sig-param">force=False</em>, <em class="sig-param">notify=False</em>, <em class="sig-param">create=False</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">strict=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_bulk_move_builds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_bulk_move_builds" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.cli_bulk_move_builds">
+<span class="sig-name descname"><span class="pre">cli_bulk_move_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">srctag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desttag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nvrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">owner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_bulk_move_builds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_bulk_move_builds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">bulk-move-builds</span></code> command</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.builds.cli_bulk_tag_builds">
-<code class="sig-name descname">cli_bulk_tag_builds</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tagname</em>, <em class="sig-param">nvrs</em>, <em class="sig-param">sorting=None</em>, <em class="sig-param">owner=None</em>, <em class="sig-param">inherit=False</em>, <em class="sig-param">force=False</em>, <em class="sig-param">notify=False</em>, <em class="sig-param">create=False</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">strict=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_bulk_tag_builds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_bulk_tag_builds" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.cli_bulk_tag_builds">
+<span class="sig-name descname"><span class="pre">cli_bulk_tag_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tagname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nvrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">owner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_bulk_tag_builds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_bulk_tag_builds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">bulk-tag-builds</span></code> command</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.builds.cli_bulk_untag_builds">
-<code class="sig-name descname">cli_bulk_untag_builds</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">tagname</em>, <em class="sig-param">nvrs</em>, <em class="sig-param">force=False</em>, <em class="sig-param">notify=False</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">strict=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_bulk_untag_builds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_bulk_untag_builds" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.cli_bulk_untag_builds">
+<span class="sig-name descname"><span class="pre">cli_bulk_untag_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tagname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nvrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_bulk_untag_builds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_bulk_untag_builds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">bulk-untag-builds</span></code> command</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.builds.cli_filter_builds">
-<code class="sig-name descname">cli_filter_builds</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">nvr_list</em>, <em class="sig-param">tags=()</em>, <em class="sig-param">inherit=False</em>, <em class="sig-param">latest=False</em>, <em class="sig-param">build_filter=None</em>, <em class="sig-param">build_sifter=None</em>, <em class="sig-param">sorting=None</em>, <em class="sig-param">outputs=None</em>, <em class="sig-param">strict=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_filter_builds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_filter_builds" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.cli_filter_builds">
+<span class="sig-name descname"><span class="pre">cli_filter_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nvr_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_sifter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_filter_builds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_filter_builds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">filter-builds</span></code> command</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.builds.cli_list_btypes">
-<code class="sig-name descname">cli_list_btypes</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">nvr=None</em>, <em class="sig-param">json=False</em>, <em class="sig-param">quiet=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_list_btypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_list_btypes" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.cli_list_btypes">
+<span class="sig-name descname"><span class="pre">cli_list_btypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nvr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_list_btypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_list_btypes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">list-btypes</span></code> command</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.builds.cli_list_cgs">
-<code class="sig-name descname">cli_list_cgs</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">nvr=None</em>, <em class="sig-param">json=False</em>, <em class="sig-param">quiet=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_list_cgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_list_cgs" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.cli_list_cgs">
+<span class="sig-name descname"><span class="pre">cli_list_cgs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nvr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_list_cgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_list_cgs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">list-cgs</span></code> command</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="kojismokydingo.cli.builds.cli_list_components">
-<code class="sig-name descname">cli_list_components</code><span class="sig-paren">(</span><em class="sig-param">session</em>, <em class="sig-param">nvr_list</em>, <em class="sig-param">tags=()</em>, <em class="sig-param">inherit=False</em>, <em class="sig-param">latest=False</em>, <em class="sig-param">build_filter=None</em>, <em class="sig-param">build_sifter=None</em>, <em class="sig-param">sorting=None</em>, <em class="sig-param">outputs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_list_components"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_list_components" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.builds.cli_list_components">
+<span class="sig-name descname"><span class="pre">cli_list_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nvr_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_sifter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/cli/builds/#cli_list_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.builds.cli_list_components" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements the <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">list-component-builds</span></code> command</p>
 </dd></dl>
 
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -333,7 +335,7 @@ May return an alternative parser instance or None.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -353,14 +355,15 @@ May return an alternative parser instance or None.</p>
         <li class="right" >
           <a href="../archives/" title="kojismokydingo.cli.archives"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../" >CLI API Reference</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >CLI API Reference</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli.builds</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-04-01.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
+      Last updated on 2021-10-14.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
     </div>
   </body>
 </html>
