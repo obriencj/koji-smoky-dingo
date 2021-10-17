@@ -26,7 +26,7 @@ installed in order for the plugins to be loaded by the Koji CLI.
 """
 
 
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 
 
 CLASSIFIERS = [
