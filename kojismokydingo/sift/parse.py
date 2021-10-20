@@ -288,8 +288,8 @@ class Item():
 
 class ItemMatch(Item):
     """
-    Seeks path members by comparison of keys to a matcher (eg. a Glob
-    or Regex)
+    Seeks path members by comparison of keys to a matcher (eg. a `Glob`
+    or `Regex`)
     """
 
     def get(self, d: dict) -> Iterator:
@@ -417,14 +417,16 @@ def split_symbol_groups(
         token = None
 
 
-def _trailing_esc(val: str) -> int:
+def _trailing_esc(
+        val: str) -> int:
     # a count of trailing escapes, just to figure out if there's an
     # odd or even amount (and hence whether there's an unterminated
     # escape at the end
     return len(val) - len(val.rstrip("\\"))
 
 
-def convert_group(grp: str) -> Union[FormattedSeries, List[str]]:
+def convert_group(
+        grp: str) -> Union[FormattedSeries, List[str]]:
     """
     A helper function for `split_symbol_groups`
     """
@@ -746,7 +748,7 @@ def convert_slice(val: str) -> slice:
     * val of ``"1:2:3"`` results in ``slice(1, 2, 3)``
     """
 
-    vals = ((int(v) if v else None) for v in val.split(":"))
+    vals = [(int(v) if v else None) for v in val.split(":")]
     return slice(*vals)
 
 

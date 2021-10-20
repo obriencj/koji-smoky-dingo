@@ -58,6 +58,8 @@ def tag_dedup(
     All None infos will be dropped.
 
     :param tag_infos: tag infos to be de-duplicated.
+
+    :since: 1.0
     """
 
     return unique(filter(None, tag_infos), key="id")
@@ -73,6 +75,8 @@ def ensure_tag(
     :param session: active koji session
 
     :param name: tag name
+
+    :since: 1.0
     """
 
     try:
@@ -107,6 +111,8 @@ def resolve_tag(
 
     :raises NoSuchTarget: if ``target`` is True and name cannot be
       resolved as a target
+
+    :since: 1.0
     """
 
     if target:
@@ -131,6 +137,8 @@ def gather_affected_targets(
 
     :raises NoSuchTag: if any of the names do not resolve to a tag
       info
+
+    :since: 1.0
     """
 
     tags = [as_taginfo(session, t) for t in set(tagnames)]
@@ -164,6 +172,8 @@ def renum_inheritance(
 
     :param step: Priority value increment for each priority after the
       first. Default, 10
+
+    :since: 1.0
     """
 
     renumbered: TagInheritance = []
@@ -189,6 +199,8 @@ def find_inheritance_parent(
 
     :returns: matching inheritance link data, or None if none are
         found with the given parent_id
+
+    :since: 1.0
     """
 
     for parent in inheritance:
@@ -223,6 +235,8 @@ def convert_tag_extras(
 
     :param prefix: Only gather and convert extras with keys having
         this prefix. Default, gather all keys not already found.
+
+    :since: 1.0
     """
 
     found = {} if into is None else into
@@ -281,6 +295,8 @@ def collect_tag_extras(
     :param prefix: Extra name prefix to select for. If set, only tag
       extra fields whose key starts with the prefix string will be
       collected. Default, collect all.
+
+    :since: 1.0
     """
 
     # this borrows heavily from the hub implementation of
@@ -324,6 +340,8 @@ def gather_tag_ids(
     :param deep: list of tag names to resolve IDs and parent IDs for
 
     :param results: storage for resolved IDs. Default, create a new set
+
+    :since: 1.0
     """
 
     results = set() if results is None else results

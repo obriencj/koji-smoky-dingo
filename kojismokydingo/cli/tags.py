@@ -94,9 +94,9 @@ def cli_affected_targets(
         output = sorted(set(targ[attr] for targ in targets))  # type: ignore
 
     if build_tags:
-        debug("Found %i affected build tags inheriting:" % len(output))
+        debug(f"Found {len(output)} affected build tags inheriting:")
     else:
-        debug("Found %i affected targets inheriting:" % len(output))
+        debug(f"Found {len(output)} affected targets inheriting:")
 
     # for debugging we re-print the tags we operated on
     for tag in sorted(set(tag_list)):
@@ -159,7 +159,7 @@ def cli_renum_tag(
             name = left['name']
             lp = left['priority']
             rp = right['priority']
-            print(" %3i -> %3i  %s" % (lp, rp, name))
+            print(f" {lp:>3} -> {rp:>3}  {name}")
 
     if test:
         print("Changes not committed in test mode.")
@@ -289,9 +289,9 @@ def cli_swap_inheritance(
             lp = left['name']
             rp = right['name']
             if lp != rp:
-                print(" %3i: %s -> %s" % (priority, lp, rp))
+                print(f" {priority:>3}: {lp} -> {rp}")
             else:
-                print(" %3i: %s" % (priority, lp))
+                print(f" {priority:>3}: {lp}")
 
     if test:
         print("Changes not committed in test mode.")

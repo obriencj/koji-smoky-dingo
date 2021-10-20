@@ -101,6 +101,8 @@ class ManagedClientSession(ClientSession):
     A `koji.ClientSession` that can be used as via the ``with``
     keyword to provide a managed session that will handle
     authenticated login and logout.
+
+    :since: 1.0
     """
 
     def __enter__(self):
@@ -119,6 +121,8 @@ class ProfileClientSession(ManagedClientSession):
     """
     A `koji.ClientSession` which loads profile config information and
     which can be used via tha ``with`` keyword.
+
+    :since: 1.0
     """
 
     def __init__(self, profile: str = "koji"):
@@ -140,6 +144,8 @@ class AnonClientSession(ProfileClientSession):
     Suitable for working with anonymous commands which do not require
     authentication. Does not authenticate, and will only connect
     lazily.
+
+    :since: 1.0
     """
 
     def __enter__(self):
@@ -160,6 +166,8 @@ class BadDingo(Exception):
     more detailed situations where a requested data type wasn't
     present on the koji hub, rather than just working with
     `koji.GenericError`
+
+    :since: 1.0
     """
 
     complaint: str = "Something bad happened"
@@ -172,6 +180,8 @@ class BadDingo(Exception):
 class NoSuchBuild(BadDingo):
     """
     A build was not found
+
+    :since: 1.0
     """
 
     complaint = "No such build"
@@ -180,6 +190,8 @@ class NoSuchBuild(BadDingo):
 class NoSuchHost(BadDingo):
     """
     A host was not found
+
+    :since: 1.0
     """
 
     complaint = "No such host"
@@ -188,6 +200,8 @@ class NoSuchHost(BadDingo):
 class NoSuchChannel(BadDingo):
     """
     A channel was not found
+
+    :since: 1.0
     """
 
     complaint = "No such builder channel"
@@ -196,6 +210,8 @@ class NoSuchChannel(BadDingo):
 class NoSuchContentGenerator(BadDingo):
     """
     A content generator was not found
+
+    :since: 1.0
     """
 
     complaint = "No such content generator"
@@ -205,7 +221,7 @@ class NoSuchPackage(BadDingo):
     """
     A package was not found
 
-    :since: 2.0
+    :since: 1.1
     """
 
     complaint = "No such package"
@@ -214,6 +230,8 @@ class NoSuchPackage(BadDingo):
 class NoSuchTag(BadDingo):
     """
     A tag was not found
+
+    :since: 1.0
     """
 
     complaint = "No such tag"
@@ -222,6 +240,8 @@ class NoSuchTag(BadDingo):
 class NoSuchTarget(BadDingo):
     """
     A target was not found
+
+    :since: 1.0
     """
 
     complaint = "No such target"
@@ -230,6 +250,8 @@ class NoSuchTarget(BadDingo):
 class NoSuchTask(BadDingo):
     """
     A task was not found
+
+    :since: 1.0
     """
 
     complaint = "No such task"
@@ -238,6 +260,8 @@ class NoSuchTask(BadDingo):
 class NoSuchUser(BadDingo):
     """
     A user was not found
+
+    :since: 1.0
     """
 
     complaint = "No such user"
@@ -246,6 +270,8 @@ class NoSuchUser(BadDingo):
 class NoSuchPermission(BadDingo):
     """
     A permission was not found
+
+    :since: 1.0
     """
 
     complaint = "No such permission"
@@ -254,6 +280,8 @@ class NoSuchPermission(BadDingo):
 class NoSuchArchive(BadDingo):
     """
     An archive was not found
+
+    :since: 1.0
     """
 
     complaint = "No such archive"
@@ -263,7 +291,7 @@ class NoSuchRepo(BadDingo):
     """
     A repository was not found
 
-    :since: 2.0
+    :since: 1.1
     """
 
     complaint = "No such repo"
@@ -330,7 +358,7 @@ def iter_bulk_load(
     :raises koji.GenericError: if err is True and an issue
       occurrs while invoking the loadfn
 
-    :since 1.0:
+    :since: 1.0
     """
 
     for key_chunk in chunkseq(keys, size):
@@ -525,7 +553,7 @@ def bulk_load_tags(
 
     :raises NoSuchTag: if err is True and a tag couldn't be loaded
 
-    :since 1.0:
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -559,6 +587,8 @@ def bulk_load_rpm_sigs(
     If results is non-None, it must support a dict-like update method,
     and will be used in place of a newly allocated dict to store and
     return the results.
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -583,6 +613,8 @@ def bulk_load_buildroot_archives(
     If results is non-None, it must support dict-like update method,
     and will be used in place of a newly allocated dict to store and
     return the results.
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -606,6 +638,8 @@ def bulk_load_buildroot_rpms(
     If results is non-None, it must support dict-like update method,
     and will be used in place of a newly allocated dict to store and
     return the results.
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -630,6 +664,8 @@ def bulk_load_build_archives(
     If results is non-None, it must support dict-like update method,
     and will be used in place of a newly allocated dict to store and
     return the results.
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -653,6 +689,8 @@ def bulk_load_build_rpms(
     If results is non-None, it must support a dict-like update method,
     and will be used in place of a newly allocated dict to store and
     return the results.
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -676,6 +714,8 @@ def bulk_load_buildroots(
     If results is non-None, it must support a dict-like update method,
     and will be used in place of a newly allocated dict to store and
     return the results.
+
+    :since: 1.0
     """
 
     results = {} if results is None else results
@@ -828,7 +868,7 @@ def as_channelinfo(
     :raises NoSuchChannel: if the channel value could not be resolved
       into a channel info dict
 
-    :since: 2.0
+    :since: 1.1
     """
 
     if isinstance(channel, (str, int)):
@@ -1006,7 +1046,7 @@ def as_packageinfo(
     :raises NoSuchPackage: if the pkg value could not be resolved into
       a package info dict
 
-    :since: 2.0
+    :since: 1.1
     """
 
     if isinstance(pkg, (str, int)):
@@ -1083,7 +1123,7 @@ def as_repoinfo(
     :raises NoSuchRepo: if the repo value could not be resolved
       into a repo info dict
 ∑
-    :since: 2.0
+    :since: 1.1
     """
 
     info: RepoInfo = None

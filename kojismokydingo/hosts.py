@@ -55,6 +55,8 @@ def gather_hosts_checkins(
 
     :param skiplist: List of glob-style patterns of builders to
         omit. Default, all builders included
+
+    :since: 1.0
     """
 
     arches = arches or None

@@ -49,6 +49,8 @@ def _rpm_str_compare(left: str, right: str) -> int:
     Either string should be *one* element of the EVR tuple (ie. either the
     epoch, version, or release). Comparison will split the element on RPM's
     special delimeters.
+
+    :since: 2.0
     """
 
     left = _rpm_str_split(left)
@@ -124,6 +126,8 @@ def evr_compare(
     :param left_evr: The left Epoch, Version, Release for comparison
 
     :param right_evr: The right Epoch, Version, Release for comparison
+
+    :since: 2.0
     """
 
     for lp, rp in zip_longest(left_evr, right_evr, fillvalue="0"):
@@ -165,6 +169,8 @@ def nevra_split(nevra: str) -> Tuple[str, str, str, str, str]:
     * version: ``"9.10.2"``
     * release: ``"2.P1.fc22"``
     * arch: ``"x86_64"``
+
+    :since: 2.0
     """
 
     name, epoch, version, release = nevr_split(nevra)
@@ -199,6 +205,8 @@ def nevr_split(nevr: str) -> Tuple[str, str, str, str]:
     * epoch: ``"32"``
     * version: ``"9.10.2"``
     * release: ``"2.P1.fc22"``
+
+    :since: 2.0
     """
 
     epoch, version, release = evr_split(nevr)
@@ -233,6 +241,8 @@ def evr_split(evr: str) -> Tuple[str, str, str]:
     * epoch: ``"32"``
     * version: ``"9.10.2"``
     * release: ``"2.P1.fc22"``
+
+    :since: 2.0
     """
 
     version = evr

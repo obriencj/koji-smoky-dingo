@@ -95,7 +95,7 @@ def cli_client_config(
             print(opts[k])
     else:
         for k in only:
-            print("%s: %s" % (k, opts[k]))
+            print(f"{k}: {opts[k]}")
 
     print()
 
@@ -236,7 +236,7 @@ def _get_type_url(
 
     loadfn = OPEN_LOADFN.get(datatype)
     if loadfn is None:
-        raise CannotOpenURL("Unsupported type for open %s" % datatype)
+        raise CannotOpenURL(f"Unsupported type for open: {datatype}")
 
     loaded = loadfn(session, element)
     typeurl = fmt.format(**loaded)

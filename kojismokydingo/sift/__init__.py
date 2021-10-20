@@ -30,8 +30,6 @@ Sifter and Sieve were good names for something that filters stuff.
 """
 
 
-import re
-
 from abc import ABCMeta, abstractproperty
 from collections import OrderedDict
 from functools import partial

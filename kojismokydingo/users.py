@@ -54,7 +54,10 @@ def collect_userinfo(
 
     :param user: name of a user or their kerberos ID
 
-    :raises NoSuchUser:
+    :raises NoSuchUser: if user is an ID or name which cannot be
+      resolved
+
+    :since: 1.0
     """
 
     userinfo = cast(DecoratedUserInfo, as_userinfo(session, user))
@@ -96,6 +99,8 @@ def collect_cg_access(
 
     :raises NoSuchUser: if user is an ID or name which cannot be
       resolved
+
+    :since: 1.0
     """
 
     userinfo = as_userinfo(session, user)
@@ -118,6 +123,8 @@ def collect_cgs(
 
     :raises NoSuchContentGenerator: if name is specified and no
       content generator matches
+
+    :since: 1.0
     """
 
     cgs = session.listCGs()
@@ -154,6 +161,8 @@ def collect_perminfo(
     :param permission: the ID or name of the permission
 
     :raises NoSuchPermission: if there is no matching permission found
+
+    :since: 1.0
     """
 
     if isinstance(permission, int):
