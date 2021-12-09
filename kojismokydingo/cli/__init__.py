@@ -626,7 +626,7 @@ class SmokyDingo(metaclass=ABCMeta):
             self,
             goptions: GOptions,
             session: ClientSession,
-            args: List[str]) -> int:
+            args: List[str] = None) -> int:
         """
         This is the koji CLI handler interface. The global options, the
         session, and the unparsed command arguments are provided.

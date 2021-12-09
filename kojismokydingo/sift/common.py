@@ -25,7 +25,7 @@ import operator
 
 from koji import ClientSession
 from operator import itemgetter
-from typing import Callable, Dict, Iterable, List, Set, Tuple, cast
+from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, cast
 
 from . import SifterError, Sieve
 from .. import iter_bulk_load
@@ -47,7 +47,7 @@ _OPMAP = {
 }
 
 
-def ensure_comparison(value: str) -> Callable:
+def ensure_comparison(value: str) -> Callable[[Any, Any], bool]:
     """
     Converts a comparison operator symbol into a comparison function.
 

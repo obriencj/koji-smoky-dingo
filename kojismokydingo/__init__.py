@@ -1080,7 +1080,7 @@ def as_archiveinfo(
 
     :raises NoSuchArchive: if the archive value could not be resolved
       into an archive info dict
-∑
+
     :since: 1.0
     """
 
@@ -1122,7 +1122,7 @@ def as_repoinfo(
 
     :raises NoSuchRepo: if the repo value could not be resolved
       into a repo info dict
-∑
+
     :since: 1.1
     """
 

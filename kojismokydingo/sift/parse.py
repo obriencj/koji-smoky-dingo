@@ -429,6 +429,8 @@ def convert_group(
         grp: str) -> Union[FormattedSeries, List[str]]:
     """
     A helper function for `split_symbol_groups`
+
+    :param grp: group eg. ``"1,2,3"`` or range specifier eg. ``"1..3"``
     """
 
     if "," not in grp:
@@ -459,7 +461,12 @@ def convert_range(rng: str) -> Union[FormattedSeries, List[str]]:
     ``START..STOP..STEP``. note that any zero-prefix padding is honored,
     and padding will be applied to values that
 
-    produces a FormattedSeries built on a range instance
+    produces a `FormattedSeries` built on a range instance
+
+    if the range specifier is invalid, then returns a list with the
+    specifier as the only value
+
+    :param rng: range specifier, eg ``"1..3"``
     """
 
     broken: List[str] = rng.split("..")
@@ -811,6 +818,16 @@ def parse_quoted(
     that is not the case, and the first quoting character is still in
     the src iterable, then a quotec of None can be used to indicate
     that it should be taken from the first character of the src.
+
+    :param reader: source to read from
+
+    :param quotec: initiating quote character, or None if the first
+      character should be read from the reader
+
+    :param advanced_escapes: if True then the escaped character will
+      be parsed for character escape sequences which will be replaced
+      with their relevant unicode value. if False then escaped
+      character will simply be inlined into the value
     """
 
     if not quotec:
@@ -846,6 +863,7 @@ def parse_quoted(
 
     if quotec == "/":
         flags = []
+        # hard-coding the flags we support for regex
         while reader.peek(1) in "aiLmsux":
             flags.append(reader.read(1))
 
@@ -853,12 +871,14 @@ def parse_quoted(
 
     elif quotec == "|":
         iflag = False
+        # hard-coding that we only support a single flag for glob
         if reader.peek(1) == 'i':
             reader.read(1)
             iflag = True
         return Glob(val, ignorecase=iflag)
 
     else:
+        # plain ol' string
         return val
 
 

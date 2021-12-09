@@ -30,7 +30,9 @@ from koji import GenericError
 from os.path import basename
 from typing import List
 
-from .. import AnonClientSession, BadDingo, ProfileClientSession
+from .. import (
+    AnonClientSession, BadDingo, ManagedClientSession,
+    ProfileClientSession, )
 from ..cli import AnonSmokyDingo, SmokyDingo, printerr
 
 
@@ -55,11 +57,11 @@ class LonelyDingo(SmokyDingo):
 
 
     @classmethod
-    def main(cls, name: str = None, args: List[str] = None):
+    def main(cls, name: str = None, args: List[str] = None) -> int:
         return cls(name)(args)
 
 
-    def create_session(self, profile: str):
+    def create_session(self, profile: str) -> ManagedClientSession:
         return ProfileClientSession(profile)
 
 
@@ -131,7 +133,7 @@ class AnonLonelyDingo(LonelyDingo):
     entry point.
     """
 
-    def create_session(self, profile):
+    def create_session(self, profile: str) -> ManagedClientSession:
         return AnonClientSession(profile)
 
 
