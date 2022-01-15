@@ -25,6 +25,7 @@ import sys
 from configparser import ConfigParser
 from koji import ClientSession
 from os import system
+from shlex import quote
 from typing import Any, Callable, Dict, Optional, Sequence, Union
 
 from . import AnonSmokyDingo, int_or_str, pretty_json
@@ -358,12 +359,21 @@ def cli_open(
         print(url)
         return 0
 
+    # Let's make sure weird characters don't break our invocation.
+    # There shouldn't be any wonky quotes etc in the URLs we generate,
+    # but who knows if someone will add handlers for new types.
+    url = quote(url)
+
     # if the configured open command has a {url} marker in it, then we
-    # want to swap that in. Otherwise we'll just append it quoted
+    # want to swap that in. Otherwise we'll just append it. In both
+    # cases we ensure it's quoted.
     if "{url}" in command:
+        # fun fact, this is still safe in case someone wanted the text
+        # {url} in their command, they can escape it as {{url}} and
+        # format should skip it.
         cmd = command.format(url=url)
     else:
-        cmd = f'{command} "{url}"'
+        cmd = f'{command} {url}'
 
     return system(cmd)
 
