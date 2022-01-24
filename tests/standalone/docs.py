@@ -12,64 +12,13 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from docutils.frontend import OptionParser
-from docutils.nodes import GenericNodeVisitor
-from docutils.parsers.rst import Parser
-from docutils.utils import new_document
 from io import StringIO
 from nose.tools import assert_equal, assert_raises, assert_true
 from pkg_resources import EntryPoint
 from unittest.mock import patch
 
-from kojismokydingo.cli import space_normalize
-
 from . import ENTRY_POINTS
-
-
-def load_rst(filename):
-    # use the docutils option parser to get defaults for our efforts
-    opts = OptionParser(components=(Parser,))
-    defaults = opts.get_default_values()
-
-    # shut up the warnings
-    defaults.warning_stream = StringIO()
-
-    doc = new_document(filename, defaults)
-    with open(filename) as f:
-        Parser().parse(f.read(), doc)
-
-    return doc
-
-
-class UsageFinder(GenericNodeVisitor):
-
-    def __init__(self, doc):
-        GenericNodeVisitor.__init__(self, doc)
-        self.found_usage = []
-
-    def visit_literal_block(self, node):
-        txt = node.astext()
-        if txt.startswith("usage: "):
-            self.found_usage.append(txt)
-
-    def default_visit(self, node):
-        pass
-
-
-def find_usage(filename):
-    """
-    Loads a reST doc from filename and finds literal blocks that start
-    with the words "usage: "
-
-    :rtype: str or None
-    """
-
-    doc = load_rst(filename)
-    finder = UsageFinder(doc)
-    doc.walk(finder)
-    found = finder.found_usage
-
-    return found[0] if found else None
+from ..cli.docs import usage_normalize, find_usage
 
 
 def check_standalone_help(cmdname):
@@ -99,8 +48,9 @@ def check_standalone_help(cmdname):
 
     # Then we can compare what we got from the command with what was
     # in the docs
-    expected = space_normalize(usage)
-    found = space_normalize(outhelp)
+    expected = usage_normalize(usage)
+    found = usage_normalize(outhelp)
+
     assert_equal(expected, found)
 
 

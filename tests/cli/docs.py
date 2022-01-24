@@ -12,6 +12,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+import re
+
 from docutils.frontend import OptionParser
 from docutils.nodes import GenericNodeVisitor
 from docutils.parsers.rst import Parser
@@ -24,6 +26,20 @@ from unittest.mock import patch
 from kojismokydingo.cli import space_normalize
 
 from . import ENTRY_POINTS, GOptions
+
+
+varargs = re.compile(r'\[(\w*) \[\1 \.\.\.\]\]')
+
+def usage_normalize(text):
+    text = space_normalize(text)
+    text = text.replace("|", " ][ ")
+
+    # some versions of argparse present varargs as [ARG [ARG ...]] and
+    # others present them as just [ARG ...]. This regex converts the
+    # former to the latter
+    text = varargs.sub(lambda m: f"[{m[1]} ...]", text)
+
+    return text
 
 
 def load_rst(filename):
@@ -105,8 +121,8 @@ def check_command_help(cmdname):
 
     # Then we can compare what we got from the command with what was
     # in the docs
-    expected = space_normalize(usage)
-    found = space_normalize(outhelp)
+    expected = usage_normalize(usage)
+    found = usage_normalize(outhelp)
 
     assert_equal(expected, found)
 
