@@ -38,12 +38,13 @@ def __plugin__(glbls):
     # the action happens inside of this function.
 
     import sys
+    from operator import attrgetter
     from pkg_resources import iter_entry_points
 
     # we sort the entry points by module name so that duplicate
     # commands have a predictable resolution order
     points = sorted(iter_entry_points('koji_smoky_dingo'),
-                    key=lambda e: (e.module_name, e.name))
+                    key=attrgetter('module_name', 'name'))
 
     for entry_point in points:
         try:

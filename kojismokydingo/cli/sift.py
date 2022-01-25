@@ -25,7 +25,7 @@ import os
 from argparse import ArgumentParser, Namespace
 from collections import defaultdict
 from functools import partial
-from operator import itemgetter
+from operator import attrgetter, itemgetter
 from os.path import basename
 from pkg_resources import EntryPoint, iter_entry_points
 from typing import Callable, Dict, Iterable, List, Optional, Type
@@ -83,7 +83,7 @@ def _entry_point_sieves(
     """
 
     points = sorted(iter_entry_points(key),
-                    key=lambda e: (e.module_name, e.name))
+                    key=attrgetter('module_name', 'name'))
 
     collected = []
 
