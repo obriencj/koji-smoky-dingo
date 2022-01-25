@@ -375,7 +375,12 @@ def cli_open(
     else:
         cmd = f'{command} {url}'
 
-    return system(cmd)
+    # bandit complains about this -- we've quoted our args, and the
+    # invocation has the same level of authority as the user running
+    # the open command -- they could do something drastic if they
+    # wanted to, just like they could do something drastic from the
+    # shell they already have access to. This tool isn't a service.
+    return system(cmd)  # nosec
 
 
 class ClientOpen(AnonSmokyDingo):

@@ -520,8 +520,8 @@ def parse_exprs(
     else:
         unterminated = False
 
-    # token_breaks = "".join((start, stop, ' [;#|/\"\'\n\r\t'))
-    token_breaks = f"{start}{stop} [;#|/\"\'\n\r\t"
+    # bandit thinks this is a password, haha
+    token_breaks = f"{start}{stop} [;#|/\"\'\n\r\t"  # nosec
 
     token: StringIO = None
     esc: str = None
@@ -685,7 +685,8 @@ def parse_itempath(
     if char == '[':
         paths.append(parse_index(reader, char))
 
-    token_breaks = ' .[]();#|/\"\'\n\r\t'
+    # bandit thinks this is a password, haha
+    token_breaks = ' .[]();#|/\"\'\n\r\t'  # nosec
 
     token: StringIO = None
     esc: str = None
