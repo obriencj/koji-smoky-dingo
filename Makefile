@@ -73,6 +73,10 @@ test: clean	## Launches tox
 	@tox
 
 
+bandit: ## Launches bandit via tox
+	@tox -e bandit
+
+
 flake8:	## Launches flake8 via tox
 	@tox -e flake8
 
