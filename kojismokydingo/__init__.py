@@ -26,6 +26,7 @@ from koji import (
     ClientSession, Fault, GenericError, ParameterError,
     convertFault, read_config)
 from koji_cli.lib import activate_session, ensure_connection
+from logging import DEBUG, basicConfig
 from typing import (
     Any, Callable, Dict, Iterator, Iterable, List,
     Optional, Sequence, TypeVar, Tuple, Union, cast)
@@ -109,12 +110,50 @@ class ManagedClientSession(ClientSession):
         activate_session(self, self.opts)
         return self
 
+
     def __exit__(self, exc_type, _exc_val, _exc_tb):
         self.logout()
         if self.rsession:
             self.rsession.close()
             self.rsession = None
         return (exc_type is None)
+
+
+    @property
+    def logger(self):
+        # a cached copy of `logging.getLogger('koji')`, assigned
+        # during `ClientSession.__init__` invocation.  There are some
+        # code paths in the underlying ClientSession which will
+        # presume that logging handlers have been configured, without
+        # checking that they actually have been. This is likely
+        # because the koji command-line interface sets up that logger
+        # shortly after parsing initial CLI args. However, when a
+        # script uses a ClientSession, that setup won't have
+        # happened. Then if the script encounters an error along one
+        # of those code paths, an additional logging warning will be
+        # output after that path attempts to log at some unconfigured
+        # level. This property allows us to set a default
+        # configuration if one hasn't been given yet, just before the
+        # instance would attempt to use the logger.
+
+        logger = self._logger
+        if logger and not logger.handlers:
+            basicConfig()
+
+            # the koji CLI will use the --debug and --quiet options to
+            # determine the logger level. However, only the debug
+            # option is recorded as part of the session options. We'll
+            # mimic as much of the logging behavior as we can
+            opts = self.opts
+            if opts.get('debug') or opts.get('debug_xmlrpc'):
+                logger.setLevel(DEBUG)
+
+        return logger
+
+
+    @logger.setter
+    def logger(self, logger):
+        self._logger = logger
 
 
 class ProfileClientSession(ManagedClientSession):
@@ -171,6 +210,7 @@ class BadDingo(Exception):
     """
 
     complaint: str = "Something bad happened"
+
 
     def __str__(self):
         orig = super().__str__()
