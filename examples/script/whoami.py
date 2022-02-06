@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # This library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from __future__ import print_function
+import sys
 
 from argparse import ArgumentParser
 from koji import GenericError
@@ -23,8 +23,6 @@ from kojismokydingo.cli import pretty_json, printerr
 from kojismokydingo.cli.users import get_usertype_str, get_userstatus_str
 from kojismokydingo.users import collect_userinfo
 from os.path import basename
-
-import sys
 
 
 DESCRIPTION = """

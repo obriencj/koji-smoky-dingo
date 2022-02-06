@@ -22,7 +22,6 @@ from os import system
 
 from abc import abstractmethod
 from kojismokydingo.sift import Sieve, ensure_str
-from six.moves import map
 
 
 class ExecSieve(Sieve):
