@@ -78,7 +78,7 @@ permissions in koji.
 ## Install
 
 The kojismokydingo package utilizes setuptools and can be built and
-installed as an egg or wheel.
+installed as a wheel.
 
 Because of how koji loads client plugins, if you want the meta plugin
 available by default system-wide, then the package needs to be
