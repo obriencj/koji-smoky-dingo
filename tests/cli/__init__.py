@@ -30,6 +30,7 @@ ENTRY_POINTS = {
     "bulk-untag-builds": "kojismokydingo.cli.builds:BulkUntagBuilds",
     "cginfo": "kojismokydingo.cli.users:ShowCGInfo",
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
+    "check-repo": "kojismokydingo.cli.tags:CheckRepo",
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
     "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",
     "filter-tags": "kojismokydingo.cli.tags:FilterTags",

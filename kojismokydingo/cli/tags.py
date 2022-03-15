@@ -26,21 +26,23 @@ from json import dumps
 from koji import ClientSession
 from koji_cli.lib import arg_filter
 from operator import itemgetter
-from typing import List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
-    int_or_str, printerr, pretty_json, read_clean_lines, tabulate, )
+    int_or_str, printerr, pretty_json, print_history,
+    read_clean_lines, tabulate, )
 from .sift import TagSifting, output_sifted
 from .. import (
     BadDingo, FeatureUnavailable, NoSuchTag,
-    as_taginfo, bulk_load_tags, version_require, )
+    as_taginfo, bulk_load_tags, iter_bulk_load, version_require, )
 from ..common import unique
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
 from ..sift import Sifter
-from ..types import TagInheritance, TagInheritanceEntry, TagSpec
+from ..types import (
+    HistoryEntry, TagInheritance, TagInheritanceEntry, TagSpec, )
 
 
 SORT_BY_ID = "sort-by-id"
@@ -916,6 +918,7 @@ class FilterTags(AnonSmokyDingo, TagSifting):
 
     description = "Filter a list of tags"
 
+
     def arguments(self, parser):
         addarg = parser.add_argument
 
@@ -978,6 +981,133 @@ class FilterTags(AnonSmokyDingo, TagSifting):
                                sorting=options.sorting,
                                outputs=outputs,
                                strict=options.strict)
+
+
+REPO_CHECK_TABLES = [
+    "build_target_config", "group_config", "group_package_listing",
+    "group_req_listing", "tag_config", "tag_external_repos", "tag_extra",
+    "tag_inheritance", "tag_listing", "tag_packages",
+]
+
+
+def cli_check_repo(
+        session: ClientSession,
+        tagname: Union[int, str],
+        target: bool = False,
+        quiet: bool = False,
+        verbose: bool = False,
+        show_events: bool = False,
+        utc: bool = False) -> int:
+
+    tag = resolve_tag(session, tagname, target)
+    tagname = tag['name']
+    tagid = tag['id']
+
+    repo = session.getRepo(tagid)
+    if not repo:
+        if not quiet:
+            print(f"Tag {tagname} has no repo")
+        return 1
+
+    create_event = repo['create_event']
+    # print("repo: ", repo)
+
+    # tagChangedSinceEvent doesn't follow inheritance on its own,
+    # instead we must collect the relevant inheritance links and
+    # check the whole set of tags
+    inher = session.getFullInheritance(tagid)
+    tag_ids = [tagid]
+    tag_ids.extend(t['parent_id'] for t in inher)
+
+    changed = session.tagChangedSinceEvent(create_event, tag_ids)
+    if changed:
+        if not quiet:
+            print(f"Tag {tagname} has a stale repo")
+        if not verbose:
+            return 1
+    else:
+        if not quiet:
+            print(f"Tag {tagname} has an up-to-date repo")
+        return 0
+
+    print(f"History since repo creation event {create_event}:")
+
+    # if we got this far then there's been tag changes since the
+    # repo's creation event, and we've been asked to display those
+    # changes. So let's create a timeline from the history of all
+    # the tags, searching for events that happened after the
+    # creation event
+    timeline: List[HistoryEntry] = []
+
+    def query(tag_id):
+        return session.queryHistory(tables=REPO_CHECK_TABLES,
+                                    tag=tag_id,
+                                    afterEvent=create_event)
+
+    # merge and linearize the events of tag and its parents
+    for tid, updates in iter_bulk_load(session, query, tag_ids):
+        for table, events in updates.items():
+            event: Dict[str, Any]
+            for event in events:
+                # just assembling the data in a way that can be
+                # sorted, and that _print_histline will work with
+                event_id: int = event.get('revoke_event')
+                create: bool = False
+                if event_id is None:
+                    create = True
+                    event_id = event.get('create_event')
+                timeline.append((event_id, table, create, event))
+
+    timeline.sort()
+
+    print_history(timeline, utc=utc, show_events=show_events)
+
+    return 1
+
+
+class CheckRepo(AnonSmokyDingo):
+
+    description = "Check the freshness of a tag's repo"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        group = parser.add_mutually_exclusive_group()
+        addarg = group.add_argument
+
+        addarg("--quiet", "-q", action="store_true", default=False,
+               help="Suppress output")
+
+        addarg("--verbose", "-v", action="store_true", default=False,
+               help="Show history modifications since repo creation")
+
+        group = parser.add_argument_group("verbose output settings")
+        addarg = group.add_argument
+
+        addarg("--utc", action="store_true", default=False,
+               help="Display timestamps in UTC. Default: show in local time."
+               "Requires koji >= 1.27")
+
+        addarg("--events", "-e", action="store_true", default=False,
+               help="Display event IDs")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_check_repo(self.session, options.tag,
+                              target=options.target,
+                              verbose=options.verbose,
+                              quiet=options.quiet,
+                              show_events=options.events,
+                              utc=options.utc)
 
 
 #

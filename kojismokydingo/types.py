@@ -69,6 +69,7 @@ __all__ = (
     "DecoratedTagExtra",
     "DecoratedTagExtras",
     "GOptions",
+    "HistoryEntry",
     "HostInfo",
     "HubVersionSpec",
     "KeySpec",
@@ -1267,6 +1268,9 @@ class GOptions(Values):
     topurl: str
     user: str
     weburl: str
+
+
+HistoryEntry = Tuple[int, str, bool, Dict[str, Any]]
 
 
 #

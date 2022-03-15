@@ -540,6 +540,12 @@ class ClientSession:
             notify: bool = False) -> None:
         ...
 
+    def tagChangedSinceEvent(
+            self,
+            event: int,
+            taglist: List[int]) -> bool:
+        ...
+
     def untagBuildBypass(
             self,
             tag: Union[int, str],
