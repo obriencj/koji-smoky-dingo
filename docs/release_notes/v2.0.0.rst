@@ -38,3 +38,4 @@ Commands
 * Added ``--print`` option to the ``open`` command
 * Made the ``open`` command return the return code of the URL opening
   executable
+* Added ``check-repo`` command to check for repo staleness
