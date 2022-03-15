@@ -28,6 +28,8 @@ API
   their own new module `kojismokydingo.rpm`
 * Added as_channelinfo, as_packageinfo, as_repoinfo, NoSuchPackage,
   NoSuchRepo to the core API
+* Added `ManagedClientSession.activate` to allow it to be used more
+  conveniently without the managed interface as well
 
 
 Commands

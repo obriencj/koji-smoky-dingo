@@ -420,6 +420,20 @@ def print_history(
         show_events: bool = False,
         verbose: bool = False):
 
+    """
+    Print history lines using koji's own history formatting
+
+    :param timeline: A sequence of history events to display
+
+    :param utc: output timestamps in UTC instead of local time
+
+    :param show_events: print the individual event IDs
+
+    :param verbose: enables show_events and some additional output
+
+    :since: 2.0
+    """
+
     Opts = namedtuple('Opts', ['utc', 'events', 'verbose'])
     options = Opts(utc, show_events, verbose)
 
