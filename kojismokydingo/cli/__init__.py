@@ -28,12 +28,14 @@ import sys
 
 from abc import ABCMeta, abstractmethod
 from argparse import Action, ArgumentParser, Namespace
+from collections import namedtuple
 from contextlib import contextmanager
 from functools import partial
 from io import StringIO
 from itertools import zip_longest
 from json import dump
 from koji import ClientSession, GenericError
+from koji_cli.commands import _print_histline
 from koji_cli.lib import activate_session, ensure_connection
 from operator import itemgetter
 from os import devnull
@@ -44,7 +46,7 @@ from typing import (
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
-from ..types import GOptions
+from ..types import GOptions, HistoryEntry
 
 
 __all__ = (
@@ -410,6 +412,19 @@ def int_or_str(value: Any) -> Union[int, str]:
         value = str(value)
 
     return value
+
+
+def print_history(
+        timeline: Sequence[HistoryEntry],
+        utc: bool = False,
+        show_events: bool = False,
+        verbose: bool = False):
+
+    Opts = namedtuple('Opts', ['utc', 'events', 'verbose'])
+    options = Opts(utc, show_events, verbose)
+
+    for event in timeline:
+        _print_histline(event, options=options)
 
 
 class SmokyDingo(metaclass=ABCMeta):

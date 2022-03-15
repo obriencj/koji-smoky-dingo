@@ -17,6 +17,7 @@ do not require any special permissions to run.
    commands/affected-targets
    commands/cginfo
    commands/check-hosts
+   commands/check-repo
    commands/client-config
    commands/filter-builds
    commands/filter-tags

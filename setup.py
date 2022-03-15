@@ -31,6 +31,7 @@ COMMANDS = {
     "bulk-tag-builds": "kojismokydingo.cli.builds:BulkTagBuilds",
     "bulk-untag-builds": "kojismokydingo.cli.builds:BulkUntagBuilds",
     "check-hosts": "kojismokydingo.cli.hosts:CheckHosts",
+    "check-repo": "kojismokydingo.cli.tags:CheckRepo",
     "client-config": "kojismokydingo.cli.clients:ClientConfig",
     "cginfo": "kojismokydingo.cli.users:ShowCGInfo",
     "filter-builds": "kojismokydingo.cli.builds:FilterBuilds",

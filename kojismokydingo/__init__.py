@@ -107,7 +107,7 @@ class ManagedClientSession(ClientSession):
     """
 
     def __enter__(self):
-        activate_session(self, self.opts)
+        self.activate()
         return self
 
 
@@ -117,6 +117,16 @@ class ManagedClientSession(ClientSession):
             self.rsession.close()
             self.rsession = None
         return (exc_type is None)
+
+
+    def activate(self):
+        """
+        Invokes `koji_cli.lib.activate_session` with this session's
+        options, which will trigger the appropriate login method.
+
+        :since 2.0:
+        """
+        return activate_session(self, self.opts)
 
 
     @property
@@ -194,6 +204,17 @@ class AnonClientSession(ProfileClientSession):
 
         # ensure_connection(self)
         return self
+
+
+    def activate(self):
+        """
+        Ensures the anonymous session is connected, but does not attempt
+        to login.
+
+        :since 2.0:
+        """
+
+        ensure_connection(self)
 
 
 class BadDingo(Exception):
