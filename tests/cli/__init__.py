@@ -697,16 +697,28 @@ Wed Sep 22 11:07:45 2021 tmux-3.2a-2.el9_b untagged from example-1.0-build by ob
 """
 
 
+def cleanup_histlines(lines):
+    # the utc option to print_history_results is only supported in
+    # koji >= 1.27, and otherwise silently falls back to
+    # localtime. Let's make it work in both situations! We'll just
+    # trim out the day and hour from the lines. It's kinda weird but
+    # it works.
+    collect = []
+    for line in lines.strip().splitlines():
+        collect.append(line[4:8] + line[14:])
+    return collect
+
+
 class TestHistory(TestCase):
 
     maxDiff = None
 
     def test_print_history_results(self):
         with patch('sys.stdout', new=StringIO()) as out:
-            print_history_results(HIST_DATA)
+            print_history_results(HIST_DATA, utc=True)
 
-        self.assertEqual(EXPECTED_HIST.strip(), out.getvalue().strip())
-
+        self.assertEqual(cleanup_histlines(EXPECTED_HIST),
+                         cleanup_histlines(out.getvalue()))
 
 
 #
