@@ -42,7 +42,7 @@ from os import devnull
 from os.path import basename
 from typing import (
     Any, Callable, Dict, Iterable, List, Optional,
-    Sequence, TextIO, Union, )
+    Sequence, TextIO, Tuple, Union, )
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
@@ -455,36 +455,36 @@ def convert_history(
     :since: 2.0
     """
 
-    results = []
-    timeline = []
+    results: List[HistoryEntry] = []
+    timeline: List[HistoryEntry] = []
 
     for table, events in history.items():
         for event in events:
             event_id: int
             event_id = event.get('revoke_event')
             if event_id:
-                timeline.append((event_id, table, 0, dict(event)))
+                timeline.append((event_id, table, False, dict(event)))
             event_id = event.get('create_event')
             if event_id:
-                timeline.append((event_id, table, 1, event))
+                timeline.append((event_id, table, True, event))
 
     timeline.sort(key=itemgetter(0, 1, 2))
 
     # group edits together
-    results = []
     last_event = None
-    edit_index = {}
+    edit_index: Dict[Tuple[str, int], Dict[Tuple, Dict[str, Any]]] = {}
     for entry in timeline:
         event_id, table, create, x = entry
         if event_id != last_event:
             edit_index = {}
             last_event = event_id
         key = tuple([x[k] for k in _table_keys[table]])
-        prev = edit_index.get((table, event_id), {}).get(key)
-        if prev:
-            prev[-1].setdefault('.related', []).append(entry)
+        prev = edit_index.setdefault((table, event_id), {})
+        if key in prev:
+            prev_x = prev[key]
+            prev_x.setdefault('.related', []).append(entry)
         else:
-            edit_index.setdefault((table, event_id), {})[key] = entry
+            prev[key] = x
             results.append(entry)
 
     return results
