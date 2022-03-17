@@ -14,21 +14,24 @@
 
 import re
 
+from argparse import HelpFormatter
 from docutils.frontend import OptionParser
 from docutils.nodes import GenericNodeVisitor
 from docutils.parsers.rst import Parser
 from docutils.utils import new_document
+from functools import partial
 from io import StringIO
 from nose.tools import assert_equal, assert_raises, assert_true
 from pkg_resources import EntryPoint
 from unittest.mock import patch
 
-from kojismokydingo.cli import space_normalize
+from kojismokydingo.cli import SmokyDingo, space_normalize
 
 from . import ENTRY_POINTS, GOptions
 
 
 varargs = re.compile(r'\[(\w*) \[\1 \.\.\.\]\]')
+
 
 def usage_normalize(text):
     text = space_normalize(text)
@@ -102,6 +105,16 @@ def check_command_help(cmdname):
         cmd_cls = ep.load(require=False)
 
     command = cmd_cls(name)
+
+    # this ugly little dance needs to happen because the default
+    # formatter checks console width and will word-wrap on hyphens in
+    # some cases. So we will force it to work with a width of 80 chars
+    orig_parser = command.parser
+    def wrap_parser():
+        argp = orig_parser()
+        argp.formatter_class = partial(HelpFormatter, width=80)
+        return argp
+    command.parser = wrap_parser
 
     # a fake goptions based on a copy of the koji defaults
     goptions = GOptions()
