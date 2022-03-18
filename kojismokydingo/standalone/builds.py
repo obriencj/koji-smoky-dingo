@@ -117,8 +117,7 @@ class LonelyFilterBuilds(AnonLonelyDingo, FilterBuilds):
         return super().validate(parser, options)
 
 
-# The console_scripts entry point is an instance of the class, not the
-# class itself.
+# The console_scripts entry point
 ksd_filter_builds = LonelyFilterBuilds.main
 
 
