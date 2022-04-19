@@ -388,6 +388,8 @@ class BuildrootInfo(TypedDict):
 
     task_id: int
 
+    workdir: str
+
 
 class BuildInfo(TypedDict):
     """
