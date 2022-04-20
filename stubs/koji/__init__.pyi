@@ -24,12 +24,11 @@ calls are being used correctly.
 :license: GPL v3
 """
 
-import datetime
-import xmlrpc.client
-
 from configparser import ConfigParser, RawConfigParser
+from datetime import datetime
 from typing import (
-    Any, Dict, List, Optional, TypedDict, Tuple, Union, Set)
+    Any, Dict, List, Optional, Tuple, TypedDict, Union, Set, )
+from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
@@ -69,7 +68,7 @@ class Enum(dict):
         ...
 
 
-BS_STATES: Enum
+BR_STATES: Enum
 BR_TYPES: Enum
 BUILD_STATES: Enum
 CHECKSUM_TYPES: Enum
@@ -729,7 +728,6 @@ def get_sigpacket_key_id(str):
     ...
 
 
-
 def ensuredir(str) -> None:
     ...
 
@@ -761,8 +759,11 @@ def _fix_print(value: Union[str, bytes]) -> str:
 def _open_text_file(path: str, mode: str = 'rt'):
     ...
 
-def formatTime(value: Union[int, float, datetime.datetime, xmlrpc.client.DateTime]) -> str:
+
+def formatTime(
+        value: Union[int, float, datetime, DateTime]) -> str:
     ...
+
 
 def openRemoteFile(
         relpath: str,
@@ -850,6 +851,7 @@ def add_stderr_logger(Any) -> None:
 
 def daemonize() -> None:
     ...
+
 
 #
 # The end.
