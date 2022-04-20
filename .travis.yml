@@ -11,7 +11,7 @@ branches:
     - master
 
 python:
-  - "3.6"
+  # - "3.6"
   - "3.7"
   - "3.8"
   - "3.9"
@@ -23,7 +23,7 @@ env:
 cache: pip
 
 install:
-  - pip install -U -I coveralls tox tox-travis
+  - pip install coveralls tox tox-travis
 
 script:
   - tox
