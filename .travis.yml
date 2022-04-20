@@ -11,7 +11,7 @@ branches:
     - master
 
 python:
-  # - "3.6"
+  - "3.6"
   - "3.7"
   - "3.8"
   - "3.9"
@@ -23,7 +23,8 @@ env:
 cache: pip
 
 install:
-  - pip install coveralls tox tox-travis
+  - if [ "$TRAVIS_PYTHON_VERSION" = "3.6" ] ; then pip install coveralls tox tox-travis ; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" != "3.6" ] ; then pip install -I -U coveralls tox tox-travis ; fi
 
 script:
   - tox
