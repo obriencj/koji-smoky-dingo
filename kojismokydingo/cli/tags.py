@@ -1083,8 +1083,8 @@ class CheckRepo(AnonSmokyDingo):
         addarg = group.add_argument
 
         addarg("--utc", action="store_true", default=False,
-               help="Display timestamps in UTC. Default: show in local time."
-               "Requires koji >= 1.27")
+               help="Display timestamps in UTC rather than local time."
+               " Requires koji >= 1.27")
 
         addarg("--events", "-e", action="store_true", default=False,
                help="Display event IDs")
