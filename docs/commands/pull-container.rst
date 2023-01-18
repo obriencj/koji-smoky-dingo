@@ -5,21 +5,21 @@ koji pull-container
 
 ::
 
- usage: koji pull-container [-h] [--latest-tagged TAG]
+ usage: koji pull-container [-h] [--latest-build TAG]
                             [--command COMMAND | --print]
-                            build [args ...]
+                            BUILD [ARGS ...]
 
  Pull a container build's image
 
  positional arguments:
-   build                 Container build to pull
-   args                  all additional arguments after will be passed to the
+   BUILD                 Container build to pull
+   ARGS                  all additional arguments after will be passed to the
                          configured container manager command. Specify -- to
                          prevent from being treated as a koji option.
 
  options:
    -h, --help            show this help message and exit
-   --latest-tagged TAG   BUILD is a package name, use the matching latest build
+   --latest-build TAG    BUILD is a package name, use the matching latest build
                          in the given TAG
    --command COMMAND, -c COMMAND
                          Command to exec with the discovered pull spec
@@ -34,6 +34,13 @@ copy of the image.
 
 Setting the pull command to ``-`` or using the ``--print`` option will
 cause the pullspec to be printed to stdout.
+
+The ``--latest-build=TAG`` option changes the behavior slightly.
+Rather than specifying a build by its NVR, the build argument is now a
+package name. The command then tries to find the latest build of the
+matching package name in the given tag, and then pulls that
+instead. It is similar to invoking with the build argument set to the
+result of `koji latest-build TAG BUILD`
 
 
 References

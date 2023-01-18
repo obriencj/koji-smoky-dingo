@@ -41,3 +41,5 @@ Commands
 * Made the ``open`` command return the return code of the URL opening
   executable
 * Added ``check-repo`` command to check for repo staleness
+* Added ``pull-container`` command to fetch container images from OSBS
+  builds, or to print the pullspec from same

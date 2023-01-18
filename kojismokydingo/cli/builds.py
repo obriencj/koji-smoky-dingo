@@ -1238,15 +1238,15 @@ class PullContainer(AnonSmokyDingo):
     def arguments(self, parser):
         addarg = parser.add_argument
 
-        addarg("build", action="store",
+        addarg("build", metavar="BUILD", action="store",
                help="Container build to pull")
 
-        addarg("args", nargs="*",
+        addarg("args", metavar="ARGS", nargs="*",
                help="all additional arguments after will be passed to"
                " the configured container manager command. Specify -- to"
                " prevent from being treated as a koji option.")
 
-        addarg("--latest-tagged", dest="tag", metavar="TAG", action="store",
+        addarg("--latest-build", dest="tag", metavar="TAG", action="store",
                default=None,
                help="BUILD is a package name, use the matching latest build"
                " in the given TAG")
