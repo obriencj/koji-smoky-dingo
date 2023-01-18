@@ -99,29 +99,6 @@ into what became Koji Sifty Dingo, an s-expression based predicate
 language!
 
 
-Why Do You Still Support Python 2.6?
-------------------------------------
-
-Because I use a number of hosts that have RHEL 6 on them, and I very
-much want to be able to use Koji Smoky Dingo in those environments.
-
-As much as people complain about Python 2, it feels pretty darn
-trivial to support older versions. Even when these hosts get upgraded
-to newer versions of RHEL or CentOS, I will mostly likely maintain
-backwards compatibility for a pretty long time. The only feature I
-truly yearn for is syntactic changes in Python 3 where keyword-only
-arguments can be expressed after variadic positionals. I'd really
-prefer to use that in the Sieve API instead of the `set_options`
-method.
-
-Honestly, the biggest struggle has been in working with multiple
-versions of Koji. Or working with multiple versions of libraries under
-Python 3 to dodge the deprecation churn.
-
-KSD version 1 will continue to support Python 2.6, KSD version 2 will
-require Python 3.6+
-
-
 Can I Write My Own Tools On Top of Koji Smoky Dingo?
 ----------------------------------------------------
 

@@ -114,7 +114,7 @@ $(ARCHIVE):
 
 ##@ Documentation
 docs: clean-docs docs/overview.rst	## Build sphinx docs
-	@KSD_MERGE_PYI=1 $(PYTHON) -B setup.py docs
+	@tox -e sphinx
 
 
 overview: docs/overview.rst  ## rebuilds the overview from README.md
