@@ -31,6 +31,7 @@ do not require any special permissions to run.
    commands/list-tag-extras
    commands/open
    commands/perminfo
+   commands/pull-container
    commands/userinfo
 
 

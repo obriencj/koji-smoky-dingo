@@ -1244,7 +1244,7 @@ class PullContainer(AnonSmokyDingo):
         addarg("args", nargs="*",
                help="all additional arguments after will be passed to"
                " the configured container manager command. Specify -- to"
-               " prevent from being treates as a koji option.")
+               " prevent from being treated as a koji option.")
 
         addarg("--latest-tagged", dest="tag", metavar="TAG", action="store",
                default=None,
