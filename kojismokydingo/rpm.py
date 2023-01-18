@@ -34,12 +34,16 @@ __all__ = (
 )
 
 
-def _rpm_str_split(s, _split=re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split):
+_rpm_str_split_re = re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split
+
+
+def _rpm_str_split(s: str) -> Tuple[str]:
     """
     Split an E, V, or R string for comparison by its segments
     """
 
-    return tuple(i for i in _split(s) if (i.isalnum() or i.startswith("~")))
+    return tuple(i for i in _rpm_str_split_re(s)
+                 if (i.isalnum() or i.startswith("~")))
 
 
 def _rpm_str_compare(left: str, right: str) -> int:
@@ -55,6 +59,9 @@ def _rpm_str_compare(left: str, right: str) -> int:
 
     left = _rpm_str_split(left)
     right = _rpm_str_split(right)
+
+    lp: str
+    rp: str
 
     for lp, rp in zip_longest(left, right, fillvalue=""):
 
@@ -84,8 +91,12 @@ def _rpm_str_compare(left: str, right: str) -> int:
             if rp.isdigit():
                 # left and right are both numeric, convert and fall
                 # through
-                lp = int(lp)
-                rp = int(rp)
+                ilp = int(lp)
+                irp = int(rp)
+                if ilp == irp:
+                    continue
+                else:
+                    return 1 if ilp > irp else -1
 
             else:
                 # right is alphabetical or absent, left is greater

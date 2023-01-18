@@ -22,16 +22,18 @@ Koji Smoky Dingo - CLI Build Commands
 
 import sys
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace, REMAINDER
 from functools import partial
-from koji import ClientSession
 from itertools import chain
+from koji import ClientSession
 from operator import itemgetter
+from os import system
+from shlex import quote
 from typing import (
-    Callable, Dict, Iterable, List, Optional, Sequence, Union, )
+    Any, Callable, Dict, Iterable, List, Optional, Sequence, Union, )
 
 from . import (
-    AnonSmokyDingo, TagSmokyDingo,
+    AnonSmokyDingo, BadDingo, TagSmokyDingo,
     int_or_str, pretty_json, open_output,
     printerr, read_clean_lines, resplit, )
 from .sift import BuildSifting, Sifter, output_sifted
@@ -71,6 +73,7 @@ __all__ = (
     "cli_list_btypes",
     "cli_list_cgs",
     "cli_list_components",
+    "cli_pull_container",
 )
 
 
@@ -1169,6 +1172,136 @@ class ListCGs(AnonSmokyDingo):
                             nvr=options.build,
                             json=options.json,
                             quiet=options.quiet)
+
+
+def cli_pull_container(
+        session: ClientSession,
+        cmd: str,
+        bld: str,
+        tag: Optional[TagSpec] = None,
+        args: List[str] = []):
+
+    if tag:
+        tinfo = as_taginfo(session, tag)
+        latest = session.getLatestBuilds(tinfo['id'], package=bld)
+        if not latest:
+            raise BadDingo(f"No latest build of {bld} in {tag}")
+        binfo = as_buildinfo(session, latest[0]['build_id'])
+
+    else:
+        binfo = as_buildinfo(session, bld)
+
+    pull: List[str] = None
+    extra: Dict[str, Any] = binfo.get("extra")
+    if extra:
+        image: Dict[str, Any] = extra.get("image")
+        if image:
+            index: Dict[str, Any] = image.get("index")
+            if index:
+                pull = index.get("pull")
+
+    if not pull:
+        raise BadDingo("Unable to determine pull spec from extra data")
+
+    for pullspec in pull:
+        if "@sha" not in pullspec:
+            break
+
+    if not cmd or cmd == "-":
+        print(pullspec)
+        return 0
+
+    pullspec = quote(pullspec)
+    if "{pullspec}" in cmd:
+        cmd = cmd.format(pullspec=pullspec)
+    else:
+        cmd = f'{cmd} {pullspec}'
+
+    if args:
+        cmdargs = " ".join(quote(a) for a in args)
+        cmd = f'{cmd} {cmdargs}'
+
+    # bandit complains about this -- we've quoted our args, and the
+    # invocation has the same level of authority as the user running
+    # the command. They could do something drastic if they wanted to,
+    # just like they could do something drastic from the shell they
+    # already have access to. This tool isn't a service.
+    return system(cmd)  # nosec
+
+
+class PullContainer(AnonSmokyDingo):
+
+    group = "info"
+    description = "Pull a container build's image"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("build", action="store",
+               help="Container build to pull")
+
+        addarg("args", nargs="*",
+               help="all additional arguments after will be passed to"
+               " the configured container manager command. Specify -- to"
+               " prevent from being treates as a koji option.")
+
+        addarg("--latest-tagged", dest="tag", metavar="TAG", action="store",
+               default=None,
+               help="BUILD is a package name, use the matching latest build"
+               " in the given TAG")
+
+        grp = parser.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--command", "-c", default=None, metavar="COMMAND",
+               help="Command to exec with the discovered pull spec")
+
+        addarg("--print", "-p", default=None, dest="command",
+               action="store_const", const="-",
+               help="Print pull spec to stdout rather than executing"
+               " a command")
+
+        return parser
+
+
+    def validate(self, parser, options):
+        command = options.command
+
+        if not command:
+            command = self.get_plugin_config("command", "podman pull")
+            options.command = command
+
+        if not command:
+            parser.error("Unable to determine a default COMMAND for"
+                         " pulling containers.\n"
+                         "Please specify via the '--command' option.")
+
+
+    def handle(self, options):
+        return cli_pull_container(self.session,
+                                  cmd=options.command,
+                                  bld=options.build,
+                                  tag=options.tag,
+                                  args=options.args)
+
+
+class RunContainer(PullContainer):
+
+    description = "Run a container from a build's image"
+
+
+    def validate(self, parser, options):
+        command = options.command
+
+        if not command:
+            command = self.get_plugin_config("command", "podman run --rm -it")
+            options.command = command
+
+        if not command:
+            parser.error("Unable to determine a default COMMAND for"
+                         " running containers.\n"
+                         "Please specify via the '--command' option.")
 
 
 #

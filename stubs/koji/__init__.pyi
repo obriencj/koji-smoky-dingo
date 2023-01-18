@@ -386,7 +386,7 @@ class ClientSession:
             self,
             tag: Union[int, str],
             event: Optional[int] = None,
-            Package: Optional[Union[int, str]] = None,
+            package: Optional[Union[int, str]] = None,
             type: Optional[str] = None) -> List[BuildInfo]:
         ...
 
