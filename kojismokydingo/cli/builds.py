@@ -65,6 +65,7 @@ __all__ = (
     "ListBTypes",
     "ListCGs",
     "ListComponents",
+    "PullContainer",
 
     "cli_bulk_move_builds",
     "cli_bulk_tag_builds",
@@ -1181,6 +1182,10 @@ def cli_pull_container(
         tag: Optional[TagSpec] = None,
         args: List[str] = []):
 
+    """
+    Implements the ``koji pull-container`` command
+    """
+
     if tag:
         tinfo = as_taginfo(session, tag)
         latest = session.getLatestBuilds(tinfo['id'], package=bld)
@@ -1231,7 +1236,6 @@ def cli_pull_container(
 
 class PullContainer(AnonSmokyDingo):
 
-    group = "info"
     description = "Pull a container build's image"
 
 

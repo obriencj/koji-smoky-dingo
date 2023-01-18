@@ -46,7 +46,7 @@ result of `koji latest-build TAG BUILD`
 References
 ----------
 
-* :py:obj:`kojismokydingo.cli.build.PullContainer`
-* :py:func:`kojismokydingo.cli.build.cli_pull_container`
-* `OSBS - Building Container Images - Get Build<https://osbs.readthedocs.io/en/latest/users.html#get-build>`_
+* :py:obj:`kojismokydingo.cli.builds.PullContainer`
+* :py:func:`kojismokydingo.cli.builds.cli_pull_container`
+* `OSBS - Building Container Images - Get Build <https://osbs.readthedocs.io/en/latest/users.html#get-build>`_
 * `Atomic Reactor - Koji Integration - Type-specific Metadata <https://github.com/containerbuildsystem/atomic-reactor/blob/master/docs/koji.md#type-specific-metadata>`_
