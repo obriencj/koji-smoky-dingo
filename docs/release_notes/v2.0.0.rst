@@ -30,6 +30,8 @@ API
   NoSuchRepo to the core API
 * Added `ManagedClientSession.activate` to allow it to be used more
   conveniently without the managed interface as well
+* Added `SmokyDingo.enabled` property, which loads plugin config to
+  determine if a command should be made available or not
 
 
 Commands

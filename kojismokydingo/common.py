@@ -32,6 +32,7 @@ import re
 from configparser import ConfigParser
 from datetime import datetime, timezone
 from fnmatch import fnmatchcase
+from functools import cache
 from glob import glob
 from itertools import filterfalse
 from operator import itemgetter
@@ -454,6 +455,19 @@ def find_config_files(
     return found
 
 
+@cache
+def _load_full_config(
+        config_files: Optional[Tuple[str]] = None) -> ConfigParser:
+
+    if config_files is None:
+        config_files = find_config_files()
+
+    conf = ConfigParser()
+    conf.read(config_files)
+
+    return conf
+
+
 def load_full_config(
         config_files: Optional[Iterable[str]] = None) -> ConfigParser:
     """
@@ -473,13 +487,13 @@ def load_full_config(
     :since: 1.0
     """
 
-    if config_files is None:
-        config_files = find_config_files()
+    # this is actually just a wrapper to a cached call, but we need to
+    # convert to a hashable argument type first.
 
-    conf = ConfigParser()
-    conf.read(config_files)
+    if config_files is not None:
+        config_files = tuple(config_files)
 
-    return conf
+    return _load_full_config(config_files)
 
 
 def get_plugin_config(
