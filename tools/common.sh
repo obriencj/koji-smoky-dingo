@@ -181,6 +181,11 @@ function ksd_test_platform() {
     # ensure the logdir exists
     mkdir -p "$PWD/logs"
 
+    if selinuxenabled ; then
+        # we will need to allow container access to these three dirs
+        chcon -t container_file_t -R docs logs tests
+    fi
+
     echo "Running tests for $NAME"
     $PODMAN run --rm \
             --volume "$PWD"/docs:/ksd/docs \
