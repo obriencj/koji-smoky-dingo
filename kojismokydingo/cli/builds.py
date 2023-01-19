@@ -52,7 +52,7 @@ from ..common import chunkseq, unique
 from ..tags import ensure_tag, gather_tag_ids
 from ..types import (
     BTypeInfo, BuildInfo, BuildInfos, BuildSpec,
-    BuildState, DecoratedBuildInfo, TagSpec, )
+    BuildState, DecoratedBuildInfo, GOptions, TagSpec, )
 from ..users import collect_cgs
 
 
@@ -1177,10 +1177,11 @@ class ListCGs(AnonSmokyDingo):
 
 def cli_pull_container(
         session: ClientSession,
+        goptions: GOptions,
         cmd: str,
+        tagcmd: str,
         bld: str,
-        tag: Optional[TagSpec] = None,
-        args: List[str] = []):
+        tag: Optional[TagSpec] = None) -> int:
 
     """
     Implements the ``koji pull-container`` command
@@ -1222,16 +1223,29 @@ def cli_pull_container(
     else:
         cmd = f'{cmd} {pullspec}'
 
-    if args:
-        cmdargs = " ".join(quote(a) for a in args)
-        cmd = f'{cmd} {cmdargs}'
-
     # bandit complains about this -- we've quoted our args, and the
     # invocation has the same level of authority as the user running
     # the command. They could do something drastic if they wanted to,
     # just like they could do something drastic from the shell they
     # already have access to. This tool isn't a service.
-    return system(cmd)  # nosec
+    print(cmd)
+    res = system(cmd)  # nosec
+    if res:
+        return res
+
+    if not tagcmd or tagcmd == "-":
+        return 0
+
+    profile = quote(goptions.profile)
+    nvr = quote(binfo['nvr'])
+    if "{" in tagcmd:
+        tagcmd = tagcmd.format(pullspec=pullspec,
+                               profile=profile, nvr=nvr)
+    else:
+        tagcmd = f'{tagcmd} {pullspec} {profile}/{nvr}'
+
+    print(tagcmd)
+    return system(tagcmd)  # nosec
 
 
 class PullContainer(AnonSmokyDingo):
@@ -1245,26 +1259,33 @@ class PullContainer(AnonSmokyDingo):
         addarg("build", metavar="BUILD", action="store",
                help="Container build to pull")
 
-        addarg("args", metavar="ARGS", nargs="*",
-               help="all additional arguments after will be passed to"
-               " the configured container manager command. Specify -- to"
-               " prevent from being treated as a koji option.")
-
-        addarg("--latest-build", dest="tag", metavar="TAG", action="store",
-               default=None,
+        addarg("--latest-build", dest="kojitag", metavar="KOJI_TAG",
+               action="store", default=None,
                help="BUILD is a package name, use the matching latest build"
-               " in the given TAG")
+               " in the given koji tag")
 
         grp = parser.add_mutually_exclusive_group()
         addarg = grp.add_argument
 
-        addarg("--command", "-c", default=None, metavar="COMMAND",
+        addarg("--command", default=None, metavar="PULL_COMMAND",
                help="Command to exec with the discovered pull spec")
 
         addarg("--print", "-p", default=None, dest="command",
                action="store_const", const="-",
                help="Print pull spec to stdout rather than executing"
                " a command")
+
+        grp = parser.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--tag-command", dest="tag_command", default=None,
+               metavar="TAG_COMMAND",
+               help="Command to exec after pulling the image")
+
+        addarg("--no-tag", "-n", dest="tag_command",
+               action="store_const", const="-",
+               help="Do not execute the tag command after pulling the"
+               " image")
 
         return parser
 
@@ -1273,7 +1294,8 @@ class PullContainer(AnonSmokyDingo):
         command = options.command
 
         if not command:
-            command = self.get_plugin_config("command", "podman pull")
+            command = self.get_plugin_config("pull_command",
+                                             "podman pull")
             options.command = command
 
         if not command:
@@ -1281,31 +1303,23 @@ class PullContainer(AnonSmokyDingo):
                          " pulling containers.\n"
                          "Please specify via the '--command' option.")
 
+        tag_command = options.tag_command
+        if not tag_command:
+            tag_command = self.get_plugin_config("tag_command",
+                                                 "podman image tag")
+            options.tag_command = tag_command
+
+        # don't bother warning about the lack of a tag_command, that
+        # part can just be skipped.
+
 
     def handle(self, options):
         return cli_pull_container(self.session,
+                                  goptions=self.goptions,
                                   cmd=options.command,
+                                  tagcmd=options.tag_command,
                                   bld=options.build,
-                                  tag=options.tag,
-                                  args=options.args)
-
-
-class RunContainer(PullContainer):
-
-    description = "Run a container from a build's image"
-
-
-    def validate(self, parser, options):
-        command = options.command
-
-        if not command:
-            command = self.get_plugin_config("command", "podman run --rm -it")
-            options.command = command
-
-        if not command:
-            parser.error("Unable to determine a default COMMAND for"
-                         " running containers.\n"
-                         "Please specify via the '--command' option.")
+                                  tag=options.kojitag)
 
 
 #

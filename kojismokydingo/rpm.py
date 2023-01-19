@@ -23,7 +23,7 @@ Koji Smoky Dingo - RPM NEVRA Utils
 import re
 
 from itertools import zip_longest
-from typing import Tuple
+from typing import Tuple, cast
 
 
 __all__ = (
@@ -42,11 +42,11 @@ def _rpm_str_split(s: str) -> Tuple[str]:
     Split an E, V, or R string for comparison by its segments
     """
 
-    return tuple(i for i in _rpm_str_split_re(s)
+    return tuple(i for i in _rpm_str_split_re(s)  # type: ignore
                  if (i.isalnum() or i.startswith("~")))
 
 
-def _rpm_str_compare(left: str, right: str) -> int:
+def _rpm_str_compare(leftstr: str, rightstr: str) -> int:
     """
     Comparison of left and right by RPM version comparison rules.
 
@@ -57,8 +57,8 @@ def _rpm_str_compare(left: str, right: str) -> int:
     :since: 2.0
     """
 
-    left = _rpm_str_split(left)
-    right = _rpm_str_split(right)
+    left: Tuple[str] = _rpm_str_split(leftstr)
+    right: Tuple[str] = _rpm_str_split(rightstr)
 
     lp: str
     rp: str
