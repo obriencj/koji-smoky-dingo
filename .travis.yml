@@ -23,8 +23,7 @@ env:
 cache: pip
 
 install:
-  - if [ "$TRAVIS_PYTHON_VERSION" = "3.6" ] ; then pip install coveralls tox tox-travis ; fi
-  - if [ "$TRAVIS_PYTHON_VERSION" != "3.6" ] ; then pip install -I -U coveralls tox tox-travis ; fi
+  - pip install coveralls tox tox-travis
 
 script:
   - tox
