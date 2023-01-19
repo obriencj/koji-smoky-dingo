@@ -22,16 +22,18 @@ Koji Smoky Dingo - CLI Build Commands
 
 import sys
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace, REMAINDER
 from functools import partial
-from koji import ClientSession
 from itertools import chain
+from koji import ClientSession
 from operator import itemgetter
+from os import system
+from shlex import quote
 from typing import (
-    Callable, Dict, Iterable, List, Optional, Sequence, Union, )
+    Any, Callable, Dict, Iterable, List, Optional, Sequence, Union, )
 
 from . import (
-    AnonSmokyDingo, TagSmokyDingo,
+    AnonSmokyDingo, BadDingo, TagSmokyDingo,
     int_or_str, pretty_json, open_output,
     printerr, read_clean_lines, resplit, )
 from .sift import BuildSifting, Sifter, output_sifted
@@ -50,7 +52,7 @@ from ..common import chunkseq, unique
 from ..tags import ensure_tag, gather_tag_ids
 from ..types import (
     BTypeInfo, BuildInfo, BuildInfos, BuildSpec,
-    BuildState, DecoratedBuildInfo, TagSpec, )
+    BuildState, DecoratedBuildInfo, GOptions, TagSpec, )
 from ..users import collect_cgs
 
 
@@ -63,6 +65,7 @@ __all__ = (
     "ListBTypes",
     "ListCGs",
     "ListComponents",
+    "PullContainer",
 
     "cli_bulk_move_builds",
     "cli_bulk_tag_builds",
@@ -71,6 +74,7 @@ __all__ = (
     "cli_list_btypes",
     "cli_list_cgs",
     "cli_list_components",
+    "cli_pull_container",
 )
 
 
@@ -1169,6 +1173,153 @@ class ListCGs(AnonSmokyDingo):
                             nvr=options.build,
                             json=options.json,
                             quiet=options.quiet)
+
+
+def cli_pull_container(
+        session: ClientSession,
+        goptions: GOptions,
+        cmd: str,
+        tagcmd: str,
+        bld: str,
+        tag: Optional[TagSpec] = None) -> int:
+
+    """
+    Implements the ``koji pull-container`` command
+    """
+
+    if tag:
+        tinfo = as_taginfo(session, tag)
+        latest = session.getLatestBuilds(tinfo['id'], package=bld)
+        if not latest:
+            raise BadDingo(f"No latest build of {bld} in {tag}")
+        binfo = as_buildinfo(session, latest[0]['build_id'])
+
+    else:
+        binfo = as_buildinfo(session, bld)
+
+    pull: List[str] = None
+    extra: Dict[str, Any] = binfo.get("extra")
+    if extra:
+        image: Dict[str, Any] = extra.get("image")
+        if image:
+            index: Dict[str, Any] = image.get("index")
+            if index:
+                pull = index.get("pull")
+
+    if not pull:
+        raise BadDingo("Unable to determine pull spec from extra data")
+
+    for pullspec in pull:
+        if "@sha" not in pullspec:
+            break
+
+    if not cmd or cmd == "-":
+        print(pullspec)
+        return 0
+
+    pullspec = quote(pullspec)
+    if "{pullspec}" in cmd:
+        cmd = cmd.format(pullspec=pullspec)
+    else:
+        cmd = f'{cmd} {pullspec}'
+
+    # bandit complains about this -- we've quoted our args, and the
+    # invocation has the same level of authority as the user running
+    # the command. They could do something drastic if they wanted to,
+    # just like they could do something drastic from the shell they
+    # already have access to. This tool isn't a service.
+    print(cmd)
+    res = system(cmd)  # nosec
+    if res:
+        return res
+
+    if not tagcmd or tagcmd == "-":
+        return 0
+
+    profile = quote(goptions.profile)
+    nvr = quote(binfo['nvr'])
+    if "{" in tagcmd:
+        tagcmd = tagcmd.format(pullspec=pullspec,
+                               profile=profile, nvr=nvr)
+    else:
+        tagcmd = f'{tagcmd} {pullspec} {profile}/{nvr}'
+
+    print(tagcmd)
+    return system(tagcmd)  # nosec
+
+
+class PullContainer(AnonSmokyDingo):
+
+    description = "Pull a container build's image"
+
+
+    def arguments(self, parser):
+        addarg = parser.add_argument
+
+        addarg("build", metavar="BUILD", action="store",
+               help="Container build to pull")
+
+        addarg("--latest-build", dest="kojitag", metavar="KOJI_TAG",
+               action="store", default=None,
+               help="BUILD is a package name, use the matching latest build"
+               " in the given koji tag")
+
+        grp = parser.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--command", default=None, metavar="PULL_COMMAND",
+               help="Command to exec with the discovered pull spec")
+
+        addarg("--print", "-p", default=None, dest="command",
+               action="store_const", const="-",
+               help="Print pull spec to stdout rather than executing"
+               " a command")
+
+        grp = parser.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--tag-command", dest="tag_command", default=None,
+               metavar="TAG_COMMAND",
+               help="Command to exec after pulling the image")
+
+        addarg("--no-tag", "-n", dest="tag_command",
+               action="store_const", const="-",
+               help="Do not execute the tag command after pulling the"
+               " image")
+
+        return parser
+
+
+    def validate(self, parser, options):
+        command = options.command
+
+        if not command:
+            command = self.get_plugin_config("pull_command",
+                                             "podman pull")
+            options.command = command
+
+        if not command:
+            parser.error("Unable to determine a default COMMAND for"
+                         " pulling containers.\n"
+                         "Please specify via the '--command' option.")
+
+        tag_command = options.tag_command
+        if not tag_command:
+            tag_command = self.get_plugin_config("tag_command",
+                                                 "podman image tag")
+            options.tag_command = tag_command
+
+        # don't bother warning about the lack of a tag_command, that
+        # part can just be skipped.
+
+
+    def handle(self, options):
+        return cli_pull_container(self.session,
+                                  goptions=self.goptions,
+                                  cmd=options.command,
+                                  tagcmd=options.tag_command,
+                                  bld=options.build,
+                                  tag=options.kojitag)
 
 
 #

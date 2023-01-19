@@ -377,9 +377,9 @@ def cli_open(
 
     # bandit complains about this -- we've quoted our args, and the
     # invocation has the same level of authority as the user running
-    # the open command -- they could do something drastic if they
-    # wanted to, just like they could do something drastic from the
-    # shell they already have access to. This tool isn't a service.
+    # the command. They could do something drastic if they wanted to,
+    # just like they could do something drastic from the shell they
+    # already have access to. This tool isn't a service.
     return system(cmd)  # nosec
 
 
@@ -435,12 +435,10 @@ class ClientOpen(AnonSmokyDingo):
 
 
     def handle(self, options):
-        command = options.command or self.get_plugin_config("command")
-
         return cli_open(self.session, self.goptions,
                         datatype=options.datatype,
                         element=options.element,
-                        command=command)
+                        command=options.command)
 
 
 #

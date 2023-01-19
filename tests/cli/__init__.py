@@ -45,6 +45,7 @@ ENTRY_POINTS = {
     "list-tag-extras": "kojismokydingo.cli.tags:ListTagExtras",
     "open": "kojismokydingo.cli.clients:ClientOpen",
     "perminfo": "kojismokydingo.cli.users:ShowPermissionInfo",
+    "pull-container": "kojismokydingo.cli.builds:PullContainer",
     "remove-env-var": "kojismokydingo.cli.tags:RemoveEnvVar",
     "remove-rpm-macro": "kojismokydingo.cli.tags:RemoveRPMMacro",
     "renum-tag-inheritance": "kojismokydingo.cli.tags:RenumTagInheritance",
