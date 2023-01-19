@@ -63,7 +63,7 @@ eg. in ``~/.config/ksd/common.conf``
    [pull-container]
    # these are also the default values if left unspecified
    pull_command = podman pull {pullspec}
-   tag_command = podman tag {pullspec} {profile}/{nvr}
+   tag_command = podman image tag {pullspec} {profile}/{nvr}
 
 
 The pull command only accepts the pullspec variable.
