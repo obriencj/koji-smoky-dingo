@@ -23,7 +23,7 @@ env:
 cache: pip
 
 install:
-  - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ] ; then pip install importlib-metadata=4.12 ; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ] ; then pip install importlib-metadata==4.12 ; fi
   - pip install coveralls tox tox-travis
 
 script:
