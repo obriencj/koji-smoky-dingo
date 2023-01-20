@@ -455,12 +455,12 @@ def find_config_files(
     return found
 
 
-@lru_cache
+@lru_cache(maxsize=1)
 def _load_full_config(
         config_files: Optional[Tuple[str]] = None) -> ConfigParser:
 
     if config_files is None:
-        config_files = find_config_files()
+        config_files = find_config_files()  # type: ignore
 
     conf = ConfigParser()
     conf.read(config_files)

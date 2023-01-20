@@ -30,7 +30,7 @@ from abc import ABCMeta, abstractmethod
 from argparse import Action, ArgumentParser, Namespace
 from collections import namedtuple
 from contextlib import contextmanager
-from functools import cached_property, partial
+from functools import lru_cache, partial
 from io import StringIO
 from itertools import zip_longest
 from json import dump
@@ -666,7 +666,8 @@ class SmokyDingo(metaclass=ABCMeta):
         return self.config.get(key, default)
 
 
-    @cached_property
+    @property
+    @lru_cache(1)
     def enabled(self):
         val = self.get_plugin_config("enabled", "1")
         return val and val.lower() in ("1", "yes", "true")

@@ -172,22 +172,22 @@ def cli_userinfo(
         for member in sorted(members, key=lambda m: m.get("name")):
             print(f"{member['name']} [{member['id']}]")
 
-    stats = userinfo.get("statistics", None)
-    if stats:
+    data = userinfo.get("statistics", None)
+    if data:
         print("Statistics:")
-        print(" Owned packages:", stats.get("package_count", 0))
-        print(" Submitted tasks:", stats.get("task_count", 0))
-        print(" Created builds:", stats.get("build_count", 0))
+        print(" Owned packages:", data.get("package_count", 0))
+        print(" Submitted tasks:", data.get("task_count", 0))
+        print(" Created builds:", data.get("build_count", 0))
 
-        dat = stats.get("last_task")
-        if dat:
-            print(f" Last task: {dat['method']} [{dat['id']}]"
-                  f" {dat['create_time'].split('.')[0]}")
+        tdat = data.get("last_task")
+        if tdat:
+            print(f" Last task: {tdat['method']} [{tdat['id']}]"
+                  f" {tdat['create_time'].split('.')[0]}")
 
-        dat = stats.get("last_build")
-        if dat:
-            print(f" Last build: {dat['nvr']} [{dat['build_id']}]"
-                  f" {dat['creation_time'].split('.')[0]}")
+        bdat = data.get("last_build")
+        if bdat:
+            print(f" Last build: {bdat['nvr']} [{bdat['build_id']}]"
+                  f" {bdat['creation_time'].split('.')[0]}")
 
 
 class ShowUserInfo(AnonSmokyDingo):

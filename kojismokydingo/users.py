@@ -43,26 +43,28 @@ def collect_userstats(
         session: ClientSession,
         user: UserSpec) -> UserStatistics:
 
-    with session.multicall() as mc:
+    userinfo = as_userinfo(session, user)
+
+    with session.multicall() as mc:  # type: ignore
         calls = (
             ('build_count',
-             mc.listBuilds(userID=user['id'],
+             mc.listBuilds(userID=userinfo['id'],
                            queryOpts={'countOnly': True})),
 
             ('last_build',
-             mc.listBuilds(userID=user['id'],
+             mc.listBuilds(userID=userinfo['id'],
                            queryOpts={'limit': 1, 'order': '-build_id'})),
 
             ('package_count',
-             mc.listPackages(userID=user['id'], with_dups=True,
+             mc.listPackages(userID=userinfo['id'], with_dups=True,
                              queryOpts={'countOnly': True})),
 
             ('task_count',
-             mc.listTasks(opts={'owner': user['id'], 'parent': None},
+             mc.listTasks(opts={'owner': userinfo['id'], 'parent': None},
                           queryOpts={'countOnly': True})),
 
             ('last_task',
-             mc.listTasks(opts={'owner': user['id'], 'parent': None},
+             mc.listTasks(opts={'owner': userinfo['id'], 'parent': None},
                           queryOpts={'limit': 1, 'order': '-id'})),
         )
 
@@ -82,7 +84,7 @@ def collect_userstats(
     else:
         stats['last_task'] = None
 
-    return stats
+    return cast(UserStatistics, stats)
 
 
 def collect_userinfo(
