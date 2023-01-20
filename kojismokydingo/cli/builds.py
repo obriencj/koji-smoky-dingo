@@ -22,7 +22,7 @@ Koji Smoky Dingo - CLI Build Commands
 
 import sys
 
-from argparse import ArgumentParser, Namespace, REMAINDER
+from argparse import ArgumentParser, Namespace
 from functools import partial
 from itertools import chain
 from koji import ClientSession
