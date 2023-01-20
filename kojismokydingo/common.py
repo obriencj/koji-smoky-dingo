@@ -32,7 +32,7 @@ import re
 from configparser import ConfigParser
 from datetime import datetime, timezone
 from fnmatch import fnmatchcase
-from functools import cache
+from functools import lru_cache
 from glob import glob
 from itertools import filterfalse
 from operator import itemgetter
@@ -455,7 +455,7 @@ def find_config_files(
     return found
 
 
-@cache
+@lru_cache
 def _load_full_config(
         config_files: Optional[Tuple[str]] = None) -> ConfigParser:
 
