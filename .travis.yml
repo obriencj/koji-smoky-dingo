@@ -15,7 +15,11 @@ python:
   - "3.7"
   - "3.8"
   - "3.9"
-  - "3.10"
+
+  # - "3.10"
+
+  # for some reason this causes travis to fail, as it is unable to
+  # find a 3.10 archive
 
 env:
   global:
