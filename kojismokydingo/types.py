@@ -104,6 +104,7 @@ __all__ = (
     "UserInfo",
     "UserSpec",
     "UserStatus",
+    "UserStatistics",
     "UserType",
 )
 
@@ -790,6 +791,24 @@ a permission's ID or name
 """
 
 
+class UserStatistics(TypedDict):
+
+    build_count: int
+    """ count of builds owned by this user """
+
+    package_count: int
+    """ count of packages owned by this user """
+
+    task_count: int
+    """ count of tasks submitted by this user """
+
+    last_build: Optional["BuildInfo"]
+    """ the most recent build by this user """
+
+    last_task: Optional["TaskInfo"]
+    """ the most recent task by this user """
+
+
 class DecoratedUserInfo(UserInfo):
     """
     A `UserInfo` decorated with additional fields that merge more data
@@ -805,6 +824,9 @@ class DecoratedUserInfo(UserInfo):
 
     members: List[UserInfo]
     """ membership if user is a group """
+
+    statistics: Optional[UserStatistics]
+    """ user's interaction statistics """
 
 
 class RepoInfo(TypedDict):

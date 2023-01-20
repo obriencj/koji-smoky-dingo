@@ -26,12 +26,14 @@ API
   `Sieve.__init__`
 * Moved RPM comparison functions out from `kojismokydingo.common` to
   their own new module `kojismokydingo.rpm`
-* Added as_channelinfo, as_packageinfo, as_repoinfo, NoSuchPackage,
-  NoSuchRepo to the core API
+* Added `as_channelinfo`, `as_packageinfo`, `as_repoinfo`,
+  `NoSuchPackage`, `NoSuchRepo` to the core API
 * Added `ManagedClientSession.activate` to allow it to be used more
   conveniently without the managed interface as well
 * Added `SmokyDingo.enabled` property, which loads plugin config to
   determine if a command should be made available or not
+* Added `collect_userstats` and introduced a new `stats` argument to
+  `collect_userinfo`
 
 
 Commands
@@ -45,3 +47,5 @@ Commands
 * Added ``check-repo`` command to check for repo staleness
 * Added ``pull-container`` command to fetch container images from OSBS
   builds, or to print the pullspec from same
+* Added ``--stats`` option to the ``userinfo`` command to include a
+  summary of statistics for the user
