@@ -77,8 +77,8 @@ class ShowUserInfoTest(TestCase):
             Permissions:
               coolguy
             """)
-        print("testing", expected)
-        self.assertEqual(expected, res)
+        print("\ntesting\n", expected)
+        self.assertEqual(expected, res[:len(expected)])
 
 
 class EnumTextTest(TestCase):

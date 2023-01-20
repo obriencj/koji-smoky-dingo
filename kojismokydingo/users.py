@@ -28,7 +28,7 @@ from typing import List, Optional, Union, cast
 from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
 from .types import (
     CGInfo, DecoratedPermInfo, DecoratedUserInfo, NamedCGInfo,
-    PermSpec, PermUser, UserInfo, UserSpec, UserType, )
+    PermSpec, PermUser, UserInfo, UserSpec, UserStatistics, UserType, )
 
 
 __all__ = (
@@ -39,9 +39,56 @@ __all__ = (
 )
 
 
+def collect_userstats(
+        session: ClientSession,
+        user: UserSpec) -> UserStatistics:
+
+    with session.multicall() as mc:
+        calls = (
+            ('build_count',
+             mc.listBuilds(userID=user['id'],
+                           queryOpts={'countOnly': True})),
+
+            ('last_build',
+             mc.listBuilds(userID=user['id'],
+                           queryOpts={'limit': 1, 'order': '-build_id'})),
+
+            ('package_count',
+             mc.listPackages(userID=user['id'], with_dups=True,
+                             queryOpts={'countOnly': True})),
+
+            ('task_count',
+             mc.listTasks(opts={'owner': user['id'], 'parent': None},
+                          queryOpts={'countOnly': True})),
+
+            ('last_task',
+             mc.listTasks(opts={'owner': user['id'], 'parent': None},
+                          queryOpts={'limit': 1, 'order': '-id'})),
+        )
+
+    stats = {k: v.result for k, v in calls}
+
+    # unwrap the last_build
+    lst = stats['last_build']
+    if lst:
+        stats['last_build'] = lst[0]
+    else:
+        stats['last_build'] = None
+
+    # and also the last_task
+    lst = stats['last_task']
+    if lst:
+        stats['last_task'] = lst[0]
+    else:
+        stats['last_task'] = None
+
+    return stats
+
+
 def collect_userinfo(
         session: ClientSession,
-        user: UserSpec) -> DecoratedUserInfo:
+        user: UserSpec,
+        stats: bool = True) -> DecoratedUserInfo:
     """
     Gather information about a named user, including the list of
     permissions the user has.
@@ -77,7 +124,12 @@ def collect_userinfo(
     userinfo["permissions"] = session.getUserPerms(uid)
     userinfo["content_generators"] = collect_cg_access(session, userinfo)
 
-    if userinfo.get("usertype", UserType.NORMAL) == UserType.GROUP:
+    ut = userinfo.get("usertype", UserType.NORMAL)
+    if ut == UserType.NORMAL:
+        if stats:
+            userinfo["statistics"] = collect_userstats(session, userinfo)
+
+    elif ut == UserType.GROUP:
         try:
             userinfo["members"] = session.getGroupMembers(uid)
         except Exception:
