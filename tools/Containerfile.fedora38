@@ -1,5 +1,5 @@
 
-FROM fedora:35
+FROM fedora:38
 
 WORKDIR /src
 
