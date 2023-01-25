@@ -50,9 +50,16 @@ def rebuild_client_config(
 
     opts = {
         "server": session.baseurl,
-        "weburl": goptions.weburl,
+
+        "authtype": goptions.authtype,
+        "cert": goptions.cert,
+        "keytab": goptions.keytab,
+        # "pkgurl": goptions.pkgurl,
+        "plugin_paths": goptions.plugin_paths,
         "topurl": goptions.topurl,
         "topdir": goptions.topdir,
+        "weburl": goptions.weburl,
+        # "pyver": goptions.pyver,
     }
     opts.update(session.opts)
 

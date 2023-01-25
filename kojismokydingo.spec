@@ -92,9 +92,10 @@ Docs for Koji Smoky Dingo
 Summary:        %{summary}
 BuildRequires:  python3-devel
 BuildRequires:  python3-pip python3-setuptools python3-wheel
+
 Requires:	python3 python3-setuptools
 
-%if 0%{?rhel} <= 8
+%if 0%{?rhel} && 0%{?rhel} <= 8
 # centos/rhel 8 doesn't have the automatic Requires generation stuff,
 # so we'll have to be explicit
 Requires:       python3-appdirs

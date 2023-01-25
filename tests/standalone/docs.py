@@ -12,6 +12,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
+from argparse import HelpFormatter
+from functools import partial
 from io import StringIO
 from nose.tools import assert_equal, assert_raises, assert_true
 from pkg_resources import EntryPoint
@@ -33,6 +35,17 @@ def check_standalone_help(cmdname):
     else:
         # old environments
         command = ep.load(require=False)
+
+    # this ugly little dance needs to happen because the default
+    # formatter checks console width and will word-wrap on hyphens in
+    # some cases. So we will force it to work with a width of 80 chars
+    lonely = command.__self__
+    orig_parser = lonely.parser
+    def wrap_parser(self):
+        argp = orig_parser(self)
+        argp.formatter_class = partial(HelpFormatter, width=80)
+        return argp
+    lonely.parser = wrap_parser
 
     # launch the loaded command with the --help option, and collect
     # its output. Also ensures that it causes the expected SystemExit

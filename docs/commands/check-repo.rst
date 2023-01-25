@@ -21,13 +21,13 @@ koji check-repo
    --verbose, -v  Show history modifications since repo creation
 
  verbose output settings:
-   --utc          Display timestamps in UTC. Default: show in local
-                  time.Requires koji >= 1.27
+   --utc          Display timestamps in UTC rather than local time.
+                  Requires koji >= 1.27
    --events, -e   Display event IDs
 
 
-This command is used to identify whether a tag's repo is out-of-date relative
-to the configuration or builds of the tag or its parents.
+This command is used to identify whether a tag's repo is out-of-date
+relative to the configuration or builds of the tag or its parents.
 
 In addition to determining whether the repo is fresh or stale, the
 ``--verbose`` may be specified to output the combined history of all

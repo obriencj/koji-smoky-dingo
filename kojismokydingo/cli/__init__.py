@@ -30,19 +30,19 @@ from abc import ABCMeta, abstractmethod
 from argparse import Action, ArgumentParser, Namespace
 from collections import namedtuple
 from contextlib import contextmanager
-from functools import partial
+from functools import lru_cache, partial
 from io import StringIO
 from itertools import zip_longest
 from json import dump
 from koji import ClientSession, GenericError
-from koji_cli.commands import _print_histline
+from koji_cli.commands import _print_histline, _table_keys
 from koji_cli.lib import activate_session, ensure_connection
 from operator import itemgetter
 from os import devnull
 from os.path import basename
 from typing import (
     Any, Callable, Dict, Iterable, List, Optional,
-    Sequence, TextIO, Union, )
+    Sequence, TextIO, Tuple, Union, )
 
 from .. import BadDingo, NotPermitted
 from ..common import load_plugin_config
@@ -58,11 +58,14 @@ __all__ = (
     "TargetSmokyDingo",
 
     "clean_lines",
+    "convert_history",
     "find_action",
     "remove_action",
     "int_or_str",
     "open_output",
     "pretty_json",
+    "print_history",
+    "print_history_results",
     "printerr",
     "read_clean_lines",
     "resplit",
@@ -94,6 +97,8 @@ def pretty_json(
     :param output: stream to print to. Default, `sys.stdout`
 
     :param pretty: additional or overriding options to `json.dump`
+
+    :since: 1.0
     """
 
     if output is None:
@@ -120,6 +125,8 @@ def find_action(
     :param key: the dest, metavar, or option string of the action
 
     :returns: the first matching Action, or None
+
+    :since 1.0:
     """
 
     for act in parser._actions:
@@ -139,6 +146,8 @@ def remove_action(
     :param parser: argument parser to remove the action from
 
     :param key: value to identify the action by
+
+    :since 1.0:
     """
 
     found = find_action(parser, key)
@@ -174,6 +183,8 @@ def resplit(
     :param arglist: original series of arguments to be resplit
 
     :param sep: separator character
+
+    :since 1.0:
     """
 
     work = map(str.strip, sep.join(arglist).split(sep))
@@ -200,6 +211,8 @@ def open_output(
     file will be overwriten unless it specified with a prefix of
     ``"@"``. This prefix will be stripped from the filename in this
     case only.
+
+    :since: 1.0
     """
 
     if filename:
@@ -239,6 +252,8 @@ def clean_lines(
 
     :param skip_comments: Skip over lines with leading # characters.
       Default, True
+
+    :since: 1.0
     """
 
     if skip_comments:
@@ -270,6 +285,8 @@ def read_clean_lines(
 
     :param skip_comments: Skip over lines with leading # characters.
       Default, True
+
+    :since: 1.0
     """
 
     if not filename:
@@ -298,6 +315,8 @@ def printerr(
     :param end: text appended after the last value, defaults to a newline
 
     :param flush: forcibly flush the stream
+
+    :since: 1.0
     """
 
     # we don't use a partial because docs can't figure out a signature
@@ -339,6 +358,8 @@ def tabulate(
       headings if out is a TTY device.
 
     :param out: Stream to write output to. Default, `sys.stdout`
+
+    :since: 1.0
     """
 
     if out is None:
@@ -391,6 +412,8 @@ def space_normalize(txt: str) -> str:
     Normalizes the whitespace in txt to single spaces.
 
     :param txt: Original text
+
+    :since: 1.0
     """
 
     return " ".join(txt.split())
@@ -400,6 +423,8 @@ def int_or_str(value: Any) -> Union[int, str]:
     """
     For use as an argument type where the value may be either an int
     (if it is entirely numeric) or a str.
+
+    :since: 1.0
     """
 
     if isinstance(value, str):
@@ -414,6 +439,57 @@ def int_or_str(value: Any) -> Union[int, str]:
     return value
 
 
+def convert_history(
+        history: Dict[str, List[Dict[str, Any]]]) -> List[HistoryEntry]:
+    """
+    Converts the history dicts as returned from the
+    `ClientSession.queryHistory` API into the format `print_history`
+    expects.
+
+    Note that the results are a single list, containing the history
+    from all tables. By default these will be in the order of the
+    table name, then in the order given.
+
+    :param history: mapping of table name to list of history events
+
+    :since: 2.0
+    """
+
+    results: List[HistoryEntry] = []
+    timeline: List[HistoryEntry] = []
+
+    for table, events in history.items():
+        for event in events:
+            event_id: int
+            event_id = event.get('revoke_event')
+            if event_id:
+                timeline.append((event_id, table, False, dict(event)))
+            event_id = event.get('create_event')
+            if event_id:
+                timeline.append((event_id, table, True, event))
+
+    timeline.sort(key=itemgetter(0, 1, 2))
+
+    # group edits together
+    last_event = None
+    edit_index: Dict[Tuple[str, int], Dict[Tuple, Dict[str, Any]]] = {}
+    for entry in timeline:
+        event_id, table, create, x = entry
+        if event_id != last_event:
+            edit_index = {}
+            last_event = event_id
+        key = tuple([x[k] for k in _table_keys[table]])
+        prev = edit_index.setdefault((table, event_id), {})
+        if key in prev:
+            prev_x = prev[key]
+            prev_x.setdefault('.related', []).append(entry)
+        else:
+            prev[key] = x
+            results.append(entry)
+
+    return results
+
+
 def print_history(
         timeline: Sequence[HistoryEntry],
         utc: bool = False,
@@ -421,7 +497,10 @@ def print_history(
         verbose: bool = False):
 
     """
-    Print history lines using koji's own history formatting
+    Print history lines using koji's own history formatting. The
+    history timeline needs to be in the format koji is expecting. The
+    results from `ClientSession.queryHistory` can be converted via the
+    `convert_history` function.
 
     :param timeline: A sequence of history events to display
 
@@ -439,6 +518,35 @@ def print_history(
 
     for event in timeline:
         _print_histline(event, options=options)
+
+
+def print_history_results(
+        timeline: Dict[str, List[Dict[str, Any]]],
+        utc: bool = False,
+        show_events: bool = False,
+        verbose: bool = False):
+
+    """
+    Prints history lines using koji's own history formatting. The
+    history timeline should be in the format as returned by the
+    `ClientSession.queryHistory` API.
+
+    This is a convenience function that combines the `convert_history`
+    and `print_history` functions.
+
+    :param timeline: A sequence of history events to display
+
+    :param utc: output timestamps in UTC instead of local time
+
+    :param show_events: print the individual event IDs
+
+    :param verbose: enables show_events and some additional output
+
+    :since: 2.0
+    """
+
+    history = convert_history(timeline)
+    return print_history(history, utc, show_events, verbose)
 
 
 class SmokyDingo(metaclass=ABCMeta):
@@ -556,6 +664,13 @@ class SmokyDingo(metaclass=ABCMeta):
             self.config = load_plugin_config(self.name, profile)
 
         return self.config.get(key, default)
+
+
+    @property
+    @lru_cache(1)
+    def enabled(self):
+        val = self.get_plugin_config("enabled", "1")
+        return val and val.lower() in ("1", "yes", "true")
 
 
     def parser(self) -> ArgumentParser:

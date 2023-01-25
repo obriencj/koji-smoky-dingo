@@ -25,7 +25,8 @@ from operator import itemgetter
 from typing import Optional, Union
 
 from . import AnonSmokyDingo, int_or_str, pretty_json
-from ..types import AuthType, UserInfo, UserSpec, UserStatus, UserType
+from ..types import (
+    AuthType, TaskState, UserInfo, UserSpec, UserStatus, UserType, )
 from ..users import (
     collect_cgs, collect_perminfo, collect_userinfo, )
 
@@ -113,6 +114,7 @@ def get_userauth_str(userinfo: UserInfo) -> Optional[str]:
 def cli_userinfo(
         session: ClientSession,
         user: UserSpec,
+        stats: bool = False,
         json: bool = False):
     """
     Implements the ``koji userinfo`` command
@@ -120,6 +122,8 @@ def cli_userinfo(
     :param session: an active koji client session
 
     :param user: user specification to output information about
+
+    :param stats: include simple user stats
 
     :param json: produce JSON output
 
@@ -129,7 +133,7 @@ def cli_userinfo(
     :since: 1.0
     """
 
-    userinfo = collect_userinfo(session, user)
+    userinfo = collect_userinfo(session, user, stats)
 
     if json:
         pretty_json(userinfo)
@@ -168,6 +172,23 @@ def cli_userinfo(
         for member in sorted(members, key=lambda m: m.get("name")):
             print(f"{member['name']} [{member['id']}]")
 
+    data = userinfo.get("statistics", None)
+    if data:
+        print("Statistics:")
+        print(" Owned packages:", data.get("package_count", 0))
+        print(" Submitted tasks:", data.get("task_count", 0))
+        print(" Created builds:", data.get("build_count", 0))
+
+        tdat = data.get("last_task")
+        if tdat:
+            print(f" Last task: {tdat['method']} [{tdat['id']}]"
+                  f" {tdat['create_time'].split('.')[0]}")
+
+        bdat = data.get("last_build")
+        if bdat:
+            print(f" Last build: {bdat['nvr']} [{bdat['build_id']}]"
+                  f" {bdat['creation_time'].split('.')[0]}")
+
 
 class ShowUserInfo(AnonSmokyDingo):
 
@@ -181,6 +202,9 @@ class ShowUserInfo(AnonSmokyDingo):
         addarg("user", action="store", type=int_or_str, metavar="USER",
                help="User name or principal")
 
+        addarg("--stats", action="store_true", default=False,
+               help="Include user statistics")
+
         addarg("--json", action="store_true", default=False,
                help="Output information as JSON")
 
@@ -189,6 +213,7 @@ class ShowUserInfo(AnonSmokyDingo):
 
     def handle(self, options):
         return cli_userinfo(self.session, options.user,
+                            stats=options.stats,
                             json=options.json)
 
 

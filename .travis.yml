@@ -16,6 +16,11 @@ python:
   - "3.8"
   - "3.9"
 
+  # - "3.10"
+
+  # for some reason this causes travis to fail, as it is unable to
+  # find a 3.10 archive
+
 env:
   global:
     - CRYPTOGRAPHY_DONT_BUILD_RUST=1
@@ -23,13 +28,14 @@ env:
 cache: pip
 
 install:
+  - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ] ; then pip install importlib-metadata==4.12 ; fi
   - pip install coveralls tox tox-travis
 
 script:
   - tox
 
 after_success:
-  - if [ "$TRAVIS_PYTHON_VERSION" = "3.8" ] ; then coverage combine ; coveralls  ; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" = "3.9" ] ; then coverage combine ; coveralls  ; fi
 
 
 # The end.

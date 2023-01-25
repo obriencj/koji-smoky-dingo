@@ -1,9 +1,11 @@
 
-FROM centos:8
+# RHEL 8 pre-beta releases
+FROM centos:stream8
 
 WORKDIR /src
 
 RUN \
+    dnf upgrade -y && \
     dnf install -qy epel-release && \
     dnf install -qy \
         dnf-plugins-core make rpm-build which \

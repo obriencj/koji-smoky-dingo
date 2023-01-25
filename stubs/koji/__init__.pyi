@@ -24,10 +24,11 @@ calls are being used correctly.
 :license: GPL v3
 """
 
-
 from configparser import ConfigParser, RawConfigParser
+from datetime import datetime
 from typing import (
-    Any, Dict, List, Optional, TypedDict, Tuple, Union, )
+    Any, Dict, List, Optional, Tuple, TypedDict, Union, Set, )
+from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
@@ -37,19 +38,45 @@ from kojismokydingo.types import (
     TaskInfo, UserInfo, )
 
 
-BR_STATES: Dict[str, int]
-BR_TYPES: Dict[str, int]
-BUILD_STATES: Dict[str, int]
-CHECKSUM_TYPES: Dict[str, int]
-REPO_STATES: Dict[str, int]
-TASK_STATES: Dict[str, int]
-USERTYPES: Dict[str, int]
-USER_STATUS: Dict[str, int]
-
 AUTHTYPE_NORMAL: int
 AUTHTYPE_KERB: int
 AUTHTYPE_SSL: int
 AUTHTYPE_GSSAPI: int
+
+REPO_INIT: int
+REPO_READY: int
+REPO_EXPIRED: int
+REPO_DELETED: int
+REPO_PROBLEM: int
+REPO_MERGE_MODES: Set[str]
+
+RPM_SIGTAG_GPG: int
+RPM_SIGTAG_PGP: int
+RPM_SIGTAG_RSA: int
+RPM_SIGTAG_MD5: int
+
+RPM_TAG_HEADERSIGNATURES: int
+RPM_TAG_FILEDIGESTALGO: int
+
+PRIO_DEFAULT: int
+
+BASEDIR: str
+
+
+class Enum(dict):
+    def getnum(self, key: Union[str, int]) -> int:
+        ...
+
+
+BR_STATES: Enum
+BR_TYPES: Enum
+BUILD_STATES: Enum
+CHECKSUM_TYPES: Enum
+REPO_STATES: Enum
+TAG_UPDATE_TYPES: Enum
+TASK_STATES: Enum
+USERTYPES: Enum
+USER_STATUS: Enum
 
 
 class Fault:
@@ -79,6 +106,18 @@ class AuthError(GenericError):
     ...
 
 
+class BuildError(GenericError):
+    ...
+
+
+class BuildrootError(BuildError):
+    ...
+
+
+class ParameterError(GenericError):
+    ...
+
+
 class ConfigurationError(GenericError):
     ...
 
@@ -87,11 +126,37 @@ class LockError(GenericError):
     ...
 
 
-class ParameterError(GenericError):
+class AuthExpired(AuthError):
+    ...
+
+
+class AuthLockError(AuthError):
+    ...
+
+
+class RetryError(AuthError):
+    ...
+
+
+class TagError(GenericError):
+    ...
+
+
+class LiveMediaError(GenericError):
+    ...
+
+
+class ApplianceError(GenericError):
+    ...
+
+
+class LiveCDError(GenericError):
     ...
 
 
 class PathInfo:
+    topdir: str
+
     def __init__(
             self,
             topdir: str = None):
@@ -129,15 +194,32 @@ class PathInfo:
             maveninfo: ArchiveInfo) -> str:
         ...
 
+    def repo(
+            self,
+            repo_id: int,
+            tag_str: str) -> str:
+        ...
+
     def rpm(
             self,
             rpminfo: RPMInfo) -> str:
+        ...
+
+    def sighdr(
+            self,
+            rinfo: RPMInfo,
+            sigkey: str) -> str:
         ...
 
     def signed(
             self,
             rpminfo: RPMInfo,
             sigkey: str) -> str:
+        ...
+
+    def taskrelpath(
+            self,
+            task_id: int) -> str:
         ...
 
     def typedir(
@@ -155,6 +237,14 @@ class PathInfo:
             self,
             wininfo: ArchiveInfo) -> str:
         ...
+
+    def work(
+            self,
+            volume=Optional[str]) -> str:
+        ...
+
+
+pathinfo: PathInfo
 
 
 class ClientSession:
@@ -193,6 +283,9 @@ class ClientSession:
             self,
             taginfo: Union[int, str],
             **kwargs) -> None:
+        ...
+
+    def exclusiveSession(self, *args, **kwargs) -> None:
         ...
 
     def getAllPerms(self) -> List[PermInfo]:
@@ -293,7 +386,7 @@ class ClientSession:
             self,
             tag: Union[int, str],
             event: Optional[int] = None,
-            Package: Optional[Union[int, str]] = None,
+            package: Optional[Union[int, str]] = None,
             type: Optional[str] = None) -> List[BuildInfo]:
         ...
 
@@ -380,6 +473,14 @@ class ClientSession:
             userID: Optional[Union[int, str]] = None) -> List[str]:
         ...
 
+    def gssapi_login(
+            self,
+            principal: Optional[str] = None,
+            keytab: Optional[str] = None,
+            ccache: Optional[str] = None,
+            proxyuser: Optional[str] = None) -> bool:
+        ...
+
     def listArchives(
             self,
             buildID: Optional[int] = None,
@@ -399,7 +500,7 @@ class ClientSession:
 
     def listBTypes(
             self,
-            query: Optional[Dict[str,str]] = None,
+            query: Optional[Dict[str, str]] = None,
             queryOpts: Optional[dict] = None) -> List[BTypeInfo]:
         ...
 
@@ -472,6 +573,11 @@ class ClientSession:
             pattern: Optional[str] = None) -> List[TagInfo]:
         ...
 
+    def login(
+            self,
+            opts: Optional[Dict[str, Any]] = None) -> bool:
+        ...
+
     def logout(self) -> None:
         ...
 
@@ -532,6 +638,14 @@ class ClientSession:
             clear: bool = False) -> None:
         ...
 
+    def ssl_login(
+            self,
+            cert: Optional[str] = None,
+            ca: Optional[str] = None,
+            serverca: Optional[str] = None,
+            proxyuser: Optional[str] = None) -> bool:
+        ...
+
     def tagBuildBypass(
             self,
             tag: Union[int, str],
@@ -569,6 +683,173 @@ def read_config(
 def read_config_files(
         config_files: List[Union[str, Tuple[str, bool]]],
         raw: bool = False) -> Union[ConfigParser, RawConfigParser]:
+    ...
+
+
+def hex_string(s: str) -> str:
+    ...
+
+
+def load_json(filepath: str):
+    ...
+
+
+def dump_json(
+        filepath: str,
+        data: Any,
+        indent: int = 4,
+        sort_keys: bool = False) -> None:
+    ...
+
+
+class RawHeader:
+    def __init__(self, data: bytes):
+        ...
+
+    def get(self, key: int, default: Any = None):
+        ...
+
+
+def check_NVR(
+        nvr: Union[str, Dict[str, Union[str, int]]],
+        strict: bool = False) -> bool:
+    ...
+
+
+def parse_NVR(nvr: str) -> Dict[str, Union[str, int]]:
+    ...
+
+
+def parse_NVRA(nvra: str) -> Dict[str, Union[str, int]]:
+    ...
+
+
+def get_sigpacket_key_id(str):
+    ...
+
+
+def ensuredir(str) -> None:
+    ...
+
+
+def grab_session_options(options) -> Dict[str, Any]:
+    ...
+
+
+def parse_arches(
+        arches: str,
+        to_list: bool = False,
+        strict: bool = False,
+        allow_none: bool = False) -> Union[List[str], str]:
+    ...
+
+
+def canonArch(arch: str) -> str:
+    ...
+
+
+def is_debuginfo(name: str) -> bool:
+    ...
+
+
+def _fix_print(value: Union[str, bytes]) -> str:
+    ...
+
+
+def _open_text_file(path: str, mode: str = 'rt'):
+    ...
+
+
+def formatTime(
+        value: Union[int, float, datetime, DateTime]) -> str:
+    ...
+
+
+def openRemoteFile(
+        relpath: str,
+        topurl: Optional[str],
+        topdir: Optional[str],
+        tempdir: Optional[str]):
+    ...
+
+
+def get_rpm_headers(
+        f: Any,
+        ts: Optional[int] = None) -> bytes:
+    ...
+
+
+def get_header_field(
+        hdr: bytes,
+        name: str,
+        src_arch: bool = False) -> Union[str, List[str]]:
+    ...
+
+
+def get_header_fields(
+        X: Union[bytes, str],
+        fields: Optional[List[str]],
+        src_arch: bool = False) -> Dict[str, Union[str, List[str]]]:
+    ...
+
+
+def get_rpm_header(
+        f: Union[bytes, str],
+        ts: Optional[int] = None) -> bytes:
+    ...
+
+
+def maven_info_to_nvr(maveinfo: Dict[str, Any]) -> Dict[str, Any]:
+    ...
+
+
+def genMockConfig(
+        name: str,
+        arch: str,
+        managed: bool = True,
+        repoid: Optional[int] = None,
+        tag_name: Optional[str] = None,
+        **opts) -> str:
+    ...
+
+
+def buildLabel(
+        buildInfo: BuildInfo,
+        showEpoch: bool = False) -> str:
+    ...
+
+
+def fixEncoding(
+        value: Any,
+        fallback: str = 'iso8859-15',
+        remove_nonprintable: bool = False) -> str:
+    ...
+
+
+def fix_encoding(
+        value: str,
+        fallback: str = 'iso8859-15',
+        remove_nonprintable: bool = False) -> str:
+    ...
+
+
+def add_file_logger(
+        logger: Any,
+        fn: str) -> None:
+    ...
+
+
+def add_mail_logger(
+        logger: Any,
+        addr: str) -> None:
+    ...
+
+
+def add_stderr_logger(Any) -> None:
+    ...
+
+
+def daemonize() -> None:
     ...
 
 

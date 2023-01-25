@@ -14,30 +14,40 @@
 
 import re
 
+from argparse import HelpFormatter
 from docutils.frontend import OptionParser
 from docutils.nodes import GenericNodeVisitor
 from docutils.parsers.rst import Parser
 from docutils.utils import new_document
+from functools import partial
 from io import StringIO
 from nose.tools import assert_equal, assert_raises, assert_true
 from pkg_resources import EntryPoint
 from unittest.mock import patch
 
-from kojismokydingo.cli import space_normalize
+from kojismokydingo.cli import SmokyDingo, space_normalize
 
 from . import ENTRY_POINTS, GOptions
 
 
-varargs = re.compile(r'\[(\w*) \[\1 \.\.\.\]\]')
+_varargs = re.compile(r'\[(\w*) \[\1 \.\.\.\]\]')
+_options = re.compile(r'^optional arguments:', flags=re.M)
+
 
 def usage_normalize(text):
-    text = space_normalize(text)
+
+    # some versions of argparse print the options header as "options:"
+    # and others as "optional arguments:" so we'll convert to the
+    # short version.
+    text = _options.sub("options:", text)
+
     text = text.replace("|", " ][ ")
+    text = space_normalize(text)
 
     # some versions of argparse present varargs as [ARG [ARG ...]] and
     # others present them as just [ARG ...]. This regex converts the
     # former to the latter
-    text = varargs.sub(lambda m: f"[{m[1]} ...]", text)
+    text = _varargs.sub(lambda m: f"[{m[1]} ...]", text)
 
     return text
 
@@ -102,6 +112,16 @@ def check_command_help(cmdname):
         cmd_cls = ep.load(require=False)
 
     command = cmd_cls(name)
+
+    # this ugly little dance needs to happen because the default
+    # formatter checks console width and will word-wrap on hyphens in
+    # some cases. So we will force it to work with a width of 80 chars
+    orig_parser = command.parser
+    def wrap_parser():
+        argp = orig_parser()
+        argp.formatter_class = partial(HelpFormatter, width=80)
+        return argp
+    command.parser = wrap_parser
 
     # a fake goptions based on a copy of the koji defaults
     goptions = GOptions()

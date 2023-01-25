@@ -1,6 +1,6 @@
 # Overview
 
-[![Build Status](https://travis-ci.com/obriencj/koji-smoky-dingo.svg?branch=master)](https://travis-ci.com/github/obriencj/koji-smoky-dingo)
+[![Build Status](https://api.travis-ci.com/obriencj/koji-smoky-dingo.svg?branch=master)](https://app.travis-ci.com/github/obriencj/koji-smoky-dingo)
 [![Coverage Status](https://coveralls.io/repos/obriencj/koji-smoky-dingo/badge.svg?branch=master)](https://coveralls.io/r/obriencj/koji-smoky-dingo)
 
 Koji Smoky Dingo is a collection of client command-line plugins for
@@ -72,6 +72,7 @@ permissions in koji.
 |`list-tag-extras` |Show all inherited extra fields for a tag |
 |`open` |Opens a brower to the info page for koji data types |
 |`perminfo` |Show information about a permission |
+|`pull-container` |Pull an image from a container build |
 |`userinfo` |Show information about a user account |
 
 

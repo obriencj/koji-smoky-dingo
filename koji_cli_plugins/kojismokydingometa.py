@@ -71,7 +71,7 @@ def __plugin__(glbls):
             # globals for the module. Thus, when the koji plugin
             # loader inspects the contents of this module, it will
             # find the handler with the appropriate name.
-            if handler:
+            if handler and getattr(handler, "enabled", True):
                 glbls[handler.__name__] = handler
 
 

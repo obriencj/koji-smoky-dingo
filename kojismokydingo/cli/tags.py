@@ -30,7 +30,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
-    int_or_str, printerr, pretty_json, print_history,
+    convert_history, int_or_str, printerr, pretty_json, print_history,
     read_clean_lines, tabulate, )
 from .sift import TagSifting, output_sifted
 from .. import (
@@ -1045,20 +1045,11 @@ def cli_check_repo(
                                     afterEvent=create_event)
 
     # merge and linearize the events of tag and its parents
-    for tid, updates in iter_bulk_load(session, query, tag_ids):
-        for table, events in updates.items():
-            event: Dict[str, Any]
-            for event in events:
-                # just assembling the data in a way that can be
-                # sorted, and that _print_histline will work with
-                event_id: int = event.get('revoke_event')
-                create: bool = False
-                if event_id is None:
-                    create = True
-                    event_id = event.get('create_event')
-                timeline.append((event_id, table, create, event))
+    updates: Dict[str, List[Dict[str, Any]]]
+    for _tid, updates in iter_bulk_load(session, query, tag_ids):
+        timeline.extend(convert_history(updates))
 
-    timeline.sort()
+    timeline.sort(key=itemgetter(0, 1, 2))
 
     print_history(timeline, utc=utc, show_events=show_events)
 
@@ -1092,8 +1083,8 @@ class CheckRepo(AnonSmokyDingo):
         addarg = group.add_argument
 
         addarg("--utc", action="store_true", default=False,
-               help="Display timestamps in UTC. Default: show in local time."
-               "Requires koji >= 1.27")
+               help="Display timestamps in UTC rather than local time."
+               " Requires koji >= 1.27")
 
         addarg("--events", "-e", action="store_true", default=False,
                help="Display event IDs")
