@@ -19,7 +19,7 @@ from setuptools import setup
 
 setup(
     name = "ksd-command",
-    version = "1.0.0",
+    version = "2.0.0",
 
     description = "Example Koji client commands using kojismokydingo",
     license = "GNU General Public License v3 (GPLv3)",
