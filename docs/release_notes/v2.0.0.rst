@@ -3,8 +3,8 @@ Koji Smoky Dingo 2.0.0 Release Notes
 
 *Unreleased*
 
-Version 2.0.0 continues the features from 1.0.0 with the following
-exceptions:
+Version 2.0.0 continues the features from 1.1.0 with a few
+incompatible API exceptions as noted below
 
 
 General
@@ -17,35 +17,46 @@ API
 ---
 
 * Adds typing annotations for majority of API
-* Drops dependency on `six`
-* `AppDirs` dependency is now a hard requirement
-* The `Sieve.__init__` method now accepts both positional and keyword
-  options by default.
-* Removed the `Sieve.receive_options` and `Sieve.set_options` methods
-  in favor of accepting options via keyword parameters in
-  `Sieve.__init__`
+* Drops dependency on `six <https://pypi.org/project/six/>`
+* `AppDirs <https://pypi.org/project/appdirs/>` dependency is now a
+  hard requirement
+* The `Sieve.__init__ <kojismokyding.sift.Sieve.__init__>` method now
+  accepts both positional and keyword options by default.
+* Removed the `Sieve.receive_options
+  <kojismokydingo.sift.Sieve.receive_options>` and `Sieve.set_options
+  <kojismokydingo.sift.Sieve.set_options>` methods in favor of
+  accepting options via keyword parameters in `Sieve.__init__
+  <kojismokyding.sift.Sieve.__init__>`
 * Moved RPM comparison functions out from `kojismokydingo.common` to
   their own new module `kojismokydingo.rpm`
-* Added `as_channelinfo`, `as_packageinfo`, `as_repoinfo`,
-  `NoSuchPackage`, `NoSuchRepo` to the core API
-* Added `ManagedClientSession.activate` to allow it to be used more
-  conveniently without the managed interface as well
-* Added `SmokyDingo.enabled` property, which loads plugin config to
-  determine if a command should be made available or not
-* Added `collect_userstats` and introduced a new `stats` argument to
-  `collect_userinfo`
+* Added `as_channelinfo <kojismokydingo.as_channelinfo>`,
+  `as_packageinfo <kojismokydingo.as_packageinfo>`, `as_repoinfo
+  <kojismokydingo.as_repoinfo>`, `NoSuchPackage
+  <kojismokydingo.NoSuchPackage>`, `NoSuchRepo
+  <kojismokydingo.NoSuchRepo>` to the core API
+* Added `ManagedClientSession.activate
+  <kojismokydingo.ManagedClientSession.activate>` to allow it to be
+  used more conveniently without the managed interface as well
+* Added `SmokyDingo.enabled <kojismokydingo.cli.SmokyDingo.enabled>`
+  property, which loads plugin config to determine if a command should
+  be made available or not
+* Added `collect_userstats <kojismokydingo.users.collect_userstats>`
+  and introduced a new ``stats`` argument to `collect_userinfo
+  <kojismokydingo.users.collect_userinfo>`
 
 
 Commands
 --------
 
-* Added support for more types to the ``open`` command: channel,
-  package, repo, build-dir, tag-repo-dir, and tag-latest-dir
+* Added support for more types to the ``open`` command: ``channel``,
+  ``package``, ``repo``, ``build-dir``, ``tag-repo-dir``, and
+  ``tag-latest-dir``
 * Added ``--print`` option to the ``open`` command
 * Made the ``open`` command return the return code of the URL opening
   executable
 * Added ``check-repo`` command to check for repo staleness
-* Added ``pull-container`` command to fetch container images from OSBS
-  builds, or to print the pullspec from same
+* Added ``pull-container`` command to fetch container images from
+  `OSBS <https://osbs.readthedocs.io/en/latest/users.html>`_ builds,
+  or to print the pullspec from same
 * Added ``--stats`` option to the ``userinfo`` command to include a
   summary of statistics for the user

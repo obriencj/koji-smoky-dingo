@@ -125,6 +125,9 @@ Koji Smoky Dingo
 * Fri Apr 2 2021 Christopher O'Brien <obriencj@gmail.com> - 2.0.0-0
 - Dropped RHEL 6, RHEL 7, and Python 2 support
 
+* Fri Oct 15 2021 Christopher O'Brien <obriencj@gmail.com> - 1.1.0-1
+- See the v1.1.0 release notes for a full list of changes
+
 * Thu Apr 1 2021 Christopher O'Brien <obriencj@gmail.com> - 1.0.0-1
 - Finally at version 1.0.0!
 - See the v1.0.0 release notes for a list of changes from the v0.9.7

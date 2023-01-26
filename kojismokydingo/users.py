@@ -36,12 +36,26 @@ __all__ = (
     "collect_cgs",
     "collect_perminfo",
     "collect_userinfo",
+    "collect_userstats",
 )
 
 
 def collect_userstats(
         session: ClientSession,
         user: UserSpec) -> UserStatistics:
+
+    """
+    Collects user statistics into a dict
+
+    :param session: an active koji client session
+
+    :param user: name of a user or their kerberos ID
+
+    :raises NoSuchUser: if user is an ID or name which cannot be
+      resolved
+
+    :since: 2.0
+    """
 
     userinfo = as_userinfo(session, user)
 
