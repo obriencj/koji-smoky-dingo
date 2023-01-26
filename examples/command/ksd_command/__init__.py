@@ -18,8 +18,6 @@ to Koji
 """
 
 
-from __future__ import print_function
-
 from kojismokydingo.cli import AnonSmokyDingo, SmokyDingo, pretty_json
 from kojismokydingo.cli.users import get_usertype_str, get_userstatus_str
 from kojismokydingo.users import collect_userinfo

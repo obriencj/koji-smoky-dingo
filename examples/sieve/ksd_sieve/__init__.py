@@ -22,7 +22,6 @@ from os import system
 
 from abc import abstractmethod
 from kojismokydingo.sift import Sieve, ensure_str
-from six.moves import map
 
 
 class ExecSieve(Sieve):
@@ -41,7 +40,7 @@ class ExecSieve(Sieve):
 
         cmd = ensure_str(cmd)
         args = map(ensure_str, args)
-        super(ExecSieve, self).__init__(sifter, cmd, *args)
+        super().__init__(sifter, cmd, *args)
 
 
     @abstractmethod

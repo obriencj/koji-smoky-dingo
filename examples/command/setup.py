@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # This library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ from setuptools import setup
 
 setup(
     name = "ksd-command",
-    version = "1.0.0",
+    version = "2.0.0",
 
     description = "Example Koji client commands using kojismokydingo",
     license = "GNU General Public License v3 (GPLv3)",

@@ -18,16 +18,8 @@ The example provides the following command implementations
 ## Install
 
 ```bash
-# for Python 2.6
-python2 setup.py clean build install --user
-
-# for Python 2.7
-python2 setup.py clean bdist_wheel
-pip2 install --user dist/ksd_command-1.0.0-py2-none-any.whl
-
-# for Python 3
 python3 setup.py clean bdist_wheel
-pip3 install --user dist/ksd_command-1.0.0-py3-none-any.whl
+pip3 install --user dist/ksd_command-2.0.0-py3-none-any.whl
 ```
 
 
