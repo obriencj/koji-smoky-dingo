@@ -54,13 +54,13 @@ compatability, etc. As a totally separate entity, KSD can iterate very
 fast to try and match my ever-changing vision of what an ideal
 "helper" layer should look like.
 
-When KSD finally reaches version 1.0.0, I will at that point have to
-begin worrying about API stability. However even then I will still
-have more flexibility than a project that has to worry about being a
-critical component in the build infrastructure for so many
-organizations. Therefore it's extremely likely that KSD will always
-remain separate... but hopefully popular enough one day that any
-advanced Koji user will also be a Koji Smoky Dingo user.
+Since KSD finally reached version 1.0.0, I do have to worry about API
+stability. However even then I will still have more flexibility than a
+project that has to worry about being a critical component in the
+build infrastructure for so many organizations. Therefore it's
+extremely likely that KSD will always remain separate... but hopefully
+popular enough one day that any advanced Koji user will also be a Koji
+Smoky Dingo user.
 
 
 Why Is There An Entire Mini Language In Here?
