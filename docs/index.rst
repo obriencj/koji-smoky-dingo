@@ -9,6 +9,7 @@ Documentation Index Table of Contents
    overview
    commands
    standalone
+   pluginconfig
    siftylang
    kojismokydingo
    kojismokydingo/sift

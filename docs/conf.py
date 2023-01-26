@@ -30,6 +30,9 @@ autoclass_content = 'both'
 autosectionlabel_maxdepth = 1
 autosectionlabel_prefix_document = False
 
+toc_object_entries = False
+
+
 # The suffix of source filenames.
 source_suffix = '.rst'
 
