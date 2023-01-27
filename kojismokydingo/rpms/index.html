@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+
+<html lang="English">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>kojismokydingo.rpm &#8212; kojismokydingo 2.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.rpm</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-kojismokydingo.rpm">
+<span id="kojismokydingo-rpm"></span><h1>kojismokydingo.rpm<a class="headerlink" href="#module-kojismokydingo.rpm" title="Permalink to this heading">¶</a></h1>
+<p>Koji Smoky Dingo - RPM NEVRA Utils</p>
+<dl class="field-list simple">
+<dt class="field-odd">author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Christopher O'Brien &lt;<a class="reference external" href="mailto:obriencj&#37;&#52;&#48;gmail&#46;com">obriencj<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
+</dd>
+<dt class="field-even">license<span class="colon">:</span></dt>
+<dd class="field-even"><p>GPL v3</p>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.rpm.evr_compare">
+<span class="sig-name descname"><span class="pre">evr_compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_evr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_evr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/rpm/#evr_compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.rpm.evr_compare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two (Epoch, Version, Release) tuples.</p>
+<p>This is an alternative implementation of the rpm lib's
+labelCompare function.</p>
+<p>Return values:</p>
+<ul class="simple">
+<li><p>1 if left_evr is greater-than right_evr</p></li>
+<li><p>0 if left_evr is equal-to right_evr</p></li>
+<li><p>-1 if left_evr is less-than right_evr</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left_evr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) -- The left Epoch, Version, Release for comparison</p></li>
+<li><p><strong>right_evr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) -- The right Epoch, Version, Release for comparison</p></li>
+</ul>
+</dd>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>2.0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.rpm.evr_split">
+<span class="sig-name descname"><span class="pre">evr_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/rpm/#evr_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.rpm.evr_split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits an EVR into a dict with the keys epoch, version, and release.</p>
+<p>If epoch is omitted, it is presumed to be <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>
+If release is omitted, it is presumed to be <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p>Valid RPM EVR is in the following layout:</p>
+<p>eg. <code class="docutils literal notranslate"><span class="pre">&quot;32:9.10.2-2.P1.fc22&quot;</span></code></p>
+<ul class="simple">
+<li><p>epoch: <code class="docutils literal notranslate"><span class="pre">&quot;32&quot;</span></code></p></li>
+<li><p>version: <code class="docutils literal notranslate"><span class="pre">&quot;9.10.2&quot;</span></code></p></li>
+<li><p>release: <code class="docutils literal notranslate"><span class="pre">&quot;2.P1.fc22&quot;</span></code></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Since<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2.0</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>evr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.rpm.nevr_split">
+<span class="sig-name descname"><span class="pre">nevr_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nevr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/rpm/#nevr_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.rpm.nevr_split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits an NEVR into a four-tuple represending the name, epoch,
+version, and release.</p>
+<p>If name, epoch, or release are absent they are represented as
+<code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p>This differs from NEVRA splitting in that the last dotted segment
+of the release is not considered an architecture. Because there
+may be 1 or more dotted segments to a release, it's impossible to
+determine whether the final segment is an arch or not simply from
+the structure.</p>
+<p>Valid RPM NEVRA is in the following layout:</p>
+<p>eg. <code class="docutils literal notranslate"><span class="pre">&quot;bind-32:9.10.2-2.P1.fc22&quot;</span></code></p>
+<ul class="simple">
+<li><p>name: <code class="docutils literal notranslate"><span class="pre">&quot;bind&quot;</span></code></p></li>
+<li><p>epoch: <code class="docutils literal notranslate"><span class="pre">&quot;32&quot;</span></code></p></li>
+<li><p>version: <code class="docutils literal notranslate"><span class="pre">&quot;9.10.2&quot;</span></code></p></li>
+<li><p>release: <code class="docutils literal notranslate"><span class="pre">&quot;2.P1.fc22&quot;</span></code></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Since<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2.0</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nevr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.rpm.nevra_split">
+<span class="sig-name descname"><span class="pre">nevra_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nevra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/rpm/#nevra_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.rpm.nevra_split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits an NEVRA into a five-tuple representing the name, epoch,
+version, release, and arch.</p>
+<p>If name, epoch, arch, or release are absent, they are represented
+as a <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p>This differs from NEVRA splitting in that the last dotted segment
+of the release is considered to be the architecture. Because there
+may be 1 or more dotted segments to a release, it's impossible to
+determine whether the final segment is an arch or not simply from
+the structure. However, a valid NEVRA will always have at least
+two segments -- the last will be the architecture.</p>
+<p>Valid RPM NEVRA is in the following layout:</p>
+<p>eg. <code class="docutils literal notranslate"><span class="pre">&quot;bind-32:9.10.2-2.P1.fc22.x86_64&quot;</span></code></p>
+<ul class="simple">
+<li><p>name: <code class="docutils literal notranslate"><span class="pre">&quot;bind&quot;</span></code></p></li>
+<li><p>epoch: <code class="docutils literal notranslate"><span class="pre">&quot;32&quot;</span></code></p></li>
+<li><p>version: <code class="docutils literal notranslate"><span class="pre">&quot;9.10.2&quot;</span></code></p></li>
+<li><p>release: <code class="docutils literal notranslate"><span class="pre">&quot;2.P1.fc22&quot;</span></code></p></li>
+<li><p>arch: <code class="docutils literal notranslate"><span class="pre">&quot;x86_64&quot;</span></code></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Since<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2.0</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nevra</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/kojismokydingo/rpms.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.rpm</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+    </div>
+  </body>
+</html>

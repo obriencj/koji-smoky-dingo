@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.sift.builds &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.sift.builds &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.sift</a> &#187;</li>
@@ -73,10 +72,9 @@
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span>
-<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">BUILD_STATES</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">BUILD_STATES</span><span class="p">,</span> <span class="n">ClientSession</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">filter</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_SIEVES</span><span class="p">,</span>
@@ -92,8 +90,10 @@
     <span class="n">build_dedup</span><span class="p">,</span> <span class="n">build_nvr_sort</span><span class="p">,</span>
     <span class="n">decorate_builds_btypes</span><span class="p">,</span> <span class="n">decorate_builds_cg_list</span><span class="p">,</span>
     <span class="n">decorate_builds_maven</span><span class="p">,</span> <span class="n">gather_rpm_sigkeys</span><span class="p">,</span> <span class="n">gavgetter</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">rpm_evr_compare</span><span class="p">,</span> <span class="n">unique</span>
+<span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">unique</span>
+<span class="kn">from</span> <span class="nn">..rpm</span> <span class="kn">import</span> <span class="n">evr_compare</span><span class="p">,</span> <span class="n">evr_split</span>
 <span class="kn">from</span> <span class="nn">..tags</span> <span class="kn">import</span> <span class="n">gather_tag_ids</span>
+<span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">BuildInfo</span><span class="p">,</span> <span class="n">BuildInfos</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -136,7 +136,7 @@
 
 
 <div class="viewcode-block" id="NVRSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.NVRSieve">[docs]</a><span class="k">class</span> <span class="nc">NVRSieve</span><span class="p">(</span><span class="n">ItemSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(nvr NVR [NVR...])``</span>
 
 <span class="sd">    filters for dict infos whose `nvr` key matches any of the given</span>
@@ -147,7 +147,7 @@
 
 
 <div class="viewcode-block" id="NameSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.NameSieve">[docs]</a><span class="k">class</span> <span class="nc">NameSieve</span><span class="p">(</span><span class="n">ItemSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(name NAME [NAME...])``</span>
 
 <span class="sd">    filters for dict infos whose `name` key matches any of the given</span>
@@ -158,7 +158,7 @@
 
 
 <div class="viewcode-block" id="VersionSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.VersionSieve">[docs]</a><span class="k">class</span> <span class="nc">VersionSieve</span><span class="p">(</span><span class="n">ItemSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(version VER [VER...])``</span>
 
 <span class="sd">    filters for dict infos whose `version` key matches any of the given</span>
@@ -169,7 +169,7 @@
 
 
 <div class="viewcode-block" id="ReleaseSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.ReleaseSieve">[docs]</a><span class="k">class</span> <span class="nc">ReleaseSieve</span><span class="p">(</span><span class="n">ItemSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(release REL [REL...])``</span>
 
 <span class="sd">    filters for dict infos whose `release` key matches any of the given</span>
@@ -180,7 +180,7 @@
 
 
 <div class="viewcode-block" id="EpochSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EpochSieve">[docs]</a><span class="k">class</span> <span class="nc">EpochSieve</span><span class="p">(</span><span class="n">ItemSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(epoch EPOCH [EPOCH...])``</span>
 
 <span class="sd">    filters for dict infos whose `epoch` key matches any of the given</span>
@@ -191,7 +191,7 @@
 
 
 <div class="viewcode-block" id="StateSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.StateSieve">[docs]</a><span class="k">class</span> <span class="nc">StateSieve</span><span class="p">(</span><span class="n">Sieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(state BUILD_STATE [BUILD_STATE...])``</span>
 
 <span class="sd">    filters for dict infos whose `state` key matches any of the given</span>
@@ -209,15 +209,17 @@
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">StateSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">)</span>
 
         <span class="n">states</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
             <span class="n">state</span> <span class="o">=</span> <span class="n">ensure_int_or_str</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
             <span class="n">found</span> <span class="o">=</span> <span class="n">BUILD_STATES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">SifterError</span><span class="p">(</span><span class="s2">&quot;Unknown build state: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">pattern</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">SifterError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown build state: </span><span class="si">{</span><span class="n">pattern</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">state</span> <span class="o">=</span> <span class="n">found</span>
@@ -232,7 +234,7 @@
 
 
 <div class="viewcode-block" id="OwnerSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.OwnerSieve">[docs]</a><span class="k">class</span> <span class="nc">OwnerSieve</span><span class="p">(</span><span class="n">IntStrSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(owner USER [USER...])```</span>
 
 <span class="sd">    filters for builds whose `owner_name` or `owner_id` key matches</span>
@@ -246,14 +248,14 @@
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">*</span><span class="n">users</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">OwnerSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">*</span><span class="n">users</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">*</span><span class="n">users</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_user_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
 
 <div class="viewcode-block" id="OwnerSieve.prep"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.OwnerSieve.prep">[docs]</a>    <span class="k">def</span> <span class="nf">prep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">_build_infos</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_users</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_user_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">))</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_user_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="OwnerSieve.check"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.OwnerSieve.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">binfo</span><span class="p">):</span>
@@ -261,7 +263,7 @@
 
 
 <div class="viewcode-block" id="ImportedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.ImportedSieve">[docs]</a><span class="k">class</span> <span class="nc">ImportedSieve</span><span class="p">(</span><span class="n">Sieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(imported)``</span>
 
 <span class="sd">    filters for build info dicts whose task ID is empty or null.</span>
@@ -275,7 +277,7 @@
 
 
 <span class="k">class</span> <span class="nc">EVRCompare</span><span class="p">(</span><span class="n">Sieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Valid comparison values are</span>
 
 <span class="sd">    * ``==``</span>
@@ -288,22 +290,13 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">ensure_str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">EVRCompare</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">version</span>
 
-        <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">version</span><span class="p">:</span>
-            <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">epoch</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
-
-        <span class="k">if</span> <span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">version</span><span class="p">:</span>
-            <span class="n">version</span><span class="p">,</span> <span class="n">release</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">release</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">release</span> <span class="o">=</span> <span class="n">release</span>
+        <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span> <span class="o">=</span> <span class="n">evr_split</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span> <span class="ow">or</span> <span class="s2">&quot;0&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span> <span class="ow">or</span> <span class="s2">&quot;0&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">ensure_comparison</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -314,18 +307,18 @@
 
         <span class="n">ours</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span> <span class="ow">or</span> <span class="n">other</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-        <span class="n">relative</span> <span class="o">=</span> <span class="n">rpm_evr_compare</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ours</span><span class="p">)</span>
+        <span class="n">relative</span> <span class="o">=</span> <span class="n">evr_compare</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ours</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">relative</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># we don&#39;t want to auto-quote the token which the default</span>
         <span class="c1"># Sieve impl does.</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;(&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="si">}</span><span class="s2">)&quot;</span>
 
 
 <div class="viewcode-block" id="EVRCompareEQ"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRCompareEQ">[docs]</a><span class="k">class</span> <span class="nc">EVRCompareEQ</span><span class="p">(</span><span class="n">EVRCompare</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(== VER)``</span>
 
 <span class="sd">    ``VER`` can be in any of the following forms</span>
@@ -345,7 +338,7 @@
 
 
 <div class="viewcode-block" id="EVRCompareNE"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRCompareNE">[docs]</a><span class="k">class</span> <span class="nc">EVRCompareNE</span><span class="p">(</span><span class="n">EVRCompare</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(!= VER)``</span>
 
 <span class="sd">    ``VER`` can be in any of the following forms</span>
@@ -365,7 +358,7 @@
 
 
 <div class="viewcode-block" id="EVRCompareGT"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRCompareGT">[docs]</a><span class="k">class</span> <span class="nc">EVRCompareGT</span><span class="p">(</span><span class="n">EVRCompare</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(&gt; VER)``</span>
 
 <span class="sd">    ``VER`` can be in any of the following forms</span>
@@ -385,7 +378,7 @@
 
 
 <div class="viewcode-block" id="EVRCompareGE"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRCompareGE">[docs]</a><span class="k">class</span> <span class="nc">EVRCompareGE</span><span class="p">(</span><span class="n">EVRCompare</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(&gt;= VER)``</span>
 
 <span class="sd">    ``VER`` can be in any of the following forms</span>
@@ -405,7 +398,7 @@
 
 
 <div class="viewcode-block" id="EVRCompareLT"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRCompareLT">[docs]</a><span class="k">class</span> <span class="nc">EVRCompareLT</span><span class="p">(</span><span class="n">EVRCompare</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(&lt; VER)``</span>
 
 <span class="sd">    ``VER`` can be in any of the following forms</span>
@@ -425,7 +418,7 @@
 
 
 <div class="viewcode-block" id="EVRCompareLE"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRCompareLE">[docs]</a><span class="k">class</span> <span class="nc">EVRCompareLE</span><span class="p">(</span><span class="n">EVRCompare</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(&lt;= VER)``</span>
 
 <span class="sd">    ``VER`` can be in any of the following forms</span>
@@ -447,17 +440,14 @@
 <span class="k">class</span> <span class="nc">EVRSorted</span><span class="p">(</span><span class="n">Sieve</span><span class="p">):</span>
 
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">EVRSorted</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">)</span>
-
-
-    <span class="k">def</span> <span class="nf">set_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">count</span> <span class="o">=</span> <span class="n">ensure_int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SifterError</span><span class="p">(</span><span class="s2">&quot;count must be greater than zero&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">count</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">binfos</span><span class="p">):</span>
@@ -471,17 +461,16 @@
         <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span>
 
         <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">binfos</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">collect</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">binfos</span> <span class="ow">in</span> <span class="n">collect</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">yield</span> <span class="n">build_nvr_sort</span><span class="p">(</span><span class="n">binfos</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">binfos</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">collect</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">binfos</span> <span class="ow">in</span> <span class="n">collect</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">blds</span> <span class="o">=</span> <span class="n">build_nvr_sort</span><span class="p">(</span><span class="n">binfos</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">bld</span> <span class="ow">in</span> <span class="n">islice</span><span class="p">(</span><span class="n">blds</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
-                    <span class="k">yield</span> <span class="n">bld</span>
+                <span class="k">yield from</span> <span class="n">islice</span><span class="p">(</span><span class="n">blds</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="EVRHigh"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRHigh">[docs]</a><span class="k">class</span> <span class="nc">EVRHigh</span><span class="p">(</span><span class="n">EVRSorted</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: (evr-high [count: COUNT])</span>
 
 <span class="sd">    Filters to only the builds which are the higest EVR of their given</span>
@@ -496,7 +485,7 @@
 
 
 <div class="viewcode-block" id="EVRLow"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.EVRLow">[docs]</a><span class="k">class</span> <span class="nc">EVRLow</span><span class="p">(</span><span class="n">EVRSorted</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: (evr-low [count: COUNT])</span>
 
 <span class="sd">    Filters to only the builds which are the lowest EVR of their given</span>
@@ -511,7 +500,7 @@
 
 
 <div class="viewcode-block" id="TaggedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.TaggedSieve">[docs]</a><span class="k">class</span> <span class="nc">TaggedSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: (tagged [TAG...])</span>
 
 <span class="sd">    If no TAG patterns are specified, matches builds which have any</span>
@@ -560,7 +549,7 @@
 
 
 <div class="viewcode-block" id="InheritedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.InheritedSieve">[docs]</a><span class="k">class</span> <span class="nc">InheritedSieve</span><span class="p">(</span><span class="n">IntStrSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: (inherited TAG [TAG...])</span>
 
 <span class="sd">    Matches builds which are tagged into any of the given tags or</span>
@@ -572,7 +561,7 @@
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">InheritedSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
 
@@ -613,7 +602,7 @@
 <span class="k">class</span> <span class="nc">PkgListSieve</span><span class="p">(</span><span class="n">IntStrSieve</span><span class="p">,</span> <span class="n">CacheMixin</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
 
@@ -622,7 +611,7 @@
         <span class="n">tids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span>
         <span class="k">if</span> <span class="n">tids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="n">tids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="n">tids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
         <span class="c1"># pre-load our package lists cache</span>
         <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tids</span><span class="p">:</span>
@@ -630,7 +619,7 @@
 
 
 <div class="viewcode-block" id="PkgAllowedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.PkgAllowedSieve">[docs]</a><span class="k">class</span> <span class="nc">PkgAllowedSieve</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(pkg-allowed TAG [TAG...])``</span>
 
 <span class="sd">    Matches builds which are have their package listing present and</span>
@@ -651,7 +640,7 @@
 
 
 <div class="viewcode-block" id="PkgBlockedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.PkgBlockedSieve">[docs]</a><span class="k">class</span> <span class="nc">PkgBlockedSieve</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(pkg-blocked TAG [TAG...])``</span>
 
 <span class="sd">    Matches builds which are have their package name blocked in any of</span>
@@ -672,7 +661,7 @@
 
 
 <div class="viewcode-block" id="PkgUnlistedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.PkgUnlistedSieve">[docs]</a><span class="k">class</span> <span class="nc">PkgUnlistedSieve</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(pkg-unlisted TAG [TAG...])``</span>
 
 <span class="sd">    Matches builds which have their package name unlisted (neither</span>
@@ -696,7 +685,7 @@
 
 
 <div class="viewcode-block" id="TypeSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.TypeSieve">[docs]</a><span class="k">class</span> <span class="nc">TypeSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(type BTYPE [BTYPE...])``</span>
 
 <span class="sd">    Passes build infos that have archives of the given btype. Normal</span>
@@ -707,7 +696,7 @@
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">btype</span><span class="p">,</span> <span class="o">*</span><span class="n">btypes</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">TypeSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">btype</span><span class="p">,</span> <span class="o">*</span><span class="n">btypes</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">btype</span><span class="p">,</span> <span class="o">*</span><span class="n">btypes</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TypeSieve.prep"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.TypeSieve.prep">[docs]</a>    <span class="k">def</span> <span class="nf">prep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">binfos</span><span class="p">):</span>
@@ -725,7 +714,7 @@
 
 
 <div class="viewcode-block" id="CGImportedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.CGImportedSieve">[docs]</a><span class="k">class</span> <span class="nc">CGImportedSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(cg-imported [CGNAME...])``</span>
 
 <span class="sd">    Passes build infos that have been produced via a cg-import by any</span>
@@ -756,7 +745,7 @@
 
 
 <div class="viewcode-block" id="LatestSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.LatestSieve">[docs]</a><span class="k">class</span> <span class="nc">LatestSieve</span><span class="p">(</span><span class="n">IntStrSieve</span><span class="p">,</span> <span class="n">CacheMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(latest TAG [TAG...])``</span>
 
 <span class="sd">    Passes build infos that are the latest build of their package name</span>
@@ -767,7 +756,7 @@
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">LatestSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
 
@@ -777,7 +766,7 @@
         <span class="n">tids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span>
         <span class="k">if</span> <span class="n">tids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tags</span> <span class="o">=</span> <span class="n">bulk_load_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">tids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span>
+            <span class="n">tids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
         <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tids</span><span class="p">:</span>
             <span class="c1"># pre-fill the caches of build IDs</span>
@@ -794,7 +783,7 @@
 
 
 <div class="viewcode-block" id="LatestMavenSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.LatestMavenSieve">[docs]</a><span class="k">class</span> <span class="nc">LatestMavenSieve</span><span class="p">(</span><span class="n">IntStrSieve</span><span class="p">,</span> <span class="n">CacheMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(latest-maven TAG [TAG...])``</span>
 
 <span class="sd">    Passes build infos that have btype maven and are the build of</span>
@@ -805,7 +794,7 @@
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">LatestMavenSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="o">*</span><span class="n">tagnames</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="kc">None</span>
 
 
@@ -815,7 +804,7 @@
         <span class="n">tids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span>
         <span class="k">if</span> <span class="n">tids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tags</span> <span class="o">=</span> <span class="n">bulk_load_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">tids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span>
+            <span class="n">tids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_ids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
         <span class="c1"># in order to perform the GAV comparisons, we need to have</span>
         <span class="c1"># loaded the various binfos with their maven fields. This</span>
@@ -840,7 +829,7 @@
 
 
 <div class="viewcode-block" id="SignedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.SignedSieve">[docs]</a><span class="k">class</span> <span class="nc">SignedSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(signed [KEY...])``</span>
 
 <span class="sd">    Passes builds which have RPMs signed with any of the given keys.</span>
@@ -861,7 +850,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">needed</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="k">for</span> <span class="n">bid</span><span class="p">,</span> <span class="n">sigs</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">gather_rpm_sigkeys</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">needed</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">bid</span><span class="p">,</span> <span class="n">sigs</span> <span class="ow">in</span> <span class="n">gather_rpm_sigkeys</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">needed</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># we need to drop the unsigned key, which is an empty</span>
             <span class="c1"># string</span>
             <span class="n">cache</span> <span class="o">=</span> <span class="n">needed</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span>
@@ -886,7 +875,7 @@
 
 
 <span class="k">class</span> <span class="nc">CompareLatestSieve</span><span class="p">(</span><span class="n">CacheMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base for performing sieving comparisons against the</span>
 <span class="sd">    latest builds in a tag using an operand.</span>
 
@@ -907,7 +896,7 @@
         <span class="n">op</span> <span class="o">=</span> <span class="n">ensure_comparison</span><span class="p">(</span><span class="n">comparison</span><span class="p">)</span>
         <span class="n">tag</span> <span class="o">=</span> <span class="n">ensure_int_or_str</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">CompareLatestSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">comparison</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">comparison</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">op</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_id</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -928,7 +917,7 @@
 
 
 <div class="viewcode-block" id="CompareLatestIDSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.CompareLatestIDSieve">[docs]</a><span class="k">class</span> <span class="nc">CompareLatestIDSieve</span><span class="p">(</span><span class="n">CompareLatestSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ```(compare-latest-id OP TAG)```</span>
 
 <span class="sd">    Filters for builds which have an ID which compares against the</span>
@@ -966,7 +955,7 @@
 
 
 <div class="viewcode-block" id="CompareLatestNVRSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.CompareLatestNVRSieve">[docs]</a><span class="k">class</span> <span class="nc">CompareLatestNVRSieve</span><span class="p">(</span><span class="n">CompareLatestSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ```(compare-latest-nvr OP TAG)```</span>
 
 <span class="sd">    Filters for builds which have an NVR which compares against the</span>
@@ -1007,7 +996,7 @@
 <span class="c1">#     name = &quot;compare-latest-maven&quot;</span>
 
 
-<span class="n">DEFAULT_BUILD_INFO_SIEVES</span> <span class="o">=</span> <span class="p">[</span>
+<span class="n">DEFAULT_BUILD_INFO_SIEVES</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Sieve</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">CGImportedSieve</span><span class="p">,</span>
     <span class="n">CompareLatestIDSieve</span><span class="p">,</span>
     <span class="n">CompareLatestNVRSieve</span><span class="p">,</span>
@@ -1039,17 +1028,15 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="build_info_sieves"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.build_info_sieves">[docs]</a><span class="k">def</span> <span class="nf">build_info_sieves</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="build_info_sieves"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.build_info_sieves">[docs]</a><span class="k">def</span> <span class="nf">build_info_sieves</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Sieve</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A new list containing the default build-info sieve classes.</span>
 
 <span class="sd">    This function is used by `build_info_sifter` when creating its</span>
 <span class="sd">    `Sifter` instance.</span>
-
-<span class="sd">    :rtype: list[type[Sieve]]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">sieves</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sieves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Sieve</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># TODO: grab some more via entry_points</span>
     <span class="n">sieves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">DEFAULT_SIEVES</span><span class="p">)</span>
@@ -1058,48 +1045,67 @@
     <span class="k">return</span> <span class="n">sieves</span></div>
 
 
-<div class="viewcode-block" id="build_info_sifter"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.build_info_sifter">[docs]</a><span class="k">def</span> <span class="nf">build_info_sifter</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="build_info_sifter"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.build_info_sifter">[docs]</a><span class="k">def</span> <span class="nf">build_info_sifter</span><span class="p">(</span>
+        <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sifter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a Sifter from the source using the default build-info</span>
 <span class="sd">    Sieves.</span>
 
 <span class="sd">    :param source: sieve expressions source</span>
-<span class="sd">    :type source: stream or str</span>
 
-<span class="sd">    :rtype: Sifter</span>
+<span class="sd">    :param params: sieve parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">Sifter</span><span class="p">(</span><span class="n">build_info_sieves</span><span class="p">(),</span> <span class="n">source</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="sift_builds"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.sift_builds">[docs]</a><span class="k">def</span> <span class="nf">sift_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">src_str</span><span class="p">,</span> <span class="n">build_infos</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="sift_builds"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.sift_builds">[docs]</a><span class="k">def</span> <span class="nf">sift_builds</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">src_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">build_infos</span><span class="p">:</span> <span class="n">BuildInfos</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">BuildInfo</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter a group of build infos with a sieve compiled from the given</span>
+<span class="sd">    source string.</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param src_str: sieve expressions source</span>
-<span class="sd">    :type src_str: src</span>
 
 <span class="sd">    :param build_infos: list of build info dicts to filter</span>
-<span class="sd">    :type build_infos: list[dict]</span>
 
-<span class="sd">    :rtype: dict[str,list[dict]]</span>
+<span class="sd">    :param params: sieve parameters</span>
+
+<span class="sd">    :returns: mapping of flags to matching build info dicts</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">sifter</span> <span class="o">=</span> <span class="n">build_info_sifter</span><span class="p">(</span><span class="n">src_str</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">sifter</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">build_infos</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="sift_nvrs"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.sift_nvrs">[docs]</a><span class="k">def</span> <span class="nf">sift_nvrs</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">src_str</span><span class="p">,</span> <span class="n">nvrs</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="sift_nvrs"><a class="viewcode-back" href="../../../../kojismokydingo/sift/builds/#kojismokydingo.sift.builds.sift_nvrs">[docs]</a><span class="k">def</span> <span class="nf">sift_nvrs</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">src_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">nvrs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">BuildInfo</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a group of NVRs as build infos and filter them with a sieve</span>
+<span class="sd">    compiled from the given source string.</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param src_str: sieve expressions source</span>
-<span class="sd">    :type src_str: src</span>
 
 <span class="sd">    :param nvrs: list of NVRs to load and filter</span>
-<span class="sd">    :type nvrs: list[str]</span>
 
-<span class="sd">    :rtype: dict[str,list[dict]]</span>
+<span class="sd">    :param params: sieve parameters</span>
+
+<span class="sd">    :returns: mapping of flags to matching build info dicts</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvrs</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">builds</span> <span class="o">=</span> <span class="n">build_dedup</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">))</span>
+    <span class="n">builds</span> <span class="o">=</span> <span class="n">build_dedup</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">sift_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">src_str</span><span class="p">,</span> <span class="n">builds</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></div>
 
 
@@ -1117,12 +1123,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1136,7 +1142,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.sift</a> &#187;</li>
@@ -1144,9 +1150,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

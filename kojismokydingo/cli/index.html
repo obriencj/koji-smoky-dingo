@@ -4,14 +4,14 @@
 <html lang="English">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CLI API Reference &#8212; kojismokydingo 1.1.0 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>CLI API Reference &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
     <link rel="next" title="kojismokydingo.cli.archives" href="archives/" />
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../standalone/tags/" title="kojismokydingo.standalone.tags"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">CLI API Reference</a></li> 
       </ul>
     </div>  
@@ -49,46 +49,60 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-kojismokydingo.cli">
-<span id="cli-api-reference"></span><h1>CLI API Reference<a class="headerlink" href="#module-kojismokydingo.cli" title="Permalink to this headline">¶</a></h1>
+  <section id="module-kojismokydingo.cli">
+<span id="cli-api-reference"></span><h1>CLI API Reference<a class="headerlink" href="#module-kojismokydingo.cli" title="Permalink to this heading">¶</a></h1>
 <p>Koji Smoky Dingo - CLI</p>
 <p>This package contains mechanisms for more easily adding new
 command-line features to the Koji client, in coordination with the
 kojismokydingometa plugin.</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Christopher O'Brien &lt;<a class="reference external" href="mailto:obriencj&#37;&#52;&#48;gmail&#46;com">obriencj<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.cli.AdminSmokyDingo">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">AdminSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#AdminSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.AdminSmokyDingo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.SmokyDingo</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AdminSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#AdminSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.AdminSmokyDingo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmokyDingo</span></code></a></p>
 <p>A SmokyDingo which checks for the 'admin' permission after
 activation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- The name that this command is being represented as</p>
+</dd>
+</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.AdminSmokyDingo.group">
-<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.AdminSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.AdminSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>The koji CLI group that this command will be displayed under in
+the help output</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.AdminSmokyDingo.permission">
-<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.AdminSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.AdminSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>permission name required for use of this command. A value of None
+indicates anonymous access.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.cli.AnonSmokyDingo">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">AnonSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#AnonSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.AnonSmokyDingo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.SmokyDingo</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnonSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#AnonSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.AnonSmokyDingo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmokyDingo</span></code></a></p>
 <p>A SmokyDingo which upon activation will connect to koji hub, but
 will not authenticate. This means only hub RPC endpoints which do
 not require some permission will work. This is normal for most
 read-only informational endpoints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> -- The name that this command is being represented as</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.cli.AnonSmokyDingo.activate">
 <span class="sig-name descname"><span class="pre">activate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#AnonSmokyDingo.activate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.AnonSmokyDingo.activate" title="Permalink to this definition">¶</a></dt>
@@ -100,13 +114,17 @@ prior.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.AnonSmokyDingo.group">
-<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'info'</span></em><a class="headerlink" href="#kojismokydingo.cli.AnonSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'info'</span></em><a class="headerlink" href="#kojismokydingo.cli.AnonSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>The koji CLI group that this command will be displayed under in
+the help output</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.AnonSmokyDingo.permission">
-<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kojismokydingo.cli.AnonSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kojismokydingo.cli.AnonSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>permission name required for use of this command. A value of None
+indicates anonymous access.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.cli.AnonSmokyDingo.pre_handle">
@@ -119,26 +137,35 @@ further calls.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.cli.HostSmokyDingo">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">HostSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#HostSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.HostSmokyDingo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.SmokyDingo</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HostSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#HostSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.HostSmokyDingo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmokyDingo</span></code></a></p>
 <p>A SmokyDingo which checks for the 'host' or 'admin' permisson
 after activation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- The name that this command is being represented as</p>
+</dd>
+</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.HostSmokyDingo.group">
-<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.HostSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.HostSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>The koji CLI group that this command will be displayed under in
+the help output</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.HostSmokyDingo.permission">
-<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'host'</span></em><a class="headerlink" href="#kojismokydingo.cli.HostSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'host'</span></em><a class="headerlink" href="#kojismokydingo.cli.HostSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>permission name required for use of this command. A value of None
+indicates anonymous access.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class for new sub-commands in Koji. Subclasses may be
 referenced via an entry point under the koji_smoky_dingo group to
 be loaded at runtime by the kojismokydingometa Koji client plugin.</p>
@@ -166,6 +193,11 @@ sub-command</p></li>
 </ul>
 </li>
 </ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- The name that this command is being represented as</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo.activate">
 <span class="sig-name descname"><span class="pre">activate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo.activate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.activate" title="Permalink to this definition">¶</a></dt>
@@ -173,6 +205,11 @@ sub-command</p></li>
 pre_handle and handle</p>
 <p>The session and goptions attributes will have been set just
 prior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -180,6 +217,14 @@ prior.</p>
 <span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parser</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.11)"><em>ArgumentParser</em></a>) -- the parser to decorate with additional arguments</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.11)"><em>ArgumentParser</em></a> | None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -189,27 +234,61 @@ May return an alternative parser instance or None.</p>
 completed, either normally or by raising an exception.</p>
 <p>The session and goptions attributes will be cleared just
 after.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'A</span> <span class="pre">CLI</span> <span class="pre">Plugin'</span></em><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.description" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'A</span> <span class="pre">CLI</span> <span class="pre">Plugin'</span></em><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short description of this command, for use in the help output</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo.enabled">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enabled</span></span><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.enabled" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo.get_plugin_config">
 <span class="sig-name descname"><span class="pre">get_plugin_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo.get_plugin_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.get_plugin_config" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>fetch a configuration value for this command under the given key. If
+no configuration is found, returns the default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- the configuration key name</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em> | </em><em>None</em>) -- value to return if no configuration is found</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo.group">
-<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'misc'</span></em><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.group" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'misc'</span></em><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>The koji CLI group that this command will be displayed under in
+the help output</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo.handle">
-<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.handle" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the full set of actions for this command.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.11)"><em>Namespace</em></a>) -- </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a> | None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -218,22 +297,32 @@ after.</p>
 <dd><p>Creates a new ArgumentParser instance and decorates it with
 arguments from the <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo.arguments" title="kojismokydingo.cli.SmokyDingo.arguments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arguments</span></code></a> method.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code></a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.11)"><em>ArgumentParser</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo.permission">
-<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>permission name required for use of this command. A value of None
+indicates anonymous access.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.cli.SmokyDingo.pre_handle">
 <span class="sig-name descname"><span class="pre">pre_handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo.pre_handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.pre_handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify necessary permissions are in place before attempting any
 further calls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.11)"><em>Namespace</em></a>) -- </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -241,42 +330,121 @@ further calls.</p>
 <span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#SmokyDingo.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.SmokyDingo.validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to perform validation on options values. Return value is
 ignored, use <code class="xref py py-obj docutils literal notranslate"><span class="pre">parser.error</span></code> if needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parser</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.11)"><em>ArgumentParser</em></a>) -- </p></li>
+<li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.11)"><em>Namespace</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.cli.TagSmokyDingo">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">TagSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#TagSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.SmokyDingo</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TagSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#TagSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmokyDingo</span></code></a></p>
 <p>A SmokyDingo which checks for the 'tag' or 'admin' permission after
 activation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- The name that this command is being represented as</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TagSmokyDingo.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TagSmokyDingo.exported_cli">
+<span class="sig-name descname"><span class="pre">exported_cli</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.exported_cli" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TagSmokyDingo.goptions">
+<span class="sig-name descname"><span class="pre">goptions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../types/#kojismokydingo.types.GOptions" title="kojismokydingo.types.GOptions"><span class="pre">GOptions</span></a></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.goptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.TagSmokyDingo.group">
-<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>The koji CLI group that this command will be displayed under in
+the help output</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TagSmokyDingo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.TagSmokyDingo.permission">
-<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'tag'</span></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tag'</span></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>permission name required for use of this command. A value of None
+indicates anonymous access.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TagSmokyDingo.session">
+<span class="sig-name descname"><span class="pre">session</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClientSession</span></em><a class="headerlink" href="#kojismokydingo.cli.TagSmokyDingo.session" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.cli.TargetSmokyDingo">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">TargetSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#TargetSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.SmokyDingo</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TargetSmokyDingo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#TargetSmokyDingo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.cli.SmokyDingo" title="kojismokydingo.cli.SmokyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmokyDingo</span></code></a></p>
 <p>A SmokyDingo which checks for the 'target' or 'admin' permission
 after activation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- The name that this command is being represented as</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TargetSmokyDingo.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TargetSmokyDingo.exported_cli">
+<span class="sig-name descname"><span class="pre">exported_cli</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.exported_cli" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TargetSmokyDingo.goptions">
+<span class="sig-name descname"><span class="pre">goptions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../types/#kojismokydingo.types.GOptions" title="kojismokydingo.types.GOptions"><span class="pre">GOptions</span></a></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.goptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.TargetSmokyDingo.group">
-<span class="sig-name descname"><span class="pre">group</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'admin'</span></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>The koji CLI group that this command will be displayed under in
+the help output</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TargetSmokyDingo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.cli.TargetSmokyDingo.permission">
-<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'target'</span></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">permission</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'target'</span></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>permission name required for use of this command. A value of None
+indicates anonymous access.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.cli.TargetSmokyDingo.session">
+<span class="sig-name descname"><span class="pre">session</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClientSession</span></em><a class="headerlink" href="#kojismokydingo.cli.TargetSmokyDingo.session" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -290,15 +458,40 @@ after activation.</p>
 leading hash ('#') will be considered a comment and omitted from
 the output.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>lines</strong> (<em>Iterator</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) -- Sequence of lines to process</p></li>
-<li><p><strong>skip_comments</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Skip over lines with leading # characters.
+<li><p><strong>lines</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) -- Sequence of lines to process</p></li>
+<li><p><strong>skip_comments</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- Skip over lines with leading # characters.
 Default, True</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>1.0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.convert_history">
+<span class="sig-name descname"><span class="pre">convert_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#convert_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.convert_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the history dicts as returned from the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">ClientSession.queryHistory</span></code> API into the format <a class="reference internal" href="#kojismokydingo.cli.print_history" title="kojismokydingo.cli.print_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_history</span></code></a>
+expects.</p>
+<p>Note that the results are a single list, containing the history
+from all tables. By default these will be in the order of the
+table name, then in the order given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>history</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>]</em><em>]</em>) -- mapping of table name to list of history events</p>
+</dd>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>2.0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>]]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -308,6 +501,22 @@ Default, True</p></li>
 <span class="sig-name descname"><span class="pre">find_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#find_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.find_action" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hunts through a parser to discover an action whose dest, metavar,
 or option strings matches the given key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parser</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.11)"><em>ArgumentParser</em></a>) -- argument parser to search within</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- the dest, metavar, or option string of the action</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the first matching Action, or None</p>
+</dd>
+<dt class="field-odd">Since 1.0<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Action" title="(in Python v3.11)"><em>Action</em></a> | None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -316,8 +525,14 @@ or option strings matches the given key.</p>
 <dd><p>For use as an argument type where the value may be either an int
 (if it is entirely numeric) or a str.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+<dt class="field-odd">Since<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) -- </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -330,50 +545,114 @@ or option strings matches the given key.</p>
 context exits.</p>
 <p>If the filename is <code class="docutils literal notranslate"><span class="pre">&quot;-&quot;</span></code> then stdout will be used as the output file
 stream, but it will not be closed.</p>
-<p>If the filename is <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code> then <a class="reference external" href="https://docs.python.org/3/library/os.html#os.devnull" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os.devnull</span></code></a> will be used.</p>
+<p>If the filename is <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code> then <a class="reference external" href="https://docs.python.org/3/library/os.html#os.devnull" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os.devnull</span></code></a> will be used.</p>
 <p>If append is True, the file will be appended to. If append is
 False, the file will be overwritten. If append is None, then the
 file will be overwriten unless it specified with a prefix of
 <code class="docutils literal notranslate"><span class="pre">&quot;&#64;&quot;</span></code>. This prefix will be stripped from the filename in this
 case only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Since<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- </p></li>
+<li><p><strong>append</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em> | </em><em>None</em>) -- </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kojismokydingo.cli.pretty_json">
 <span class="sig-name descname"><span class="pre">pretty_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pretty</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#pretty_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.pretty_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Presents JSON in a pretty way.</p>
-<p>Keyword arguments are passed along to <a class="reference external" href="https://docs.python.org/3/library/json.html#json.dump" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">json.dump</span></code></a> to alter the
+<p>Keyword arguments are passed along to <a class="reference external" href="https://docs.python.org/3/library/json.html#json.dump" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">json.dump</span></code></a> to alter the
 default output format defined by <code class="xref py py-obj docutils literal notranslate"><span class="pre">JSON_PRETTY_OPTIONS</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a>) -- value to be printed</p></li>
-<li><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/io.html#io.TextIOBase" title="(in Python v3.10)"><em>io.TextIOBase</em></a><em>, </em><em>optional</em>) -- stream to print to. Default, <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stdout</span></code></a></p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) -- value to be printed</p></li>
+<li><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TextIO" title="(in Python v3.11)"><em>TextIO</em></a><em> | </em><em>None</em>) -- stream to print to. Default, <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stdout</span></code></a></p></li>
+<li><p><strong>pretty</strong> -- additional or overriding options to <a class="reference external" href="https://docs.python.org/3/library/json.html#json.dump" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">json.dump</span></code></a></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)">None</a></p>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>1.0</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.print_history">
+<span class="sig-name descname"><span class="pre">print_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">utc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#print_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.print_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print history lines using koji's own history formatting. The
+history timeline needs to be in the format koji is expecting. The
+results from <code class="xref py py-obj docutils literal notranslate"><span class="pre">ClientSession.queryHistory</span></code> can be converted via the
+<a class="reference internal" href="#kojismokydingo.cli.convert_history" title="kojismokydingo.cli.convert_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_history</span></code></a> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeline</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>]</em><em>]</em>) -- A sequence of history events to display</p></li>
+<li><p><strong>utc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- output timestamps in UTC instead of local time</p></li>
+<li><p><strong>show_events</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- print the individual event IDs</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- enables show_events and some additional output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>2.0</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kojismokydingo.cli.print_history_results">
+<span class="sig-name descname"><span class="pre">print_history_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">utc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#print_history_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.print_history_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints history lines using koji's own history formatting. The
+history timeline should be in the format as returned by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">ClientSession.queryHistory</span></code> API.</p>
+<p>This is a convenience function that combines the <a class="reference internal" href="#kojismokydingo.cli.convert_history" title="kojismokydingo.cli.convert_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_history</span></code></a>
+and <a class="reference internal" href="#kojismokydingo.cli.print_history" title="kojismokydingo.cli.print_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_history</span></code></a> functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeline</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>]</em><em>]</em>) -- A sequence of history events to display</p></li>
+<li><p><strong>utc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- output timestamps in UTC instead of local time</p></li>
+<li><p><strong>show_events</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- print the individual event IDs</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- enables show_events and some additional output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>2.0</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kojismokydingo.cli.printerr">
-<span class="sig-name descname"><span class="pre">printerr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kojismokydingo.cli.printerr" title="Permalink to this definition">¶</a></dt>
-<dd><p>print(value, ..., sep=' ', end='n', file=sys.stdout, flush=False)</p>
-<p>Prints the values to a stream, or to sys.stdout by default.
-Optional keyword arguments:
-file:  a file-like object (stream); defaults to the current sys.stdout.
-sep:   string inserted between values, default a space.
-end:   string appended after the last value, default a newline.
-flush: whether to forcibly flush the stream.</p>
+<span class="sig-name descname"><span class="pre">printerr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flush</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#printerr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.printerr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints values to stderr by default</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) -- values to be printed</p></li>
+<li><p><strong>sep</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- text inserted between values, defaults to a space</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- text appended after the last value, defaults to a newline</p></li>
+<li><p><strong>flush</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- forcibly flush the stream</p></li>
+</ul>
+</dd>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>1.0</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kojismokydingo.cli.read_clean_lines">
 <span class="sig-name descname"><span class="pre">read_clean_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_comments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#read_clean_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.read_clean_lines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads clean lines from a named file. If filename is <code class="docutils literal notranslate"><span class="pre">-</span></code> then
-read from <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdin" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stdin</span></code></a> instead.</p>
+read from <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdin" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stdin</span></code></a> instead.</p>
 <p>Each line will be stripped of leading and trailing whitespace.</p>
 <p>If skip_comments is True (the default), then any line with a
 leading hash ('#') will be considered a comment and omitted from
@@ -381,16 +660,19 @@ the output.</p>
 <p>Content will be fully collected into a list and the file (if not
 stdin) will be closed before returning.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) -- File name to read lines from, or <code class="docutils literal notranslate"><span class="pre">-</span></code> to indicate
-stdin. Default, read from <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdin" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stdin</span></code></a></p></li>
-<li><p><strong>skip_comments</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Skip over lines with leading # characters.
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- File name to read lines from, or <code class="docutils literal notranslate"><span class="pre">-</span></code> to indicate
+stdin. Default, read from <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdin" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stdin</span></code></a></p></li>
+<li><p><strong>skip_comments</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- Skip over lines with leading # characters.
 Default, True</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>1.0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -400,6 +682,16 @@ Default, True</p></li>
 <span class="sig-name descname"><span class="pre">remove_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#remove_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.remove_action" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hunts through a parser to remove an action based on the given key. The
 key can match either the dest, the metavar, or the option strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parser</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.11)"><em>ArgumentParser</em></a>) -- argument parser to remove the action from</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- value to identify the action by</p></li>
+</ul>
+</dd>
+<dt class="field-even">Since 1.0<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -412,6 +704,19 @@ argument.</p>
 <p><code class="docutils literal notranslate"><span class="pre">-x</span> <span class="pre">1</span> <span class="pre">-x</span> <span class="pre">2,</span> <span class="pre">-x</span> <span class="pre">3,4,5</span> <span class="pre">-x</span> <span class="pre">,6,7,</span> <span class="pre">-x</span> <span class="pre">8</span></code></p>
 <p>to become</p>
 <p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8]</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arglist</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) -- original series of arguments to be resplit</p></li>
+<li><p><strong>sep</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- separator character</p></li>
+</ul>
+</dd>
+<dt class="field-even">Since 1.0<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -419,11 +724,14 @@ argument.</p>
 <span class="sig-name descname"><span class="pre">space_normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">txt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/kojismokydingo/cli/#space_normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.cli.space_normalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalizes the whitespace in txt to single spaces.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>txt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- Original text</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>txt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- Original text</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>1.0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -438,30 +746,30 @@ the same count of rows, nothing will inject empty values.</p>
 width necessary for the longest value from all the rows or the
 heading.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>headings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) -- The column titles</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) -- Rows of data</p></li>
-<li><p><strong>key</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><em>object</em></a><em>]</em>) -- Transformation to apply to each row of data to get the
+<li><p><strong>headings</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) -- The column titles</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) -- Rows of data</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a><em> | </em><em>None</em>) -- Transformation to apply to each row of data to get the
 actual individual columns. Should be a unary function. Default,
 data is iterated as-is.</p></li>
-<li><p><strong>sorting</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) -- Whether data rows should be sorted and in what
+<li><p><strong>sorting</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- Whether data rows should be sorted and in what
 direction. 0 for no sorting, 1 for ascending, -1 for
 descending. If key is specified, then sorting will be based on
 those transformations. Default, no sorting.</p></li>
-<li><p><strong>quiet</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) -- Whether to print headings or not. Default, only print
+<li><p><strong>quiet</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em> | </em><em>None</em>) -- Whether to print headings or not. Default, only print
 headings if out is a TTY device.</p></li>
-<li><p><strong>out</strong> (<a class="reference external" href="https://docs.python.org/3/library/io.html#io.TextIOBase" title="(in Python v3.10)"><em>io.TextIOBase</em></a><em>, </em><em>optional</em>) -- Stream to write output to. Default, <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stdout</span></code></a></p></li>
+<li><p><strong>out</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TextIO" title="(in Python v3.11)"><em>TextIO</em></a><em> | </em><em>None</em>) -- Stream to write output to. Default, <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stdout</span></code></a></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)">None</a></p>
+<dt class="field-even">Since<span class="colon">:</span></dt>
+<dd class="field-even"><p>1.0</p>
 </dd>
 </dl>
 </dd></dl>
 
-<div class="section" id="cli-modules">
-<h2>CLI Modules<a class="headerlink" href="#cli-modules" title="Permalink to this headline">¶</a></h2>
+<section id="cli-modules">
+<h2>CLI Modules<a class="headerlink" href="#cli-modules" title="Permalink to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="archives/">kojismokydingo.cli.archives</a></li>
@@ -473,8 +781,8 @@ headings if out is a TTY device.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="users/">kojismokydingo.cli.users</a></li>
 </ul>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -483,20 +791,26 @@ headings if out is a TTY device.</p></li>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../../">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../../">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">CLI API Reference</a><ul>
 <li><a class="reference internal" href="#cli-modules">CLI Modules</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../standalone/tags/"
-                        title="previous chapter">kojismokydingo.standalone.tags</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="archives/"
-                        title="next chapter">kojismokydingo.cli.archives</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../standalone/tags/"
+                          title="previous chapter">kojismokydingo.standalone.tags</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="archives/"
+                          title="next chapter">kojismokydingo.cli.archives</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -508,12 +822,12 @@ headings if out is a TTY device.</p></li>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -533,14 +847,14 @@ headings if out is a TTY device.</p></li>
         <li class="right" >
           <a href="../standalone/tags/" title="kojismokydingo.standalone.tags"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">CLI API Reference</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

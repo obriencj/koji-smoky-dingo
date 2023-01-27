@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo</a></li> 
       </ul>
@@ -66,15 +65,30 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">ClientSession</span><span class="p">,</span> <span class="n">Fault</span><span class="p">,</span> <span class="n">GenericError</span><span class="p">,</span> <span class="n">ParameterError</span><span class="p">,</span>
     <span class="n">convertFault</span><span class="p">,</span> <span class="n">read_config</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">koji_cli.lib</span> <span class="kn">import</span> <span class="n">activate_session</span><span class="p">,</span> <span class="n">ensure_connection</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">zip</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">DEBUG</span><span class="p">,</span> <span class="n">basicConfig</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">chunkseq</span>
+<span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ArchiveInfo</span><span class="p">,</span> <span class="n">ArchiveInfos</span><span class="p">,</span> <span class="n">ArchiveSpec</span><span class="p">,</span>
+    <span class="n">BuildInfo</span><span class="p">,</span> <span class="n">BuildSpec</span><span class="p">,</span>
+    <span class="n">ChannelInfo</span><span class="p">,</span> <span class="n">ChannelSpec</span><span class="p">,</span>
+    <span class="n">HostInfo</span><span class="p">,</span> <span class="n">HostSpec</span><span class="p">,</span>
+    <span class="n">HubVersionSpec</span><span class="p">,</span>
+    <span class="n">PackageInfo</span><span class="p">,</span> <span class="n">PackageSpec</span><span class="p">,</span>
+    <span class="n">RepoInfo</span><span class="p">,</span> <span class="n">RepoSpec</span><span class="p">,</span>
+    <span class="n">RPMInfo</span><span class="p">,</span> <span class="n">RPMInfos</span><span class="p">,</span> <span class="n">RPMSignature</span><span class="p">,</span> <span class="n">RPMSpec</span><span class="p">,</span>
+    <span class="n">TagInfo</span><span class="p">,</span> <span class="n">TagSpec</span><span class="p">,</span>
+    <span class="n">TargetInfo</span><span class="p">,</span> <span class="n">TargetSpec</span><span class="p">,</span>
+    <span class="n">TaskInfo</span><span class="p">,</span> <span class="n">TaskSpec</span><span class="p">,</span>
+    <span class="n">UserInfo</span><span class="p">,</span> <span class="n">UserSpec</span><span class="p">,</span> <span class="p">)</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -86,6 +100,7 @@
     <span class="s2">&quot;NoSuchBuild&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchChannel&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchContentGenerator&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NoSuchHost&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchPackage&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchPermission&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NoSuchRepo&quot;</span><span class="p">,</span>
@@ -127,7 +142,7 @@
 
 
 <div class="viewcode-block" id="ManagedClientSession"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.ManagedClientSession">[docs]</a><span class="k">class</span> <span class="nc">ManagedClientSession</span><span class="p">(</span><span class="n">ClientSession</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A `koji.ClientSession` that can be used as via the ``with``</span>
 <span class="sd">    keyword to provide a managed session that will handle</span>
 <span class="sd">    authenticated login and logout.</span>
@@ -136,33 +151,86 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">activate_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span>
+
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">_exc_val</span><span class="p">,</span> <span class="n">_exc_tb</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rsession</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rsession</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rsession</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">exc_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">exc_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ManagedClientSession.activate"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.ManagedClientSession.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Invokes `koji_cli.lib.activate_session` with this session&#39;s</span>
+<span class="sd">        options, which will trigger the appropriate login method.</span>
+
+<span class="sd">        :since 2.0:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">activate_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># a cached copy of `logging.getLogger(&#39;koji&#39;)`, assigned</span>
+        <span class="c1"># during `ClientSession.__init__` invocation.  There are some</span>
+        <span class="c1"># code paths in the underlying ClientSession which will</span>
+        <span class="c1"># presume that logging handlers have been configured, without</span>
+        <span class="c1"># checking that they actually have been. This is likely</span>
+        <span class="c1"># because the koji command-line interface sets up that logger</span>
+        <span class="c1"># shortly after parsing initial CLI args. However, when a</span>
+        <span class="c1"># script uses a ClientSession, that setup won&#39;t have</span>
+        <span class="c1"># happened. Then if the script encounters an error along one</span>
+        <span class="c1"># of those code paths, an additional logging warning will be</span>
+        <span class="c1"># output after that path attempts to log at some unconfigured</span>
+        <span class="c1"># level. This property allows us to set a default</span>
+        <span class="c1"># configuration if one hasn&#39;t been given yet, just before the</span>
+        <span class="c1"># instance would attempt to use the logger.</span>
+
+        <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+            <span class="n">basicConfig</span><span class="p">()</span>
+
+            <span class="c1"># the koji CLI will use the --debug and --quiet options to</span>
+            <span class="c1"># determine the logger level. However, only the debug</span>
+            <span class="c1"># option is recorded as part of the session options. We&#39;ll</span>
+            <span class="c1"># mimic as much of the logging behavior as we can</span>
+            <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span>
+            <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;debug_xmlrpc&#39;</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">DEBUG</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">logger</span>
+
+
+    <span class="nd">@logger</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span></div>
 
 
 <div class="viewcode-block" id="ProfileClientSession"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.ProfileClientSession">[docs]</a><span class="k">class</span> <span class="nc">ProfileClientSession</span><span class="p">(</span><span class="n">ManagedClientSession</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A `koji.ClientSession` which loads profile config information and</span>
 <span class="sd">    which can be used via tha ``with`` keyword.</span>
 
 <span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="s2">&quot;koji&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;koji&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param profile: name of the koji profile to load from local</span>
+<span class="sd">          configuration locations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">conf</span> <span class="o">=</span> <span class="n">read_config</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
         <span class="n">server</span> <span class="o">=</span> <span class="n">conf</span><span class="p">[</span><span class="s2">&quot;server&quot;</span><span class="p">]</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ProfileClientSession</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">opts</span><span class="o">=</span><span class="n">conf</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">opts</span><span class="o">=</span><span class="n">conf</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AnonClientSession"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.AnonClientSession">[docs]</a><span class="k">class</span> <span class="nc">AnonClientSession</span><span class="p">(</span><span class="n">ProfileClientSession</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A `koji.ClientSession` which loads profile config information and</span>
 <span class="sd">    which can be used via the ``with`` keyword.</span>
 
@@ -179,11 +247,22 @@
         <span class="c1"># call, so let&#39;s be lazy instead.</span>
 
         <span class="c1"># ensure_connection(self)</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="k">return</span> <span class="bp">self</span>
+
+
+<div class="viewcode-block" id="AnonClientSession.activate"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.AnonClientSession.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensures the anonymous session is connected, but does not attempt</span>
+<span class="sd">        to login.</span>
+
+<span class="sd">        :since 2.0:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ensure_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="BadDingo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.BadDingo">[docs]</a><span class="k">class</span> <span class="nc">BadDingo</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generalized base class for exceptions raised from kojismokydingo.</span>
 <span class="sd">    This class and its subclasses are used to combine a fixed</span>
 <span class="sd">    complaint string with some specific information. This is a</span>
@@ -195,15 +274,16 @@
 <span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;Something bad happened&quot;</span>
+    <span class="n">complaint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Something bad happened&quot;</span>
+
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">orig</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
-        <span class="k">return</span> <span class="s2">&quot;: &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">complaint</span><span class="p">,</span> <span class="n">orig</span><span class="p">])</span></div>
+        <span class="n">orig</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">complaint</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">orig</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
 
 <div class="viewcode-block" id="NoSuchBuild"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchBuild">[docs]</a><span class="k">class</span> <span class="nc">NoSuchBuild</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A build was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -212,18 +292,18 @@
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such build&quot;</span></div>
 
 
-<span class="k">class</span> <span class="nc">NoSuchHost</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="NoSuchHost"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchHost">[docs]</a><span class="k">class</span> <span class="nc">NoSuchHost</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A host was not found</span>
 
 <span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such host&quot;</span>
+    <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such host&quot;</span></div>
 
 
 <div class="viewcode-block" id="NoSuchChannel"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchChannel">[docs]</a><span class="k">class</span> <span class="nc">NoSuchChannel</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A channel was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -233,7 +313,7 @@
 
 
 <div class="viewcode-block" id="NoSuchContentGenerator"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchContentGenerator">[docs]</a><span class="k">class</span> <span class="nc">NoSuchContentGenerator</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A content generator was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -243,7 +323,7 @@
 
 
 <div class="viewcode-block" id="NoSuchPackage"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchPackage">[docs]</a><span class="k">class</span> <span class="nc">NoSuchPackage</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A package was not found</span>
 
 <span class="sd">    :since: 1.1</span>
@@ -253,7 +333,7 @@
 
 
 <div class="viewcode-block" id="NoSuchTag"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchTag">[docs]</a><span class="k">class</span> <span class="nc">NoSuchTag</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A tag was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -263,7 +343,7 @@
 
 
 <div class="viewcode-block" id="NoSuchTarget"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchTarget">[docs]</a><span class="k">class</span> <span class="nc">NoSuchTarget</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A target was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -273,7 +353,7 @@
 
 
 <div class="viewcode-block" id="NoSuchTask"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchTask">[docs]</a><span class="k">class</span> <span class="nc">NoSuchTask</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A task was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -283,7 +363,7 @@
 
 
 <div class="viewcode-block" id="NoSuchUser"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchUser">[docs]</a><span class="k">class</span> <span class="nc">NoSuchUser</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A user was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -293,7 +373,7 @@
 
 
 <div class="viewcode-block" id="NoSuchPermission"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchPermission">[docs]</a><span class="k">class</span> <span class="nc">NoSuchPermission</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A permission was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -303,7 +383,7 @@
 
 
 <div class="viewcode-block" id="NoSuchArchive"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchArchive">[docs]</a><span class="k">class</span> <span class="nc">NoSuchArchive</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An archive was not found</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -313,7 +393,7 @@
 
 
 <div class="viewcode-block" id="NoSuchRepo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchRepo">[docs]</a><span class="k">class</span> <span class="nc">NoSuchRepo</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A repository was not found</span>
 
 <span class="sd">    :since: 1.1</span>
@@ -323,36 +403,40 @@
 
 
 <div class="viewcode-block" id="NoSuchRPM"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NoSuchRPM">[docs]</a><span class="k">class</span> <span class="nc">NoSuchRPM</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An RPM was not found</span>
-
-<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;No such RPM&quot;</span></div>
 
 
 <div class="viewcode-block" id="NotPermitted"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.NotPermitted">[docs]</a><span class="k">class</span> <span class="nc">NotPermitted</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A required permission was not associated with the currently logged</span>
 <span class="sd">    in user account.</span>
-
-<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;Insufficient permissions&quot;</span></div>
 
 
 <div class="viewcode-block" id="FeatureUnavailable"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.FeatureUnavailable">[docs]</a><span class="k">class</span> <span class="nc">FeatureUnavailable</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A given feature isn&#39;t available due to the version on the koji hub</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;The koji hub version doesn&#39;t support this feature&quot;</span></div>
 
 
-<div class="viewcode-block" id="iter_bulk_load"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.iter_bulk_load">[docs]</a><span class="k">def</span> <span class="nf">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">loadfn</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="n">KT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;KT&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="iter_bulk_load"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.iter_bulk_load">[docs]</a><span class="k">def</span> <span class="nf">iter_bulk_load</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">loadfn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">keys</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">KT</span><span class="p">],</span>
+        <span class="n">err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic bulk loading generator. Invokes the given loadfn on each</span>
 <span class="sd">    key in keys using chunking multicalls limited to the specified</span>
 <span class="sd">    size.</span>
@@ -365,31 +449,21 @@
 
 <span class="sd">    :param session: The koji session</span>
 
-<span class="sd">    :type session: `koji.ClientSession`</span>
-
 <span class="sd">    :param loadfn: The loading function, to be invoked in a multicall</span>
 <span class="sd">      arrangement. Will be called once with each given key from keys</span>
 
-<span class="sd">    :type loadfn: Callable[[object], object]</span>
-
 <span class="sd">    :param keys: The sequence of keys to be used to invoke loadfn.</span>
-
-<span class="sd">    :type keys: list[object]</span>
 
 <span class="sd">    :param err: Whether to raise any underlying fault returns as</span>
 <span class="sd">      exceptions. Default, True</span>
 
-<span class="sd">    :type err: bool, optional</span>
-
 <span class="sd">    :param size: How many calls to loadfn to chunk up for each</span>
 <span class="sd">      multicall. Default, 100</span>
-
-<span class="sd">    :type size: int, optional</span>
 
 <span class="sd">    :raises koji.GenericError: if err is True and an issue</span>
 <span class="sd">      occurrs while invoking the loadfn</span>
 
-<span class="sd">    :rtype: Generator[tuple[object, object]]</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">key_chunk</span> <span class="ow">in</span> <span class="n">chunkseq</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
@@ -402,110 +476,104 @@
             <span class="k">if</span> <span class="n">info</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;faultCode&quot;</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">convertFault</span><span class="p">(</span><span class="n">Fault</span><span class="p">(</span><span class="o">**</span><span class="n">info</span><span class="p">))</span>
+                        <span class="k">raise</span> <span class="n">convertFault</span><span class="p">(</span><span class="n">Fault</span><span class="p">(</span><span class="o">**</span><span class="n">info</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="kc">None</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="bulk_load"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load">[docs]</a><span class="k">def</span> <span class="nf">bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">loadfn</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load">[docs]</a><span class="k">def</span> <span class="nf">bulk_load</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">loadfn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">keys</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="n">err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic bulk loading function. Invokes the given `loadfn` on each</span>
 <span class="sd">    key in `keys` using chunking multicalls limited to the specified</span>
 <span class="sd">    size.</span>
 
-<span class="sd">    Returns an `OrderedDict` associating the individual keys with the</span>
-<span class="sd">    returned value of loadfn. If `results` is specified, it must</span>
-<span class="sd">    support dict-like assignment via an update method, and will be</span>
-<span class="sd">    used in place of a newly allocated `OrderedDict` to store and</span>
-<span class="sd">    return the results.</span>
+<span class="sd">    Returns a dict associating the individual keys with the returned</span>
+<span class="sd">    value of loadfn. If `results` is specified, it must support</span>
+<span class="sd">    dict-like assignment via an update method, and will be used in</span>
+<span class="sd">    place of a newly allocated dict to store and return the results.</span>
 
-<span class="sd">    :param session: The koji session</span>
-
-<span class="sd">    :type session: `koji.ClientSession`</span>
+<span class="sd">    :param session: an active koji client session</span>
 
 <span class="sd">    :param loadfn: The loading function, to be invoked in a multicall</span>
 <span class="sd">      arrangement. Will be called once with each given key from `keys`</span>
-
-<span class="sd">    :type loadfn: Callable[[object], object]</span>
 
 <span class="sd">    :param keys: The sequence of keys to be used to invoke `loadfn`.</span>
 <span class="sd">      These keys need to be individually hashable, or the `results`</span>
 <span class="sd">      value needs to be specified with an instance that accepts</span>
 <span class="sd">      assignmnet using these values as the key.</span>
 
-<span class="sd">    :type keys: list[object]</span>
-
 <span class="sd">    :param err: Whether to raise any underlying fault returns as</span>
-<span class="sd">      exceptions. Default, True</span>
-
-<span class="sd">    :type err: bool, optional</span>
+<span class="sd">      exceptions. Default, `True`</span>
 
 <span class="sd">    :param size: How many calls to `loadfn` to chunk up for each</span>
-<span class="sd">      multicall. Default, 100</span>
-
-<span class="sd">    :type size: int, optional</span>
+<span class="sd">      multicall. Default, `100`</span>
 
 <span class="sd">    :param results: storage for `loadfn` results. If specified, must</span>
 <span class="sd">      support item assignment (like a dict) via an update method, and</span>
 <span class="sd">      it will be populated and then used as the return value for this</span>
-<span class="sd">      function. Default, a new `OrderedDict` will be allocated.</span>
-
-<span class="sd">    :type results: dict, optional</span>
+<span class="sd">      function. Default, a new dict will be allocated.</span>
 
 <span class="sd">    :raises koji.GenericError: if `err` is `True` and an issue</span>
 <span class="sd">      occurrs while invoking the `loadfn`</span>
 
-<span class="sd">    :rtype: dict[object, object]</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
     <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">loadfn</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_builds"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_builds">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvrs</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_builds"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_builds">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_builds</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">nvrs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+        <span class="n">err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                                                <span class="n">BuildInfo</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load many buildinfo dicts from a koji client session and a</span>
 <span class="sd">    sequence of NVRs.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual NVRs with their</span>
+<span class="sd">    Returns a dict associating the individual NVRs with their</span>
 <span class="sd">    resulting buildinfo.</span>
 
 <span class="sd">    If err is True (default) then any missing build info will raise a</span>
-<span class="sd">    NoSuchBuild exception. If err is False, then a None will be</span>
+<span class="sd">    `NoSuchBuild` exception. If err is False, then a None will be</span>
 <span class="sd">    substituted into the ordered dict for the result.</span>
 
 <span class="sd">    If results is non-None, it must support dict assignment, and will</span>
-<span class="sd">    be used in place of a newly allocated OrderedDict to store and</span>
-<span class="sd">    return the results.</span>
+<span class="sd">    be used in place of a newly allocated dict to store and return the</span>
+<span class="sd">    results.</span>
 
 <span class="sd">    :param nvrs: Sequence of build NVRs or build IDs to load</span>
-
-<span class="sd">    :type nvrs: Iterator[str] or Iterator[int]</span>
 
 <span class="sd">    :param err: Raise an exception if an NVR fails to load. Default,</span>
 <span class="sd">      True.</span>
 
-<span class="sd">    :type err: bool, optional</span>
-
 <span class="sd">    :param size: Count of NVRs to load in a single multicall. Default,</span>
 <span class="sd">      100</span>
 
-<span class="sd">    :type size: int, optional</span>
-
 <span class="sd">    :param results: mapping to store the results in. Default, produce</span>
-<span class="sd">      a new OrderedDict</span>
+<span class="sd">      a new dict</span>
 
-<span class="sd">    :type results: Mapping, optional</span>
+<span class="sd">    :raises NoSuchBuild: if err is True and any of the given builds</span>
+<span class="sd">      could not be loaded</span>
 
-<span class="sd">    :rtype: Mapping</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
 
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">getBuild</span><span class="p">,</span> <span class="n">nvrs</span><span class="p">,</span>
                                     <span class="kc">False</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
@@ -517,17 +585,42 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_tasks"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_tasks">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_tasks</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">task_ids</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_tasks"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_tasks">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_tasks</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">task_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">request</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">TaskInfo</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load many taskinfo dicts from a koji client session and a sequence</span>
 <span class="sd">    of task IDs.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual IDs with their</span>
-<span class="sd">    resulting taskinfo.</span>
+<span class="sd">    Returns a dict associating the individual IDs with their resulting</span>
+<span class="sd">    taskinfo.</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param task_ids: IDs of tasks to be loaded</span>
+
+<span class="sd">    :param request: if True then load the task&#39;s request data as</span>
+<span class="sd">      well. Default, False</span>
+
+<span class="sd">    :param err: raise an exception if a task fails to load. Default,</span>
+<span class="sd">      True</span>
+
+<span class="sd">    :param size: count of tasks to load in a single</span>
+<span class="sd">      multicall. Default, 100</span>
+
+<span class="sd">    :param results: mapping to store the results in. Default, produce</span>
+<span class="sd">      a new dict</span>
+
+<span class="sd">    :raises NoSuchTask: if err is True and a task couldn&#39;tb e loaded</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
 
     <span class="n">fn</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">getTaskInfo</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
 
@@ -540,25 +633,40 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_tags"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_tags">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_tags"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_tags">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_tags</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tags</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+        <span class="n">err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                                                <span class="n">TagInfo</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load many taginfo dicts from tag names or IDs.</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param tags: tag IDs or names to load</span>
+
 <span class="sd">    :param err: Raise an exception if a tag fails to load. Default,</span>
 <span class="sd">      True.</span>
-
-<span class="sd">    :type err: bool, optional</span>
 
 <span class="sd">    :param size: Count of tags to load in a single multicall. Default,</span>
 <span class="sd">      100</span>
 
-<span class="sd">    :type size: int, optional</span>
+<span class="sd">    :param results: mapping to store the results in. Default, produce</span>
+<span class="sd">      a new dict</span>
+
+<span class="sd">    :raises NoSuchTag: if err is True and a tag couldn&#39;t be loaded</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
 
     <span class="k">if</span> <span class="n">version_check</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">23</span><span class="p">)):</span>
         <span class="n">fn</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">getTag</span><span class="p">,</span> <span class="n">blocked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">fn</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getTag</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getTag</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">err</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">info</span><span class="p">:</span>
@@ -569,168 +677,199 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_rpm_sigs"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_rpm_sigs">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_rpm_sigs</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rpm_ids</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_rpm_sigs"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_rpm_sigs">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_rpm_sigs</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">rpm_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">RPMSignature</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set up a chunking multicall to fetch the signatures for a list of</span>
 <span class="sd">    RPM via `session.queryRPMSigs` for each ID in rpm_ids.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual RPM IDs with their</span>
+<span class="sd">    Returns a dict associating the individual RPM IDs with their</span>
 <span class="sd">    resulting RPM signature lists.</span>
 
 <span class="sd">    If results is non-None, it must support a dict-like update method,</span>
-<span class="sd">    and will be used in place of a newly allocated OrderedDict to</span>
-<span class="sd">    store and return the results.</span>
+<span class="sd">    and will be used in place of a newly allocated dict to store and</span>
+<span class="sd">    return the results.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
     <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">queryRPMSigs</span><span class="p">,</span>
                                   <span class="n">rpm_ids</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_buildroot_archives"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_buildroot_archives">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_buildroot_archives</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">buildroot_ids</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                 <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_buildroot_archives"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_buildroot_archives">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_buildroot_archives</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">buildroot_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">btype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ArchiveInfo</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set up a chunking multicall to fetch the archives of buildroots</span>
 <span class="sd">    via `session.listArchives` for each buildroot ID in buildrood_ids.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual buildroot IDs with</span>
-<span class="sd">    their resulting archive lists.</span>
+<span class="sd">    Returns a dict associating the individual buildroot IDs with their</span>
+<span class="sd">    resulting archive lists.</span>
 
 <span class="sd">    If results is non-None, it must support dict-like update method,</span>
-<span class="sd">    and will be used in place of a newly allocated OrderedDict to</span>
-<span class="sd">    store and return the results.</span>
+<span class="sd">    and will be used in place of a newly allocated dict to store and</span>
+<span class="sd">    return the results.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
     <span class="n">fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">listArchives</span><span class="p">(</span><span class="n">componentBuildrootID</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">btype</span><span class="p">)</span>
     <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">buildroot_ids</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_buildroot_rpms"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_buildroot_rpms">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_buildroot_rpms</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">buildroot_ids</span><span class="p">,</span>
-                             <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_buildroot_rpms"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_buildroot_rpms">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_buildroot_rpms</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">buildroot_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">RPMInfo</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set up a chunking multicall to fetch the RPMs of buildroots via</span>
 <span class="sd">    `session.listRPMs` for each buildroot ID in buildrood_ids.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual buildroot IDs with</span>
-<span class="sd">    their resulting RPM lists.</span>
+<span class="sd">    Returns a dict associating the individual buildroot IDs with their</span>
+<span class="sd">    resulting RPM lists.</span>
 
 <span class="sd">    If results is non-None, it must support dict-like update method,</span>
-<span class="sd">    and will be used in place of a newly allocated OrderedDict to</span>
-<span class="sd">    store and return the results.</span>
+<span class="sd">    and will be used in place of a newly allocated dict to store and</span>
+<span class="sd">    return the results.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
     <span class="n">fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">listRPMs</span><span class="p">(</span><span class="n">componentBuildrootID</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
     <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">buildroot_ids</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_build_archives"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_build_archives">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_build_archives</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">build_ids</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                             <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_build_archives"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_build_archives">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_build_archives</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">build_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">btype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ArchiveInfo</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set up a chunking multicall to fetch the archives of builds</span>
 <span class="sd">    via `session.listArchives` for each build ID in build_ids.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual build IDs with</span>
-<span class="sd">    their resulting archive lists.</span>
+<span class="sd">    Returns a dict associating the individual build IDs with their</span>
+<span class="sd">    resulting archive lists.</span>
 
 <span class="sd">    If results is non-None, it must support dict-like update method,</span>
-<span class="sd">    and will be used in place of a newly allocated OrderedDict to</span>
-<span class="sd">    store and return the results.</span>
+<span class="sd">    and will be used in place of a newly allocated dict to store and</span>
+<span class="sd">    return the results.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
     <span class="n">fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">listArchives</span><span class="p">(</span><span class="n">buildID</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">btype</span><span class="p">)</span>
     <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">build_ids</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_build_rpms"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_build_rpms">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_build_rpms</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">build_ids</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_build_rpms"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_build_rpms">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_build_rpms</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">build_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">RPMInfo</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set up a chunking multicall to fetch the RPMs of builds via</span>
 <span class="sd">    `session.listRPMS` for each build ID in build_ids.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual build IDs with</span>
-<span class="sd">    their resulting RPM lists.</span>
+<span class="sd">    Returns a dict associating the individual build IDs with their</span>
+<span class="sd">    resulting RPM lists.</span>
 
 <span class="sd">    If results is non-None, it must support a dict-like update method,</span>
-<span class="sd">    and will be used in place of a newly allocated OrderedDict to</span>
-<span class="sd">    store and return the results.</span>
+<span class="sd">    and will be used in place of a newly allocated dict to store and</span>
+<span class="sd">    return the results.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
     <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">listRPMs</span><span class="p">,</span>
                                   <span class="n">build_ids</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_buildroots"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_buildroots">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_buildroots</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">broot_ids</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_buildroots"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_buildroots">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_buildroots</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">broot_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set up a chunking multicall to fetch the buildroot data via</span>
 <span class="sd">    `session.getBuildroot` for each ID in broot_ids.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual buildroot IDs</span>
-<span class="sd">    with their resulting buildroot info dicts.</span>
+<span class="sd">    Returns a dict associating the individual buildroot IDs with their</span>
+<span class="sd">    resulting buildroot info dicts.</span>
 
 <span class="sd">    If results is non-None, it must support a dict-like update method,</span>
-<span class="sd">    and will be used in place of a newly allocated OrderedDict to</span>
-<span class="sd">    store and return the results.</span>
+<span class="sd">    and will be used in place of a newly allocated dict to store and</span>
+<span class="sd">    return the results.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
     <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">getBuildroot</span><span class="p">,</span>
                                   <span class="n">broot_ids</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="bulk_load_users"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_users">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_users</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="bulk_load_users"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.bulk_load_users">[docs]</a><span class="k">def</span> <span class="nf">bulk_load_users</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">users</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                                                <span class="n">UserInfo</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load many userinfo dicts from a koji client session and a sequence of</span>
 <span class="sd">    user identifiers.</span>
 
-<span class="sd">    Returns an OrderedDict associating the individual identifiers with</span>
-<span class="sd">    their resulting userinfo.</span>
+<span class="sd">    Returns a dict associating the individual identifiers with their</span>
+<span class="sd">    resulting userinfo.</span>
 
 <span class="sd">    If err is True (default) then any missing user info will raise a</span>
 <span class="sd">    NoSuchUser exception. If err is False, then a None will be</span>
 <span class="sd">    substituted into the ordered dict for the result.</span>
 
 <span class="sd">    If results is non-None, it must support dict assignment, and will</span>
-<span class="sd">    be used in place of a newly allocated OrderedDict to store and</span>
-<span class="sd">    return the results.</span>
+<span class="sd">    be used in place of a newly allocated dict to store and return the</span>
+<span class="sd">    results.</span>
 
 <span class="sd">    :param session: active koji session</span>
 
-<span class="sd">    :type session: koji.ClientSession</span>
-
 <span class="sd">    :param users: user names or IDs to load</span>
 
-<span class="sd">    :type users: Iterator[str] or Iterator[int]</span>
-
 <span class="sd">    :param err: halt on problems and raise an exception. Default, True</span>
-
-<span class="sd">    :type err: bool, optional</span>
 
 <span class="sd">    :param size: number of users to load in a single</span>
 <span class="sd">      multicall. Default, 100</span>
 
-<span class="sd">    :type size: int, optional</span>
-
 <span class="sd">    :param results: dict to store results in. Default, allocate a new</span>
-<span class="sd">      OrderedDict</span>
+<span class="sd">      dict</span>
 
-<span class="sd">    :type results: dict, optional</span>
-
-<span class="sd">    :rtype: dict</span>
+<span class="sd">    :raises NoSuchUser: if err is True and a user could not be loaded</span>
 
 <span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">users</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">users</span><span class="p">)</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">results</span>
@@ -782,8 +921,10 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="as_buildinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_buildinfo">[docs]</a><span class="k">def</span> <span class="nf">as_buildinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">build</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_buildinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_buildinfo">[docs]</a><span class="k">def</span> <span class="nf">as_buildinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">build</span><span class="p">:</span> <span class="n">BuildSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BuildInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a build value into a koji build info dict.</span>
 
 <span class="sd">    If build is an</span>
@@ -791,13 +932,9 @@
 <span class="sd">     * str, will attempt to load as an NVR</span>
 <span class="sd">     * dict, will presume already a build info</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param build: value to lookup</span>
-
-<span class="sd">    :type build: int or str or dict</span>
-
-<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchBuild: if the build value could not be resolved</span>
 <span class="sd">      into a build info dict</span>
@@ -818,8 +955,10 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_channelinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_channelinfo">[docs]</a><span class="k">def</span> <span class="nf">as_channelinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_channelinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_channelinfo">[docs]</a><span class="k">def</span> <span class="nf">as_channelinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">channel</span><span class="p">:</span> <span class="n">ChannelSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChannelInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a channel value into a koji channel info dict.</span>
 
 <span class="sd">    If channel is an</span>
@@ -831,9 +970,8 @@
 
 <span class="sd">    :param channel: value to lookup</span>
 
-<span class="sd">    :rtype: dict</span>
-
-<span class="sd">    :raises NoSuchChannel: if the channel could not be resolved</span>
+<span class="sd">    :raises NoSuchChannel: if the channel value could not be resolved</span>
+<span class="sd">      into a channel info dict</span>
 
 <span class="sd">    :since: 1.1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -851,8 +989,11 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_taginfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_taginfo">[docs]</a><span class="k">def</span> <span class="nf">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_taginfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_taginfo">[docs]</a><span class="k">def</span> <span class="nf">as_taginfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tag</span><span class="p">:</span> <span class="n">TagSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TagInfo</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a tag value into a koji tag info dict.</span>
 
 <span class="sd">    If tag is an</span>
@@ -860,13 +1001,9 @@
 <span class="sd">     * str, will attempt to load as a tag name</span>
 <span class="sd">     * dict, will presume already a tag info</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param tag: value to lookup</span>
-
-<span class="sd">    :type tag: int or str or dict</span>
-
-<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchTag: if the tag value could not be resolved into a</span>
 <span class="sd">      tag info dict</span>
@@ -892,55 +1029,22 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_packageinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_packageinfo">[docs]</a><span class="k">def</span> <span class="nf">as_packageinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">pkg</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Coerces a host value into a host info dict.</span>
-
-<span class="sd">    If pkg is an:</span>
-<span class="sd">     * int, will attempt to load as a package ID</span>
-<span class="sd">     * str, will attempt to load as a package name</span>
-<span class="sd">     * dict, will presume already a package info</span>
-
-<span class="sd">    :param session: an active koji client session</span>
-
-<span class="sd">    :param pkg: value to lookup</span>
-
-<span class="sd">    :rtype: dict</span>
-
-<span class="sd">    :raises NoSuchPackage: if the pkg value could not be resolved into</span>
-<span class="sd">      a package info dict</span>
-
-<span class="sd">    :since: 1.1</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
-        <span class="n">info</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getPackage</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="n">info</span> <span class="o">=</span> <span class="n">pkg</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">info</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">info</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">NoSuchPackage</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">info</span></div>
-
-
-<div class="viewcode-block" id="as_taskinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_taskinfo">[docs]</a><span class="k">def</span> <span class="nf">as_taskinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_taskinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_taskinfo">[docs]</a><span class="k">def</span> <span class="nf">as_taskinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">TaskSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TaskInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a task value into a koji task info dict.</span>
 
 <span class="sd">    If task is an</span>
 <span class="sd">     * int, will attempt to load as a task ID</span>
 <span class="sd">     * dict, will presume already a task info</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    Note that if this function does attempt to load a task, it will</span>
+<span class="sd">    request it with the task&#39;s request data as well.</span>
+
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param task: value to lookup</span>
-
-<span class="sd">    :type task: int or dict</span>
-
-<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchTask: if the task value could not be resolved</span>
 <span class="sd">      into a task info dict</span>
@@ -961,8 +1065,10 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_targetinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_targetinfo">[docs]</a><span class="k">def</span> <span class="nf">as_targetinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_targetinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_targetinfo">[docs]</a><span class="k">def</span> <span class="nf">as_targetinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">TargetSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TargetInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a target value into a koji target info dict.</span>
 
 <span class="sd">    If target is an</span>
@@ -970,13 +1076,9 @@
 <span class="sd">     * str, will attempt to load as a target name</span>
 <span class="sd">     * dict, will presume already a target info</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param target: value to lookup</span>
-
-<span class="sd">    :type target: int or str or dict</span>
-
-<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchTarget: if the target value could not be resolved</span>
 <span class="sd">      into a target info dict</span>
@@ -997,22 +1099,20 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_hostinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_hostinfo">[docs]</a><span class="k">def</span> <span class="nf">as_hostinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">host</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_hostinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_hostinfo">[docs]</a><span class="k">def</span> <span class="nf">as_hostinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="n">HostSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HostInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a host value into a host info dict.</span>
 
-<span class="sd">    If target is an:</span>
+<span class="sd">    If host is an:</span>
 <span class="sd">     * int, will attempt to load as a host ID</span>
 <span class="sd">     * str, will attempt to load as a host name</span>
 <span class="sd">     * dict, will presume already a host info</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param host: value to lookup</span>
-
-<span class="sd">    :type host: int or str or dict</span>
-
-<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchHost: if the host value could not be resolved</span>
 <span class="sd">      into a host info dict</span>
@@ -1033,22 +1133,55 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_archiveinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_archiveinfo">[docs]</a><span class="k">def</span> <span class="nf">as_archiveinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">archive</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_packageinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_packageinfo">[docs]</a><span class="k">def</span> <span class="nf">as_packageinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">pkg</span><span class="p">:</span> <span class="n">PackageSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PackageInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coerces a host value into a host info dict.</span>
+
+<span class="sd">    If pkg is an:</span>
+<span class="sd">     * int, will attempt to load as a package ID</span>
+<span class="sd">     * str, will attempt to load as a package name</span>
+<span class="sd">     * dict, will presume already a package info</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param pkg: value to lookup</span>
+
+<span class="sd">    :raises NoSuchPackage: if the pkg value could not be resolved into</span>
+<span class="sd">      a package info dict</span>
+
+<span class="sd">    :since: 1.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getPackage</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">pkg</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">info</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NoSuchPackage</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="as_archiveinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_archiveinfo">[docs]</a><span class="k">def</span> <span class="nf">as_archiveinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">archive</span><span class="p">:</span> <span class="n">ArchiveSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArchiveInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces an archive value into an archive info dict.</span>
 
 <span class="sd">    If archive is an:</span>
 <span class="sd">     * int, will attempt to load as an archive ID</span>
-<span class="sd">     * str, will attempt to load as an archive filename</span>
+<span class="sd">     * str, will attempt to load as the first-found archive matching</span>
+<span class="sd">       the given filename</span>
 <span class="sd">     * dict, will presume already an archive info</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param archive: value to lookup</span>
-
-<span class="sd">    :type archive: int or str or dict</span>
-
-<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchArchive: if the archive value could not be resolved</span>
 <span class="sd">      into an archive info dict</span>
@@ -1075,8 +1208,10 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_repoinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_repoinfo">[docs]</a><span class="k">def</span> <span class="nf">as_repoinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">repo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_repoinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_repoinfo">[docs]</a><span class="k">def</span> <span class="nf">as_repoinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">repo</span><span class="p">:</span> <span class="n">RepoSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RepoInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a repo value into a Repo info dict.</span>
 
 <span class="sd">    If repo is an:</span>
@@ -1086,25 +1221,24 @@
 <span class="sd">     * int, will attempt to load the repo by ID</span>
 <span class="sd">     * dict, will presume already a repo info</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
-<span class="sd">    :param repo: repo to resolve</span>
+<span class="sd">    :param repo: value to lookup</span>
 
-<span class="sd">    :rtype: dict</span>
-
-<span class="sd">    :raises NoSuchRepo: if the repo value could not be resolved to a</span>
-<span class="sd">      repo info dict</span>
+<span class="sd">    :raises NoSuchRepo: if the repo value could not be resolved</span>
+<span class="sd">      into a repo info dict</span>
 
 <span class="sd">    :since: 1.1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">info</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">info</span><span class="p">:</span> <span class="n">RepoInfo</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">repo</span><span class="p">:</span>
-            <span class="n">repo</span> <span class="o">=</span> <span class="n">repo</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">TagInfo</span><span class="p">,</span> <span class="n">repo</span><span class="p">)</span>
+            <span class="n">repo</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">repo</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">RepoInfo</span><span class="p">,</span> <span class="n">repo</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">repotag</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getRepo</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
@@ -1121,22 +1255,20 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_rpminfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_rpminfo">[docs]</a><span class="k">def</span> <span class="nf">as_rpminfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rpm</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_rpminfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_rpminfo">[docs]</a><span class="k">def</span> <span class="nf">as_rpminfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">rpm</span><span class="p">:</span> <span class="n">RPMSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RPMInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coerces a host value into a RPM info dict.</span>
 
-<span class="sd">    If rpm is an:</span>
+<span class="sd">    If rpm is specified as an:</span>
 <span class="sd">     * int, will attempt to load as a RPM ID</span>
-<span class="sd">     * str, will attempt to load as a RPM NVR</span>
+<span class="sd">     * str, will attempt to load as a RPM NVRA</span>
 <span class="sd">     * dict, will presume already an RPM info</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param rpm: value to lookup</span>
-
-<span class="sd">    :type rpm: int or str or dict</span>
-
-<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchRPM: if the rpm value could not be resolved</span>
 <span class="sd">      into a RPM info dict</span>
@@ -1144,8 +1276,10 @@
 <span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">info</span><span class="p">:</span> <span class="n">RPMInfo</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rpm</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
-        <span class="n">info</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getRPM</span><span class="p">(</span><span class="n">rpm</span><span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getRPM</span><span class="p">(</span><span class="n">rpm</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rpm</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="n">info</span> <span class="o">=</span> <span class="n">rpm</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1157,21 +1291,19 @@
     <span class="k">return</span> <span class="n">info</span></div>
 
 
-<div class="viewcode-block" id="as_userinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_userinfo">[docs]</a><span class="k">def</span> <span class="nf">as_userinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="as_userinfo"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.as_userinfo">[docs]</a><span class="k">def</span> <span class="nf">as_userinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">user</span><span class="p">:</span> <span class="n">UserSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UserInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resolves user to a userinfo dict.</span>
 
 <span class="sd">    If user is a str or int, then getUser will be invoked. If user is</span>
 <span class="sd">    already a dict, it&#39;s presumed to be a userinfo already and it&#39;s</span>
 <span class="sd">    returned unaltered.</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param user: Name, ID, or User Info describing a koji user</span>
-
-<span class="sd">    :type user: str or int or dict</span>
-
-<span class="sd">    :rtype: dict</span>
 
 <span class="sd">    :raises NoSuchUser: when user cannot be found</span>
 
@@ -1222,19 +1354,18 @@
     <span class="k">return</span> <span class="n">val</span>
 
 
-<div class="viewcode-block" id="hub_version"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.hub_version">[docs]</a><span class="k">def</span> <span class="nf">hub_version</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="hub_version"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.hub_version">[docs]</a><span class="k">def</span> <span class="nf">hub_version</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper for ``session.getKojiVersion`` which caches the results on</span>
 <span class="sd">    the session and splits the value into a tuple of ints for easy</span>
 <span class="sd">    comparison.</span>
 
 <span class="sd">    If the getKojiVersion method isn&#39;t implemented on the hub, we</span>
 <span class="sd">    presume that we&#39;re version 1.22 ``(1, 22)`` which is the last</span>
-<span class="sd">    version before getKojiVersion was added.</span>
+<span class="sd">    version before the getKojiVersion API was added.</span>
 
-<span class="sd">    :param session: an active koji client session</span>
-
-<span class="sd">    :rtype: tuple[int]</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1262,8 +1393,10 @@
     <span class="k">return</span> <span class="n">hub_ver</span></div>
 
 
-<div class="viewcode-block" id="version_check"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.version_check">[docs]</a><span class="k">def</span> <span class="nf">version_check</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">23</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="version_check"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.version_check">[docs]</a><span class="k">def</span> <span class="nf">version_check</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">minimum</span><span class="p">:</span> <span class="n">HubVersionSpec</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">23</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Verifies that the requested minimum version is met compared</span>
 <span class="sd">    against session.getKojiVersion.</span>
 
@@ -1275,13 +1408,9 @@
 <span class="sd">    Version is specified as a tuple of integers, eg. 1.23 is ``(1,</span>
 <span class="sd">    23)``</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param minimum: Minimum version required. Default, ``(1, 23)``</span>
-
-<span class="sd">    :type minimum: tuple[int]</span>
-
-<span class="sd">    :rtype: bool</span>
 
 <span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1294,8 +1423,11 @@
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">hub_ver</span> <span class="ow">and</span> <span class="n">hub_ver</span> <span class="o">&gt;=</span> <span class="n">minimum</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="version_require"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.version_require">[docs]</a><span class="k">def</span> <span class="nf">version_require</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">23</span><span class="p">),</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="version_require"><a class="viewcode-back" href="../../kojismokydingo/#kojismokydingo.version_require">[docs]</a><span class="k">def</span> <span class="nf">version_require</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">minimum</span><span class="p">:</span> <span class="n">HubVersionSpec</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">23</span><span class="p">),</span>
+        <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Verifies that the requested minimum version is met compared</span>
 <span class="sd">    against ``session.getKojiVersion()``</span>
 
@@ -1311,21 +1443,15 @@
 <span class="sd">    exception is raised, with the given message. If message is not</span>
 <span class="sd">    provided, a simple one is constructed based on the minimum value.</span>
 
-<span class="sd">    :param session: an active koji client session</span>
+<span class="sd">    :param session: active koji session</span>
 
 <span class="sd">    :param minimum: Minimum version required. Default, ``(1, 23)``</span>
-
-<span class="sd">    :type minimum: tuple[int]</span>
 
 <span class="sd">    :param message: Message to use in exception if version check</span>
 <span class="sd">      fails. Default, with a minimum of ``(1, 23)``, ``&quot;requires &gt;=</span>
 <span class="sd">      1.23&quot;``</span>
 
-<span class="sd">    :type message: str, optional</span>
-
 <span class="sd">    :raises FeatureUnavailable: If the minimum version is not met</span>
-
-<span class="sd">    :rtype: bool</span>
 
 <span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1336,7 +1462,7 @@
     <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">minimum</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="n">minimum</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">minimum</span><span class="p">)</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;requires &gt;= </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">minimum</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;requires &gt;= </span><span class="si">{</span><span class="n">minimum</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="k">raise</span> <span class="n">FeatureUnavailable</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
 
@@ -1355,12 +1481,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1374,15 +1500,15 @@
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

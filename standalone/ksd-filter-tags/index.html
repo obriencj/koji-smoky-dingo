@@ -4,17 +4,17 @@
 <html lang="English">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ksd-filter-tags &#8212; kojismokydingo 1.1.0 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>ksd-filter-tags &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
-    <link rel="next" title="Sifty Dingo Filtering Language" href="../../siftylang/" />
+    <link rel="next" title="Smoky Dingo Plugin Configuration" href="../../pluginconfig/" />
     <link rel="prev" title="ksd-filter-builds" href="../ksd-filter-builds/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -34,12 +34,12 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../../siftylang/" title="Sifty Dingo Filtering Language"
+          <a href="../../pluginconfig/" title="Smoky Dingo Plugin Configuration"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../ksd-filter-builds/" title="ksd-filter-builds"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" accesskey="U">Standalone Commands</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ksd-filter-tags</a></li> 
       </ul>
@@ -50,8 +50,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="ksd-filter-tags">
-<h1>ksd-filter-tags<a class="headerlink" href="#ksd-filter-tags" title="Permalink to this headline">¶</a></h1>
+  <section id="ksd-filter-tags">
+<h1>ksd-filter-tags<a class="headerlink" href="#ksd-filter-tags" title="Permalink to this heading">¶</a></h1>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>usage: ksd-filter-tags [-h] [--profile PROFILE] [-f TAG_FILE] [--strict]
                        [--search GLOB | --regex REGEX]
                        [--nvr-sort | --id-sort] [--param KEY=VALUE]
@@ -112,24 +112,24 @@ option, or a regex-style name search via the <code class="docutils literal notra
 <p>If no tags are given as arguments, and the <code class="docutils literal notranslate"><span class="pre">--file</span></code> option isn't
 specified, and stdin is detected to not be a TTY, then the list of
 tags will be read from stdin by default.</p>
-<div class="section" id="filtering-tags-with-sifty-dingo">
-<h2>Filtering Tags with Sifty Dingo<a class="headerlink" href="#filtering-tags-with-sifty-dingo" title="Permalink to this headline">¶</a></h2>
+<section id="filtering-tags-with-sifty-dingo">
+<h2>Filtering Tags with Sifty Dingo<a class="headerlink" href="#filtering-tags-with-sifty-dingo" title="Permalink to this heading">¶</a></h2>
 <p>This command supports filtering using the <a class="reference internal" href="../../siftylang/#sifty-dingo-filtering-language"><span class="std std-ref">Sifty Dingo Filtering Language</span></a>. Sieve predicates can be specified inline using the
 <code class="docutils literal notranslate"><span class="pre">--filter</span></code> option or loaded from a file using the <code class="docutils literal notranslate"><span class="pre">--filter-file</span></code>
 option.</p>
 <p>It's important to note that sifty dingo filtering only happens after
 the tags have been loaded from koji. The filters themselves are run
 client-side.</p>
-</div>
-<div class="section" id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="../../kojismokydingo/standalone/tags/#kojismokydingo.standalone.tags.LonelyFilterTags" title="kojismokydingo.standalone.tags.LonelyFilterTags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.standalone.tags.LonelyFilterTags</span></code></a></p></li>
 <li><p><a class="reference internal" href="../../kojismokydingo/standalone/tags/#kojismokydingo.standalone.tags.ksd_filter_tags" title="kojismokydingo.standalone.tags.ksd_filter_tags"><code class="xref py py-func docutils literal notranslate"><span class="pre">kojismokydingo.standalone.tags.ksd_filter_tags()</span></code></a></p></li>
 <li><p><a class="reference internal" href="../../kojismokydingo/sift/tags/#module-kojismokydingo.sift.tags" title="kojismokydingo.sift.tags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.sift.tags</span></code></a></p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -138,8 +138,9 @@ client-side.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../../">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../../">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">ksd-filter-tags</a><ul>
 <li><a class="reference internal" href="#filtering-tags-with-sifty-dingo">Filtering Tags with Sifty Dingo</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
@@ -147,12 +148,17 @@ client-side.</p>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../ksd-filter-builds/"
-                        title="previous chapter">ksd-filter-builds</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../../siftylang/"
-                        title="next chapter">Sifty Dingo Filtering Language</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../ksd-filter-builds/"
+                          title="previous chapter">ksd-filter-builds</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../../pluginconfig/"
+                          title="next chapter">Smoky Dingo Plugin Configuration</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -164,12 +170,12 @@ client-side.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -184,20 +190,20 @@ client-side.</p>
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../../siftylang/" title="Sifty Dingo Filtering Language"
+          <a href="../../pluginconfig/" title="Smoky Dingo Plugin Configuration"
              >next</a> |</li>
         <li class="right" >
           <a href="../ksd-filter-builds/" title="ksd-filter-builds"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" >Standalone Commands</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ksd-filter-tags</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

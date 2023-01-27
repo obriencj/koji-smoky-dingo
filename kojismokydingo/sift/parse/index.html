@@ -4,14 +4,14 @@
 <html lang="English">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.sift.parse &#8212; kojismokydingo 1.1.0 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>kojismokydingo.sift.parse &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="kojismokydingo.sift.tags" href="../tags/" />
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../common/" title="kojismokydingo.sift.common"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" accesskey="U">Sift API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.sift.parse</a></li> 
       </ul>
@@ -50,34 +50,42 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-kojismokydingo.sift.parse">
-<span id="kojismokydingo-sift-parse"></span><h1>kojismokydingo.sift.parse<a class="headerlink" href="#module-kojismokydingo.sift.parse" title="Permalink to this headline">¶</a></h1>
+  <section id="module-kojismokydingo.sift.parse">
+<span id="kojismokydingo-sift-parse"></span><h1>kojismokydingo.sift.parse<a class="headerlink" href="#module-kojismokydingo.sift.parse" title="Permalink to this heading">¶</a></h1>
 <p>Koji Smoky Dingo - Sifty Dingo Parser</p>
 <p>This is the parser for the Sift Dingo filtering language.</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Christopher O'Brien &lt;<a class="reference external" href="mailto:obriencj&#37;&#52;&#48;gmail&#46;com">obriencj<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.AllItems">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">AllItems</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#AllItems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.AllItems" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Item" title="kojismokydingo.sift.parse.Item"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.Item</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllItems</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#AllItems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.AllItems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Item" title="kojismokydingo.sift.parse.Item"><code class="xref py py-class docutils literal notranslate"><span class="pre">Item</span></code></a></p>
 <p>Seeks all path members</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.AllItems.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#AllItems.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.AllItems.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) -- </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.11)"><em>Iterator</em></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Glob">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Glob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignorecase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Glob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Glob" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.Matcher</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Glob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignorecase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Glob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Glob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matcher</span></code></a></p>
 <p>A glob is a quoted literal using pipes as quotes</p>
 <p>Examples:</p>
 <ul class="simple">
@@ -88,80 +96,132 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Item">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Item" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Seeks path members by an int or str key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.11)"><em>slice</em></a><em> | </em><a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><em>Matcher</em></a>) -- </p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Item.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Item.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Item.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) -- </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.11)"><em>Iterator</em></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.ItemMatch">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ItemMatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#ItemMatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.ItemMatch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Item" title="kojismokydingo.sift.parse.Item"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.Item</span></code></a></p>
-<p>Seeks path members by comparison of keys to a matcher (eg. a Glob
-or Regex)</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ItemMatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#ItemMatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.ItemMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Item" title="kojismokydingo.sift.parse.Item"><code class="xref py py-class docutils literal notranslate"><span class="pre">Item</span></code></a></p>
+<p>Seeks path members by comparison of keys to a matcher (eg. a <a class="reference internal" href="#kojismokydingo.sift.parse.Glob" title="kojismokydingo.sift.parse.Glob"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Glob</span></code></a>
+or <a class="reference internal" href="#kojismokydingo.sift.parse.Regex" title="kojismokydingo.sift.parse.Regex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Regex</span></code></a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.11)"><em>slice</em></a><em> | </em><a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><em>Matcher</em></a>) -- </p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.ItemMatch.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#ItemMatch.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.ItemMatch.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) -- </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.11)"><em>Iterator</em></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.ItemPath">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ItemPath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">paths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#ItemPath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.ItemPath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ItemPath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">paths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#ItemPath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.ItemPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Represents a collection of elements inside a nested tree of lists
 and dicts</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>paths</strong> (<a class="reference internal" href="#kojismokydingo.sift.parse.Item" title="kojismokydingo.sift.parse.Item"><em>Item</em></a><em> | </em><a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><em>Matcher</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.11)"><em>slice</em></a>) -- </p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.ItemPath.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#ItemPath.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.ItemPath.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) -- </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.11)"><em>Iterator</em></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Matcher">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Matcher</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Matcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Matcher" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Matcher</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Matcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Matcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class for special comparison types</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Null">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Null</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Null"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Null" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.Matcher</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Null</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Null"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matcher</span></code></a></p>
 <p>An empty literal, represented by the symbols <code class="docutils literal notranslate"><span class="pre">null</span></code> or
 <code class="docutils literal notranslate"><span class="pre">None</span></code>. Matches only with the python None value.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Number">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Number</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Number" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.Matcher</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Number</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matcher</span></code></a></p>
 <p>A number is a literal made entirely of digits. It can compare with
 both the python int and str types.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Reader">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Reader" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_io.StringIO</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StringIO</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- </p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Reader.peek">
 <span class="sig-name descname"><span class="pre">peek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Reader.peek"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Reader.peek" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Regex">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Regex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Regex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Regex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.Matcher</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Regex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Regex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Regex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matcher</span></code></a></p>
 <p>A regex is a quoted literal using forward-slashes as quotes</p>
 <p>Examples:</p>
 <ul class="simple">
@@ -172,27 +232,27 @@ both the python int and str types.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.RegexError">
-<em class="property"><span class="pre">exception</span> </em><span class="sig-name descname"><span class="pre">RegexError</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#RegexError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.RegexError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.ParserError</span></code></p>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RegexError</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#RegexError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.RegexError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ParserError</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.RegexError.complaint">
-<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Error</span> <span class="pre">compiling</span> <span class="pre">Regex'</span></em><a class="headerlink" href="#kojismokydingo.sift.parse.RegexError.complaint" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">complaint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Error</span> <span class="pre">compiling</span> <span class="pre">Regex'</span></em><a class="headerlink" href="#kojismokydingo.sift.parse.RegexError.complaint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.Symbol">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Symbol</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Symbol" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.Matcher</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Symbol</span></span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#Symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.Symbol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matcher</span></code></a></p>
 <p>An unquoted literal series of characters. A symbol can compare
 with python str instances.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.SymbolGroup">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SymbolGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#SymbolGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.SymbolGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.parse.Matcher</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SymbolGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#SymbolGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.SymbolGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matcher</span></code></a></p>
 <p>A symbol group is a literal symbol with multiple permutations. It is
 represented as a symbol containing groups within curly-braces</p>
 <p>Examples:</p>
@@ -207,8 +267,11 @@ represented as a symbol containing groups within curly-braces</p>
 <span class="sig-name descname"><span class="pre">convert_escapes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#convert_escapes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.convert_escapes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decodes common escape sequences embedded in a str</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- source str to decode</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -216,21 +279,21 @@ represented as a symbol containing groups within curly-braces</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kojismokydingo.sift.parse.convert_token">
 <span class="sig-name descname"><span class="pre">convert_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#convert_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.convert_token" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts unquoted values to a Matcher instance.</p>
+<dd><p>Converts unquoted values to a <a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Matcher</span></code></a> instance.</p>
 <ul class="simple">
-<li><p>An all-digit value will become Number</p></li>
-<li><p>None, null, nil become a Null</p></li>
-<li><p>True becomes the boolean True</p></li>
-<li><p>False becomes the boolean False</p></li>
-<li><p>Use of {} may become a SymbolGroup or Symbol</p></li>
-<li><p>Everything else becomes a Symbol.</p></li>
+<li><p>An all-digit value will become <a class="reference internal" href="#kojismokydingo.sift.parse.Number" title="kojismokydingo.sift.parse.Number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Number</span></code></a></p></li>
+<li><p>None, null, nil become a <a class="reference internal" href="#kojismokydingo.sift.parse.Null" title="kojismokydingo.sift.parse.Null"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Null</span></code></a></p></li>
+<li><p>True becomes the boolean <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a></p></li>
+<li><p>False becomes the boolean <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a></p></li>
+<li><p>Use of <code class="docutils literal notranslate"><span class="pre">{}</span></code> may become a <a class="reference internal" href="#kojismokydingo.sift.parse.SymbolGroup" title="kojismokydingo.sift.parse.SymbolGroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SymbolGroup</span></code></a> or <a class="reference internal" href="#kojismokydingo.sift.parse.Symbol" title="kojismokydingo.sift.parse.Symbol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Symbol</span></code></a></p></li>
+<li><p>Everything else becomes a <a class="reference internal" href="#kojismokydingo.sift.parse.Symbol" title="kojismokydingo.sift.parse.Symbol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Symbol</span></code></a></p></li>
 </ul>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- token value to be converted</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- token value to be converted</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher">Matcher</a></p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.sift.parse.Matcher" title="kojismokydingo.sift.parse.Matcher"><em>Matcher</em></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -240,9 +303,21 @@ represented as a symbol containing groups within curly-braces</p>
 <span class="sig-name descname"><span class="pre">parse_exprs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/parse/#parse_exprs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.parse.parse_exprs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple s-expr parser. Reads from a string or character iterator,
 emits expressions as nested lists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reader</strong> (<a class="reference internal" href="#kojismokydingo.sift.parse.Reader" title="kojismokydingo.sift.parse.Reader"><em>Reader</em></a>) -- </p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>None</em>) -- </p></li>
+<li><p><strong>stop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>None</em>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.11)"><em>Iterator</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -251,12 +326,16 @@ emits expressions as nested lists.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../common/"
-                        title="previous chapter">kojismokydingo.sift.common</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../tags/"
-                        title="next chapter">kojismokydingo.sift.tags</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../common/"
+                          title="previous chapter">kojismokydingo.sift.common</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../tags/"
+                          title="next chapter">kojismokydingo.sift.tags</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -268,12 +347,12 @@ emits expressions as nested lists.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -293,15 +372,15 @@ emits expressions as nested lists.</p>
         <li class="right" >
           <a href="../common/" title="kojismokydingo.sift.common"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" >Sift API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.sift.parse</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

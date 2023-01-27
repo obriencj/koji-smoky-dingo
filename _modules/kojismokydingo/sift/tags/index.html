@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.sift.tags &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.sift.tags &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.sift</a> &#187;</li>
@@ -71,8 +70,9 @@
 
 
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">ClientSession</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_SIEVES</span><span class="p">,</span>
@@ -83,9 +83,10 @@
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">as_buildinfo</span><span class="p">,</span> <span class="n">bulk_load_builds</span><span class="p">,</span> <span class="n">bulk_load_tags</span><span class="p">,</span> <span class="n">iter_bulk_load</span><span class="p">,</span> <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..builds</span> <span class="kn">import</span> <span class="n">build_dedup</span>
-<span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">rpm_evr_compare</span>
+<span class="kn">from</span> <span class="nn">..rpm</span> <span class="kn">import</span> <span class="n">evr_compare</span>
 <span class="kn">from</span> <span class="nn">..tags</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">gather_tag_ids</span><span class="p">,</span> <span class="n">tag_dedup</span><span class="p">,</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">TagInfo</span><span class="p">,</span> <span class="n">TagInfos</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -119,7 +120,7 @@
 
 
 <div class="viewcode-block" id="NameSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.NameSieve">[docs]</a><span class="k">class</span> <span class="nc">NameSieve</span><span class="p">(</span><span class="n">ItemSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage: ``(name NAME [NAME...])``</span>
 
 <span class="sd">    filters for dict infos whose name matches any of the given</span>
@@ -130,7 +131,7 @@
 
 
 <div class="viewcode-block" id="ArchSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.ArchSieve">[docs]</a><span class="k">class</span> <span class="nc">ArchSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(arch [ARCH...])``</span>
 
 <span class="sd">    If no ``ARCH`` patterns are specified, matches tags which have any</span>
@@ -168,7 +169,7 @@
 
 
 <div class="viewcode-block" id="ExactArchSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.ExactArchSieve">[docs]</a><span class="k">class</span> <span class="nc">ExactArchSieve</span><span class="p">(</span><span class="n">SymbolSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(exact-arch [ARCH...])``</span>
 
 <span class="sd">    If no ``ARCH`` names are specified, matches only tags which have</span>
@@ -207,7 +208,7 @@
 
 
 <div class="viewcode-block" id="LockedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.LockedSieve">[docs]</a><span class="k">class</span> <span class="nc">LockedSieve</span><span class="p">(</span><span class="n">Sieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(locked)``</span>
 
 <span class="sd">    Matches tags which have been locked</span>
@@ -217,7 +218,7 @@
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">LockedSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="LockedSieve.check"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.LockedSieve.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">taginfo</span><span class="p">):</span>
@@ -225,7 +226,7 @@
 
 
 <div class="viewcode-block" id="PermissionSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.PermissionSieve">[docs]</a><span class="k">class</span> <span class="nc">PermissionSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(permission [PERM...])```</span>
 
 <span class="sd">    If no ``PERM`` is specified, then matches tags which have any</span>
@@ -244,7 +245,7 @@
 
 
 <span class="k">class</span> <span class="nc">TargetSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for BuildTagSieve and DestTagSieve. Both operate on the</span>
 <span class="sd">    same principal, but use slightly different queries.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -284,7 +285,7 @@
 
 
 <div class="viewcode-block" id="BuildTagSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.BuildTagSieve">[docs]</a><span class="k">class</span> <span class="nc">BuildTagSieve</span><span class="p">(</span><span class="n">TargetSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(build-tag [TARGET...])``</span>
 
 <span class="sd">    If no ``TARGET`` is specified, then matches tags which are used as</span>
@@ -304,7 +305,7 @@
 
 
 <div class="viewcode-block" id="DestTagSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.DestTagSieve">[docs]</a><span class="k">class</span> <span class="nc">DestTagSieve</span><span class="p">(</span><span class="n">TargetSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(dest-tag [TARGET...])``</span>
 
 <span class="sd">    If no ``TARGET`` is specified, then matches tags which are used as</span>
@@ -324,7 +325,7 @@
 
 
 <span class="k">class</span> <span class="nc">InheritanceSieve</span><span class="p">(</span><span class="n">MatcherSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for inheritance-checking sieves. The ``prep_inheritance``</span>
 <span class="sd">    method must be implemented to load the relevant inheritance links</span>
 <span class="sd">    for the given predicate.</span>
@@ -366,7 +367,7 @@
 
 
 <div class="viewcode-block" id="HasParentSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.HasParentSieve">[docs]</a><span class="k">class</span> <span class="nc">HasParentSieve</span><span class="p">(</span><span class="n">InheritanceSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(has-parent [TAG...])``</span>
 <span class="sd">    alias: ``(child-of [TAG...])``</span>
 
@@ -387,7 +388,7 @@
 
 
 <div class="viewcode-block" id="HasAncestorSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.HasAncestorSieve">[docs]</a><span class="k">class</span> <span class="nc">HasAncestorSieve</span><span class="p">(</span><span class="n">InheritanceSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(has-ancestor [TAG...])``</span>
 <span class="sd">    alias: ``(inherits-from [TAG...])``</span>
 
@@ -408,7 +409,7 @@
 
 
 <div class="viewcode-block" id="HasChildSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.HasChildSieve">[docs]</a><span class="k">class</span> <span class="nc">HasChildSieve</span><span class="p">(</span><span class="n">InheritanceSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(has-child [TAG...])``</span>
 <span class="sd">    alias: ``(parent-of [TAG...])``</span>
 
@@ -431,7 +432,7 @@
 
 
 <div class="viewcode-block" id="HasDescendantSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.HasDescendantSieve">[docs]</a><span class="k">class</span> <span class="nc">HasDescendantSieve</span><span class="p">(</span><span class="n">InheritanceSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(has-descendant [TAG...])``</span>
 <span class="sd">    alias: ``(inherited-by [TAG...])``</span>
 
@@ -458,7 +459,7 @@
         <span class="k">if</span> <span class="n">nvr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">nvr</span> <span class="o">=</span> <span class="n">ensure_int_or_str</span><span class="p">(</span><span class="n">nvr</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">NVRSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">nvr</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">nvr</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">build_id</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pkg_name</span> <span class="o">=</span> <span class="kc">None</span>
@@ -516,7 +517,7 @@
 
 
 <div class="viewcode-block" id="TaggedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.TaggedSieve">[docs]</a><span class="k">class</span> <span class="nc">TaggedSieve</span><span class="p">(</span><span class="n">NVRSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(tagged [NVR...])``</span>
 
 <span class="sd">    If no ``NVR`` is specified, matches tags which have any builds tagged</span>
@@ -545,7 +546,7 @@
 
 
 <div class="viewcode-block" id="LatestSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.LatestSieve">[docs]</a><span class="k">class</span> <span class="nc">LatestSieve</span><span class="p">(</span><span class="n">NVRSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(latest [NVR...])``</span>
 
 <span class="sd">    If no ``NVR`` is specified, matches tags which have any builds</span>
@@ -574,7 +575,7 @@
 
 
 <div class="viewcode-block" id="CompareLatestSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.CompareLatestSieve">[docs]</a><span class="k">class</span> <span class="nc">CompareLatestSieve</span><span class="p">(</span><span class="n">Sieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(compare-latest PKG [OP VER])``</span>
 
 <span class="sd">    If OP and VER are not specified, matches tags which have any build</span>
@@ -594,7 +595,7 @@
         <span class="n">opfn</span> <span class="o">=</span> <span class="n">ensure_comparison</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">ensure_str</span><span class="p">(</span><span class="n">ver</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">CompareLatestSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">pkgname</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">ver</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">pkgname</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">ver</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">version</span><span class="p">:</span>
             <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -642,14 +643,14 @@
 
         <span class="n">ours</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span> <span class="ow">or</span> <span class="n">other</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-        <span class="n">relative</span> <span class="o">=</span> <span class="n">rpm_evr_compare</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ours</span><span class="p">)</span>
+        <span class="n">relative</span> <span class="o">=</span> <span class="n">evr_compare</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ours</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">relative</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div></div>
 
 
 <span class="k">class</span> <span class="nc">PkgListSieve</span><span class="p">(</span><span class="n">SymbolSieve</span><span class="p">,</span> <span class="n">CacheMixin</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">pkgname</span><span class="p">,</span> <span class="o">*</span><span class="n">pkgnames</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">pkgname</span><span class="p">,</span> <span class="o">*</span><span class="n">pkgnames</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">pkgname</span><span class="p">,</span> <span class="o">*</span><span class="n">pkgnames</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">prep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">taginfos</span><span class="p">):</span>
@@ -657,7 +658,7 @@
 
 
 <div class="viewcode-block" id="PkgAllowedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.PkgAllowedSieve">[docs]</a><span class="k">class</span> <span class="nc">PkgAllowedSieve</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(pkg-allowed PKG [PKG...])``</span>
 
 <span class="sd">    Matches tags which have a package listing with any of the given</span>
@@ -677,7 +678,7 @@
 
 
 <div class="viewcode-block" id="PkgBlockedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.PkgBlockedSieve">[docs]</a><span class="k">class</span> <span class="nc">PkgBlockedSieve</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(pkg-blocked PKG [PKG...])``</span>
 
 <span class="sd">    Matches tags which have a package listing with any of the given</span>
@@ -697,7 +698,7 @@
 
 
 <div class="viewcode-block" id="PkgUnlistedSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.PkgUnlistedSieve">[docs]</a><span class="k">class</span> <span class="nc">PkgUnlistedSieve</span><span class="p">(</span><span class="n">PkgListSieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(pkg-unlisted PKG [PKG...])``</span>
 
 <span class="sd">    Matches tags which have no package listing (neither allowed nor</span>
@@ -723,7 +724,7 @@
 
 
 <div class="viewcode-block" id="GroupSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.GroupSieve">[docs]</a><span class="k">class</span> <span class="nc">GroupSieve</span><span class="p">(</span><span class="n">SymbolSieve</span><span class="p">,</span> <span class="n">CacheMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(group GROUP [GROUP...])``</span>
 
 <span class="sd">    Matches tags which have any of the given install groups</span>
@@ -734,7 +735,7 @@
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="o">*</span><span class="n">groups</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">GroupSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="o">*</span><span class="n">groups</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="o">*</span><span class="n">groups</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GroupSieve.prep"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.GroupSieve.prep">[docs]</a>    <span class="k">def</span> <span class="nf">prep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">taginfos</span><span class="p">):</span>
@@ -746,7 +747,7 @@
                 <span class="n">needed</span><span class="p">[</span><span class="n">tag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cache</span>
 
         <span class="n">loaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_get_tag_groups</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">needed</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">loaded</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">loaded</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">cache</span> <span class="o">=</span> <span class="n">needed</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
             <span class="n">cache</span><span class="p">[</span><span class="s2">&quot;group_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">grp</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">]</span></div>
 
@@ -763,7 +764,7 @@
 
 
 <div class="viewcode-block" id="GroupPkgSieve"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.GroupPkgSieve">[docs]</a><span class="k">class</span> <span class="nc">GroupPkgSieve</span><span class="p">(</span><span class="n">SymbolSieve</span><span class="p">,</span> <span class="n">CacheMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    usage: ``(group-pkg GROUP PKG [PKG...] [require_all: False])``</span>
 
 <span class="sd">    Matches tags which have the given install group, which also</span>
@@ -773,13 +774,10 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;group-pkg&quot;</span>
 
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">pkg</span><span class="p">,</span> <span class="o">*</span><span class="n">pkgs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">GroupPkgSieve</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">pkg</span><span class="p">,</span> <span class="o">*</span><span class="n">pkgs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sifter</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">pkg</span><span class="p">,</span> <span class="o">*</span><span class="n">pkgs</span><span class="p">,</span> <span class="n">require_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sifter</span><span class="p">,</span> <span class="n">pkg</span><span class="p">,</span> <span class="o">*</span><span class="n">pkgs</span><span class="p">,</span> <span class="n">require_all</span><span class="o">=</span><span class="n">require_all</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">ensure_symbol</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="GroupPkgSieve.set_options"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.GroupPkgSieve.set_options">[docs]</a>    <span class="k">def</span> <span class="nf">set_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">require_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">require_all</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">require_all</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">require_all</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">require_all</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GroupPkgSieve.prep"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.GroupPkgSieve.prep">[docs]</a>    <span class="k">def</span> <span class="nf">prep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">taginfos</span><span class="p">):</span>
@@ -791,7 +789,7 @@
                 <span class="n">needed</span><span class="p">[</span><span class="n">tag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cache</span>
 
         <span class="n">loaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_get_tag_groups</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">needed</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">loaded</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">loaded</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">cache</span> <span class="o">=</span> <span class="n">needed</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
             <span class="n">cache</span><span class="p">[</span><span class="s2">&quot;group_pkgs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">simple_groups</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
@@ -825,7 +823,7 @@
                 <span class="k">return</span> <span class="kc">False</span></div></div>
 
 
-<span class="n">DEFAULT_TAG_INFO_SIEVES</span> <span class="o">=</span> <span class="p">[</span>
+<span class="n">DEFAULT_TAG_INFO_SIEVES</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Sieve</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">ArchSieve</span><span class="p">,</span>
     <span class="n">BuildTagSieve</span><span class="p">,</span>
     <span class="n">CompareLatestSieve</span><span class="p">,</span>
@@ -848,65 +846,76 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="tag_info_sieves"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.tag_info_sieves">[docs]</a><span class="k">def</span> <span class="nf">tag_info_sieves</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="tag_info_sieves"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.tag_info_sieves">[docs]</a><span class="k">def</span> <span class="nf">tag_info_sieves</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Sieve</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A new list containing the default tag-info sieve classes.</span>
 
 <span class="sd">    This function is used by `tag_info_sifter` when creating its</span>
 <span class="sd">    `Sifter` instance.</span>
-
-<span class="sd">    :rtype: list[type[Sieve]]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">sieves</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sieves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Sieve</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">sieves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">DEFAULT_SIEVES</span><span class="p">)</span>
     <span class="n">sieves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">DEFAULT_TAG_INFO_SIEVES</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">sieves</span></div>
 
 
-<div class="viewcode-block" id="tag_info_sifter"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.tag_info_sifter">[docs]</a><span class="k">def</span> <span class="nf">tag_info_sifter</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="tag_info_sifter"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.tag_info_sifter">[docs]</a><span class="k">def</span> <span class="nf">tag_info_sifter</span><span class="p">(</span>
+        <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sifter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a Sifter from the source using the default tag-info</span>
 <span class="sd">    Sieves.</span>
 
 <span class="sd">    :param source: sieve expressions source</span>
-<span class="sd">    :type source: stream or str</span>
 
-<span class="sd">    :rtype: Sifter</span>
+<span class="sd">    :param params: sieve parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">Sifter</span><span class="p">(</span><span class="n">tag_info_sieves</span><span class="p">(),</span> <span class="n">source</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="sift_tags"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.sift_tags">[docs]</a><span class="k">def</span> <span class="nf">sift_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">src_str</span><span class="p">,</span> <span class="n">tag_infos</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="sift_tags"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.sift_tags">[docs]</a><span class="k">def</span> <span class="nf">sift_tags</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">src_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tag_infos</span><span class="p">:</span> <span class="n">TagInfos</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">TagInfo</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param src_str: sieve expressions source</span>
-<span class="sd">    :type src_str: src</span>
 
 <span class="sd">    :param build_infos: list of tag info dicts to filter</span>
-<span class="sd">    :type build_infos: list[dict]</span>
 
-<span class="sd">    :rtype: dict[str,list[dict]]</span>
+<span class="sd">    :param params: sieve parameters</span>
+
+<span class="sd">    :returns: mapping of flags to matching tag info dicts</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">sifter</span> <span class="o">=</span> <span class="n">tag_info_sifter</span><span class="p">(</span><span class="n">src_str</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">sifter</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag_infos</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="sift_tagnames"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.sift_tagnames">[docs]</a><span class="k">def</span> <span class="nf">sift_tagnames</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">src_str</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="sift_tagnames"><a class="viewcode-back" href="../../../../kojismokydingo/sift/tags/#kojismokydingo.sift.tags.sift_tagnames">[docs]</a><span class="k">def</span> <span class="nf">sift_tagnames</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">src_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">names</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">TagInfo</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param session: an active koji client session</span>
+
 <span class="sd">    :param src_str: sieve expressions source</span>
-<span class="sd">    :type src_str: src</span>
 
-<span class="sd">    :param nvrs: list of tag names to load and filter</span>
-<span class="sd">    :type nvrs: list[str]</span>
+<span class="sd">    :param names: list of tag names to load and filter</span>
 
-<span class="sd">    :rtype: dict[str,list[dict]]</span>
+<span class="sd">    :param params: sieve parameters</span>
+
+<span class="sd">    :returns: mapping of flags to matching tag info dicts</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="n">tag_dedup</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">))</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">tag_dedup</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">sift_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">src_str</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></div>
 
 
@@ -924,12 +933,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -943,7 +952,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.sift</a> &#187;</li>
@@ -951,9 +960,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

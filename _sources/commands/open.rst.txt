@@ -28,10 +28,9 @@ element.
 The ``--command=COMMAND`` option can be specified to pass the relevant
 URL to an arbitrary executable rather than the platform-default URL
 opener.  On linux, the default command is ``xdg-open``, on macOS it is
-``open`` and on Microsoft Windows it is ``start``. The default can
-also be set as a plugin configuration as the value ``command`` under
-the ``[open]`` section header. The return code of the executed command
-will become the return code of the ``koji open`` invocation.
+``open`` and on Microsoft Windows it is ``start``. The return code of
+the executed command will become the return code of the ``koji open``
+invocation.
 
 The types ``archive``, ``build``, ``channel``, ``host``, ``package``,
 ``repo``, ``rpm``, ``tag``, ``target``, ``task``, and ``user`` all
@@ -46,6 +45,20 @@ points to the actual repo ID path rather than the ``latest`` symlink.
 
 The type ``build-dir`` accepts a build as the argument, and will open
 the storage directory for that build's archives and logs.
+
+
+Configuration
+-------------
+
+The default value for the open command can also be set under the
+``[open]`` plugin configuration using the setting ``command``
+
+eg. in ``~/.config/ksd/common.conf``
+
+::
+
+   [open]
+   command = firefox --new-window {url}
 
 
 References

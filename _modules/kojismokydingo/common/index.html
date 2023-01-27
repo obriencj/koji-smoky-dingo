@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.common &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.common &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.common</a></li> 
@@ -70,26 +69,25 @@
 
 <span class="c1"># Note: features implemented in this module should not be specific to</span>
 <span class="c1"># working with koji. ie: nothing should require a session object or</span>
-<span class="c1"># work with the koji-specific dict types (build info, tag info, etc)</span>
+<span class="c1"># work with the koji-specific types (build info, tag info, etc)</span>
 
 
 <span class="kn">import</span> <span class="nn">re</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 <span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">fnmatchcase</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
 <span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">filterfalse</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">expanduser</span><span class="p">,</span> <span class="n">isdir</span><span class="p">,</span> <span class="n">join</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">filter</span><span class="p">,</span> <span class="n">filterfalse</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">zip_longest</span>
-<span class="kn">from</span> <span class="nn">six.moves.configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="p">)</span>
 
+<span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="n">KeySpec</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timezone</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-    <span class="n">timezone</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">appdirs</span>
@@ -99,6 +97,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">&quot;chunkseq&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;escapable_replace&quot;</span><span class="p">,</span>
     <span class="s2">&quot;fnmatches&quot;</span><span class="p">,</span>
     <span class="s2">&quot;find_config_dirs&quot;</span><span class="p">,</span>
     <span class="s2">&quot;find_config_files&quot;</span><span class="p">,</span>
@@ -108,24 +107,23 @@
     <span class="s2">&quot;load_plugin_config&quot;</span><span class="p">,</span>
     <span class="s2">&quot;merge_extend&quot;</span><span class="p">,</span>
     <span class="s2">&quot;parse_datetime&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;rpm_evr_compare&quot;</span><span class="p">,</span>
     <span class="s2">&quot;unique&quot;</span><span class="p">,</span>
     <span class="s2">&quot;update_extend&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="chunkseq"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.chunkseq">[docs]</a><span class="k">def</span> <span class="nf">chunkseq</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="chunkseq"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.chunkseq">[docs]</a><span class="k">def</span> <span class="nf">chunkseq</span><span class="p">(</span>
+        <span class="n">seq</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span>
+        <span class="n">chunksize</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Chop up a sequence into sub-sequences, each up to chunksize in</span>
 <span class="sd">    length.</span>
 
 <span class="sd">    :param seq: a sequence to chunk up</span>
-<span class="sd">    :type seq: list</span>
 
 <span class="sd">    :param chunksize: max length for chunks</span>
-<span class="sd">    :type chunksize: int</span>
 
-<span class="sd">    :rtype: Generator[list]</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
@@ -136,8 +134,11 @@
             <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">seqlen</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">))</span></div>
 
 
-<span class="k">def</span> <span class="nf">escapable_replace</span><span class="p">(</span><span class="n">orig</span><span class="p">,</span> <span class="n">character</span><span class="p">,</span> <span class="n">replacement</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="escapable_replace"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.escapable_replace">[docs]</a><span class="k">def</span> <span class="nf">escapable_replace</span><span class="p">(</span>
+        <span class="n">orig</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">character</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">replacement</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Single-character string substitutions. Doubled sentinel characters</span>
 <span class="sd">    can be used to represent that exact character.</span>
 
@@ -149,18 +150,17 @@
 <span class="sd">       ``&quot;Hello %&quot;``</span>
 
 <span class="sd">    :param orig: Original text</span>
-<span class="sd">    :type orig: str</span>
 
 <span class="sd">    :param character: Single-character token.</span>
-<span class="sd">    :type character: str</span>
 
 <span class="sd">    :param replacement: Replacement text</span>
-<span class="sd">    :type replacement: str</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">character</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;escapable_replace requires single characters&quot;</span>
 
-    <span class="n">gather</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">gather</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">collect</span> <span class="o">=</span> <span class="n">gather</span><span class="o">.</span><span class="n">append</span>
 
     <span class="n">pieces</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">orig</span><span class="p">)</span>
@@ -177,24 +177,24 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">collect</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gather</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gather</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="fnmatches"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.fnmatches">[docs]</a><span class="k">def</span> <span class="nf">fnmatches</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">ignore_case</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="fnmatches"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.fnmatches">[docs]</a><span class="k">def</span> <span class="nf">fnmatches</span><span class="p">(</span>
+        <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">patterns</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">ignore_case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks value against multiple glob patterns. Returns True if any</span>
 <span class="sd">    match.</span>
 
 <span class="sd">    :param value: string to be matched</span>
-<span class="sd">    :type value: str</span>
 
 <span class="sd">    :param patterns: list of glob-style pattern strings</span>
-<span class="sd">    :type patterns: list[str]</span>
 
 <span class="sd">    :param ignore_case: if True case is normalized, Default False</span>
-<span class="sd">    :type ignore_case: bool, optional</span>
 
-<span class="sd">    :rtype: bool</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">ignore_case</span><span class="p">:</span>
@@ -208,8 +208,13 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="update_extend"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.update_extend">[docs]</a><span class="k">def</span> <span class="nf">update_extend</span><span class="p">(</span><span class="n">dict_orig</span><span class="p">,</span> <span class="o">*</span><span class="n">dict_additions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="n">KT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;KT&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="update_extend"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.update_extend">[docs]</a><span class="k">def</span> <span class="nf">update_extend</span><span class="p">(</span>
+        <span class="n">dict_orig</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+        <span class="o">*</span><span class="n">dict_additions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extend the list values of the original dict with the list values of</span>
 <span class="sd">    the additions dict.</span>
 
@@ -228,46 +233,52 @@
 <span class="sd">    :param dict_orig: The original dict, which may be mutated and whose</span>
 <span class="sd">      values may be extended</span>
 
-<span class="sd">    :type dict_orig: dict[object, list]</span>
-
 <span class="sd">    :param dict_additions: The additions dict. Will not be altered.</span>
-
-<span class="sd">    :type dict_additions: dict[object, list]</span>
 
 <span class="sd">    :returns: The original dict instance</span>
 
-<span class="sd">    :rtype: dict[object, list]</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># oddity here, really *dict_additions should be Dict[Any,</span>
+    <span class="c1"># Iterable] but for some bizarre reason MyPy doesn&#39;t consider</span>
+    <span class="c1"># lists to be iterable when they&#39;re dict values. Really weird.</span>
+
     <span class="k">for</span> <span class="n">additions</span> <span class="ow">in</span> <span class="n">dict_additions</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">additions</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">additions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">orig</span> <span class="o">=</span> <span class="n">dict_orig</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span>
             <span class="n">orig</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">dict_orig</span></div>
 
 
-<div class="viewcode-block" id="merge_extend"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.merge_extend">[docs]</a><span class="k">def</span> <span class="nf">merge_extend</span><span class="p">(</span><span class="o">*</span><span class="n">dict_additions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="merge_extend"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.merge_extend">[docs]</a><span class="k">def</span> <span class="nf">merge_extend</span><span class="p">(</span>
+        <span class="o">*</span><span class="n">dict_additions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Similar to `update_extend` but creates a new dict to hold results,</span>
 <span class="sd">    and new initial lists to be extended, leaving all the arguments</span>
 <span class="sd">    unaltered.</span>
 
 <span class="sd">    :param dict_additions: The additions dict. Will not be altered.</span>
 
-<span class="sd">    :type dict_additions: dict[object, list]</span>
-
 <span class="sd">    :returns: A new dict, whose values are new lists</span>
 
-<span class="sd">    :rtype: dict[object, list]</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">update_extend</span><span class="p">({},</span> <span class="o">*</span><span class="n">dict_additions</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="globfilter"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.globfilter">[docs]</a><span class="k">def</span> <span class="nf">globfilter</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">patterns</span><span class="p">,</span>
-               <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_case</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="n">GFT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;GFT&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="globfilter"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.globfilter">[docs]</a><span class="k">def</span> <span class="nf">globfilter</span><span class="p">(</span>
+        <span class="n">seq</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">GFT</span><span class="p">],</span>
+        <span class="n">patterns</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KeySpec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">ignore_case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">GFT</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generator yielding members of sequence seq which match any of the</span>
 <span class="sd">    glob patterns specified.</span>
 
@@ -284,30 +295,20 @@
 <span class="sd">      but may be any type provided the key parameter is specified to</span>
 <span class="sd">      provide a string for matching based on the given object.</span>
 
-<span class="sd">    :type seq: list</span>
-
 <span class="sd">    :param patterns: list of glob-style pattern strings. Members of</span>
 <span class="sd">      seq which match any of these patterns are yielded.</span>
-
-<span class="sd">    :type patterns: list[str]</span>
 
 <span class="sd">    :param key: A unary callable which translates individual items on</span>
 <span class="sd">      seq into the value to be matched against the patterns. Default,</span>
 <span class="sd">      match against values in seq directly.</span>
 
-<span class="sd">    :type key: Callable[[object], str], optional</span>
-
 <span class="sd">    :param invert: Invert the logic, yielding the non-matches rather</span>
 <span class="sd">      than the matches. Default, yields matches</span>
-
-<span class="sd">    :type invert: bool, optional</span>
 
 <span class="sd">    :param ignore_case: pattern comparison is case normalized if</span>
 <span class="sd">      True. Default, False</span>
 
-<span class="sd">    :type ignore_case: bool, optional</span>
-
-<span class="sd">    :rtype: Iterable[object]</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">ignore_case</span><span class="p">:</span>
@@ -329,117 +330,13 @@
     <span class="k">return</span> <span class="n">filterfalse</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span> <span class="k">if</span> <span class="n">invert</span> <span class="k">else</span> <span class="nb">filter</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_rpm_str_split</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">_split</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(~?(?:\d+|[a-zA-Z]+))&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Split an E, V, or R string for comparison by its segments</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_split</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">i</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)))</span>
+<span class="n">UT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;UT&#39;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_rpm_str_compare</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Comparison of left and right by RPM version comparison rules.</span>
-
-<span class="sd">    Either string should be *one* element of the EVR tuple (ie. either the</span>
-<span class="sd">    epoch, version, or release). Comparison will split the element on RPM&#39;s</span>
-<span class="sd">    special delimeters.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">left</span> <span class="o">=</span> <span class="n">_rpm_str_split</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
-    <span class="n">right</span> <span class="o">=</span> <span class="n">_rpm_str_split</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">lp</span><span class="p">,</span> <span class="n">rp</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-
-        <span class="c1"># Special comparison for tilde segments</span>
-        <span class="k">if</span> <span class="n">lp</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">):</span>
-            <span class="c1"># left is tilde</span>
-
-            <span class="k">if</span> <span class="n">rp</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">):</span>
-                <span class="c1"># right also is tilde, let&#39;s just chop off the tilde</span>
-                <span class="c1"># and fall through to non-tilde comparisons below</span>
-
-                <span class="n">lp</span> <span class="o">=</span> <span class="n">lp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-                <span class="n">rp</span> <span class="o">=</span> <span class="n">rp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># right is not tilde, therefore right is greater</span>
-                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
-
-        <span class="k">elif</span> <span class="n">rp</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">):</span>
-            <span class="c1"># left is not tilde, but right is, therefore left is greater</span>
-            <span class="k">return</span> <span class="mi">1</span>
-
-        <span class="c1"># Special comparison for digits vs. alphabetical</span>
-        <span class="k">if</span> <span class="n">lp</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-            <span class="c1"># left is numeric</span>
-
-            <span class="k">if</span> <span class="n">rp</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-                <span class="c1"># left and right are both numeric, convert and fall</span>
-                <span class="c1"># through</span>
-                <span class="n">lp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lp</span><span class="p">)</span>
-                <span class="n">rp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rp</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># right is alphabetical or absent, left is greater</span>
-                <span class="k">return</span> <span class="mi">1</span>
-
-        <span class="k">elif</span> <span class="n">rp</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-            <span class="c1"># left is alphabetical but right is not, right is greater</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
-
-        <span class="c1"># Final comparison for segment</span>
-        <span class="k">if</span> <span class="n">lp</span> <span class="o">==</span> <span class="n">rp</span><span class="p">:</span>
-            <span class="c1"># left and right are equivalent, check next segment</span>
-            <span class="k">continue</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># left and right are not equivalent</span>
-            <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">lp</span> <span class="o">&gt;</span> <span class="n">rp</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># ran out of segments to check, must be equivalent</span>
-        <span class="k">return</span> <span class="mi">0</span>
-
-
-<div class="viewcode-block" id="rpm_evr_compare"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.rpm_evr_compare">[docs]</a><span class="k">def</span> <span class="nf">rpm_evr_compare</span><span class="p">(</span><span class="n">left_evr</span><span class="p">,</span> <span class="n">right_evr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compare two (Epoch, Version, Release) tuples.</span>
-
-<span class="sd">    This is an alternative implementation of the rpm lib&#39;s</span>
-<span class="sd">    labelCompare function.</span>
-
-<span class="sd">    Return values:</span>
-
-<span class="sd">    * 1 if left_evr is greater-than right_evr</span>
-<span class="sd">    * 0 if left_evr is equal-to right_evr</span>
-<span class="sd">    * -1 if left_evr is less-than right_evr</span>
-
-<span class="sd">    :param left_evr: The left Epoch, Version, Release for comparison</span>
-<span class="sd">    :type left_evr: (str, str, str)</span>
-
-<span class="sd">    :param right_evr: The right Epoch, Version, Release for comparison</span>
-<span class="sd">    :type right_evr: (str, str, str)</span>
-
-<span class="sd">    :rtype: int</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">for</span> <span class="n">lp</span><span class="p">,</span> <span class="n">rp</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">left_evr</span><span class="p">,</span> <span class="n">right_evr</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">lp</span> <span class="o">==</span> <span class="n">rp</span><span class="p">:</span>
-            <span class="c1"># fast check to potentially skip all the matching</span>
-            <span class="k">continue</span>
-
-        <span class="n">compared</span> <span class="o">=</span> <span class="n">_rpm_str_compare</span><span class="p">(</span><span class="n">lp</span><span class="p">,</span> <span class="n">rp</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">compared</span><span class="p">:</span>
-            <span class="c1"># non zero comparison for segment, done checking</span>
-            <span class="k">return</span> <span class="n">compared</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># ran out of segments to check, must be equivalent</span>
-        <span class="k">return</span> <span class="mi">0</span></div>
-
-
-<div class="viewcode-block" id="unique"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.unique">[docs]</a><span class="k">def</span> <span class="nf">unique</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="unique"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.unique">[docs]</a><span class="k">def</span> <span class="nf">unique</span><span class="p">(</span>
+        <span class="n">sequence</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">UT</span><span class="p">],</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KeySpec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">UT</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a sequence, de-duplicate it into a new list, preserving</span>
 <span class="sd">    order.</span>
 
@@ -450,30 +347,22 @@
 <span class="sd">    de-duplication.</span>
 
 <span class="sd">    :param sequence: series of hashable objects</span>
-<span class="sd">    :type sequence: list</span>
 
 <span class="sd">    :param key: unary callable that produces a hashable identifying</span>
 <span class="sd">      value. Default, use each object in sequence as its own</span>
 <span class="sd">      identifier.</span>
 
-<span class="sd">    :type key: Callable[[object],object], optional</span>
-
-<span class="sd">    :rtype: list</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># in python 3.6+ OrderedDict is not necessary here, but we&#39;re</span>
-    <span class="c1"># supporting 2.6, 2.7 as well. At some point Python will likely do</span>
-    <span class="c1"># something bad and deprecate OrderedDict, at that point we&#39;ll</span>
-    <span class="c1"># have to begin detecting the version and using just plain dict</span>
 
     <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
             <span class="c1"># undocumented behavior! woo!!</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">itemgetter</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="n">work</span> <span class="o">=</span> <span class="p">((</span><span class="n">key</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">work</span><span class="p">)))</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">(</span><span class="n">v</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">}</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">work</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedDict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">sequence</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">sequence</span><span class="p">))</span></div>
 
 
 <span class="n">DATETIME_FORMATS</span> <span class="o">=</span> <span class="p">(</span>
@@ -517,8 +406,10 @@
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="parse_datetime"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.parse_datetime">[docs]</a><span class="k">def</span> <span class="nf">parse_datetime</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="parse_datetime"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.parse_datetime">[docs]</a><span class="k">def</span> <span class="nf">parse_datetime</span><span class="p">(</span>
+        <span class="n">src</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempts to parse a datetime string in numerous ways based on</span>
 <span class="sd">    pre-defined regex mappings</span>
 
@@ -539,25 +430,15 @@
 
 <span class="sd">    :param src: Date-time text to be parsed</span>
 
-<span class="sd">    :type src: str</span>
-
 <span class="sd">    :param strict: Raise an exception if no matching format is known</span>
 <span class="sd">      and the date-time text cannot be parsed. If False, simply return</span>
-<span class="sd">      `None`</span>
+<span class="sd">      `None` when the value cannot be parsed.</span>
 
-<span class="sd">    :type strict: bool, optional</span>
-
-<span class="sd">    :raises Exception: if strict and no src matches none of the</span>
+<span class="sd">    :raises ValueError: if strict and no src matches none of the</span>
 <span class="sd">      pre-defined formats</span>
 
-<span class="sd">    :rtype: `datetime` or `None`</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="n">timezone</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># This is gross, but if we are on an older Python with no</span>
-        <span class="c1"># timezone support baked in, we need to remove the %z portion</span>
-        <span class="c1"># and replace it with a hardcoded UTC for %Z instead.</span>
-        <span class="n">src</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([+-]\d</span><span class="si">{2}</span><span class="s2">:?\d</span><span class="si">{2}</span><span class="s2">$)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot; UTC&quot;</span><span class="p">,</span> <span class="n">src</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">parser</span> <span class="ow">in</span> <span class="n">DATETIME_FORMATS</span><span class="p">:</span>
         <span class="n">mtch</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
@@ -565,17 +446,17 @@
             <span class="k">return</span> <span class="n">parser</span><span class="p">(</span><span class="n">mtch</span><span class="o">.</span><span class="n">string</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid date-time format, </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">src</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid date-time format, </span><span class="si">{</span><span class="n">src</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="find_config_dirs"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.find_config_dirs">[docs]</a><span class="k">def</span> <span class="nf">find_config_dirs</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The site and user configuration dirs, as a tuple. Attempts to use</span>
-<span class="sd">    the ``appdirs`` package if it is available.</span>
+<div class="viewcode-block" id="find_config_dirs"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.find_config_dirs">[docs]</a><span class="k">def</span> <span class="nf">find_config_dirs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The site and user configuration dirs for koji-smoky-dingo, as a</span>
+<span class="sd">    tuple. Attempts to use the ``appdirs`` package if it is available.</span>
 
-<span class="sd">    :rtype: tuple[str]</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">appdirs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -588,24 +469,28 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">site_conf_dir</span><span class="p">,</span> <span class="n">user_conf_dir</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="find_config_files"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.find_config_files">[docs]</a><span class="k">def</span> <span class="nf">find_config_files</span><span class="p">(</span><span class="n">dirs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="find_config_files"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.find_config_files">[docs]</a><span class="k">def</span> <span class="nf">find_config_files</span><span class="p">(</span>
+        <span class="n">dirs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The ordered list of configuration files to be loaded.</span>
 
 <span class="sd">    If `dirs` is specified, it must be a sequence of directory names,</span>
 <span class="sd">    from which conf files will be loaded in order. If unspecified,</span>
 <span class="sd">    defaults to the result of `find_config_dirs`</span>
 
-<span class="sd">    :param dirs: list of directories to look for config files within</span>
-<span class="sd">    :type dirs: list[str], optional</span>
+<span class="sd">    Configuration files must have the extension ``.conf`` to be</span>
+<span class="sd">    considered. The files will be listed in directory order, and then</span>
+<span class="sd">    in alphabetical order from within each directory.</span>
 
-<span class="sd">    :rtype: list[str]</span>
+<span class="sd">    :param dirs: list of directories to look for config files within</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">dirs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dirs</span> <span class="o">=</span> <span class="n">find_config_dirs</span><span class="p">()</span>
 
-    <span class="n">found</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">found</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">confdir</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">isdir</span><span class="p">(</span><span class="n">confdir</span><span class="p">):</span>
@@ -615,44 +500,65 @@
     <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="load_full_config"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.load_full_config">[docs]</a><span class="k">def</span> <span class="nf">load_full_config</span><span class="p">(</span><span class="n">config_files</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_load_full_config</span><span class="p">(</span>
+        <span class="n">config_files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigParser</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">config_files</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config_files</span> <span class="o">=</span> <span class="n">find_config_files</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+
+    <span class="n">conf</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config_files</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">conf</span>
+
+
+<div class="viewcode-block" id="load_full_config"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.load_full_config">[docs]</a><span class="k">def</span> <span class="nf">load_full_config</span><span class="p">(</span>
+        <span class="n">config_files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigParser</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Configuration object representing the full merged view of config</span>
 <span class="sd">    files.</span>
 
 <span class="sd">    If `config_files` is None, use the results of `find_config_files`.</span>
 <span class="sd">    Otherwise, `config_files` must be a sequence of filenames.</span>
 
-<span class="sd">    :rtype: ConfigParser</span>
+<span class="sd">    :param config_files: configuration files to be loaded, in order.</span>
+<span class="sd">      If not specified, the results of `find_config_files` will be</span>
+<span class="sd">      used.</span>
+
+<span class="sd">    :returns: a configuration representing a merged view of all config</span>
+<span class="sd">      files</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">config_files</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">config_files</span> <span class="o">=</span> <span class="n">find_config_files</span><span class="p">()</span>
+    <span class="c1"># this is actually just a wrapper to a cached call, but we need to</span>
+    <span class="c1"># convert to a hashable argument type first.</span>
 
-    <span class="n">conf</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
-    <span class="n">conf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config_files</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">config_files</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config_files</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">config_files</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">conf</span></div>
+    <span class="k">return</span> <span class="n">_load_full_config</span><span class="p">(</span><span class="n">config_files</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_plugin_config"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.get_plugin_config">[docs]</a><span class="k">def</span> <span class="nf">get_plugin_config</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="get_plugin_config"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.get_plugin_config">[docs]</a><span class="k">def</span> <span class="nf">get_plugin_config</span><span class="p">(</span>
+        <span class="n">conf</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span>
+        <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">profile</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a loaded configuration, return the section specific to the</span>
-<span class="sd">    given plugin, and optionally profile</span>
+<span class="sd">    given plugin, and optionally profile-specific as well.</span>
 
-<span class="sd">    :param conf: Full configuration</span>
-<span class="sd">    :type conf: ConfigParser</span>
+<span class="sd">    :param conf: loaded configuration data</span>
 
-<span class="sd">    :param plugin: Plugin name</span>
-<span class="sd">    :type plugin: str</span>
+<span class="sd">    :param plugin: plugin name</span>
 
-<span class="sd">    :param profile: Profile name</span>
-<span class="sd">    :type profile: str, optional</span>
+<span class="sd">    :param profile: profile name, optional</span>
 
-<span class="sd">    :rtype: dict[str,object]</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">plugin_conf</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">plugin_conf</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">has_section</span><span class="p">(</span><span class="n">plugin</span><span class="p">):</span>
         <span class="n">plugin_conf</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">plugin</span><span class="p">))</span>
@@ -665,17 +571,31 @@
     <span class="k">return</span> <span class="n">plugin_conf</span></div>
 
 
-<div class="viewcode-block" id="load_plugin_config"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.load_plugin_config">[docs]</a><span class="k">def</span> <span class="nf">load_plugin_config</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Configuration specific to a given plugin, and optionally profile</span>
+<div class="viewcode-block" id="load_plugin_config"><a class="viewcode-back" href="../../../kojismokydingo/common/#kojismokydingo.common.load_plugin_config">[docs]</a><span class="k">def</span> <span class="nf">load_plugin_config</span><span class="p">(</span>
+        <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">profile</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configuration specific to a given plugin, and optionally specific</span>
+<span class="sd">    to a given profile as well.</span>
 
-<span class="sd">    :param plugin: Plugin name</span>
-<span class="sd">    :type plugin: str</span>
+<span class="sd">    Profile-specific sections are denoted by a suffix on the section</span>
+<span class="sd">    name, eg.</span>
 
-<span class="sd">    :param profile: Profile name</span>
-<span class="sd">    :type profile: str, optional</span>
+<span class="sd">    ::</span>
 
-<span class="sd">    :rtype: dict[str,object]</span>
+<span class="sd">      [my_plugin]</span>
+<span class="sd">      # this setting is for my_plugin on all profiles</span>
+<span class="sd">      setting = foo</span>
+
+<span class="sd">      [my_plugin:testing]</span>
+<span class="sd">      # this setting is for my_plugin on the testing profile</span>
+<span class="sd">      setting = bar</span>
+
+<span class="sd">    :param plugin: plugin name</span>
+
+<span class="sd">    :param profile: profile name</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">conf</span> <span class="o">=</span> <span class="n">load_full_config</span><span class="p">()</span>
@@ -696,12 +616,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -715,16 +635,16 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.common</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

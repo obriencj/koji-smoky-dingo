@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.cli.clients &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.cli.clients &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.cli</a> &#187;</li>
@@ -67,22 +66,23 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
-
 <span class="kn">import</span> <span class="nn">sys</span>
 
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">ClientSession</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">system</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">iterkeys</span>
-<span class="kn">from</span> <span class="nn">six.moves.configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">shlex</span> <span class="kn">import</span> <span class="n">quote</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">BadDingo</span><span class="p">,</span> <span class="n">int_or_str</span><span class="p">,</span> <span class="n">pretty_json</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">int_or_str</span><span class="p">,</span> <span class="n">pretty_json</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BadDingo</span><span class="p">,</span>
     <span class="n">as_archiveinfo</span><span class="p">,</span> <span class="n">as_buildinfo</span><span class="p">,</span> <span class="n">as_channelinfo</span><span class="p">,</span> <span class="n">as_hostinfo</span><span class="p">,</span>
-    <span class="n">as_packageinfo</span><span class="p">,</span> <span class="n">as_repoinfo</span><span class="p">,</span> <span class="n">as_rpminfo</span><span class="p">,</span> <span class="n">as_taginfo</span><span class="p">,</span> <span class="n">as_targetinfo</span><span class="p">,</span>
+    <span class="n">as_packageinfo</span><span class="p">,</span> <span class="n">as_rpminfo</span><span class="p">,</span> <span class="n">as_repoinfo</span><span class="p">,</span> <span class="n">as_taginfo</span><span class="p">,</span> <span class="n">as_targetinfo</span><span class="p">,</span>
     <span class="n">as_taskinfo</span><span class="p">,</span> <span class="n">as_userinfo</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..builds</span> <span class="kn">import</span> <span class="n">BUILD_COMPLETE</span>
 <span class="kn">from</span> <span class="nn">..clients</span> <span class="kn">import</span> <span class="n">rebuild_client_config</span>
 <span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">load_plugin_config</span>
+<span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">BuildState</span><span class="p">,</span> <span class="n">GOptions</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -98,18 +98,23 @@
 
 
 <div class="viewcode-block" id="CannotOpenURL"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.CannotOpenURL">[docs]</a><span class="k">class</span> <span class="nc">CannotOpenURL</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A problem occured opening a URL</span>
 
-<span class="sd">    :since: 1.1</span>
+<span class="sd">    :since: 2.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;Cannot open URL&quot;</span></div>
 
 
-<div class="viewcode-block" id="cli_client_config"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.cli_client_config">[docs]</a><span class="k">def</span> <span class="nf">cli_client_config</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span>
-                      <span class="n">only</span><span class="o">=</span><span class="p">(),</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cli_client_config"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.cli_client_config">[docs]</a><span class="k">def</span> <span class="nf">cli_client_config</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">goptions</span><span class="p">:</span> <span class="n">GOptions</span><span class="p">,</span>
+        <span class="n">only</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji client-config`` command</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -118,22 +123,17 @@
     <span class="n">profile</span><span class="p">,</span> <span class="n">opts</span> <span class="o">=</span> <span class="n">rebuild_client_config</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">only</span><span class="p">:</span>
-        <span class="c1"># supporting RHEL 6 means supporting python 2.6, which doesn&#39;t</span>
-        <span class="c1"># have dict comprehensions.</span>
-        <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">opts</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">only</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">)</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">opts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">only</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">only</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">opts</span><span class="p">))</span>
+        <span class="n">only</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">json</span><span class="p">:</span>
         <span class="n">pretty_json</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
         <span class="k">return</span>
 
     <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
-        <span class="c1"># under python3 we&#39;d just set defaults and the default section</span>
-        <span class="c1"># name, but koji still operates under python2 (see RHEL 6), so</span>
-        <span class="c1"># we need to be sure to work under both environments.</span>
         <span class="n">cfg</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
-        <span class="n">cfg</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="n">profile</span><span class="p">]</span> <span class="o">=</span> <span class="n">opts</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="n">profile</span><span class="p">]</span> <span class="o">=</span> <span class="n">opts</span>  <span class="c1"># type: ignore</span>
         <span class="n">cfg</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
         <span class="k">return</span>
 
@@ -142,7 +142,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">only</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">opts</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">opts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">()</span></div>
 
@@ -177,7 +177,7 @@
 
 <div class="viewcode-block" id="ClientConfig.activate"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.ClientConfig.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># entirely local, do not even attempt to connect to koji</span>
-        <span class="k">pass</span></div>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="ClientConfig.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.ClientConfig.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
@@ -188,36 +188,40 @@
                                  <span class="n">json</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">json</span><span class="p">)</span></div></div>
 
 
-<span class="k">def</span> <span class="nf">_get_build_dir_url</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">buildid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :since: 1.1</span>
+<span class="k">def</span> <span class="nf">_get_build_dir_url</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">goptions</span><span class="p">:</span> <span class="n">GOptions</span><span class="p">,</span>
+        <span class="n">buildid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :since: 2.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">topurl</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">topurl</span>
-
+    <span class="n">topurl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">topurl</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">topurl</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">CannotOpenURL</span><span class="p">(</span><span class="s2">&quot;Client has no topurl configured&quot;</span><span class="p">)</span>
-
     <span class="n">topurl</span> <span class="o">=</span> <span class="n">topurl</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
 
     <span class="n">build</span> <span class="o">=</span> <span class="n">as_buildinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">buildid</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">BUILD_COMPLETE</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">BuildState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">CannotOpenURL</span><span class="p">(</span><span class="s2">&quot;Build directory is not available&quot;</span><span class="p">)</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
     <span class="n">version</span> <span class="o">=</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span>
     <span class="n">release</span> <span class="o">=</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;release&quot;</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">topurl</span><span class="p">,</span> <span class="s2">&quot;packages&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">release</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topurl</span><span class="si">}</span><span class="s2">/packages/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">release</span><span class="si">}</span><span class="s2">&quot;</span>
 
 
-<span class="k">def</span> <span class="nf">_get_tag_repo_dir_url</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">tagid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :since: 1.1</span>
+<span class="k">def</span> <span class="nf">_get_tag_repo_dir_url</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">goptions</span><span class="p">:</span> <span class="n">GOptions</span><span class="p">,</span>
+        <span class="n">tagid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :since: 2.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">topurl</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">topurl</span>
+    <span class="n">topurl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">topurl</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">topurl</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">CannotOpenURL</span><span class="p">(</span><span class="s2">&quot;Client has no topurl configured&quot;</span><span class="p">)</span>
     <span class="n">topurl</span> <span class="o">=</span> <span class="n">topurl</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
@@ -225,15 +229,18 @@
     <span class="n">tag</span> <span class="o">=</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagid</span><span class="p">)</span>
     <span class="n">repo</span> <span class="o">=</span> <span class="n">as_repoinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">topurl</span><span class="p">,</span> <span class="s2">&quot;repos&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">repo</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topurl</span><span class="si">}</span><span class="s2">/repos/</span><span class="si">{</span><span class="n">tag</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">repo</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
 
 
-<span class="k">def</span> <span class="nf">_get_tag_latest_dir_url</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">tagid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :since: 1.1</span>
+<span class="k">def</span> <span class="nf">_get_tag_latest_dir_url</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">goptions</span><span class="p">:</span> <span class="n">GOptions</span><span class="p">,</span>
+        <span class="n">tagid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :since: 2.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">topurl</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">topurl</span>
+    <span class="n">topurl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">topurl</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">topurl</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">CannotOpenURL</span><span class="p">(</span><span class="s2">&quot;Client has no topurl configured&quot;</span><span class="p">)</span>
     <span class="n">topurl</span> <span class="o">=</span> <span class="n">topurl</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
@@ -241,10 +248,10 @@
     <span class="n">tag</span> <span class="o">=</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagid</span><span class="p">)</span>
     <span class="n">as_repoinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">topurl</span><span class="p">,</span> <span class="s2">&quot;repos&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s2">&quot;latest&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topurl</span><span class="si">}</span><span class="s2">/repos/</span><span class="si">{</span><span class="n">tag</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/latest&quot;</span>
 
 
-<span class="n">OPEN_LOADFN</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">OPEN_LOADFN</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;archive&quot;</span><span class="p">:</span> <span class="n">as_archiveinfo</span><span class="p">,</span>
     <span class="s2">&quot;build&quot;</span><span class="p">:</span> <span class="n">as_buildinfo</span><span class="p">,</span>
     <span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="n">as_channelinfo</span><span class="p">,</span>
@@ -259,29 +266,35 @@
 <span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">_get_type_url</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :since: 1.1</span>
+<span class="k">def</span> <span class="nf">_get_type_url</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">goptions</span><span class="p">:</span> <span class="n">GOptions</span><span class="p">,</span>
+        <span class="n">datatype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">fmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">element</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :since: 2.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">weburl</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">weburl</span>
+    <span class="n">weburl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">goptions</span><span class="o">.</span><span class="n">weburl</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">weburl</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">CannotOpenURL</span><span class="p">(</span><span class="s2">&quot;Client has no weburl configured&quot;</span><span class="p">)</span>
     <span class="n">weburl</span> <span class="o">=</span> <span class="n">weburl</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
 
     <span class="n">loadfn</span> <span class="o">=</span> <span class="n">OPEN_LOADFN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">loadfn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">CannotOpenURL</span><span class="p">(</span><span class="s2">&quot;Unsupported type for open </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datatype</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">CannotOpenURL</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported type for open: </span><span class="si">{</span><span class="n">datatype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">loaded</span> <span class="o">=</span> <span class="n">loadfn</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span>
     <span class="n">typeurl</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">loaded</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">weburl</span><span class="p">,</span> <span class="n">typeurl</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">weburl</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">typeurl</span><span class="si">}</span><span class="s1">&#39;</span>
 
 
-<span class="n">OPEN_URL</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">OPEN_URL</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;archive&quot;</span><span class="p">:</span> <span class="s2">&quot;archiveinfo?archiveID=</span><span class="si">{id}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="s2">&quot;build&quot;</span><span class="p">:</span> <span class="s2">&quot;buildinfo?buildID=</span><span class="si">{id}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="c1"># &quot;buildroot&quot;: &quot;buildrootinfo?buildrootID={id}&quot;,</span>
     <span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="s2">&quot;channelinfo?channelID=</span><span class="si">{id}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;hostinfo?hostID=</span><span class="si">{id}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="s2">&quot;package&quot;</span><span class="p">:</span> <span class="s2">&quot;packageinfo?packageID=</span><span class="si">{id}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -298,8 +311,12 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="get_open_url"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.get_open_url">[docs]</a><span class="k">def</span> <span class="nf">get_open_url</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="get_open_url"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.get_open_url">[docs]</a><span class="k">def</span> <span class="nf">get_open_url</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">goptions</span><span class="p">:</span> <span class="n">GOptions</span><span class="p">,</span>
+        <span class="n">datatype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">element</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a client configuration, datatype, and element identifier,</span>
 <span class="sd">    produce a URL referencing the hub or topdir path for that record.</span>
 
@@ -311,12 +328,12 @@
 
 <span class="sd">    :param element: identifier for an element of the given data type</span>
 
-<span class="sd">    :since: 1.1</span>
+<span class="sd">    :since: 2.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">opener</span> <span class="o">=</span> <span class="n">OPEN_URL</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
+    <span class="n">opener</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">OPEN_URL</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">opener</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">BadDingo</span><span class="p">(</span><span class="s2">&quot;Unsupported type for open: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datatype</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">BadDingo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported type for open: </span><span class="si">{</span><span class="n">datatype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">opener</span><span class="p">):</span>
         <span class="n">url</span> <span class="o">=</span> <span class="n">opener</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span>
@@ -333,8 +350,10 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="get_open_command"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.get_open_command">[docs]</a><span class="k">def</span> <span class="nf">get_open_command</span><span class="p">(</span><span class="n">profile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="get_open_command"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.get_open_command">[docs]</a><span class="k">def</span> <span class="nf">get_open_command</span><span class="p">(</span>
+        <span class="n">profile</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine the command used to open URLs. Attempts to load</span>
 <span class="sd">    profile-specific plugin configuration under the heading &#39;open&#39; and</span>
 <span class="sd">    the key &#39;command&#39; first. If that doesn&#39;t find a command, then fall</span>
@@ -342,16 +361,12 @@
 
 <span class="sd">    :param profile: name of koji profile</span>
 
-<span class="sd">    :type profile: str, optional</span>
-
 <span class="sd">    :param err: raise an exception if no command is discovered. If False</span>
 <span class="sd">      then will return None instead</span>
 
-<span class="sd">    :type err: bool, optional</span>
+<span class="sd">    :raises BadDingo: when `err` is `True` and no command could be found</span>
 
-<span class="sd">    :rtype: str</span>
-
-<span class="sd">    :raises BadDingo: when `err` is True and no command could be found</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">default_command</span> <span class="o">=</span> <span class="n">OPEN_CMD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">)</span>
@@ -365,9 +380,13 @@
     <span class="k">return</span> <span class="n">command</span></div>
 
 
-<div class="viewcode-block" id="cli_open"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.cli_open">[docs]</a><span class="k">def</span> <span class="nf">cli_open</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">goptions</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span>
-             <span class="n">command</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cli_open"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.cli_open">[docs]</a><span class="k">def</span> <span class="nf">cli_open</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">goptions</span><span class="p">:</span> <span class="n">GOptions</span><span class="p">,</span>
+        <span class="n">datatype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">element</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">command</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji open`` command</span>
 
 <span class="sd">    :since: 1.0</span>
@@ -386,14 +405,28 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span>
 
+    <span class="c1"># Let&#39;s make sure weird characters don&#39;t break our invocation.</span>
+    <span class="c1"># There shouldn&#39;t be any wonky quotes etc in the URLs we generate,</span>
+    <span class="c1"># but who knows if someone will add handlers for new types.</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
     <span class="c1"># if the configured open command has a {url} marker in it, then we</span>
-    <span class="c1"># want to swap that in. Otherwise we&#39;ll just append it quoted</span>
+    <span class="c1"># want to swap that in. Otherwise we&#39;ll just append it. In both</span>
+    <span class="c1"># cases we ensure it&#39;s quoted.</span>
     <span class="k">if</span> <span class="s2">&quot;</span><span class="si">{url}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">command</span><span class="p">:</span>
+        <span class="c1"># fun fact, this is still safe in case someone wanted the text</span>
+        <span class="c1"># {url} in their command, they can escape it as {{url}} and</span>
+        <span class="c1"># format should skip it.</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">&#39;</span>
 
-    <span class="k">return</span> <span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span></div>
+    <span class="c1"># bandit complains about this -- we&#39;ve quoted our args, and the</span>
+    <span class="c1"># invocation has the same level of authority as the user running</span>
+    <span class="c1"># the command. They could do something drastic if they wanted to,</span>
+    <span class="c1"># just like they could do something drastic from the shell they</span>
+    <span class="c1"># already have access to. This tool isn&#39;t a service.</span>
+    <span class="k">return</span> <span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>  <span class="c1"># nosec</span></div>
 
 
 <div class="viewcode-block" id="ClientOpen"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.ClientOpen">[docs]</a><span class="k">class</span> <span class="nc">ClientOpen</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
@@ -406,14 +439,15 @@
         <span class="n">addarg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span>
 
         <span class="n">known</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">OPEN_URL</span><span class="p">))</span>
-        <span class="n">hlp</span> <span class="o">=</span> <span class="s2">&quot;The koji data element type. Supported types: &quot;</span> <span class="o">+</span> <span class="n">known</span>
-        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;datatype&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;TYPE&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">hlp</span><span class="p">)</span>
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;datatype&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;TYPE&quot;</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The koji data element type.&quot;</span>
+               <span class="sa">f</span><span class="s2">&quot; Supported types: </span><span class="si">{</span><span class="n">known</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;element&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">int_or_str</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;KEY&quot;</span><span class="p">,</span>
                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The key for the given element type.&quot;</span><span class="p">)</span>
 
-        <span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
-        <span class="n">addarg</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span>
+        <span class="n">grp</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+        <span class="n">addarg</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">add_argument</span>
 
         <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--command&quot;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;COMMAND&quot;</span><span class="p">,</span>
                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Command to exec with the discovered koji web URL&quot;</span><span class="p">)</span>
@@ -447,12 +481,10 @@
 
 
 <div class="viewcode-block" id="ClientOpen.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/clients/#kojismokydingo.cli.clients.ClientOpen.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
-        <span class="n">command</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">command</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_plugin_config</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">cli_open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">goptions</span><span class="p">,</span>
                         <span class="n">datatype</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span>
                         <span class="n">element</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">element</span><span class="p">,</span>
-                        <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">)</span></div></div>
+                        <span class="n">command</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">command</span><span class="p">)</span></div></div>
 
 
 <span class="c1">#</span>
@@ -469,12 +501,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -488,7 +520,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.cli</a> &#187;</li>
@@ -496,9 +528,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

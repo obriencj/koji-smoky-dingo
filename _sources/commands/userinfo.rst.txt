@@ -5,15 +5,16 @@ koji userinfo
 
 ::
 
- usage: koji userinfo [-h] [--json] USER
+ usage: koji userinfo [-h] [--stats] [--json] USER
 
  Show information about a user
 
  positional arguments:
    USER        User name or principal
 
- optional arguments:
+ options:
    -h, --help  show this help message and exit
+   --stats     Include user statistics
    --json      Output information as JSON
 
 
@@ -22,7 +23,14 @@ blocked), their type (user or group), their kerberos identities if
 any, and a listing of any permissions they have. If the user is
 configured to perform a CG import, this will also be presented.
 
-For groups will also show the members.
+User statistics include
+* Owned package count
+* Submitted task count
+* Created builds count
+* Last task summary
+* Last build summary
+
+For groups this command will also show the members.
 
 
 References

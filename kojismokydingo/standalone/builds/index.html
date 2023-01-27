@@ -4,14 +4,14 @@
 <html lang="English">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.standalone.builds &#8212; kojismokydingo 1.1.0 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>kojismokydingo.standalone.builds &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="kojismokydingo.standalone.tags" href="../tags/" />
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../" title="Standalone API Reference"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" accesskey="U">Standalone API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.standalone.builds</a></li> 
       </ul>
@@ -50,28 +50,63 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-kojismokydingo.standalone.builds">
-<span id="kojismokydingo-standalone-builds"></span><h1>kojismokydingo.standalone.builds<a class="headerlink" href="#module-kojismokydingo.standalone.builds" title="Permalink to this headline">¶</a></h1>
+  <section id="module-kojismokydingo.standalone.builds">
+<span id="kojismokydingo-standalone-builds"></span><h1>kojismokydingo.standalone.builds<a class="headerlink" href="#module-kojismokydingo.standalone.builds" title="Permalink to this heading">¶</a></h1>
 <p>Koji Smoky Dingo - Standalone build commands</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Christopher O'Brien &lt;<a class="reference external" href="mailto:obriencj&#37;&#52;&#48;gmail&#46;com">obriencj<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
 </dd>
-<dt class="field-even">licence</dt>
+<dt class="field-even">licence<span class="colon">:</span></dt>
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.standalone.builds.LonelyFilterBuilds">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">LonelyFilterBuilds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/standalone/builds/#LonelyFilterBuilds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.standalone.builds.LonelyFilterBuilds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.standalone.AnonLonelyDingo" title="kojismokydingo.standalone.AnonLonelyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.standalone.AnonLonelyDingo</span></code></a>, <a class="reference internal" href="../../cli/builds/#kojismokydingo.cli.builds.FilterBuilds" title="kojismokydingo.cli.builds.FilterBuilds"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.cli.builds.FilterBuilds</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LonelyFilterBuilds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/standalone/builds/#LonelyFilterBuilds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.standalone.builds.LonelyFilterBuilds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.standalone.AnonLonelyDingo" title="kojismokydingo.standalone.AnonLonelyDingo"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnonLonelyDingo</span></code></a>, <a class="reference internal" href="../../cli/builds/#kojismokydingo.cli.builds.FilterBuilds" title="kojismokydingo.cli.builds.FilterBuilds"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterBuilds</span></code></a></p>
 <p>Adapter to make the FilterBuilds command into a LonelyDingo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> -- The name that this command is being represented as</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.standalone.builds.LonelyFilterBuilds.arguments">
 <span class="sig-name descname"><span class="pre">arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/standalone/builds/#LonelyFilterBuilds.arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.standalone.builds.LonelyFilterBuilds.arguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to add relevant arguments to the given parser instance.
 May return an alternative parser instance or None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parser</strong> -- the parser to decorate with additional arguments</p>
+</dd>
+</dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.standalone.builds.LonelyFilterBuilds.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kojismokydingo.standalone.builds.LonelyFilterBuilds.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.standalone.builds.LonelyFilterBuilds.exported_cli">
+<span class="sig-name descname"><span class="pre">exported_cli</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#kojismokydingo.standalone.builds.LonelyFilterBuilds.exported_cli" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.standalone.builds.LonelyFilterBuilds.goptions">
+<span class="sig-name descname"><span class="pre">goptions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../types/#kojismokydingo.types.GOptions" title="kojismokydingo.types.GOptions"><span class="pre">GOptions</span></a></em><a class="headerlink" href="#kojismokydingo.standalone.builds.LonelyFilterBuilds.goptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.standalone.builds.LonelyFilterBuilds.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#kojismokydingo.standalone.builds.LonelyFilterBuilds.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kojismokydingo.standalone.builds.LonelyFilterBuilds.session">
+<span class="sig-name descname"><span class="pre">session</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClientSession</span></em><a class="headerlink" href="#kojismokydingo.standalone.builds.LonelyFilterBuilds.session" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.standalone.builds.LonelyFilterBuilds.sifter_arguments">
@@ -100,9 +135,20 @@ ignored, use <code class="xref py py-obj docutils literal notranslate"><span cla
 <dl class="py function">
 <dt class="sig sig-object py" id="kojismokydingo.standalone.builds.ksd_filter_builds">
 <span class="sig-name descname"><span class="pre">ksd_filter_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kojismokydingo.standalone.builds.ksd_filter_builds" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>None</em>) -- </p></li>
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
 
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -111,12 +157,16 @@ ignored, use <code class="xref py py-obj docutils literal notranslate"><span cla
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../"
-                        title="previous chapter">Standalone API Reference</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../tags/"
-                        title="next chapter">kojismokydingo.standalone.tags</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../"
+                          title="previous chapter">Standalone API Reference</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../tags/"
+                          title="next chapter">kojismokydingo.standalone.tags</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -128,12 +178,12 @@ ignored, use <code class="xref py py-obj docutils literal notranslate"><span cla
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -153,15 +203,15 @@ ignored, use <code class="xref py py-obj docutils literal notranslate"><span cla
         <li class="right" >
           <a href="../" title="Standalone API Reference"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" >Standalone API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.standalone.builds</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

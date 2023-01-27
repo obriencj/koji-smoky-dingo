@@ -1,0 +1,1390 @@
+
+<!DOCTYPE html>
+
+<html lang="English">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.types &#8212; kojismokydingo 2.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.types</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kojismokydingo.types</h1><div class="highlight"><pre>
+<span></span><span class="c1"># This library is free software; you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation; either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This library is distributed in the hope that it will be useful, but</span>
+<span class="c1"># WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Koji Smoky Dingo - Type Definitions</span>
+
+<span class="sd">Python typing compatible definitions for the Koji dict types and</span>
+<span class="sd">enumerations</span>
+
+<span class="sd">:author: Christopher O&#39;Brien &lt;obriencj@gmail.com&gt;</span>
+<span class="sd">:license: GPL v3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AUTHTYPE_NORMAL</span><span class="p">,</span> <span class="n">AUTHTYPE_KERB</span><span class="p">,</span> <span class="n">AUTHTYPE_SSL</span><span class="p">,</span> <span class="n">AUTHTYPE_GSSAPI</span><span class="p">,</span>
+    <span class="n">BR_STATES</span><span class="p">,</span> <span class="n">BR_TYPES</span><span class="p">,</span> <span class="n">BUILD_STATES</span><span class="p">,</span> <span class="n">CHECKSUM_TYPES</span><span class="p">,</span> <span class="n">REPO_STATES</span><span class="p">,</span>
+    <span class="n">TASK_STATES</span><span class="p">,</span> <span class="n">USERTYPES</span><span class="p">,</span> <span class="n">USER_STATUS</span><span class="p">,</span>
+    <span class="n">PathInfo</span><span class="p">,</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">Values</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="p">)</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># Python &lt; 3.8 doesn&#39;t have TypedDict yet, need to pull it in from</span>
+    <span class="c1"># the typing_extensions backport instead.</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;ArchiveInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ArchiveInfos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ArchiveSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ArchiveTypeInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AuthType&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BuildInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BuildInfos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BuildrootInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BuildrootState&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BuildrootType&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BuildSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BuildState&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BTypeInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ChannelInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ChannelSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ChecksumType&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CGInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DecoratedBuildInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DecoratedHostInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DecoratedHostInfos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DecoratedTagExtra&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DecoratedTagExtras&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;GOptions&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;HistoryEntry&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;HostInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;HubVersionSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;KeySpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NamedCGInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PackageInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PackageSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PathSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PermInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PermSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RepoInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RepoState&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RPMInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RPMInfos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RPMSignature&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RPMSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SearchResult&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagInfos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagInheritance&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagInheritanceEntry&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagGroupInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagGroupPackage&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagGroupReq&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagPackageInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TargetInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TargetInfos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TargetSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TaskInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TaskSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TaskState&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UserInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UserSpec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UserStatus&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UserStatistics&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UserType&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="AuthType"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.AuthType">[docs]</a><span class="k">class</span> <span class="nc">AuthType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Authentication method types</span>
+
+<span class="sd">    Normally only used in the `kojismokydingo.types.UserInfo` dict</span>
+<span class="sd">    when obtained via the ``getLoggedInUser`` XMLRPC call.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">GSSAPI</span> <span class="o">=</span> <span class="n">AUTHTYPE_GSSAPI</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; user authenticated via GSSAPI &quot;&quot;&quot;</span>
+
+    <span class="n">KERB</span> <span class="o">=</span> <span class="n">AUTHTYPE_KERB</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; user authenticated via a Kerberos ticket &quot;&quot;&quot;</span>
+
+    <span class="n">NORMAL</span> <span class="o">=</span> <span class="n">AUTHTYPE_NORMAL</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; user authenticated via password &quot;&quot;&quot;</span>
+
+    <span class="n">SSL</span> <span class="o">=</span> <span class="n">AUTHTYPE_SSL</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; user authenticated via an SSL certificate &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="BuildrootState"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.BuildrootState">[docs]</a><span class="k">class</span> <span class="nc">BuildrootState</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Values for a BuildrootInfo&#39;s br_state</span>
+
+<span class="sd">    See `koji.BR_STATES`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">INIT</span> <span class="o">=</span> <span class="n">BR_STATES</span><span class="p">[</span><span class="s1">&#39;INIT&#39;</span><span class="p">]</span>
+    <span class="n">WAITING</span> <span class="o">=</span> <span class="n">BR_STATES</span><span class="p">[</span><span class="s1">&#39;WAITING&#39;</span><span class="p">]</span>
+    <span class="n">BUILDING</span> <span class="o">=</span> <span class="n">BR_STATES</span><span class="p">[</span><span class="s1">&#39;BUILDING&#39;</span><span class="p">]</span>
+    <span class="n">EXPIRED</span> <span class="o">=</span> <span class="n">BR_STATES</span><span class="p">[</span><span class="s1">&#39;EXPIRED&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="BuildrootType"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.BuildrootType">[docs]</a><span class="k">class</span> <span class="nc">BuildrootType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Values for a BuildrootInfo&#39;s br_type</span>
+
+<span class="sd">    See `koji.BR_TYPES`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">STANDARD</span> <span class="o">=</span> <span class="n">BR_TYPES</span><span class="p">[</span><span class="s1">&#39;STANDARD&#39;</span><span class="p">]</span>
+    <span class="n">EXTERNAL</span> <span class="o">=</span> <span class="n">BR_TYPES</span><span class="p">[</span><span class="s1">&#39;EXTERNAL&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="BuildState"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.BuildState">[docs]</a><span class="k">class</span> <span class="nc">BuildState</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Values for a BuildInfo&#39;s state.</span>
+
+<span class="sd">    See `koji.BUILD_STATES`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">BUILDING</span> <span class="o">=</span> <span class="n">BUILD_STATES</span><span class="p">[</span><span class="s2">&quot;BUILDING&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The build is still in-progress</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">COMPLETE</span> <span class="o">=</span> <span class="n">BUILD_STATES</span><span class="p">[</span><span class="s2">&quot;COMPLETE&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The build has been completed successfully</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">DELETED</span> <span class="o">=</span> <span class="n">BUILD_STATES</span><span class="p">[</span><span class="s2">&quot;DELETED&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The build has been deleted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">FAILED</span> <span class="o">=</span> <span class="n">BUILD_STATES</span><span class="p">[</span><span class="s2">&quot;FAILED&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The build did not complete successfully due to an error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">CANCELED</span> <span class="o">=</span> <span class="n">BUILD_STATES</span><span class="p">[</span><span class="s2">&quot;CANCELED&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The build did not complete successfully due to cancelation</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ChecksumType"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.ChecksumType">[docs]</a><span class="k">class</span> <span class="nc">ChecksumType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Supported checksum types</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MD5</span> <span class="o">=</span> <span class="n">CHECKSUM_TYPES</span><span class="p">[</span><span class="s1">&#39;md5&#39;</span><span class="p">]</span>
+    <span class="n">SHA1</span> <span class="o">=</span> <span class="n">CHECKSUM_TYPES</span><span class="p">[</span><span class="s1">&#39;sha1&#39;</span><span class="p">]</span>
+    <span class="n">SHA256</span> <span class="o">=</span> <span class="n">CHECKSUM_TYPES</span><span class="p">[</span><span class="s1">&#39;sha256&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="RepoState"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.RepoState">[docs]</a><span class="k">class</span> <span class="nc">RepoState</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="n">INIT</span> <span class="o">=</span> <span class="n">REPO_STATES</span><span class="p">[</span><span class="s1">&#39;INIT&#39;</span><span class="p">]</span>
+    <span class="n">READY</span> <span class="o">=</span> <span class="n">REPO_STATES</span><span class="p">[</span><span class="s1">&#39;READY&#39;</span><span class="p">]</span>
+    <span class="n">EXPIRED</span> <span class="o">=</span> <span class="n">REPO_STATES</span><span class="p">[</span><span class="s1">&#39;DELETED&#39;</span><span class="p">]</span>
+    <span class="n">PROBLEM</span> <span class="o">=</span> <span class="n">REPO_STATES</span><span class="p">[</span><span class="s1">&#39;PROBLEM&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="TaskState"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TaskState">[docs]</a><span class="k">class</span> <span class="nc">TaskState</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="n">FREE</span> <span class="o">=</span> <span class="n">TASK_STATES</span><span class="p">[</span><span class="s1">&#39;FREE&#39;</span><span class="p">]</span>
+    <span class="n">OPEN</span> <span class="o">=</span> <span class="n">TASK_STATES</span><span class="p">[</span><span class="s1">&#39;OPEN&#39;</span><span class="p">]</span>
+    <span class="n">CLOSED</span> <span class="o">=</span> <span class="n">TASK_STATES</span><span class="p">[</span><span class="s1">&#39;CLOSED&#39;</span><span class="p">]</span>
+    <span class="n">CANCELED</span> <span class="o">=</span> <span class="n">TASK_STATES</span><span class="p">[</span><span class="s1">&#39;CANCELED&#39;</span><span class="p">]</span>
+    <span class="n">ASSIGNED</span> <span class="o">=</span> <span class="n">TASK_STATES</span><span class="p">[</span><span class="s1">&#39;ASSIGNED&#39;</span><span class="p">]</span>
+    <span class="n">FAILED</span> <span class="o">=</span> <span class="n">TASK_STATES</span><span class="p">[</span><span class="s1">&#39;FAILED&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="UserStatus"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.UserStatus">[docs]</a><span class="k">class</span> <span class="nc">UserStatus</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Valid values for the ``&#39;status&#39;`` item of a `UserInfo` dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">NORMAL</span> <span class="o">=</span> <span class="n">USER_STATUS</span><span class="p">[</span><span class="s1">&#39;NORMAL&#39;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; account is enabled &quot;&quot;&quot;</span>
+
+    <span class="n">BLOCKED</span> <span class="o">=</span> <span class="n">USER_STATUS</span><span class="p">[</span><span class="s1">&#39;BLOCKED&#39;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    account is blocked. May not call XMLRPC endpoints requiring</span>
+<span class="sd">    authentication</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="UserType"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.UserType">[docs]</a><span class="k">class</span> <span class="nc">UserType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Valid values for the ``&#39;usertype&#39;`` item of a `UserInfo` dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">NORMAL</span> <span class="o">=</span> <span class="n">USERTYPES</span><span class="p">[</span><span class="s1">&#39;NORMAL&#39;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Account is a normal user &quot;&quot;&quot;</span>
+
+    <span class="n">HOST</span> <span class="o">=</span> <span class="n">USERTYPES</span><span class="p">[</span><span class="s1">&#39;HOST&#39;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Account is a build host &quot;&quot;&quot;</span>
+
+    <span class="n">GROUP</span> <span class="o">=</span> <span class="n">USERTYPES</span><span class="p">[</span><span class="s1">&#39;GROUP&#39;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Account is a group &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ArchiveInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.ArchiveInfo">[docs]</a><span class="k">class</span> <span class="nc">ArchiveInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji archive. These are typically obtained via</span>
+<span class="sd">    the ``getArchive`` or ``listArchives`` XMLRPC calls, or from the</span>
+<span class="sd">    `kojismokydingo.as_archiveinfo` function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">btype</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Name of this archive&#39;s koji BType. eg. &#39;maven&#39; or &#39;image&#39; &quot;&quot;&quot;</span>
+
+    <span class="n">btype_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of this archive&#39;s koji BType &quot;&quot;&quot;</span>
+
+    <span class="n">build_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of koji build owning this archive &quot;&quot;&quot;</span>
+
+    <span class="n">buildroot_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the koji buildroot used to produce this archive &quot;&quot;&quot;</span>
+
+    <span class="n">checksum</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; hex representation of the checksum for this archive &quot;&quot;&quot;</span>
+
+    <span class="n">checksum_type</span><span class="p">:</span> <span class="n">ChecksumType</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; type of cryptographic checksum used in the `checksum` field &quot;&quot;&quot;</span>
+
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; additional metadata provided by content generators &quot;&quot;&quot;</span>
+
+    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; base filename for this archive &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal ID &quot;&quot;&quot;</span>
+
+    <span class="n">metadata_only</span><span class="p">:</span> <span class="nb">bool</span>
+
+    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; filesize in bytes &quot;&quot;&quot;</span>
+
+    <span class="n">type_description</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; this archive&#39;s type description &quot;&quot;&quot;</span>
+
+    <span class="n">type_extensions</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; space-delimited extensions shared by this archive&#39;s type &quot;&quot;&quot;</span>
+
+    <span class="n">type_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the archive&#39;s type &quot;&quot;&quot;</span>
+
+    <span class="n">type_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the archive&#39;s type. eg. &#39;zip&#39; or &#39;pom&#39; &quot;&quot;&quot;</span>
+
+    <span class="n">artifact_id</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Only present on maven archives. The maven artifact&#39;s name &quot;&quot;&quot;</span>
+
+    <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Only present on maven archives. The maven artifact&#39;s group &quot;&quot;&quot;</span>
+
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Only present on maven archives. The maven artifact&#39;s version &quot;&quot;&quot;</span>
+
+    <span class="n">platforms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Only present on Windows archives &quot;&quot;&quot;</span>
+
+    <span class="n">relpath</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Only present on Windows archives &quot;&quot;&quot;</span>
+
+    <span class="n">flags</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Only present on Windows archives &quot;&quot;&quot;</span>
+
+    <span class="n">arch</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Only present on Image archives &quot;&quot;&quot;</span></div>
+
+
+<span class="n">ArchiveInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ArchiveInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot; An Iterable of ArchiveInfo dicts &quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">DecoratedArchiveInfo</span><span class="p">(</span><span class="n">ArchiveInfo</span><span class="p">):</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="n">DecoratedArchiveInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DecoratedArchiveInfo</span><span class="p">]</span>
+
+
+<span class="n">ArchiveSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ArchiveInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An archive ID, filename, or info dict</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ArchiveTypeInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.ArchiveTypeInfo">[docs]</a><span class="k">class</span> <span class="nc">ArchiveTypeInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; short title of the type &quot;&quot;&quot;</span>
+
+    <span class="n">extensions</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; space separated extensions for this type &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the internal ID of the archive type &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the name of the archive type &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="BuildrootInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.BuildrootInfo">[docs]</a><span class="k">class</span> <span class="nc">BuildrootInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">arch</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">br_type</span><span class="p">:</span> <span class="n">BuildrootType</span>
+
+    <span class="n">cg_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="n">cg_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">cg_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+    <span class="n">container_arch</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">container_type</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">create_event_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">create_event_time</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">create_ts</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="n">extra</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>
+
+    <span class="n">host_arch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">host_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">host_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">host_os</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="n">repo_create_event_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">repo_create_event_time</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">repo_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">repo_state</span><span class="p">:</span> <span class="n">RepoState</span>
+
+    <span class="n">retire_event_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">retire_event_time</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">retire_ts</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="n">state</span><span class="p">:</span> <span class="n">BuildrootState</span>
+
+    <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">tag_name</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">task_id</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="n">workdir</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="BuildInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.BuildInfo">[docs]</a><span class="k">class</span> <span class="nc">BuildInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji build. These are typically obtained via</span>
+<span class="sd">    the ``getBuild`` XMLRPC call, or from the</span>
+<span class="sd">    `kojismokydingo.as_buildinfo` function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">build_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The internal ID for the build record &quot;&quot;&quot;</span>
+
+    <span class="n">cg_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The ID of the content generator which has reserved or produced</span>
+<span class="sd">    this build &quot;&quot;&quot;</span>
+
+    <span class="n">cg_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The name of the content generator which has reserved or produced</span>
+<span class="sd">    this build &quot;&quot;&quot;</span>
+
+    <span class="n">completion_time</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ISO-8601 formatted UTC datetime stamp indicating when this build</span>
+<span class="sd">    was completed &quot;&quot;&quot;</span>
+
+    <span class="n">completion_ts</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; UTC timestamp indicating when this build was completed &quot;&quot;&quot;</span>
+
+    <span class="n">creation_event_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; koji event ID at the creation of this build record &quot;&quot;&quot;</span>
+
+    <span class="n">creation_time</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ISO-8601 formatted UTC datetime stamp indicating when this build</span>
+<span class="sd">    record was created &quot;&quot;&quot;</span>
+
+    <span class="n">creation_ts</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; UTC timestamp indicating when this build record was created &quot;&quot;&quot;</span>
+
+    <span class="n">epoch</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; epoch of this build, or None if unspecified. This field is</span>
+<span class="sd">    typically only used for RPM builds which have specified an epoch</span>
+<span class="sd">    in their spec. &quot;&quot;&quot;</span>
+
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; flexible additional information for this build, used by content</span>
+<span class="sd">    generators &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Same as build_id &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The name component of the NVR of this build. Should match the</span>
+<span class="sd">    package_name field. &quot;&quot;&quot;</span>
+
+    <span class="n">nvr</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The unique NVR of the build, comprised of the name, version, and</span>
+<span class="sd">    release separated by hyphens &quot;&quot;&quot;</span>
+
+    <span class="n">owner_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the koji user that owns this build &quot;&quot;&quot;</span>
+
+    <span class="n">owner_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the koji user that owns this build &quot;&quot;&quot;</span>
+
+    <span class="n">package_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The corresponding package ID for this build. &quot;&quot;&quot;</span>
+
+    <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The corresponding package name for this build. Should match the</span>
+<span class="sd">    name field. &quot;&quot;&quot;</span>
+
+    <span class="n">release</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">start_ts</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="n">state</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; state of the build, see `BuildState` &quot;&quot;&quot;</span>
+
+    <span class="n">task_id</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; version portion of the NVR for the build &quot;&quot;&quot;</span>
+
+    <span class="n">volume_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the storage volume that the archives for this build will be</span>
+<span class="sd">    stored on &quot;&quot;&quot;</span>
+
+    <span class="n">volume_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the storage that the archives for this build will be</span>
+<span class="sd">    stored on &quot;&quot;&quot;</span>
+
+    <span class="n">maven_group_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; only present on Maven builds which have been loaded with type</span>
+<span class="sd">    information &quot;&quot;&quot;</span>
+
+    <span class="n">maven_artifact_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; only present on Maven builds which have been loaded with type</span>
+<span class="sd">    information &quot;&quot;&quot;</span>
+
+    <span class="n">maven_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; only present on Maven builds which have been loaded with type</span>
+<span class="sd">    information &quot;&quot;&quot;</span>
+
+    <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; only present on Windows builds which have been loaded with type</span>
+<span class="sd">    information &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="DecoratedBuildInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.DecoratedBuildInfo">[docs]</a><span class="k">class</span> <span class="nc">DecoratedBuildInfo</span><span class="p">(</span><span class="n">BuildInfo</span><span class="p">):</span>
+
+    <span class="n">archive_btype_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">archive_btype_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+
+    <span class="n">archive_cg_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">archive_cg_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span></div>
+
+
+<span class="n">BuildInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">BuildInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An Iterable of BuildInfo dicts</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="n">DecoratedBuildInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DecoratedBuildInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An Iterable of DecoratedBuildInfo dicts</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="n">BuildSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">BuildInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An indicator for a build in cases where the build may be</span>
+<span class="sd">communicated as its ID, its NVR, or as an already-loaded BuildInfo</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="BTypeInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.BTypeInfo">[docs]</a><span class="k">class</span> <span class="nc">BTypeInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the internal ID of the btype &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the name of the btype &quot;&quot;&quot;</span></div>
+
+
+<span class="n">PathSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PathInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="RPMInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.RPMInfo">[docs]</a><span class="k">class</span> <span class="nc">RPMInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji RPM. These are typically obtained via the</span>
+<span class="sd">    ``listRPMs`` XMLRPC call, or from the `kojismokydingo.as_rpminfo`</span>
+<span class="sd">    function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">arch</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The RPM&#39;s architecture, eg. &#39;src&#39; or &#39;x86_64&#39; &quot;&quot;&quot;</span>
+
+    <span class="n">build_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The ID of the build owning this RPM &quot;&quot;&quot;</span>
+
+    <span class="n">buildroot_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The buildroot used by the task which produced this RPM &quot;&quot;&quot;</span>
+
+    <span class="n">buildtime</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; UTC timestamp of the time that this RPM was produced &quot;&quot;&quot;</span>
+
+    <span class="n">epoch</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The RPM&#39;s epoch field, or None if not defined &quot;&quot;&quot;</span>
+
+    <span class="n">external_repo_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The external repo ID for this RPM record, or 0 if the RPM was</span>
+<span class="sd">    built in this koji instance rather than being a reference to an</span>
+<span class="sd">    external repository &quot;&quot;&quot;</span>
+
+    <span class="n">external_repo_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name identifying the repo that this RPM came from, or &#39;INTERNAL&#39;</span>
+<span class="sd">    if built in this koji instance &quot;&quot;&quot;</span>
+
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Optional extra data &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The internal ID for this RPM &quot;&quot;&quot;</span>
+
+    <span class="n">metadata_only</span><span class="p">:</span> <span class="nb">bool</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The RPM&#39;s name field &quot;&quot;&quot;</span>
+
+    <span class="n">nvr</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The NVR (Name Version and Release) of the RPM &quot;&quot;&quot;</span>
+
+    <span class="n">payloadhash</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The MD5 in hex of the RPM&#39;s payload (the content past the</span>
+<span class="sd">    headers) &quot;&quot;&quot;</span>
+
+    <span class="n">release</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The RPM&#39;s release field &quot;&quot;&quot;</span>
+
+    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The file size of the unsigned copy of the RPM &quot;&quot;&quot;</span>
+
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The RPM&#39;s version field &quot;&quot;&quot;</span></div>
+
+
+<span class="n">RPMInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">RPMInfo</span><span class="p">]</span>
+
+
+<span class="n">RPMSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">RPMInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Ways to indicate an RPM to `as_rpminfo`</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="RPMSignature"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.RPMSignature">[docs]</a><span class="k">class</span> <span class="nc">RPMSignature</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing an RPM signature in koji. Obtained via the</span>
+<span class="sd">    ``queryRPMSigs`` XMLRPC API or from the</span>
+<span class="sd">    `kojismokydingo.bulk_load_rpm_sigs` function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rpm_id</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="n">sigkey</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">sighash</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<span class="k">class</span> <span class="nc">DecoratedRPMInfo</span><span class="p">(</span><span class="n">RPMInfo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returned by `kojismokydingo.archives.gather_signed_rpms` Simply an</span>
+<span class="sd">    `RPMInfo` dict with a single additional field representing which</span>
+<span class="sd">    preferred signature (if any) was available.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">btype</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">btype_id</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">sigkey</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">type_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">type_name</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="n">DecoratedRPMInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DecoratedRPMInfo</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="HostInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.HostInfo">[docs]</a><span class="k">class</span> <span class="nc">HostInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji host. These are typically obtained via the</span>
+<span class="sd">    ``getHost`` XMLRPC call</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">arches</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; space-separated list of architectures this host can handle &quot;&quot;&quot;</span>
+
+    <span class="n">capacity</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; maximum capacity for tasks, using the sum of the task weight</span>
+<span class="sd">    values &quot;&quot;&quot;</span>
+
+    <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; text describing the current status or usage &quot;&quot;&quot;</span>
+
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; text describing this host &quot;&quot;&quot;</span>
+
+    <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; whether this host is configured by the hub to take tasks &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal identifier &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; user name of this host&#39;s account, normally FQDN. &quot;&quot;&quot;</span>
+
+    <span class="n">ready</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; whether this host is reporting itself as active and prepared to</span>
+<span class="sd">    accept tasks &quot;&quot;&quot;</span>
+
+    <span class="n">task_load</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the load of currently running tasks on the host. Compared with the</span>
+<span class="sd">    capacity and a given task&#39;s weight, this can determine whether a</span>
+<span class="sd">    task will &#39;fit&#39; on the host &quot;&quot;&quot;</span>
+
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the user ID of this host&#39;s account. Hosts have a user account of</span>
+<span class="sd">    type HOST, which is how they authenticate with the hub &quot;&quot;&quot;</span></div>
+
+
+<span class="n">HostSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">HostInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Acceptable ways to specify a host</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="DecoratedHostInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.DecoratedHostInfo">[docs]</a><span class="k">class</span> <span class="nc">DecoratedHostInfo</span><span class="p">(</span><span class="n">HostInfo</span><span class="p">):</span>
+    <span class="n">last_update</span><span class="p">:</span> <span class="n">datetime</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The last time that a host checked in with an update &quot;&quot;&quot;</span></div>
+
+
+<span class="n">DecoratedHostInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DecoratedHostInfo</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="UserInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.UserInfo">[docs]</a><span class="k">class</span> <span class="nc">UserInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji user account. These are typically</span>
+<span class="sd">    obtained via the ``getUser`` or ``getLoggedInUser`` XMLRPC calls,</span>
+<span class="sd">    or the ``kojismokydingo.as_userinfo`` function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">authtype</span><span class="p">:</span> <span class="n">AuthType</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Only present from the ``getLoggedInUser`` call &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal identifer &quot;&quot;&quot;</span>
+
+    <span class="n">krb_principal</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; kerberos principal associated with the user. Only used in koji</span>
+<span class="sd">    before 1.19 or when using the ``getLoggedInUser`` call. &quot;&quot;&quot;</span>
+
+    <span class="n">krb_principals</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; list of kerberos principals associated with the user. Used in koji</span>
+<span class="sd">    from 1.19 onwards. &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the username &quot;&quot;&quot;</span>
+
+    <span class="n">status</span><span class="p">:</span> <span class="n">UserStatus</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; status of the account. not present for members from the</span>
+<span class="sd">    ``getGroupMembers`` call. &quot;&quot;&quot;</span>
+
+    <span class="n">usertype</span><span class="p">:</span> <span class="n">UserType</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; type of the account &quot;&quot;&quot;</span></div>
+
+
+<span class="n">UserSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">UserInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Acceptable ways to specify a user, either by a UserInfo dict, a</span>
+<span class="sd">username str, or a user&#39;s int ID</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="CGInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.CGInfo">[docs]</a><span class="k">class</span> <span class="nc">CGInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji Content Generator. A dict of these are</span>
+<span class="sd">    typically obtained via the ``listCGs`` XMLRPC call, mapping their</span>
+<span class="sd">    friendly names to the CGInfo structure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal identifier &quot;&quot;&quot;</span>
+
+    <span class="n">users</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; list of account names with access to perform CGImports using</span>
+<span class="sd">    this content generator &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NamedCGInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.NamedCGInfo">[docs]</a><span class="k">class</span> <span class="nc">NamedCGInfo</span><span class="p">(</span><span class="n">CGInfo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A CGInfo with its name merged into it. Obtained via</span>
+<span class="sd">    `kojismokydingo.users.collect_cgs`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; friendly name for this content generator &quot;&quot;&quot;</span></div>
+
+
+<span class="k">class</span> <span class="nc">PermUser</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">user_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">permission_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">create_ts</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">create_date</span><span class="p">:</span> <span class="n">datetime</span>
+
+
+<div class="viewcode-block" id="PermInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.PermInfo">[docs]</a><span class="k">class</span> <span class="nc">PermInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<span class="k">class</span> <span class="nc">DecoratedPermInfo</span><span class="p">(</span><span class="n">PermInfo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A `PermInfo` decorated with the list of users that have been</span>
+<span class="sd">    granted the permission. Obtained via</span>
+<span class="sd">    `kojismokydingo.users.collect_perminfo`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">users</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PermUser</span><span class="p">]</span>
+
+
+<span class="n">PermSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">a permission&#39;s ID or name</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="UserStatistics"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.UserStatistics">[docs]</a><span class="k">class</span> <span class="nc">UserStatistics</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+
+    <span class="n">build_count</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; count of builds owned by this user &quot;&quot;&quot;</span>
+
+    <span class="n">package_count</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; count of packages owned by this user &quot;&quot;&quot;</span>
+
+    <span class="n">task_count</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; count of tasks submitted by this user &quot;&quot;&quot;</span>
+
+    <span class="n">last_build</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;BuildInfo&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the most recent build by this user &quot;&quot;&quot;</span>
+
+    <span class="n">last_task</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;TaskInfo&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the most recent task by this user &quot;&quot;&quot;</span></div>
+
+
+<span class="k">class</span> <span class="nc">DecoratedUserInfo</span><span class="p">(</span><span class="n">UserInfo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A `UserInfo` decorated with additional fields that merge more data</span>
+<span class="sd">    together from other calls. Obtained via</span>
+<span class="sd">    `kojismokydingo.users.collect_userinfo`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">permissions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; names of granted permissions &quot;&quot;&quot;</span>
+
+    <span class="n">content_generators</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">NamedCGInfo</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; names of granted content generators &quot;&quot;&quot;</span>
+
+    <span class="n">members</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">UserInfo</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; membership if user is a group &quot;&quot;&quot;</span>
+
+    <span class="n">statistics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">UserStatistics</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; user&#39;s interaction statistics &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="RepoInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.RepoInfo">[docs]</a><span class="k">class</span> <span class="nc">RepoInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji build tag&#39;s repository. These are</span>
+<span class="sd">    typically obtained via the ``getRepo`` or ``repoInfo`` XMLRPC</span>
+<span class="sd">    calls, or from the `kojismokydingo.as_repoinfo` function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">create_event</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; koji event ID representing the point that the repo&#39;s tag</span>
+<span class="sd">    configuration was snapshot from. Note that this doesn&#39;t always</span>
+<span class="sd">    correlate to the creation time of the repo -- koji has the ability to</span>
+<span class="sd">    generate a repository based on older events &quot;&quot;&quot;</span>
+
+    <span class="n">create_ts</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; UTC timestamp indicating when this repo was created &quot;&quot;&quot;</span>
+
+    <span class="n">creation_time</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ISO-8601 formatted UTC datetime stamp indicating when this repo</span>
+<span class="sd">    was created &quot;&quot;&quot;</span>
+
+    <span class="n">dist</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; whether this is a dist-repo or not &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal ID for this repository &quot;&quot;&quot;</span>
+
+    <span class="n">state</span><span class="p">:</span> <span class="n">RepoState</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the current state of this repository &quot;&quot;&quot;</span>
+
+    <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the tag from which this repo was generated. This value is not</span>
+<span class="sd">    present in the output of the ``getRepo`` XMLRPC call as it is presumed</span>
+<span class="sd">    that the caller already knows the tag&#39;s identity &quot;&quot;&quot;</span>
+
+    <span class="n">tag_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the tag from which this repo was generated.  This value is</span>
+<span class="sd">    not present in the output of the ``getRepo`` XMLRPC call as it is</span>
+<span class="sd">    presumed that the caller already knows the tag&#39;s identity &quot;&quot;&quot;</span>
+
+    <span class="n">task_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the task which generated this repository &quot;&quot;&quot;</span></div>
+
+
+<span class="n">RepoSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">RepoInfo</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;TagInfo&#39;</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">`kojismokydingo.as_repoinfo`</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="TargetInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TargetInfo">[docs]</a><span class="k">class</span> <span class="nc">TargetInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji build target. Typically obtained via the</span>
+<span class="sd">    ``getBuildTarget`` or ``getBuildTargets`` XMLRPC calls, or the</span>
+<span class="sd">    `kojismokydingo.as_targetinfo` function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">build_tag</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal ID of the target&#39;s build tag &quot;&quot;&quot;</span>
+
+    <span class="n">build_tag_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the target&#39;s build tag &quot;&quot;&quot;</span>
+
+    <span class="n">dest_tag</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal ID of the target&#39;s destination tag &quot;&quot;&quot;</span>
+
+    <span class="n">dest_tag_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the target&#39;s destination tag &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal ID of this build target &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of this build target &quot;&quot;&quot;</span></div>
+
+
+<span class="n">TargetInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TargetInfo</span><span class="p">]</span>
+
+
+<span class="n">TargetSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">TargetInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An indicator for a target in cases where it may be communicated by</span>
+<span class="sd">its ID, its name, or an already-loaded TargetInfo</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="TagInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TagInfo">[docs]</a><span class="k">class</span> <span class="nc">TagInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a koji tag. Typically obtained via the</span>
+<span class="sd">    ``getTag`` XMLRPC call, or the `kojismokydingo.as_taginfo` and</span>
+<span class="sd">    `kojismokydingo.bulk_load_tags` functions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">arches</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; space-separated list of architectures, or None &quot;&quot;&quot;</span>
+
+    <span class="n">extra</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; inheritable additional configuration data &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal ID of this tag &quot;&quot;&quot;</span>
+
+    <span class="n">locked</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; when locked, a tag will protest against having addtional builds</span>
+<span class="sd">    associated with it &quot;&quot;&quot;</span>
+
+    <span class="n">maven_include_all</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; whether this tag should use the alternative maven-latest logic</span>
+<span class="sd">    (including multiple builds of the same package name) when inherited</span>
+<span class="sd">    by the build tag of a maven-enabled target &quot;&quot;&quot;</span>
+
+    <span class="n">maven_support</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; whether this tag should generate a maven repository when it is</span>
+<span class="sd">    the build tag for a target &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">perm</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the required permission to associate builds with this tag,</span>
+<span class="sd">    or None &quot;&quot;&quot;</span>
+
+    <span class="n">perm_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the required permission to associate builds with this tag,</span>
+<span class="sd">    or None &quot;&quot;&quot;</span></div>
+
+
+<span class="n">TagInfos</span> <span class="o">=</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TagInfo</span><span class="p">]</span>
+
+
+<span class="n">TagSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">TagInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An indicator for a tag in cases where it may be communicated by</span>
+<span class="sd">its ID, its name, or as an already-loaded TagInfo</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="TagInheritanceEntry"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TagInheritanceEntry">[docs]</a><span class="k">class</span> <span class="nc">TagInheritanceEntry</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representing a single inheritance element. A list of these</span>
+<span class="sd">    represents the inheritance data for a tag. Typically obtained via</span>
+<span class="sd">    the ``getFullInheritance`` XMLRPC call.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">child_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the ID of the child tag in the inheritance link. The child tag</span>
+<span class="sd">    inherits from the parent tag &quot;&quot;&quot;</span>
+
+    <span class="n">currdepth</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; only present from the ``getFullInheritance`` call. The inheritance</span>
+<span class="sd">    depth this link occurs at. A depth of 1 indicates that the child</span>
+<span class="sd">    tag would be the one originally queried for its inheritance tree</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">filter</span><span class="p">:</span> <span class="nb">list</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; only present from the ``getFullInheritance`` call. &quot;&quot;&quot;</span>
+
+    <span class="n">intransitive</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; if true then this inheritance link would not be inherited. ie.</span>
+<span class="sd">    this link only appears at a depth of 1, and is otherwise omitted. &quot;&quot;&quot;</span>
+
+    <span class="n">maxdepth</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; additional parents in the inheritance tree from this link are only</span>
+<span class="sd">    considered up to this depth, relative from the link&#39;s current</span>
+<span class="sd">    depth.  A maxdepth of 1 indicates that only the immediate parents</span>
+<span class="sd">    will be inherited. A maxdepth of 0 indicates that the tag and none</span>
+<span class="sd">    of its parents will be inherited. A value of None indicates no</span>
+<span class="sd">    restriction. &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the parent tag&#39;s name &quot;&quot;&quot;</span>
+
+    <span class="n">nextdepth</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; only present from the ``getFullInheritance`` call. &quot;&quot;&quot;</span>
+
+    <span class="n">noconfig</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; if True then this inheritance link does not include tag</span>
+<span class="sd">    configuration data, such as extras and groups &quot;&quot;&quot;</span>
+
+    <span class="n">parent_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the parent tag&#39;s internal ID &quot;&quot;&quot;</span>
+
+    <span class="n">pkg_filter</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; a regex indicating which package entries may be inherited. If empty,</span>
+<span class="sd">    all packages are inherited &quot;&quot;&quot;</span>
+
+    <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the inheritance link priority, which provides an ordering for</span>
+<span class="sd">    links at the same depth with the same child tag (ie. what order</span>
+<span class="sd">    the parent links for a given tag are processed in). Lower</span>
+<span class="sd">    priorities are processed first. &quot;&quot;&quot;</span></div>
+
+
+<span class="n">TagInheritance</span> <span class="o">=</span> <span class="n">List</span><span class="p">[</span><span class="n">TagInheritanceEntry</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">As returned by the ``getInheritanceData`` and</span>
+<span class="sd">``getFullInheritance`` XMLRPC calls. A list of inheritance elements</span>
+<span class="sd">for a tag.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="DecoratedTagExtra"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.DecoratedTagExtra">[docs]</a><span class="k">class</span> <span class="nc">DecoratedTagExtra</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tag_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<span class="n">DecoratedTagExtras</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DecoratedTagExtra</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="PackageInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.PackageInfo">[docs]</a><span class="k">class</span> <span class="nc">PackageInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``getPackage`` XMLRPC call.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    the internal ID for this package</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    the package name</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<span class="n">PackageSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">PackageInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">`kojismokydingo.as_packageinfo`</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="TagPackageInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TagPackageInfo">[docs]</a><span class="k">class</span> <span class="nc">TagPackageInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``listPackages`` XMLRPC call.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">blocked</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; if True this entry represents a block &quot;&quot;&quot;</span>
+
+    <span class="n">extra_arches</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; additional architectures, separated by spaces &quot;&quot;&quot;</span>
+
+    <span class="n">owner_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the user who is the owner of the package for this tag &quot;&quot;&quot;</span>
+
+    <span class="n">owner_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the user who is the owner of the package for this tag &quot;&quot;&quot;</span>
+
+    <span class="n">package_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the package &quot;&quot;&quot;</span>
+
+    <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the package &quot;&quot;&quot;</span>
+
+    <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the package listing&#39;s tag &quot;&quot;&quot;</span>
+
+    <span class="n">tag_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; name of the package listing&#39;s tag &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="TagGroupPackage"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TagGroupPackage">[docs]</a><span class="k">class</span> <span class="nc">TagGroupPackage</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">basearchonly</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">group_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">package</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">requires</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="TagGroupReq"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TagGroupReq">[docs]</a><span class="k">class</span> <span class="nc">TagGroupReq</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">group_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">is_metapkg</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">req_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="TagGroupInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TagGroupInfo">[docs]</a><span class="k">class</span> <span class="nc">TagGroupInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``getTagGroups`` XMLRPC call</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">biarchonly</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">exported</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">group_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">grouplist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TagGroupReq</span><span class="p">]</span>
+    <span class="n">is_default</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">langonly</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">packagelist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TagGroupPackage</span><span class="p">]</span>
+    <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">uservisible</span><span class="p">:</span> <span class="nb">bool</span></div>
+
+
+<div class="viewcode-block" id="TaskInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.TaskInfo">[docs]</a><span class="k">class</span> <span class="nc">TaskInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``getTaskInfo`` XMLRPC call or `kojismokydingo.as_taskinfo` function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">arch</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; task architecture, or &#39;noarch&#39; &quot;&quot;&quot;</span>
+
+    <span class="n">awaited</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; True if this task is currently being waiting-for by its parent</span>
+<span class="sd">    task.  False if this task is no longer being waited-for. None if</span>
+<span class="sd">    the task was never waited-for. &quot;&quot;&quot;</span>
+
+    <span class="n">channel_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal ID of the channel from which a host will be selected to</span>
+<span class="sd">    take this task &quot;&quot;&quot;</span>
+
+    <span class="n">completion_time</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ISO-8601 formatted UTC datetime stamp indicating when this task</span>
+<span class="sd">    was completed, or None if not completed &quot;&quot;&quot;</span>
+
+    <span class="n">completion_ts</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; UTC timestamp indicating when this task was completed, or None if</span>
+<span class="sd">    not completed &quot;&quot;&quot;</span>
+
+    <span class="n">create_time</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ISO-8601 formatted UTC datetime stamp indicating when this task</span>
+<span class="sd">    was created &quot;&quot;&quot;</span>
+
+    <span class="n">create_ts</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; UTC timestamp indicating when this task was created &quot;&quot;&quot;</span>
+
+    <span class="n">host_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; host which has taken this task, or None &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal task ID &quot;&quot;&quot;</span>
+
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; task label, or None &quot;&quot;&quot;</span>
+
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; task method, indicates the type of work to be done &quot;&quot;&quot;</span>
+
+    <span class="n">owner</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the user that initiated this task &quot;&quot;&quot;</span>
+
+    <span class="n">parent</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ID of the parent task, or None &quot;&quot;&quot;</span>
+
+    <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; ISO-8601 formatted UTC datetime stamp indicating when this task</span>
+<span class="sd">    was started by a host, or None if not yet started &quot;&quot;&quot;</span>
+
+    <span class="n">start_ts</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; UTC timestamp indicating when this task was started by a host, or</span>
+<span class="sd">    None if not yet started &quot;&quot;&quot;</span>
+
+    <span class="n">state</span><span class="p">:</span> <span class="n">TaskState</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; the current state of this task &quot;&quot;&quot;</span>
+
+    <span class="n">waiting</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; True if this task is currently waiting for any of its subtasks to</span>
+<span class="sd">    complete. False if this task is not waiting, or None if the task</span>
+<span class="sd">    never needed to wait. &quot;&quot;&quot;</span>
+
+    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; value which ascribes the general resources needed to perform this</span>
+<span class="sd">    task. hosts have a limit to the number of resources which can be used</span>
+<span class="sd">    to run tasks in parallel &quot;&quot;&quot;</span>
+
+    <span class="n">request</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The task request info. Only present when the request parameter to</span>
+<span class="sd">    the ``getTaskInfo`` call is `True`. Note that the `as_taskinfo`</span>
+<span class="sd">    function does set that parameter to True. &quot;&quot;&quot;</span></div>
+
+
+<span class="n">TaskSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">TaskInfo</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">task ID or TaskInfo dict</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ChannelInfo"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.ChannelInfo">[docs]</a><span class="k">class</span> <span class="nc">ChannelInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; internal channel ID &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; channel name &quot;&quot;&quot;</span></div>
+
+
+<span class="n">ChannelSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ChannelInfo</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="SearchResult"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.SearchResult">[docs]</a><span class="k">class</span> <span class="nc">SearchResult</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; as returned by the ``search`` XMLRPC call &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; result ID &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; result name &quot;&quot;&quot;</span></div>
+
+
+<span class="n">HubVersionSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">a koji version requirement, specified as either a string or tuple of ints</span>
+
+<span class="sd">  * ``&quot;1.25&quot;``</span>
+<span class="sd">  * ``(1, 25)``</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="n">KeySpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">a key specifier, used as either an index/item lookup on objects, or a</span>
+<span class="sd">unary callable which returns the desired field.</span>
+
+<span class="sd">Typically non callable keyspec values are converted into an itemgetter</span>
+<span class="sd">using that value.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="GOptions"><a class="viewcode-back" href="../../../kojismokydingo/types/#kojismokydingo.types.GOptions">[docs]</a><span class="k">class</span> <span class="nc">GOptions</span><span class="p">(</span><span class="n">Values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the koji client configuration options as provided by the</span>
+<span class="sd">    baseline koji CLI.</span>
+
+<span class="sd">    `Values` instances with these fields are fed to</span>
+<span class="sd">    `kojismokydingo.cli.SmokyDingo` instances via their ``__call__``</span>
+<span class="sd">    handlers.</span>
+
+<span class="sd">    Note that koji uses the `optparse` package, while koji smoky dingo</span>
+<span class="sd">    uses the `argparse` package.</span>
+
+<span class="sd">    Returned by the ``get_options`` function from within the koji CLI</span>
+<span class="sd">    utility, which cannot be imported normally. Default values for</span>
+<span class="sd">    these are pulled from the profile configuration if unspecified as</span>
+<span class="sd">    base CLI arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">authtype</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">cert</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">force_auth</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">keytab</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">noauth</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">plugin_paths</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">principal</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">runas</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">server</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">skip_main</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">topdir</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">topurl</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">user</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">weburl</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<span class="n">HistoryEntry</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># The end.</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.types</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+    </div>
+  </body>
+</html>

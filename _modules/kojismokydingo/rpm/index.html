@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+
+<html lang="English">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.rpm &#8212; kojismokydingo 2.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.rpm</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kojismokydingo.rpm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># This library is free software; you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation; either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This library is distributed in the hope that it will be useful, but</span>
+<span class="c1"># WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Koji Smoky Dingo - RPM NEVRA Utils</span>
+
+<span class="sd">:author: Christopher O&#39;Brien &lt;obriencj@gmail.com&gt;</span>
+<span class="sd">:license: GPL v3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">cast</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;evr_compare&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;evr_split&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nevr_split&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nevra_split&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">_rpm_str_split_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(~?(?:\d+|[a-zA-Z]+))&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span>
+
+
+<span class="k">def</span> <span class="nf">_rpm_str_split</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Split an E, V, or R string for comparison by its segments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_rpm_str_split_re</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+                 <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">i</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)))</span>
+
+
+<span class="k">def</span> <span class="nf">_rpm_str_compare</span><span class="p">(</span><span class="n">leftstr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rightstr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Comparison of left and right by RPM version comparison rules.</span>
+
+<span class="sd">    Either string should be *one* element of the EVR tuple (ie. either the</span>
+<span class="sd">    epoch, version, or release). Comparison will split the element on RPM&#39;s</span>
+<span class="sd">    special delimeters.</span>
+
+<span class="sd">    :since: 2.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">left</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">_rpm_str_split</span><span class="p">(</span><span class="n">leftstr</span><span class="p">)</span>
+    <span class="n">right</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">_rpm_str_split</span><span class="p">(</span><span class="n">rightstr</span><span class="p">)</span>
+
+    <span class="n">lp</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">rp</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">for</span> <span class="n">lp</span><span class="p">,</span> <span class="n">rp</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+
+        <span class="c1"># Special comparison for tilde segments</span>
+        <span class="k">if</span> <span class="n">lp</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">):</span>
+            <span class="c1"># left is tilde</span>
+
+            <span class="k">if</span> <span class="n">rp</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">):</span>
+                <span class="c1"># right also is tilde, let&#39;s just chop off the tilde</span>
+                <span class="c1"># and fall through to non-tilde comparisons below</span>
+
+                <span class="n">lp</span> <span class="o">=</span> <span class="n">lp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="n">rp</span> <span class="o">=</span> <span class="n">rp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># right is not tilde, therefore right is greater</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="n">rp</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">):</span>
+            <span class="c1"># left is not tilde, but right is, therefore left is greater</span>
+            <span class="k">return</span> <span class="mi">1</span>
+
+        <span class="c1"># Special comparison for digits vs. alphabetical</span>
+        <span class="k">if</span> <span class="n">lp</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="c1"># left is numeric</span>
+
+            <span class="k">if</span> <span class="n">rp</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="c1"># left and right are both numeric, convert and fall</span>
+                <span class="c1"># through</span>
+                <span class="n">ilp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lp</span><span class="p">)</span>
+                <span class="n">irp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ilp</span> <span class="o">==</span> <span class="n">irp</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">ilp</span> <span class="o">&gt;</span> <span class="n">irp</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># right is alphabetical or absent, left is greater</span>
+                <span class="k">return</span> <span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="n">rp</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="c1"># left is alphabetical but right is not, right is greater</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># Final comparison for segment</span>
+        <span class="k">if</span> <span class="n">lp</span> <span class="o">==</span> <span class="n">rp</span><span class="p">:</span>
+            <span class="c1"># left and right are equivalent, check next segment</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># left and right are not equivalent</span>
+            <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">lp</span> <span class="o">&gt;</span> <span class="n">rp</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># ran out of segments to check, must be equivalent</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="evr_compare"><a class="viewcode-back" href="../../../kojismokydingo/rpms/#kojismokydingo.rpm.evr_compare">[docs]</a><span class="k">def</span> <span class="nf">evr_compare</span><span class="p">(</span>
+        <span class="n">left_evr</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">right_evr</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare two (Epoch, Version, Release) tuples.</span>
+
+<span class="sd">    This is an alternative implementation of the rpm lib&#39;s</span>
+<span class="sd">    labelCompare function.</span>
+
+<span class="sd">    Return values:</span>
+
+<span class="sd">    * 1 if left_evr is greater-than right_evr</span>
+<span class="sd">    * 0 if left_evr is equal-to right_evr</span>
+<span class="sd">    * -1 if left_evr is less-than right_evr</span>
+
+<span class="sd">    :param left_evr: The left Epoch, Version, Release for comparison</span>
+
+<span class="sd">    :param right_evr: The right Epoch, Version, Release for comparison</span>
+
+<span class="sd">    :since: 2.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">lp</span><span class="p">,</span> <span class="n">rp</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">left_evr</span><span class="p">,</span> <span class="n">right_evr</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lp</span> <span class="o">==</span> <span class="n">rp</span><span class="p">:</span>
+            <span class="c1"># fast check to potentially skip all the matching</span>
+            <span class="k">continue</span>
+
+        <span class="n">compared</span> <span class="o">=</span> <span class="n">_rpm_str_compare</span><span class="p">(</span><span class="n">lp</span><span class="p">,</span> <span class="n">rp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">compared</span><span class="p">:</span>
+            <span class="c1"># non zero comparison for segment, done checking</span>
+            <span class="k">return</span> <span class="n">compared</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># ran out of segments to check, must be equivalent</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="nevra_split"><a class="viewcode-back" href="../../../kojismokydingo/rpms/#kojismokydingo.rpm.nevra_split">[docs]</a><span class="k">def</span> <span class="nf">nevra_split</span><span class="p">(</span><span class="n">nevra</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits an NEVRA into a five-tuple representing the name, epoch,</span>
+<span class="sd">    version, release, and arch.</span>
+
+<span class="sd">    If name, epoch, arch, or release are absent, they are represented</span>
+<span class="sd">    as a ``None``</span>
+
+<span class="sd">    This differs from NEVRA splitting in that the last dotted segment</span>
+<span class="sd">    of the release is considered to be the architecture. Because there</span>
+<span class="sd">    may be 1 or more dotted segments to a release, it&#39;s impossible to</span>
+<span class="sd">    determine whether the final segment is an arch or not simply from</span>
+<span class="sd">    the structure. However, a valid NEVRA will always have at least</span>
+<span class="sd">    two segments -- the last will be the architecture.</span>
+
+<span class="sd">    Valid RPM NEVRA is in the following layout:</span>
+
+<span class="sd">    eg. ``&quot;bind-32:9.10.2-2.P1.fc22.x86_64&quot;``</span>
+
+<span class="sd">    * name: ``&quot;bind&quot;``</span>
+<span class="sd">    * epoch: ``&quot;32&quot;``</span>
+<span class="sd">    * version: ``&quot;9.10.2&quot;``</span>
+<span class="sd">    * release: ``&quot;2.P1.fc22&quot;``</span>
+<span class="sd">    * arch: ``&quot;x86_64&quot;``</span>
+
+<span class="sd">    :since: 2.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">release</span> <span class="o">=</span> <span class="n">nevr_split</span><span class="p">(</span><span class="n">nevra</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">release</span> <span class="ow">and</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">release</span><span class="p">:</span>
+        <span class="n">release</span><span class="p">,</span> <span class="n">arch</span> <span class="o">=</span> <span class="n">release</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">arch</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">release</span><span class="p">,</span> <span class="n">arch</span></div>
+
+
+<div class="viewcode-block" id="nevr_split"><a class="viewcode-back" href="../../../kojismokydingo/rpms/#kojismokydingo.rpm.nevr_split">[docs]</a><span class="k">def</span> <span class="nf">nevr_split</span><span class="p">(</span><span class="n">nevr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits an NEVR into a four-tuple represending the name, epoch,</span>
+<span class="sd">    version, and release.</span>
+
+<span class="sd">    If name, epoch, or release are absent they are represented as</span>
+<span class="sd">    ``None``</span>
+
+<span class="sd">    This differs from NEVRA splitting in that the last dotted segment</span>
+<span class="sd">    of the release is not considered an architecture. Because there</span>
+<span class="sd">    may be 1 or more dotted segments to a release, it&#39;s impossible to</span>
+<span class="sd">    determine whether the final segment is an arch or not simply from</span>
+<span class="sd">    the structure.</span>
+
+<span class="sd">    Valid RPM NEVRA is in the following layout:</span>
+
+<span class="sd">    eg. ``&quot;bind-32:9.10.2-2.P1.fc22&quot;``</span>
+
+<span class="sd">    * name: ``&quot;bind&quot;``</span>
+<span class="sd">    * epoch: ``&quot;32&quot;``</span>
+<span class="sd">    * version: ``&quot;9.10.2&quot;``</span>
+<span class="sd">    * release: ``&quot;2.P1.fc22&quot;``</span>
+
+<span class="sd">    :since: 2.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">release</span> <span class="o">=</span> <span class="n">evr_split</span><span class="p">(</span><span class="n">nevr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">epoch</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">epoch</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="k">if</span> <span class="n">release</span> <span class="ow">and</span> <span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">release</span><span class="p">:</span>
+            <span class="n">version</span><span class="p">,</span> <span class="n">release</span> <span class="o">=</span> <span class="n">release</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">release</span>
+            <span class="n">release</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">release</span></div>
+
+
+<div class="viewcode-block" id="evr_split"><a class="viewcode-back" href="../../../kojismokydingo/rpms/#kojismokydingo.rpm.evr_split">[docs]</a><span class="k">def</span> <span class="nf">evr_split</span><span class="p">(</span><span class="n">evr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits an EVR into a dict with the keys epoch, version, and release.</span>
+
+<span class="sd">    If epoch is omitted, it is presumed to be ``&quot;0&quot;``</span>
+<span class="sd">    If release is omitted, it is presumed to be ``None``</span>
+
+<span class="sd">    Valid RPM EVR is in the following layout:</span>
+
+<span class="sd">    eg. ``&quot;32:9.10.2-2.P1.fc22&quot;``</span>
+
+<span class="sd">    * epoch: ``&quot;32&quot;``</span>
+<span class="sd">    * version: ``&quot;9.10.2&quot;``</span>
+<span class="sd">    * release: ``&quot;2.P1.fc22&quot;``</span>
+
+<span class="sd">    :since: 2.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">version</span> <span class="o">=</span> <span class="n">evr</span>
+
+    <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">version</span><span class="p">:</span>
+        <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">version</span><span class="p">:</span>
+        <span class="n">version</span><span class="p">,</span> <span class="n">release</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">release</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">release</span></div>
+
+
+<span class="c1">#</span>
+<span class="c1"># The end.</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.rpm</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+    </div>
+  </body>
+</html>

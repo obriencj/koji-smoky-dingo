@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.cli.tags &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.cli.tags &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.cli</a> &#187;</li>
@@ -67,27 +66,29 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
-
 <span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dumps</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">ClientSession</span>
 <span class="kn">from</span> <span class="nn">koji_cli.lib</span> <span class="kn">import</span> <span class="n">arg_filter</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">zip</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">TagSmokyDingo</span><span class="p">,</span>
-    <span class="n">int_or_str</span><span class="p">,</span> <span class="n">printerr</span><span class="p">,</span> <span class="n">pretty_json</span><span class="p">,</span> <span class="n">read_clean_lines</span><span class="p">,</span> <span class="n">tabulate</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">convert_history</span><span class="p">,</span> <span class="n">int_or_str</span><span class="p">,</span> <span class="n">printerr</span><span class="p">,</span> <span class="n">pretty_json</span><span class="p">,</span> <span class="n">print_history</span><span class="p">,</span>
+    <span class="n">read_clean_lines</span><span class="p">,</span> <span class="n">tabulate</span><span class="p">,</span> <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.sift</span> <span class="kn">import</span> <span class="n">TagSifting</span><span class="p">,</span> <span class="n">output_sifted</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BadDingo</span><span class="p">,</span> <span class="n">FeatureUnavailable</span><span class="p">,</span> <span class="n">NoSuchTag</span><span class="p">,</span>
-    <span class="n">bulk_load_tags</span><span class="p">,</span> <span class="n">version_require</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">as_taginfo</span><span class="p">,</span> <span class="n">bulk_load_tags</span><span class="p">,</span> <span class="n">iter_bulk_load</span><span class="p">,</span> <span class="n">version_require</span><span class="p">,</span> <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">unique</span>
 <span class="kn">from</span> <span class="nn">..tags</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">collect_tag_extras</span><span class="p">,</span> <span class="n">find_inheritance_parent</span><span class="p">,</span> <span class="n">gather_affected_targets</span><span class="p">,</span>
     <span class="n">renum_inheritance</span><span class="p">,</span> <span class="n">resolve_tag</span><span class="p">,</span> <span class="n">tag_dedup</span><span class="p">,</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..sift</span> <span class="kn">import</span> <span class="n">Sifter</span>
+<span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">HistoryEntry</span><span class="p">,</span> <span class="n">TagInheritance</span><span class="p">,</span> <span class="n">TagInheritanceEntry</span><span class="p">,</span> <span class="n">TagSpec</span><span class="p">,</span> <span class="p">)</span>
 
 
 <span class="n">SORT_BY_ID</span> <span class="o">=</span> <span class="s2">&quot;sort-by-id&quot;</span>
@@ -114,9 +115,12 @@
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;Environment variable is not defined at this tag&quot;</span></div>
 
 
-<div class="viewcode-block" id="cli_affected_targets"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_affected_targets">[docs]</a><span class="k">def</span> <span class="nf">cli_affected_targets</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag_list</span><span class="p">,</span>
-                         <span class="n">build_tags</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">quiet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_affected_targets"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_affected_targets">[docs]</a><span class="k">def</span> <span class="nf">cli_affected_targets</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tag_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">build_tags</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">quiet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">quiet</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">isatty</span><span class="p">()</span>
@@ -135,12 +139,12 @@
         <span class="c1"># get a unique sorted list of either the target names or the</span>
         <span class="c1"># build tag names for the targets</span>
         <span class="n">attr</span> <span class="o">=</span> <span class="s1">&#39;build_tag_name&#39;</span> <span class="k">if</span> <span class="n">build_tags</span> <span class="k">else</span> <span class="s1">&#39;name&#39;</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">targ</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="k">for</span> <span class="n">targ</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">targ</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="k">for</span> <span class="n">targ</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">if</span> <span class="n">build_tags</span><span class="p">:</span>
-        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Found </span><span class="si">%i</span><span class="s2"> affected build tags inheriting:&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+        <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="si">}</span><span class="s2"> affected build tags inheriting:&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Found </span><span class="si">%i</span><span class="s2"> affected targets inheriting:&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+        <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="si">}</span><span class="s2"> affected targets inheriting:&quot;</span><span class="p">)</span>
 
     <span class="c1"># for debugging we re-print the tags we operated on</span>
     <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tag_list</span><span class="p">)):</span>
@@ -184,11 +188,15 @@
                                     <span class="n">options</span><span class="o">.</span><span class="n">quiet</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_renum_tag"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_renum_tag">[docs]</a><span class="k">def</span> <span class="nf">cli_renum_tag</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                  <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_renum_tag"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_renum_tag">[docs]</a><span class="k">def</span> <span class="nf">cli_renum_tag</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">begin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">test</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="o">.</span><span class="n">getTag</span><span class="p">(</span><span class="n">tagname</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">NoSuchTag</span><span class="p">(</span><span class="n">tagname</span><span class="p">)</span>
+    <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">)</span>
 
     <span class="n">original</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getInheritanceData</span><span class="p">(</span><span class="n">tagname</span><span class="p">)</span>
     <span class="n">renumbered</span> <span class="o">=</span> <span class="n">renum_inheritance</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
@@ -199,15 +207,13 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
             <span class="n">lp</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="s1">&#39;priority&#39;</span><span class="p">]</span>
             <span class="n">rp</span> <span class="o">=</span> <span class="n">right</span><span class="p">[</span><span class="s1">&#39;priority&#39;</span><span class="p">]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%3i</span><span class="s2"> -&gt; </span><span class="si">%3i</span><span class="s2">  </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lp</span><span class="p">,</span> <span class="n">rp</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">lp</span><span class="si">:</span><span class="s2">&gt;3</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">rp</span><span class="si">:</span><span class="s2">&gt;3</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">test</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Changes not committed in test mode.&quot;</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">setInheritanceData</span><span class="p">(</span><span class="n">tagname</span><span class="p">,</span> <span class="n">renumbered</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">results</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+        <span class="n">session</span><span class="o">.</span><span class="n">setInheritanceData</span><span class="p">(</span><span class="n">tagname</span><span class="p">,</span> <span class="n">renumbered</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RenumTagInheritance"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.RenumTagInheritance">[docs]</a><span class="k">class</span> <span class="nc">RenumTagInheritance</span><span class="p">(</span><span class="n">TagSmokyDingo</span><span class="p">):</span>
@@ -263,8 +269,13 @@
                              <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">test</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_swap_inheritance"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_swap_inheritance">[docs]</a><span class="k">def</span> <span class="nf">cli_swap_inheritance</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">old_parent</span><span class="p">,</span> <span class="n">new_parent</span><span class="p">,</span>
-                         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_swap_inheritance"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_swap_inheritance">[docs]</a><span class="k">def</span> <span class="nf">cli_swap_inheritance</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">old_parent</span><span class="p">:</span> <span class="n">TagSpec</span><span class="p">,</span>
+        <span class="n">new_parent</span><span class="p">:</span> <span class="n">TagSpec</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">test</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">tagname</span> <span class="ow">in</span> <span class="p">(</span><span class="n">old_parent</span><span class="p">,</span> <span class="n">new_parent</span><span class="p">)</span> <span class="ow">or</span> <span class="n">old_parent</span> <span class="o">==</span> <span class="n">new_parent</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">BadSwap</span><span class="p">(</span><span class="n">tagname</span><span class="p">,</span> <span class="n">old_parent</span><span class="p">,</span> <span class="n">new_parent</span><span class="p">)</span>
@@ -273,16 +284,11 @@
     <span class="k">if</span> <span class="n">original</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">NoSuchTag</span><span class="p">(</span><span class="n">tagname</span><span class="p">)</span>
 
-    <span class="n">old_p</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getTag</span><span class="p">(</span><span class="n">old_parent</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">old_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">NoSuchTag</span><span class="p">(</span><span class="n">old_parent</span><span class="p">)</span>
-
-    <span class="n">new_p</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getTag</span><span class="p">(</span><span class="n">new_parent</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">new_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">NoSuchTag</span><span class="p">(</span><span class="n">new_parent</span><span class="p">)</span>
+    <span class="n">old_p</span> <span class="o">=</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">old_parent</span><span class="p">)</span>
+    <span class="n">new_p</span> <span class="o">=</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_parent</span><span class="p">)</span>
 
     <span class="c1"># deep copy of original inheritance</span>
-    <span class="n">swapped</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">original</span><span class="p">]</span>
+    <span class="n">swapped</span><span class="p">:</span> <span class="n">TagInheritance</span> <span class="o">=</span> <span class="p">[</span><span class="n">TagInheritanceEntry</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">original</span><span class="p">]</span>
 
     <span class="n">found_old</span> <span class="o">=</span> <span class="n">find_inheritance_parent</span><span class="p">(</span><span class="n">swapped</span><span class="p">,</span> <span class="n">old_p</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
     <span class="n">found_new</span> <span class="o">=</span> <span class="n">find_inheritance_parent</span><span class="p">(</span><span class="n">swapped</span><span class="p">,</span> <span class="n">new_p</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
@@ -295,13 +301,15 @@
     <span class="c1"># so we can show what&#39;s changed. Second, we&#39;re collecting the</span>
     <span class="c1"># changes as either two edits, or a delete and an addition.</span>
 
+    <span class="n">changes</span><span class="p">:</span> <span class="n">TagInheritance</span>
+
     <span class="k">if</span> <span class="n">found_new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># the new inheritance isn&#39;t in the current inheritance</span>
         <span class="c1"># structure, therefore duplicate the old inheritance link and</span>
         <span class="c1"># mark it as a deletion, and then modify the old inheritance</span>
         <span class="c1"># link later.</span>
-        <span class="n">changed_old</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">found_old</span><span class="p">)</span>
-        <span class="n">changed_old</span><span class="p">[</span><span class="s1">&#39;delete link&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">changed_old</span> <span class="o">=</span> <span class="n">TagInheritanceEntry</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">found_old</span><span class="p">)</span>
+        <span class="n">changed_old</span><span class="p">[</span><span class="s1">&#39;delete link&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># type: ignore</span>
         <span class="n">changes</span> <span class="o">=</span> <span class="p">[</span><span class="n">changed_old</span><span class="p">,</span> <span class="n">found_old</span><span class="p">]</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -329,16 +337,14 @@
             <span class="n">lp</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
             <span class="n">rp</span> <span class="o">=</span> <span class="n">right</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">lp</span> <span class="o">!=</span> <span class="n">rp</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%3i</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">priority</span><span class="p">,</span> <span class="n">lp</span><span class="p">,</span> <span class="n">rp</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">priority</span><span class="si">:</span><span class="s2">&gt;3</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">lp</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">rp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%3i</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">priority</span><span class="p">,</span> <span class="n">lp</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">priority</span><span class="si">:</span><span class="s2">&gt;3</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">lp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">test</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Changes not committed in test mode.&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">setInheritanceData</span><span class="p">(</span><span class="n">tagname</span><span class="p">,</span> <span class="n">changes</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">results</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+        <span class="n">session</span><span class="o">.</span><span class="n">setInheritanceData</span><span class="p">(</span><span class="n">tagname</span><span class="p">,</span> <span class="n">changes</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SwapTagInheritance"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.SwapTagInheritance">[docs]</a><span class="k">class</span> <span class="nc">SwapTagInheritance</span><span class="p">(</span><span class="n">TagSmokyDingo</span><span class="p">):</span>
@@ -374,14 +380,19 @@
                                     <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">test</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_list_rpm_macros"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_list_rpm_macros">[docs]</a><span class="k">def</span> <span class="nf">cli_list_rpm_macros</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">quiet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">defn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_list_rpm_macros"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_list_rpm_macros">[docs]</a><span class="k">def</span> <span class="nf">cli_list_rpm_macros</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">defn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
     <span class="n">taginfo</span> <span class="o">=</span> <span class="n">resolve_tag</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
     <span class="n">extras</span> <span class="o">=</span> <span class="n">collect_tag_extras</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">taginfo</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;rpm.macro.&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">extras</span><span class="p">):</span>
-        <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;macro&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">10</span><span class="p">:]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">extras</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;macro&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">10</span><span class="p">:]</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">if</span> <span class="n">json</span><span class="p">:</span>
         <span class="n">pretty_json</span><span class="p">(</span><span class="n">extras</span><span class="p">)</span>
@@ -391,12 +402,12 @@
         <span class="c1"># macro definition mode</span>
         <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;%</span><span class="si">{macro}</span><span class="s2"> </span><span class="si">{value}</span><span class="s2">&quot;</span>
 
-        <span class="k">for</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">extras</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">extras</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">extra</span><span class="p">))</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">tabulate</span><span class="p">((</span><span class="s2">&quot;Macro&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;Tag&quot;</span><span class="p">),</span>
-                 <span class="n">itervalues</span><span class="p">(</span><span class="n">extras</span><span class="p">),</span>
+                 <span class="n">extras</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
                  <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;macro&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_name&quot;</span><span class="p">),</span>
                  <span class="n">sorting</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span></div>
@@ -440,11 +451,16 @@
                                    <span class="n">json</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">json</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_set_rpm_macro"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_set_rpm_macro">[docs]</a><span class="k">def</span> <span class="nf">cli_set_rpm_macro</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">macro</span><span class="p">,</span>
-                      <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                      <span class="n">target</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_set_rpm_macro"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_set_rpm_macro">[docs]</a><span class="k">def</span> <span class="nf">cli_set_rpm_macro</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">macro</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">remove</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">block</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    If remove is True, value and block are ignored. The setting will</span>
 <span class="sd">    be removed from the tag&#39;s extra settings.</span>
 
@@ -594,10 +610,15 @@
                                  <span class="n">target</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">target</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_set_env_var"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_set_env_var">[docs]</a><span class="k">def</span> <span class="nf">cli_set_env_var</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span>
-                    <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">target</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cli_set_env_var"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_set_env_var">[docs]</a><span class="k">def</span> <span class="nf">cli_set_env_var</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">var</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">remove</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">block</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    If remove is True, value and block are ignored. The setting will</span>
 <span class="sd">    be removed from the tag&#39;s extra settings.</span>
 
@@ -750,14 +771,19 @@
                                <span class="n">target</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">target</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_list_env_vars"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_list_env_vars">[docs]</a><span class="k">def</span> <span class="nf">cli_list_env_vars</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                      <span class="n">quiet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">defn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_list_env_vars"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_list_env_vars">[docs]</a><span class="k">def</span> <span class="nf">cli_list_env_vars</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">defn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
     <span class="n">taginfo</span> <span class="o">=</span> <span class="n">resolve_tag</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
     <span class="n">extras</span> <span class="o">=</span> <span class="n">collect_tag_extras</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">taginfo</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;rpm.env.&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">extras</span><span class="p">):</span>
-        <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">8</span><span class="p">:]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">extras</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">8</span><span class="p">:]</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">if</span> <span class="n">json</span><span class="p">:</span>
         <span class="n">pretty_json</span><span class="p">(</span><span class="n">extras</span><span class="p">)</span>
@@ -766,19 +792,19 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># we&#39;re going to want to add some escaping safety nets. Let&#39;s</span>
         <span class="c1"># have json.dumps do that work for us.</span>
-        <span class="k">for</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">extras</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">extras</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">extra</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">defn</span><span class="p">:</span>
         <span class="c1"># macro definition mode</span>
         <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{var!s}</span><span class="s2">=</span><span class="si">{value!s}</span><span class="s2">&quot;</span>
 
-        <span class="k">for</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">extras</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">extras</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">extra</span><span class="p">))</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">tabulate</span><span class="p">((</span><span class="s2">&quot;Variable&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;Tag&quot;</span><span class="p">),</span>
-                 <span class="n">itervalues</span><span class="p">(</span><span class="n">extras</span><span class="p">),</span>
+                 <span class="n">extras</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
                  <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_name&quot;</span><span class="p">),</span>
                  <span class="n">sorting</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span></div>
@@ -822,9 +848,13 @@
                                  <span class="n">json</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">json</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_list_tag_extras"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_list_tag_extras">[docs]</a><span class="k">def</span> <span class="nf">cli_list_tag_extras</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">blocked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">quiet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_list_tag_extras"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_list_tag_extras">[docs]</a><span class="k">def</span> <span class="nf">cli_list_tag_extras</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">blocked</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
     <span class="n">taginfo</span> <span class="o">=</span> <span class="n">resolve_tag</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
     <span class="n">extras</span> <span class="o">=</span> <span class="n">collect_tag_extras</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">taginfo</span><span class="p">)</span>
@@ -832,6 +862,8 @@
     <span class="k">if</span> <span class="n">json</span><span class="p">:</span>
         <span class="n">pretty_json</span><span class="p">(</span><span class="n">extras</span><span class="p">)</span>
         <span class="k">return</span>
+
+    <span class="n">headings</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">blocked</span><span class="p">:</span>
         <span class="n">headings</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Setting&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;Tag&quot;</span><span class="p">,</span> <span class="s2">&quot;Block&quot;</span><span class="p">)</span>
@@ -847,7 +879,7 @@
         <span class="n">fields</span> <span class="o">=</span> <span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_name&quot;</span><span class="p">)</span>
 
     <span class="n">tabulate</span><span class="p">(</span><span class="n">headings</span><span class="p">,</span>
-             <span class="n">itervalues</span><span class="p">(</span><span class="n">extras</span><span class="p">),</span>
+             <span class="n">extras</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
              <span class="n">key</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span>
              <span class="n">sorting</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
              <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span></div>
@@ -890,11 +922,15 @@
                                    <span class="n">json</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">json</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_filter_tags"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_filter_tags">[docs]</a><span class="k">def</span> <span class="nf">cli_filter_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag_list</span><span class="p">,</span>
-                    <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">tag_sifter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">sorting</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_filter_tags"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_filter_tags">[docs]</a><span class="k">def</span> <span class="nf">cli_filter_tags</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tag_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">search</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regex</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tag_sifter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sifter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sorting</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">search</span><span class="p">:</span>
         <span class="n">tag_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span>
@@ -906,12 +942,12 @@
 
     <span class="n">tag_list</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">int_or_str</span><span class="p">,</span> <span class="n">tag_list</span><span class="p">))</span>
     <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_tags</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag_list</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="n">tag_dedup</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">))</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">tag_dedup</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">tag_sifter</span><span class="p">:</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">tag_sifter</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="n">tags</span><span class="p">}</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">tags</span><span class="p">)}</span>
 
     <span class="k">if</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_NAME</span><span class="p">:</span>
         <span class="n">sortkey</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span>
@@ -920,12 +956,14 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">sortkey</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">output_sifted</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sortkey</span><span class="p">)</span></div>
+    <span class="c1"># unsure why</span>
+    <span class="n">output_sifted</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sortkey</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
 
 
 <div class="viewcode-block" id="FilterTags"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.FilterTags">[docs]</a><span class="k">class</span> <span class="nc">FilterTags</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">TagSifting</span><span class="p">):</span>
 
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Filter a list of tags&quot;</span>
+
 
 <div class="viewcode-block" id="FilterTags.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.FilterTags.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
         <span class="n">addarg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span>
@@ -991,6 +1029,124 @@
                                <span class="n">strict</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">strict</span><span class="p">)</span></div></div>
 
 
+<span class="n">REPO_CHECK_TABLES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;build_target_config&quot;</span><span class="p">,</span> <span class="s2">&quot;group_config&quot;</span><span class="p">,</span> <span class="s2">&quot;group_package_listing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;group_req_listing&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_config&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_external_repos&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_extra&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;tag_inheritance&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_listing&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_packages&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="cli_check_repo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_check_repo">[docs]</a><span class="k">def</span> <span class="nf">cli_check_repo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">show_events</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">utc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">resolve_tag</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="n">tagname</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="n">tagid</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getRepo</span><span class="p">(</span><span class="n">tagid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">repo</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tag </span><span class="si">{</span><span class="n">tagname</span><span class="si">}</span><span class="s2"> has no repo&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">create_event</span> <span class="o">=</span> <span class="n">repo</span><span class="p">[</span><span class="s1">&#39;create_event&#39;</span><span class="p">]</span>
+    <span class="c1"># print(&quot;repo: &quot;, repo)</span>
+
+    <span class="c1"># tagChangedSinceEvent doesn&#39;t follow inheritance on its own,</span>
+    <span class="c1"># instead we must collect the relevant inheritance links and</span>
+    <span class="c1"># check the whole set of tags</span>
+    <span class="n">inher</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getFullInheritance</span><span class="p">(</span><span class="n">tagid</span><span class="p">)</span>
+    <span class="n">tag_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">tagid</span><span class="p">]</span>
+    <span class="n">tag_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;parent_id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">inher</span><span class="p">)</span>
+
+    <span class="n">changed</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">tagChangedSinceEvent</span><span class="p">(</span><span class="n">create_event</span><span class="p">,</span> <span class="n">tag_ids</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">changed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tag </span><span class="si">{</span><span class="n">tagname</span><span class="si">}</span><span class="s2"> has a stale repo&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tag </span><span class="si">{</span><span class="n">tagname</span><span class="si">}</span><span class="s2"> has an up-to-date repo&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;History since repo creation event </span><span class="si">{</span><span class="n">create_event</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+
+    <span class="c1"># if we got this far then there&#39;s been tag changes since the</span>
+    <span class="c1"># repo&#39;s creation event, and we&#39;ve been asked to display those</span>
+    <span class="c1"># changes. So let&#39;s create a timeline from the history of all</span>
+    <span class="c1"># the tags, searching for events that happened after the</span>
+    <span class="c1"># creation event</span>
+    <span class="n">timeline</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">HistoryEntry</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="n">tag_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">session</span><span class="o">.</span><span class="n">queryHistory</span><span class="p">(</span><span class="n">tables</span><span class="o">=</span><span class="n">REPO_CHECK_TABLES</span><span class="p">,</span>
+                                    <span class="n">tag</span><span class="o">=</span><span class="n">tag_id</span><span class="p">,</span>
+                                    <span class="n">afterEvent</span><span class="o">=</span><span class="n">create_event</span><span class="p">)</span>
+
+    <span class="c1"># merge and linearize the events of tag and its parents</span>
+    <span class="n">updates</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span>
+    <span class="k">for</span> <span class="n">_tid</span><span class="p">,</span> <span class="n">updates</span> <span class="ow">in</span> <span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">tag_ids</span><span class="p">):</span>
+        <span class="n">timeline</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">convert_history</span><span class="p">(</span><span class="n">updates</span><span class="p">))</span>
+
+    <span class="n">timeline</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">print_history</span><span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="n">utc</span><span class="p">,</span> <span class="n">show_events</span><span class="o">=</span><span class="n">show_events</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="CheckRepo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.CheckRepo">[docs]</a><span class="k">class</span> <span class="nc">CheckRepo</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Check the freshness of a tag&#39;s repo&quot;</span>
+
+
+<div class="viewcode-block" id="CheckRepo.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.CheckRepo.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="n">addarg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;TAGNAME&quot;</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of tag&quot;</span><span class="p">)</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--target&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Specify by target rather than a tag&quot;</span><span class="p">)</span>
+
+        <span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+        <span class="n">addarg</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--quiet&quot;</span><span class="p">,</span> <span class="s2">&quot;-q&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Suppress output&quot;</span><span class="p">)</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--verbose&quot;</span><span class="p">,</span> <span class="s2">&quot;-v&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Show history modifications since repo creation&quot;</span><span class="p">)</span>
+
+        <span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s2">&quot;verbose output settings&quot;</span><span class="p">)</span>
+        <span class="n">addarg</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--utc&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Display timestamps in UTC rather than local time.&quot;</span>
+               <span class="s2">&quot; Requires koji &gt;= 1.27&quot;</span><span class="p">)</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--events&quot;</span><span class="p">,</span> <span class="s2">&quot;-e&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Display event IDs&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parser</span></div>
+
+
+<div class="viewcode-block" id="CheckRepo.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.CheckRepo.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cli_check_repo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span>
+                              <span class="n">target</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
+                              <span class="n">verbose</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                              <span class="n">quiet</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">quiet</span><span class="p">,</span>
+                              <span class="n">show_events</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">events</span><span class="p">,</span>
+                              <span class="n">utc</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span></div></div>
+
+
 <span class="c1">#</span>
 <span class="c1"># The end.</span>
 </pre></div>
@@ -1005,12 +1161,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1024,7 +1180,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.cli</a> &#187;</li>
@@ -1032,9 +1188,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

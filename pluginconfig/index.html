@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+
+<html lang="English">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Smoky Dingo Plugin Configuration &#8212; kojismokydingo 2.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Sifty Dingo Filtering Language" href="../siftylang/" />
+    <link rel="prev" title="ksd-filter-tags" href="../standalone/ksd-filter-tags/" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../siftylang/" title="Sifty Dingo Filtering Language"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../standalone/ksd-filter-tags/" title="ksd-filter-tags"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Smoky Dingo Plugin Configuration</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="smoky-dingo-plugin-configuration">
+<h1>Smoky Dingo Plugin Configuration<a class="headerlink" href="#smoky-dingo-plugin-configuration" title="Permalink to this heading">¶</a></h1>
+<p>The koji configuration implementation is focused heavily on defining
+koji profiles, and is therefore limited in what keys it will accept.
+This makes it essentially impossible for a plugin to have its own
+configuration unless it wants to define a separate config path and
+loading system.</p>
+<p>Koji Smoky Dingo assists in this space by providing an extensible
+configuration system intended just for koji CLI plugins.</p>
+<section id="configuration-format">
+<h2>Configuration Format<a class="headerlink" href="#configuration-format" title="Permalink to this heading">¶</a></h2>
+<p>KSD plugin configuration is specified using the common config-file
+format, as implemented in Python's <a class="reference external" href="https://docs.python.org/3/library/configparser.html#configparser.ConfigParser" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configparser.ConfigParser</span></code></a> API</p>
+<p>Configuration files are loaded from two distinct directories. First
+from a shared system directory, and then a user-specific directory.</p>
+<p>These directories are discovered via the <a class="reference external" href="https://pypi.org/project/appdirs/">AppDirs</a> package. Thus for example on a
+linux system this will use the <a class="reference external" href="https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html">XDG path specification</a>,
+and so the system dir would likely be <code class="docutils literal notranslate"><span class="pre">/etc/xdg/ksd/</span></code> and the user
+dir would be <code class="docutils literal notranslate"><span class="pre">~/.local/config/ksd/</span></code></p>
+<p>From these two directories every file ending in the suffix <code class="docutils literal notranslate"><span class="pre">.conf</span></code>
+will be loaded in filename order. First all of the files from the
+system dir, and then all of the files from the user dir. This ensures
+that user configuration can override system configuration.</p>
+<p>The individual config files are broken up into sections. These
+sections are named after the plugin command whose configuration they
+hold. For example, the configuration for <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">pull-container</span></code> would
+be under a heading <code class="docutils literal notranslate"><span class="pre">[pull-container]</span></code></p>
+<p>It is up to each plugin command to define the keys that they are
+interesed in under their section. However, the <code class="docutils literal notranslate"><span class="pre">enabled</span></code> key is used
+by the base SmokyDingo implementation by default. This key is used at
+command loading time to determine whether the command should be
+enabled or not. By default this setting is <code class="docutils literal notranslate"><span class="pre">1</span></code> meaning all commands
+are used. However, setting <code class="docutils literal notranslate"><span class="pre">enabled</span> <span class="pre">=</span> <span class="pre">0</span></code> will cause the meta plugin
+to skip over that command, thus not adding it to the koji CLI.</p>
+<p>For example, if a user wanted to disable the KSD version of the
+<code class="docutils literal notranslate"><span class="pre">userinfo</span></code> command in favor of the in-built command of the same name
+in recent koji versions, they could have the following in a file named
+<code class="docutils literal notranslate"><span class="pre">~/.local/config/ksd/common.conf</span></code></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[userinfo]
+enable = 0
+</pre></div>
+</div>
+</section>
+<section id="configuration-api">
+<h2>Configuration API<a class="headerlink" href="#configuration-api" title="Permalink to this heading">¶</a></h2>
+<p>Accessing plugin configurations is easiest via the method
+<a class="reference internal" href="../kojismokydingo/cli/#kojismokydingo.cli.SmokyDingo.get_plugin_config" title="kojismokydingo.cli.SmokyDingo.get_plugin_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SmokyDingo.get_plugin_config</span></code></a> which will
+automatically load the configuration files and look for a section
+matching the name of the instance of the command.</p>
+<p>Outside of a SmokyDingo subclass, the <a class="reference internal" href="../kojismokydingo/common/#kojismokydingo.common.get_plugin_config" title="kojismokydingo.common.get_plugin_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_plugin_config</span></code></a> function offers the same
+lookup, but the caller must specifcy the command or plugin's name.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Smoky Dingo Plugin Configuration</a><ul>
+<li><a class="reference internal" href="#configuration-format">Configuration Format</a></li>
+<li><a class="reference internal" href="#configuration-api">Configuration API</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../standalone/ksd-filter-tags/"
+                          title="previous chapter">ksd-filter-tags</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../siftylang/"
+                          title="next chapter">Sifty Dingo Filtering Language</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pluginconfig.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../siftylang/" title="Sifty Dingo Filtering Language"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../standalone/ksd-filter-tags/" title="ksd-filter-tags"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Smoky Dingo Plugin Configuration</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+    </div>
+  </body>
+</html>

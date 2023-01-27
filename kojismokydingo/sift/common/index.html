@@ -4,14 +4,14 @@
 <html lang="English">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.sift.common &#8212; kojismokydingo 1.1.0 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>kojismokydingo.sift.common &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex/" />
     <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="kojismokydingo.sift.parse" href="../parse/" />
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../builds/" title="kojismokydingo.sift.builds"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" accesskey="U">Sift API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.sift.common</a></li> 
       </ul>
@@ -50,33 +50,45 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-kojismokydingo.sift.common">
-<span id="kojismokydingo-sift-common"></span><h1>kojismokydingo.sift.common<a class="headerlink" href="#module-kojismokydingo.sift.common" title="Permalink to this headline">¶</a></h1>
+  <section id="module-kojismokydingo.sift.common">
+<span id="kojismokydingo-sift-common"></span><h1>kojismokydingo.sift.common<a class="headerlink" href="#module-kojismokydingo.sift.common" title="Permalink to this heading">¶</a></h1>
 <p>Koji Smoky Dingo - Koji-specific utilities for working with Sifty
 Sieves</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Christopher O'Brien &lt;<a class="reference external" href="mailto:obriencj&#37;&#52;&#48;gmail&#46;com">obriencj<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GPL v3</p>
 </dd>
 </dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">CacheMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sifter</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">tokens</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.sift.Sieve" title="kojismokydingo.sift.Sieve"><code class="xref py py-class docutils literal notranslate"><span class="pre">kojismokydingo.sift.Sieve</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CacheMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sifter</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../#kojismokydingo.sift.Sieve" title="kojismokydingo.sift.Sieve"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sieve</span></code></a></p>
 <p>Mixin providing some caching interfaces to various koji calls.
 These will store cached results on the instance's sifter. The
 cache is cleared when the sifter's <code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code> method is invoked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sifter</strong> (<a class="reference internal" href="../#kojismokydingo.sift.Sifter" title="kojismokydingo.sift.Sifter"><em>Sifter</em></a>) -- </p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin.allowed_packages">
 <span class="sig-name descname"><span class="pre">allowed_packages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherited</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.allowed_packages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.allowed_packages" title="Permalink to this definition">¶</a></dt>
-<dd><p>a caching wrapper for session.listPackages which returns a set
+<dd><p>a caching wrapper for <code class="docutils literal notranslate"><span class="pre">session.listPackages</span></code> which returns a set
 containing only the package names which are not blocked.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.10)">set</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+<li><p><strong>inherited</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -84,11 +96,18 @@ containing only the package names which are not blocked.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin.blocked_packages">
 <span class="sig-name descname"><span class="pre">blocked_packages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherited</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.blocked_packages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.blocked_packages" title="Permalink to this definition">¶</a></dt>
-<dd><p>a caching wrapper for session.listPackages which returns a set
+<dd><p>a caching wrapper for <code class="docutils literal notranslate"><span class="pre">session.listPackages</span></code> which returns a set
 containing only the package names which are blocked.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.10)">set</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+<li><p><strong>inherited</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -96,11 +115,17 @@ containing only the package names which are blocked.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin.bulk_get_tag_groups">
 <span class="sig-name descname"><span class="pre">bulk_get_tag_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_ids</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.bulk_get_tag_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.bulk_get_tag_groups" title="Permalink to this definition">¶</a></dt>
-<dd><p>a multicall caching wrapper for session.getTagGroups. Shares a
+<dd><p>a multicall caching wrapper for <code class="docutils literal notranslate"><span class="pre">session.getTagGroups</span></code>. Shares a
 cache with <a class="reference internal" href="#kojismokydingo.sift.common.CacheMixin.get_tag_groups" title="kojismokydingo.sift.common.CacheMixin.get_tag_groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tag_groups</span></code></a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_ids</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="../../types/#kojismokydingo.types.TagGroupInfo" title="kojismokydingo.types.TagGroupInfo"><em>TagGroupInfo</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -108,12 +133,19 @@ cache with <a class="reference internal" href="#kojismokydingo.sift.common.Cache
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin.bulk_list_packages">
 <span class="sig-name descname"><span class="pre">bulk_list_packages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherited</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.bulk_list_packages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.bulk_list_packages" title="Permalink to this definition">¶</a></dt>
-<dd><p>a multicall caching wrapper for session.listPackages</p>
+<dd><p>a multicall caching wrapper for <code class="docutils literal notranslate"><span class="pre">session.listPackages</span></code></p>
 <p>shares the same cache as <a class="reference internal" href="#kojismokydingo.sift.common.CacheMixin.list_packages" title="kojismokydingo.sift.common.CacheMixin.list_packages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_packages</span></code></a> (and therefore
 <a class="reference internal" href="#kojismokydingo.sift.common.CacheMixin.allowed_packages" title="kojismokydingo.sift.common.CacheMixin.allowed_packages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">allowed_packages</span></code></a> and <a class="reference internal" href="#kojismokydingo.sift.common.CacheMixin.blocked_packages" title="kojismokydingo.sift.common.CacheMixin.blocked_packages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">blocked_packages</span></code></a>)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>,<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_ids</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) -- </p></li>
+<li><p><strong>inherited</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="../../types/#kojismokydingo.types.TagPackageInfo" title="kojismokydingo.types.TagPackageInfo"><em>TagPackageInfo</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -121,10 +153,16 @@ cache with <a class="reference internal" href="#kojismokydingo.sift.common.Cache
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin.get_tag_groups">
 <span class="sig-name descname"><span class="pre">get_tag_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.get_tag_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.get_tag_groups" title="Permalink to this definition">¶</a></dt>
-<dd><p>a caching wrapper for session.getTagGroups</p>
+<dd><p>a caching wrapper for <code class="docutils literal notranslate"><span class="pre">session.getTagGroups</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="../../types/#kojismokydingo.types.TagGroupInfo" title="kojismokydingo.types.TagGroupInfo"><em>TagGroupInfo</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -132,11 +170,18 @@ cache with <a class="reference internal" href="#kojismokydingo.sift.common.Cache
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin.latest_build_ids">
 <span class="sig-name descname"><span class="pre">latest_build_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.latest_build_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.latest_build_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>a caching wrapper for session.getLatestBuilds which returns a set
-containing only the build IDs</p>
+<dd><p>a caching wrapper for <code class="docutils literal notranslate"><span class="pre">session.getLatestBuilds</span></code> which returns a
+set containing only the build IDs</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.10)">set</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -144,10 +189,17 @@ containing only the build IDs</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin.latest_builds">
 <span class="sig-name descname"><span class="pre">latest_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.latest_builds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.latest_builds" title="Permalink to this definition">¶</a></dt>
-<dd><p>a caching wrapper for session.getLatestBuilds</p>
+<dd><p>a caching wrapper for <code class="docutils literal notranslate"><span class="pre">session.getLatestBuilds</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="../../types/#kojismokydingo.types.BuildInfo" title="kojismokydingo.types.BuildInfo"><em>BuildInfo</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -158,8 +210,15 @@ containing only the build IDs</p>
 <dd><p>a caching wrapper for session.getLatestBuilds which returns a dict
 mapping the build names to the build info</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference internal" href="../../types/#kojismokydingo.types.BuildInfo" title="kojismokydingo.types.BuildInfo"><em>BuildInfo</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -170,8 +229,15 @@ mapping the build names to the build info</p>
 <dd><p>a caching wrapper for <a class="reference internal" href="../../builds/#kojismokydingo.builds.latest_maven_builds" title="kojismokydingo.builds.latest_maven_builds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.builds.latest_maven_builds</span></code></a>
 which returns a set containing only the build IDs</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.10)">set</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -181,8 +247,15 @@ which returns a set containing only the build IDs</p>
 <span class="sig-name descname"><span class="pre">latest_maven_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.latest_maven_builds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.latest_maven_builds" title="Permalink to this definition">¶</a></dt>
 <dd><p>a caching wrapper for <a class="reference internal" href="../../builds/#kojismokydingo.builds.latest_maven_builds" title="kojismokydingo.builds.latest_maven_builds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.builds.latest_maven_builds</span></code></a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+<li><p><strong>inherit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>], <a class="reference internal" href="../../types/#kojismokydingo.types.BuildInfo" title="kojismokydingo.types.BuildInfo"><em>BuildInfo</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -190,10 +263,17 @@ which returns a set containing only the build IDs</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.sift.common.CacheMixin.list_packages">
 <span class="sig-name descname"><span class="pre">list_packages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherited</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#CacheMixin.list_packages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.CacheMixin.list_packages" title="Permalink to this definition">¶</a></dt>
-<dd><p>a caching wrapper for session.listPackages</p>
+<dd><p>a caching wrapper for <code class="docutils literal notranslate"><span class="pre">session.listPackages</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<em>ClientSession</em>) -- </p></li>
+<li><p><strong>tag_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) -- </p></li>
+<li><p><strong>inherited</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="../../types/#kojismokydingo.types.TagPackageInfo" title="kojismokydingo.types.TagPackageInfo"><em>TagPackageInfo</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -205,17 +285,20 @@ which returns a set containing only the build IDs</p>
 <span class="sig-name descname"><span class="pre">ensure_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/kojismokydingo/sift/common/#ensure_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.sift.common.ensure_comparison" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a comparison operator symbol into a comparison function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- The symbol or string to convert. Should be one of
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) -- The symbol or string to convert. Should be one of
 '==', '!=', '&gt;', '&gt;=', '&lt;', '&lt;='</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>callable</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../#kojismokydingo.sift.SifterError" title="kojismokydingo.sift.SifterError"><strong>SifterError</strong></a> -- if the value isn't one of the known operators</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -224,12 +307,16 @@ which returns a set containing only the build IDs</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../builds/"
-                        title="previous chapter">kojismokydingo.sift.builds</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../parse/"
-                        title="next chapter">kojismokydingo.sift.parse</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../builds/"
+                          title="previous chapter">kojismokydingo.sift.builds</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../parse/"
+                          title="next chapter">kojismokydingo.sift.parse</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -241,12 +328,12 @@ which returns a set containing only the build IDs</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -266,15 +353,15 @@ which returns a set containing only the build IDs</p>
         <li class="right" >
           <a href="../builds/" title="kojismokydingo.sift.builds"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" >Sift API Reference</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.sift.common</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

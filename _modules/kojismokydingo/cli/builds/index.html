@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.cli.builds &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.cli.builds &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.cli</a> &#187;</li>
@@ -67,35 +66,40 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
-
 <span class="kn">import</span> <span class="nn">sys</span>
 
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">Namespace</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">ClientSession</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">filter</span><span class="p">,</span> <span class="nb">map</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">system</span>
+<span class="kn">from</span> <span class="nn">shlex</span> <span class="kn">import</span> <span class="n">quote</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">TagSmokyDingo</span><span class="p">,</span>
+    <span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">BadDingo</span><span class="p">,</span> <span class="n">TagSmokyDingo</span><span class="p">,</span>
     <span class="n">int_or_str</span><span class="p">,</span> <span class="n">pretty_json</span><span class="p">,</span> <span class="n">open_output</span><span class="p">,</span>
     <span class="n">printerr</span><span class="p">,</span> <span class="n">read_clean_lines</span><span class="p">,</span> <span class="n">resplit</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.sift</span> <span class="kn">import</span> <span class="n">BuildSifting</span><span class="p">,</span> <span class="n">output_sifted</span>
+<span class="kn">from</span> <span class="nn">.sift</span> <span class="kn">import</span> <span class="n">BuildSifting</span><span class="p">,</span> <span class="n">Sifter</span><span class="p">,</span> <span class="n">output_sifted</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">NoSuchUser</span><span class="p">,</span>
-    <span class="n">as_buildinfo</span><span class="p">,</span> <span class="n">as_taginfo</span><span class="p">,</span>
+    <span class="n">as_buildinfo</span><span class="p">,</span> <span class="n">as_taginfo</span><span class="p">,</span> <span class="n">as_userinfo</span><span class="p">,</span>
     <span class="n">bulk_load</span><span class="p">,</span> <span class="n">bulk_load_builds</span><span class="p">,</span> <span class="n">bulk_load_tags</span><span class="p">,</span> <span class="n">iter_bulk_load</span><span class="p">,</span>
     <span class="n">version_check</span><span class="p">,</span> <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..builds</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">BUILD_COMPLETE</span><span class="p">,</span> <span class="n">BUILD_DELETED</span><span class="p">,</span>
     <span class="n">BuildFilter</span><span class="p">,</span>
     <span class="n">build_dedup</span><span class="p">,</span> <span class="n">build_id_sort</span><span class="p">,</span> <span class="n">build_nvr_sort</span><span class="p">,</span>
     <span class="n">decorate_builds_btypes</span><span class="p">,</span> <span class="n">decorate_builds_cg_list</span><span class="p">,</span>
     <span class="n">gather_component_build_ids</span><span class="p">,</span> <span class="n">gather_wrapped_builds</span><span class="p">,</span>
-    <span class="n">iter_bulk_move_builds</span><span class="p">,</span> <span class="n">iter_bulk_tag_builds</span><span class="p">,</span> <span class="n">iter_bulk_untag_builds</span><span class="p">,</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..tags</span> <span class="kn">import</span> <span class="n">ensure_tag</span><span class="p">,</span> <span class="n">gather_tag_ids</span>
+    <span class="n">iter_bulk_move_builds</span><span class="p">,</span> <span class="n">iter_bulk_tag_builds</span><span class="p">,</span>
+    <span class="n">iter_bulk_untag_builds</span><span class="p">,</span> <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">chunkseq</span><span class="p">,</span> <span class="n">unique</span>
+<span class="kn">from</span> <span class="nn">..tags</span> <span class="kn">import</span> <span class="n">ensure_tag</span><span class="p">,</span> <span class="n">gather_tag_ids</span>
+<span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BTypeInfo</span><span class="p">,</span> <span class="n">BuildInfo</span><span class="p">,</span> <span class="n">BuildInfos</span><span class="p">,</span> <span class="n">BuildSpec</span><span class="p">,</span>
+    <span class="n">BuildState</span><span class="p">,</span> <span class="n">DecoratedBuildInfo</span><span class="p">,</span> <span class="n">GOptions</span><span class="p">,</span> <span class="n">TagSpec</span><span class="p">,</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..users</span> <span class="kn">import</span> <span class="n">collect_cgs</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -107,6 +111,7 @@
     <span class="s2">&quot;ListBTypes&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ListCGs&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ListComponents&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PullContainer&quot;</span><span class="p">,</span>
 
     <span class="s2">&quot;cli_bulk_move_builds&quot;</span><span class="p">,</span>
     <span class="s2">&quot;cli_bulk_tag_builds&quot;</span><span class="p">,</span>
@@ -115,6 +120,7 @@
     <span class="s2">&quot;cli_list_btypes&quot;</span><span class="p">,</span>
     <span class="s2">&quot;cli_list_cgs&quot;</span><span class="p">,</span>
     <span class="s2">&quot;cli_list_components&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cli_pull_container&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -122,23 +128,28 @@
 <span class="n">SORT_BY_NVR</span> <span class="o">=</span> <span class="s2">&quot;sort-by-nvr&quot;</span>
 
 
-<div class="viewcode-block" id="cli_bulk_tag_builds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_bulk_tag_builds">[docs]</a><span class="k">def</span> <span class="nf">cli_bulk_tag_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">nvrs</span><span class="p">,</span>
-                        <span class="n">sorting</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">owner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_bulk_tag_builds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_bulk_tag_builds">[docs]</a><span class="k">def</span> <span class="nf">cli_bulk_tag_builds</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">nvrs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">sorting</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">owner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">notify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">create</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji bulk-tag-builds`` command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># set up the verbose debugging output function</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-            <span class="n">printerr</span><span class="p">(</span><span class="n">message</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">debug</span> <span class="o">=</span> <span class="n">printerr</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="k">pass</span>
 
     <span class="c1"># fetch the destination tag info (and make sure it actually</span>
@@ -152,34 +163,31 @@
     <span class="c1"># have a matching pkg entry already. Someone needs to own them...</span>
     <span class="n">ownerid</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">owner</span><span class="p">:</span>
-        <span class="n">ownerinfo</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getUser</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ownerinfo</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NoSuchUser</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
+        <span class="n">ownerinfo</span> <span class="o">=</span> <span class="n">as_userinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">owner</span><span class="p">)</span>
         <span class="n">ownerid</span> <span class="o">=</span> <span class="n">ownerinfo</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
 
     <span class="c1"># load the buildinfo for all of the NVRs</span>
-    <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fed with </span><span class="si">%i</span><span class="s2"> builds&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nvrs</span><span class="p">))</span>
+    <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fed with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nvrs</span><span class="p">)</span><span class="si">}</span><span class="s2"> builds&quot;</span><span class="p">)</span>
 
     <span class="c1"># validate our list of NVRs first by attempting to load them</span>
     <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">unique</span><span class="p">(</span><span class="n">nvrs</span><span class="p">),</span> <span class="n">err</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
-    <span class="n">builds</span> <span class="o">=</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">)</span>
 
     <span class="c1"># sort/dedup as requested</span>
     <span class="k">if</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_NVR</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;NVR sorting specified&quot;</span><span class="p">)</span>
-        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_nvr_sort</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span>
+        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_nvr_sort</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">elif</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_ID</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;ID sorting specified&quot;</span><span class="p">)</span>
-        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_id_sort</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span>
+        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_id_sort</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No sorting specified, preserving feed order&quot;</span><span class="p">)</span>
-        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_dedup</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span>
+        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_dedup</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="c1"># at this point builds is a list of build info dicts</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sorted and trimmed duplicates to </span><span class="si">%i</span><span class="s2"> builds&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">))</span>
+        <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sorted and trimmed duplicates to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span><span class="si">}</span><span class="s2"> builds&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">build</span> <span class="ow">in</span> <span class="n">builds</span><span class="p">:</span>
-            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2"> </span><span class="si">%i</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;nvr&quot;</span><span class="p">],</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+            <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;nvr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">builds</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Nothing to do!&quot;</span><span class="p">)</span>
@@ -197,14 +205,14 @@
         <span class="n">packages</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">listPackages</span><span class="p">(</span><span class="n">tagID</span><span class="o">=</span><span class="n">tagid</span><span class="p">,</span>
                                         <span class="n">inherited</span><span class="o">=</span><span class="n">inherit</span><span class="p">)</span>
 
-    <span class="n">packages</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pkg</span><span class="p">[</span><span class="s2">&quot;package_id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">)</span>
+    <span class="n">package_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pkg</span><span class="p">[</span><span class="s2">&quot;package_id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">)</span>
 
     <span class="n">package_todo</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">build</span> <span class="ow">in</span> <span class="n">builds</span><span class="p">:</span>
         <span class="n">pkgid</span> <span class="o">=</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;package_id&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">pkgid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
-            <span class="n">packages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pkgid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pkgid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">package_ids</span><span class="p">:</span>
+            <span class="n">package_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pkgid</span><span class="p">)</span>
             <span class="n">package_todo</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">pkgid</span><span class="p">,</span> <span class="n">ownerid</span> <span class="ow">or</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;owner_id&quot;</span><span class="p">]))</span>
 
     <span class="k">if</span> <span class="n">package_todo</span><span class="p">:</span>
@@ -243,7 +251,7 @@
         <span class="c1"># and of course display the courtesy counter so the user</span>
         <span class="c1"># knows we&#39;re actually doing something</span>
         <span class="n">counter</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">done</span><span class="p">)</span>
-        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot; tagged </span><span class="si">%i</span><span class="s2">/</span><span class="si">%i</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">))</span>
+        <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; tagged </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;All done!&quot;</span><span class="p">)</span></div>
 
@@ -332,35 +340,39 @@
                                    <span class="n">strict</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">strict</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_bulk_untag_builds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_bulk_untag_builds">[docs]</a><span class="k">def</span> <span class="nf">cli_bulk_untag_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">,</span> <span class="n">nvrs</span><span class="p">,</span>
-                          <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                          <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_bulk_untag_builds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_bulk_untag_builds">[docs]</a><span class="k">def</span> <span class="nf">cli_bulk_untag_builds</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">tagname</span><span class="p">:</span> <span class="n">TagSpec</span><span class="p">,</span>
+        <span class="n">nvrs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">notify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji bulk-untag-builds`` command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># set up the verbose debugging output function</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-            <span class="n">printerr</span><span class="p">(</span><span class="n">message</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">debug</span> <span class="o">=</span> <span class="n">printerr</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="k">pass</span>
 
     <span class="n">taginfo</span> <span class="o">=</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagname</span><span class="p">)</span>
 
     <span class="c1"># load the buildinfo for all of the NVRs</span>
-    <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fed with </span><span class="si">%i</span><span class="s2"> builds&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nvrs</span><span class="p">))</span>
+    <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fed with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nvrs</span><span class="p">)</span><span class="si">}</span><span class="s2"> builds&quot;</span><span class="p">)</span>
 
     <span class="c1"># validate our list of NVRs first by attempting to load them</span>
     <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">unique</span><span class="p">(</span><span class="n">nvrs</span><span class="p">),</span> <span class="n">err</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
-    <span class="n">builds</span> <span class="o">=</span> <span class="n">build_dedup</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">))</span>
+    <span class="n">builds</span> <span class="o">=</span> <span class="n">build_dedup</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Trimmed duplicates to </span><span class="si">%i</span><span class="s2"> builds&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">))</span>
+        <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trimmed duplicates to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span><span class="si">}</span><span class="s2"> builds&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">build</span> <span class="ow">in</span> <span class="n">builds</span><span class="p">:</span>
-            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2"> </span><span class="si">%i</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;nvr&quot;</span><span class="p">],</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+            <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;nvr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">builds</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Nothing to do!&quot;</span><span class="p">)</span>
@@ -381,7 +393,7 @@
         <span class="c1"># and of course display the courtesy counter so the user</span>
         <span class="c1"># knows we&#39;re actually doing something</span>
         <span class="n">counter</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">done</span><span class="p">)</span>
-        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot; untagged </span><span class="si">%i</span><span class="s2">/</span><span class="si">%i</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">))</span>
+        <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; untagged </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;All done!&quot;</span><span class="p">)</span></div>
 
@@ -441,23 +453,29 @@
                                      <span class="n">strict</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">strict</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_bulk_move_builds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_bulk_move_builds">[docs]</a><span class="k">def</span> <span class="nf">cli_bulk_move_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">srctag</span><span class="p">,</span> <span class="n">desttag</span><span class="p">,</span> <span class="n">nvrs</span><span class="p">,</span>
-                         <span class="n">sorting</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">owner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_bulk_move_builds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_bulk_move_builds">[docs]</a><span class="k">def</span> <span class="nf">cli_bulk_move_builds</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">srctag</span><span class="p">:</span> <span class="n">TagSpec</span><span class="p">,</span>
+        <span class="n">desttag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">nvrs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">sorting</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">owner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">notify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">create</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji bulk-move-builds`` command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># set up the verbose debugging output function</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-            <span class="n">printerr</span><span class="p">(</span><span class="n">message</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">debug</span> <span class="o">=</span> <span class="n">printerr</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="k">pass</span>
 
     <span class="c1"># fetch the source tag info</span>
@@ -465,9 +483,9 @@
 
     <span class="c1"># fetch the destination tag info (and make sure it actually</span>
     <span class="c1"># exists)</span>
-    <span class="n">desttag</span> <span class="o">=</span> <span class="n">ensure_tag</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">desttag</span><span class="p">)</span> <span class="k">if</span> <span class="n">create</span> \
+    <span class="n">dtag</span> <span class="o">=</span> <span class="n">ensure_tag</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">desttag</span><span class="p">)</span> <span class="k">if</span> <span class="n">create</span> \
         <span class="k">else</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">desttag</span><span class="p">)</span>
-    <span class="n">tagid</span> <span class="o">=</span> <span class="n">desttag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+    <span class="n">tagid</span> <span class="o">=</span> <span class="n">dtag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">srctag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tagid</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Source and destination tags are the same, nothing to do!&quot;</span><span class="p">)</span>
@@ -477,34 +495,33 @@
     <span class="c1"># have a matching pkg entry already. Someone needs to own them...</span>
     <span class="n">ownerid</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">owner</span><span class="p">:</span>
-        <span class="n">ownerinfo</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getUser</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ownerinfo</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NoSuchUser</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
+        <span class="n">ownerinfo</span> <span class="o">=</span> <span class="n">as_userinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">owner</span><span class="p">)</span>
         <span class="n">ownerid</span> <span class="o">=</span> <span class="n">ownerinfo</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
 
     <span class="c1"># load the buildinfo for all of the NVRs</span>
-    <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fed with </span><span class="si">%i</span><span class="s2"> builds&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nvrs</span><span class="p">))</span>
+    <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fed with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nvrs</span><span class="p">)</span><span class="si">}</span><span class="s2"> builds&quot;</span><span class="p">)</span>
 
     <span class="c1"># validate our list of NVRs first by attempting to load them</span>
     <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">unique</span><span class="p">(</span><span class="n">nvrs</span><span class="p">),</span> <span class="n">err</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
-    <span class="n">builds</span> <span class="o">=</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">)</span>
+
+    <span class="n">builds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BuildInfo</span><span class="p">]</span>
 
     <span class="c1"># sort/dedup as requested</span>
     <span class="k">if</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_NVR</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;NVR sorting specified&quot;</span><span class="p">)</span>
-        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_nvr_sort</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span>
+        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_nvr_sort</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">elif</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_ID</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;ID sorting specified&quot;</span><span class="p">)</span>
-        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_id_sort</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span>
+        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_id_sort</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No sorting specified, preserving feed order&quot;</span><span class="p">)</span>
-        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_dedup</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span>
+        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_dedup</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="c1"># at this point builds is a list of build info dicts</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sorted and trimmed duplicates to </span><span class="si">%i</span><span class="s2"> builds&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">))</span>
+        <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sorted and trimmed duplicates to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span><span class="si">}</span><span class="s2"> builds&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">build</span> <span class="ow">in</span> <span class="n">builds</span><span class="p">:</span>
-            <span class="n">debug</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2"> </span><span class="si">%i</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;nvr&quot;</span><span class="p">],</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+            <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;nvr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">builds</span><span class="p">:</span>
         <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Nothing to do!&quot;</span><span class="p">)</span>
@@ -522,14 +539,14 @@
         <span class="n">packages</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">listPackages</span><span class="p">(</span><span class="n">tagID</span><span class="o">=</span><span class="n">tagid</span><span class="p">,</span>
                                         <span class="n">inherited</span><span class="o">=</span><span class="n">inherit</span><span class="p">)</span>
 
-    <span class="n">packages</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pkg</span><span class="p">[</span><span class="s2">&quot;package_id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">)</span>
+    <span class="n">package_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pkg</span><span class="p">[</span><span class="s2">&quot;package_id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">)</span>
 
     <span class="n">package_todo</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">build</span> <span class="ow">in</span> <span class="n">builds</span><span class="p">:</span>
         <span class="n">pkgid</span> <span class="o">=</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;package_id&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">pkgid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
-            <span class="n">packages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pkgid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pkgid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">package_ids</span><span class="p">:</span>
+            <span class="n">package_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pkgid</span><span class="p">)</span>
             <span class="n">package_todo</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">pkgid</span><span class="p">,</span> <span class="n">ownerid</span> <span class="ow">or</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;owner_id&quot;</span><span class="p">]))</span>
 
     <span class="k">if</span> <span class="n">package_todo</span><span class="p">:</span>
@@ -553,7 +570,7 @@
     <span class="c1"># and finally, move the builds themselves in chunks of 100</span>
     <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Begining build moving&quot;</span><span class="p">)</span>
     <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">done</span> <span class="ow">in</span> <span class="n">iter_bulk_move_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">srctag</span><span class="p">,</span> <span class="n">desttag</span><span class="p">,</span> <span class="n">builds</span><span class="p">,</span>
+    <span class="k">for</span> <span class="n">done</span> <span class="ow">in</span> <span class="n">iter_bulk_move_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">srctag</span><span class="p">,</span> <span class="n">dtag</span><span class="p">,</span> <span class="n">builds</span><span class="p">,</span>
                                       <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="n">notify</span><span class="p">,</span>
                                       <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">):</span>
 
@@ -568,7 +585,7 @@
         <span class="c1"># and of course display the courtesy counter so the user</span>
         <span class="c1"># knows we&#39;re actually doing something</span>
         <span class="n">counter</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">done</span><span class="p">)</span>
-        <span class="n">debug</span><span class="p">(</span><span class="s2">&quot; moved </span><span class="si">%i</span><span class="s2">/</span><span class="si">%i</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">))</span>
+        <span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; moved </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">debug</span><span class="p">(</span><span class="s2">&quot;All done!&quot;</span><span class="p">)</span></div>
 
@@ -663,12 +680,13 @@
 
 
 <div class="viewcode-block" id="BuildFiltering"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.BuildFiltering">[docs]</a><span class="k">class</span> <span class="nc">BuildFiltering</span><span class="p">(</span><span class="n">BuildSifting</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for commands which use build filtering options</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
-<div class="viewcode-block" id="BuildFiltering.filtering_arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.BuildFiltering.filtering_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">filtering_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+<div class="viewcode-block" id="BuildFiltering.filtering_arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.BuildFiltering.filtering_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">filtering_arguments</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parser</span><span class="p">:</span> <span class="n">ArgumentParser</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArgumentParser</span><span class="p">:</span>
 
         <span class="n">grp</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s2">&quot;Filtering by tag&quot;</span><span class="p">)</span>
         <span class="n">addarg</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">add_argument</span>
@@ -735,18 +753,23 @@
         <span class="n">grp</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
         <span class="n">addarg</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">add_argument</span>
 
-        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--completed&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_const&quot;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="n">BUILD_COMPLETE</span><span class="p">,</span>
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--completed&quot;</span><span class="p">,</span>
+               <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_const&quot;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="n">BuildState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,</span>
                <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Limit to completed builds&quot;</span><span class="p">)</span>
 
-        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--deleted&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_const&quot;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="n">BUILD_DELETED</span><span class="p">,</span>
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--deleted&quot;</span><span class="p">,</span>
+               <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_const&quot;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="n">BuildState</span><span class="o">.</span><span class="n">DELETED</span><span class="p">,</span>
                <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Limit to deleted builds&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">parser</span></div>
 
 
-<div class="viewcode-block" id="BuildFiltering.get_filter"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.BuildFiltering.get_filter">[docs]</a>    <span class="k">def</span> <span class="nf">get_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="BuildFiltering.get_filter"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.BuildFiltering.get_filter">[docs]</a>    <span class="k">def</span> <span class="nf">get_filter</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">options</span><span class="p">:</span> <span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BuildFilter</span><span class="p">:</span>
         <span class="c1"># setup the limit as a set of IDs for each tag named in the</span>
         <span class="c1"># options.</span>
         <span class="n">limit_ids</span> <span class="o">=</span> <span class="n">gather_tag_ids</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span>
@@ -766,12 +789,18 @@
                            <span class="n">state</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">state</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_list_components"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_list_components">[docs]</a><span class="k">def</span> <span class="nf">cli_list_components</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvr_list</span><span class="p">,</span>
-                        <span class="n">tags</span><span class="o">=</span><span class="p">(),</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">build_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">build_sifter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">sorting</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_list_components"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_list_components">[docs]</a><span class="k">def</span> <span class="nf">cli_list_components</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">nvr_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">tags</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">TagSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+        <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">latest</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">build_filter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BuildFilter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">build_sifter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sifter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sorting</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji list-component-builds`` command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -780,7 +809,7 @@
     <span class="k">if</span> <span class="n">nvr_list</span><span class="p">:</span>
         <span class="c1"># load the initial set of builds, validating them</span>
         <span class="n">found</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvr_list</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">loaded</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">found</span><span class="p">))</span>
+        <span class="n">loaded</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">found</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">loaded</span> <span class="o">=</span> <span class="p">{}</span>
@@ -788,8 +817,8 @@
     <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
         <span class="c1"># mix in any tagged builds</span>
         <span class="n">tag</span> <span class="o">=</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-        <span class="n">found</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">listTagged</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">inherit</span><span class="o">=</span><span class="n">inherit</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="n">latest</span><span class="p">)</span>
-        <span class="n">loaded</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">found</span><span class="p">)</span>
+        <span class="n">tagged</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">listTagged</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">inherit</span><span class="o">=</span><span class="n">inherit</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="n">latest</span><span class="p">)</span>
+        <span class="n">loaded</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">tagged</span><span class="p">)</span>
 
     <span class="c1"># the build IDs of all the builds we&#39;ve loaded, combined from the</span>
     <span class="c1"># initial nvr_list, plus the builds from tag</span>
@@ -800,26 +829,27 @@
     <span class="n">components</span> <span class="o">=</span> <span class="n">gather_component_build_ids</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">bids</span><span class="p">)</span>
 
     <span class="c1"># now we need to turn those components build IDs into build_infos</span>
-    <span class="n">component_ids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">itervalues</span><span class="p">(</span><span class="n">components</span><span class="p">)))</span>
+    <span class="n">component_ids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">components</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
     <span class="n">found</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">component_ids</span><span class="p">)</span>
 
     <span class="c1"># we&#39;ll also want the underlying builds used to produce any</span>
     <span class="c1"># standalone wrapperRPM builds, as those are not recorded as</span>
     <span class="c1"># normal buildroot components</span>
-    <span class="n">tids</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;task_id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">)</span> <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="s2">&quot;task_id&quot;</span><span class="p">]]</span>
+    <span class="n">tids</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;task_id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="s2">&quot;task_id&quot;</span><span class="p">]]</span>
     <span class="n">wrapped</span> <span class="o">=</span> <span class="n">gather_wrapped_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tids</span><span class="p">)</span>
 
-    <span class="n">builds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">found</span><span class="p">))</span>
-    <span class="n">builds</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">wrapped</span><span class="p">))</span>
+    <span class="n">builds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">builds</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">wrapped</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">build_filter</span><span class="p">:</span>
-        <span class="n">builds</span> <span class="o">=</span> <span class="n">build_filter</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span>
+        <span class="n">builds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">build_filter</span><span class="p">(</span><span class="n">builds</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">build_sifter</span><span class="p">:</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">build_sifter</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">builds</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="n">builds</span><span class="p">}</span>
 
+    <span class="n">sortfn</span><span class="p">:</span> <span class="n">Callable</span>
     <span class="k">if</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_NVR</span><span class="p">:</span>
         <span class="n">sortfn</span> <span class="o">=</span> <span class="n">build_nvr_sort</span>
     <span class="k">elif</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_ID</span><span class="p">:</span>
@@ -829,7 +859,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">sortfn</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">output_sifted</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;nvr&quot;</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sortfn</span><span class="p">)</span></div>
+    <span class="n">output_sifted</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;nvr&quot;</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sortfn</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
 
 
 <div class="viewcode-block" id="ListComponents"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.ListComponents">[docs]</a><span class="k">class</span> <span class="nc">ListComponents</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">BuildFiltering</span><span class="p">):</span>
@@ -906,21 +936,28 @@
                                    <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_filter_builds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_filter_builds">[docs]</a><span class="k">def</span> <span class="nf">cli_filter_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvr_list</span><span class="p">,</span>
-                      <span class="n">tags</span><span class="o">=</span><span class="p">(),</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                      <span class="n">build_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">build_sifter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                      <span class="n">sorting</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                      <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="cli_filter_builds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_filter_builds">[docs]</a><span class="k">def</span> <span class="nf">cli_filter_builds</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">nvr_list</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">tags</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TagSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+        <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">latest</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">build_filter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BuildFilter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">build_sifter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sifter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sorting</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji filter-builds`` command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">nvr_list</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">int_or_str</span><span class="p">,</span> <span class="n">nvr_list</span><span class="p">))</span>
 
+    <span class="n">builds</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">BuildInfo</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">nvr_list</span><span class="p">:</span>
         <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvr_list</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
-        <span class="n">builds</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">))</span>
+        <span class="n">builds</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">builds</span> <span class="o">=</span> <span class="p">()</span>
 
@@ -943,7 +980,7 @@
             <span class="n">tagged_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">tagged</span><span class="p">)</span>
             <span class="n">loaded</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tagged_ids</span> <span class="o">-</span> <span class="n">known_ids</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">loaded</span><span class="p">:</span>
-                <span class="n">builds</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">loaded</span><span class="p">))</span>
+                <span class="n">builds</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">build_filter</span><span class="p">:</span>
         <span class="n">builds</span> <span class="o">=</span> <span class="n">build_filter</span><span class="p">(</span><span class="n">builds</span><span class="p">)</span>
@@ -951,8 +988,9 @@
     <span class="k">if</span> <span class="n">build_sifter</span><span class="p">:</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">build_sifter</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">builds</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="n">builds</span><span class="p">}</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">builds</span><span class="p">)}</span>
 
+    <span class="n">sortfn</span><span class="p">:</span> <span class="n">Callable</span>
     <span class="k">if</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_NVR</span><span class="p">:</span>
         <span class="n">sortfn</span> <span class="o">=</span> <span class="n">build_nvr_sort</span>
     <span class="k">elif</span> <span class="n">sorting</span> <span class="o">==</span> <span class="n">SORT_BY_ID</span><span class="p">:</span>
@@ -962,7 +1000,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">sortfn</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">output_sifted</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;nvr&quot;</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sortfn</span><span class="p">)</span></div>
+    <span class="n">output_sifted</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;nvr&quot;</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sortfn</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
 
 
 <div class="viewcode-block" id="FilterBuilds"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.FilterBuilds">[docs]</a><span class="k">class</span> <span class="nc">FilterBuilds</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">BuildFiltering</span><span class="p">):</span>
@@ -1043,23 +1081,29 @@
                                  <span class="n">strict</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">strict</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_list_btypes"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_list_btypes">[docs]</a><span class="k">def</span> <span class="nf">cli_list_btypes</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cli_list_btypes"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_list_btypes">[docs]</a><span class="k">def</span> <span class="nf">cli_list_btypes</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">nvr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BuildSpec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements ``koji list-btypes`` command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">btypes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">bt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">bt</span><span class="p">)</span> <span class="k">for</span> <span class="n">bt</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">listBTypes</span><span class="p">())</span>
+    <span class="n">btypes_ids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BTypeInfo</span><span class="p">]</span>
+    <span class="n">btypes_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">bt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">bt</span> <span class="k">for</span> <span class="n">bt</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">listBTypes</span><span class="p">()}</span>
 
     <span class="k">if</span> <span class="n">nvr</span><span class="p">:</span>
         <span class="n">build</span> <span class="o">=</span> <span class="n">as_buildinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvr</span><span class="p">)</span>
-        <span class="n">decorate_builds_btypes</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="p">[</span><span class="n">build</span><span class="p">])</span>
-        <span class="n">build_bts</span> <span class="o">=</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;archive_btype_ids&quot;</span><span class="p">]</span>
+        <span class="n">dbuild</span> <span class="o">=</span> <span class="n">decorate_builds_btypes</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="p">[</span><span class="n">build</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">build_bts</span> <span class="o">=</span> <span class="n">dbuild</span><span class="p">[</span><span class="s2">&quot;archive_btype_ids&quot;</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">btid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">btypes</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">btid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">btypes_ids</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">btid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">build_bts</span><span class="p">:</span>
-                <span class="n">btypes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">btid</span><span class="p">)</span>
+                <span class="n">btypes_ids</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">btid</span><span class="p">)</span>
 
-    <span class="n">btypes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">btypes</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="n">btypes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BTypeInfo</span><span class="p">]</span>
+    <span class="n">btypes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">btypes_ids</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">json</span><span class="p">:</span>
         <span class="n">pretty_json</span><span class="p">(</span><span class="n">btypes</span><span class="p">)</span>
@@ -1071,7 +1115,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;  </span><span class="si">{name}</span><span class="s2"> [</span><span class="si">{id}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span>
         <span class="k">if</span> <span class="n">nvr</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Build Types for </span><span class="si">{nvr}</span><span class="s2"> [</span><span class="si">{id}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">build</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Build Types for </span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;nvr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Build Types&quot;</span><span class="p">)</span>
 
@@ -1080,7 +1124,7 @@
 
 
 <div class="viewcode-block" id="ListBTypes"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.ListBTypes">[docs]</a><span class="k">class</span> <span class="nc">ListBTypes</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Koji client command &#39;list-btypes&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1109,30 +1153,30 @@
                                <span class="n">quiet</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">quiet</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_list_cgs"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_list_cgs">[docs]</a><span class="k">def</span> <span class="nf">cli_list_cgs</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cli_list_cgs"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_list_cgs">[docs]</a><span class="k">def</span> <span class="nf">cli_list_cgs</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">nvr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BuildSpec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji list-cgs`` command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">cgs</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">cg</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">listCGs</span><span class="p">()):</span>
-        <span class="n">cg</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">cg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;users&quot;</span><span class="p">)</span>
-        <span class="n">cgs</span><span class="p">[</span><span class="n">cg</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cg</span>
+    <span class="n">cgs</span> <span class="o">=</span> <span class="p">{</span><span class="n">cg</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]:</span> <span class="n">cg</span> <span class="k">for</span> <span class="n">cg</span> <span class="ow">in</span> <span class="n">collect_cgs</span><span class="p">(</span><span class="n">session</span><span class="p">)}</span>
 
     <span class="k">if</span> <span class="n">nvr</span><span class="p">:</span>
         <span class="n">build</span> <span class="o">=</span> <span class="n">as_buildinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvr</span><span class="p">)</span>
-        <span class="n">decorate_builds_cg_list</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="p">[</span><span class="n">build</span><span class="p">])</span>
-        <span class="n">build_cgs</span> <span class="o">=</span> <span class="n">build</span><span class="p">[</span><span class="s2">&quot;archive_cg_ids&quot;</span><span class="p">]</span>
+        <span class="n">dbuild</span> <span class="o">=</span> <span class="n">decorate_builds_cg_list</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="p">[</span><span class="n">build</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">build_cgs</span> <span class="o">=</span> <span class="n">dbuild</span><span class="p">[</span><span class="s2">&quot;archive_cg_ids&quot;</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">cgid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">cgs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">cgid</span> <span class="ow">in</span> <span class="n">cgs</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cgid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">build_cgs</span><span class="p">:</span>
                 <span class="n">cgs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">cgid</span><span class="p">)</span>
 
-    <span class="n">cgs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">itervalues</span><span class="p">(</span><span class="n">cgs</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="n">keep_cgs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cgs</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">json</span><span class="p">:</span>
-        <span class="n">pretty_json</span><span class="p">(</span><span class="n">cgs</span><span class="p">)</span>
+        <span class="n">pretty_json</span><span class="p">(</span><span class="n">keep_cgs</span><span class="p">)</span>
         <span class="k">return</span>
 
     <span class="k">if</span> <span class="n">quiet</span><span class="p">:</span>
@@ -1141,11 +1185,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;  </span><span class="si">{name}</span><span class="s2"> [</span><span class="si">{id}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span>
         <span class="k">if</span> <span class="n">nvr</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Content Generators for </span><span class="si">{nvr}</span><span class="s2"> [</span><span class="si">{id}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">build</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Content Generators for </span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;nvr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">build</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Content Generators&quot;</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">cg</span> <span class="ow">in</span> <span class="n">cgs</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">cg</span> <span class="ow">in</span> <span class="n">keep_cgs</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">fmt</span><span class="p">(</span><span class="o">**</span><span class="n">cg</span><span class="p">))</span></div>
 
 
@@ -1177,6 +1221,153 @@
                             <span class="n">quiet</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">quiet</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="cli_pull_container"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.cli_pull_container">[docs]</a><span class="k">def</span> <span class="nf">cli_pull_container</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">goptions</span><span class="p">:</span> <span class="n">GOptions</span><span class="p">,</span>
+        <span class="n">cmd</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tagcmd</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">bld</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TagSpec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implements the ``koji pull-container`` command</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">tag</span><span class="p">:</span>
+        <span class="n">tinfo</span> <span class="o">=</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+        <span class="n">latest</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getLatestBuilds</span><span class="p">(</span><span class="n">tinfo</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">package</span><span class="o">=</span><span class="n">bld</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">latest</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BadDingo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No latest build of </span><span class="si">{</span><span class="n">bld</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">binfo</span> <span class="o">=</span> <span class="n">as_buildinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">latest</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;build_id&#39;</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">binfo</span> <span class="o">=</span> <span class="n">as_buildinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">bld</span><span class="p">)</span>
+
+    <span class="n">pull</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">extra</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">binfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;extra&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">extra</span><span class="p">:</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">extra</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">image</span><span class="p">:</span>
+            <span class="n">index</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span><span class="p">:</span>
+                <span class="n">pull</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pull&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pull</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">BadDingo</span><span class="p">(</span><span class="s2">&quot;Unable to determine pull spec from extra data&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">pullspec</span> <span class="ow">in</span> <span class="n">pull</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;@sha&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pullspec</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cmd</span> <span class="ow">or</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">pullspec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">pullspec</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">pullspec</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;</span><span class="si">{pullspec}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pullspec</span><span class="o">=</span><span class="n">pullspec</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">pullspec</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="c1"># bandit complains about this -- we&#39;ve quoted our args, and the</span>
+    <span class="c1"># invocation has the same level of authority as the user running</span>
+    <span class="c1"># the command. They could do something drastic if they wanted to,</span>
+    <span class="c1"># just like they could do something drastic from the shell they</span>
+    <span class="c1"># already have access to. This tool isn&#39;t a service.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>  <span class="c1"># nosec</span>
+    <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tagcmd</span> <span class="ow">or</span> <span class="n">tagcmd</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">goptions</span><span class="o">.</span><span class="n">profile</span><span class="p">)</span>
+    <span class="n">nvr</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">binfo</span><span class="p">[</span><span class="s1">&#39;nvr&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="s2">&quot;{&quot;</span> <span class="ow">in</span> <span class="n">tagcmd</span><span class="p">:</span>
+        <span class="n">tagcmd</span> <span class="o">=</span> <span class="n">tagcmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pullspec</span><span class="o">=</span><span class="n">pullspec</span><span class="p">,</span>
+                               <span class="n">profile</span><span class="o">=</span><span class="n">profile</span><span class="p">,</span> <span class="n">nvr</span><span class="o">=</span><span class="n">nvr</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tagcmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tagcmd</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">pullspec</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">profile</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">nvr</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">tagcmd</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">system</span><span class="p">(</span><span class="n">tagcmd</span><span class="p">)</span>  <span class="c1"># nosec</span></div>
+
+
+<div class="viewcode-block" id="PullContainer"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.PullContainer">[docs]</a><span class="k">class</span> <span class="nc">PullContainer</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Pull a container build&#39;s image&quot;</span>
+
+
+<div class="viewcode-block" id="PullContainer.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.PullContainer.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="n">addarg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;build&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;BUILD&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Container build to pull&quot;</span><span class="p">)</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--latest-build&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;kojitag&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;KOJI_TAG&quot;</span><span class="p">,</span>
+               <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;BUILD is a package name, use the matching latest build&quot;</span>
+               <span class="s2">&quot; in the given koji tag&quot;</span><span class="p">)</span>
+
+        <span class="n">grp</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+        <span class="n">addarg</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">add_argument</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--command&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PULL_COMMAND&quot;</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Command to exec with the discovered pull spec&quot;</span><span class="p">)</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--print&quot;</span><span class="p">,</span> <span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;command&quot;</span><span class="p">,</span>
+               <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_const&quot;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Print pull spec to stdout rather than executing&quot;</span>
+               <span class="s2">&quot; a command&quot;</span><span class="p">)</span>
+
+        <span class="n">grp</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+        <span class="n">addarg</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">add_argument</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--tag-command&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;tag_command&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;TAG_COMMAND&quot;</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Command to exec after pulling the image&quot;</span><span class="p">)</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--no-tag&quot;</span><span class="p">,</span> <span class="s2">&quot;-n&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;tag_command&quot;</span><span class="p">,</span>
+               <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_const&quot;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Do not execute the tag command after pulling the&quot;</span>
+               <span class="s2">&quot; image&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parser</span></div>
+
+
+<div class="viewcode-block" id="PullContainer.validate"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.PullContainer.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">command</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">command</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_plugin_config</span><span class="p">(</span><span class="s2">&quot;pull_command&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;podman pull&quot;</span><span class="p">)</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">command</span><span class="p">:</span>
+            <span class="n">parser</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unable to determine a default COMMAND for&quot;</span>
+                         <span class="s2">&quot; pulling containers.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                         <span class="s2">&quot;Please specify via the &#39;--command&#39; option.&quot;</span><span class="p">)</span>
+
+        <span class="n">tag_command</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">tag_command</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tag_command</span><span class="p">:</span>
+            <span class="n">tag_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_plugin_config</span><span class="p">(</span><span class="s2">&quot;tag_command&quot;</span><span class="p">,</span>
+                                                 <span class="s2">&quot;podman image tag&quot;</span><span class="p">)</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">tag_command</span> <span class="o">=</span> <span class="n">tag_command</span></div>
+
+        <span class="c1"># don&#39;t bother warning about the lack of a tag_command, that</span>
+        <span class="c1"># part can just be skipped.</span>
+
+
+<div class="viewcode-block" id="PullContainer.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/builds/#kojismokydingo.cli.builds.PullContainer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cli_pull_container</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
+                                  <span class="n">goptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">goptions</span><span class="p">,</span>
+                                  <span class="n">cmd</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">command</span><span class="p">,</span>
+                                  <span class="n">tagcmd</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">tag_command</span><span class="p">,</span>
+                                  <span class="n">bld</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">build</span><span class="p">,</span>
+                                  <span class="n">tag</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">kojitag</span><span class="p">)</span></div></div>
+
+
 <span class="c1">#</span>
 <span class="c1"># The end.</span>
 </pre></div>
@@ -1191,12 +1382,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1210,7 +1401,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.cli</a> &#187;</li>
@@ -1218,9 +1409,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

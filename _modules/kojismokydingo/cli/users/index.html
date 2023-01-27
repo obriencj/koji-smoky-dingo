@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.cli.users &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.cli.users &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.cli</a> &#187;</li>
@@ -67,84 +66,130 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
-
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">ClientSession</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">AnonSmokyDingo</span><span class="p">,</span> <span class="n">int_or_str</span><span class="p">,</span> <span class="n">pretty_json</span>
+<span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AuthType</span><span class="p">,</span> <span class="n">TaskState</span><span class="p">,</span> <span class="n">UserInfo</span><span class="p">,</span> <span class="n">UserSpec</span><span class="p">,</span> <span class="n">UserStatus</span><span class="p">,</span> <span class="n">UserType</span><span class="p">,</span> <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..users</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">USER_NORMAL</span><span class="p">,</span> <span class="n">USER_HOST</span><span class="p">,</span> <span class="n">USER_GROUP</span><span class="p">,</span>
-    <span class="n">STATUS_NORMAL</span><span class="p">,</span> <span class="n">STATUS_BLOCKED</span><span class="p">,</span>
     <span class="n">collect_cgs</span><span class="p">,</span> <span class="n">collect_perminfo</span><span class="p">,</span> <span class="n">collect_userinfo</span><span class="p">,</span> <span class="p">)</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;CGInfo&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;PermissionInfo&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;UserInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ShowCGInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ShowPermissionInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ShowUserInfo&quot;</span><span class="p">,</span>
 
     <span class="s2">&quot;cli_cginfo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;cli_perminfo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;cli_userinfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_userauth_str&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_userstatus_str&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_usertype_str&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_usertype_str"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.get_usertype_str">[docs]</a><span class="k">def</span> <span class="nf">get_usertype_str</span><span class="p">(</span><span class="n">userinfo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="get_usertype_str"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.get_usertype_str">[docs]</a><span class="k">def</span> <span class="nf">get_usertype_str</span><span class="p">(</span><span class="n">userinfo</span><span class="p">:</span> <span class="n">UserInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provide a human-readable label for the koji user type enum value</span>
 <span class="sd">    in a koji user info dict.</span>
 
 <span class="sd">    :param userinfo: user info</span>
-<span class="sd">    :type userinfo: dict</span>
 
-<span class="sd">    :rtype: str</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">val</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;usertype&quot;</span><span class="p">,</span> <span class="n">USER_NORMAL</span><span class="p">)</span> <span class="ow">or</span> <span class="n">USER_NORMAL</span>
-    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">USER_NORMAL</span><span class="p">:</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;usertype&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">UserType</span><span class="o">.</span><span class="n">NORMAL</span>
+
+    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">UserType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;NORMAL (user)&quot;</span>
-    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">USER_HOST</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">UserType</span><span class="o">.</span><span class="n">HOST</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;HOST (builder)&quot;</span>
-    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">USER_GROUP</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">UserType</span><span class="o">.</span><span class="n">GROUP</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;GROUP&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;Unknown (</span><span class="si">%i</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">val</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Unknown (</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="get_userstatus_str"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.get_userstatus_str">[docs]</a><span class="k">def</span> <span class="nf">get_userstatus_str</span><span class="p">(</span><span class="n">userinfo</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="get_userstatus_str"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.get_userstatus_str">[docs]</a><span class="k">def</span> <span class="nf">get_userstatus_str</span><span class="p">(</span><span class="n">userinfo</span><span class="p">:</span> <span class="n">UserInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provide a human-readable label for the koji user status enum value</span>
 <span class="sd">    in a koji user info dict.</span>
 
 <span class="sd">    :param userinfo: user info</span>
-<span class="sd">    :type userinfo: dict</span>
 
-<span class="sd">    :rtype: str</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">val</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">STATUS_NORMAL</span><span class="p">)</span> <span class="ow">or</span> <span class="n">STATUS_NORMAL</span>
-    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">STATUS_NORMAL</span><span class="p">:</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">UserStatus</span><span class="o">.</span><span class="n">NORMAL</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">UserStatus</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;NORMAL (enabled)&quot;</span>
-    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">STATUS_BLOCKED</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">UserStatus</span><span class="o">.</span><span class="n">BLOCKED</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;BLOCKED (disabled)&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;Unknown (</span><span class="si">%i</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">val</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Unknown (</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="cli_userinfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.cli_userinfo">[docs]</a><span class="k">def</span> <span class="nf">cli_userinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Implements the ``koji userinfo`` command</span>
+<div class="viewcode-block" id="get_userauth_str"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.get_userauth_str">[docs]</a><span class="k">def</span> <span class="nf">get_userauth_str</span><span class="p">(</span><span class="n">userinfo</span><span class="p">:</span> <span class="n">UserInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provide a human-readable label for the koji auth type enum value</span>
+<span class="sd">    in a koji user info dict. Returns None if the auth</span>
+
+<span class="sd">    :param userinfo: user info</span>
+
+<span class="sd">    :since: 2.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">userinfo</span> <span class="o">=</span> <span class="n">collect_userinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;authtype&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">AuthType</span><span class="o">.</span><span class="n">GSSAPI</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;GSSAPI&quot;</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">AuthType</span><span class="o">.</span><span class="n">KERB</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Kerberos ticket&quot;</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">AuthType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Password&quot;</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">AuthType</span><span class="o">.</span><span class="n">SSL</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;SSL certificate&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Unknown (</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+<div class="viewcode-block" id="cli_userinfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.cli_userinfo">[docs]</a><span class="k">def</span> <span class="nf">cli_userinfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">user</span><span class="p">:</span> <span class="n">UserSpec</span><span class="p">,</span>
+        <span class="n">stats</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implements the ``koji userinfo`` command</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param user: user specification to output information about</span>
+
+<span class="sd">    :param stats: include simple user stats</span>
+
+<span class="sd">    :param json: produce JSON output</span>
+
+<span class="sd">    :raises NoSuchUser: if the user specification doesn&#39;t correlate to</span>
+<span class="sd">      a known user</span>
+
+<span class="sd">    :since: 1.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">userinfo</span> <span class="o">=</span> <span class="n">collect_userinfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">stats</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">json</span><span class="p">:</span>
         <span class="n">pretty_json</span><span class="p">(</span><span class="n">userinfo</span><span class="p">)</span>
         <span class="k">return</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;User: </span><span class="si">{name}</span><span class="s2"> [</span><span class="si">{id}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">userinfo</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User: </span><span class="si">{</span><span class="n">userinfo</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">userinfo</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+    <span class="n">auth</span> <span class="o">=</span> <span class="n">get_userauth_str</span><span class="p">(</span><span class="n">userinfo</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">auth</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Authentication method:&quot;</span><span class="p">,</span> <span class="n">auth</span><span class="p">)</span>
 
     <span class="n">krb_princs</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;krb_principals&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">krb_princs</span><span class="p">:</span>
@@ -158,8 +203,8 @@
     <span class="n">cgs</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content_generators&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cgs</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Content generators:&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">cg</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cgs</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">{name}</span><span class="s2"> [</span><span class="si">{id}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">cg</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">cg</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cgs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cg</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">cg</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
 
     <span class="n">perms</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permissions&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">perms</span><span class="p">:</span>
@@ -171,20 +216,40 @@
     <span class="k">if</span> <span class="n">members</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Members:&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">members</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">{name}</span><span class="s2"> [</span><span class="si">{id}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">member</span><span class="p">))</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">member</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">member</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">userinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;statistics&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Statistics:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Owned packages:&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;package_count&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Submitted tasks:&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task_count&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Created builds:&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;build_count&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">tdat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_task&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tdat</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; Last task: </span><span class="si">{</span><span class="n">tdat</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">tdat</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">]&quot;</span>
+                  <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">tdat</span><span class="p">[</span><span class="s1">&#39;create_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">bdat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_build&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bdat</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; Last build: </span><span class="si">{</span><span class="n">bdat</span><span class="p">[</span><span class="s1">&#39;nvr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">bdat</span><span class="p">[</span><span class="s1">&#39;build_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">]&quot;</span>
+                  <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">bdat</span><span class="p">[</span><span class="s1">&#39;creation_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="UserInfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.UserInfo">[docs]</a><span class="k">class</span> <span class="nc">UserInfo</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowUserInfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowUserInfo">[docs]</a><span class="k">class</span> <span class="nc">ShowUserInfo</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
 
     <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Show information about a user&quot;</span>
 
 
-<div class="viewcode-block" id="UserInfo.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.UserInfo.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowUserInfo.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowUserInfo.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
         <span class="n">addarg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span>
 
         <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">int_or_str</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;USER&quot;</span><span class="p">,</span>
                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;User name or principal&quot;</span><span class="p">)</span>
+
+        <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--stats&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Include user statistics&quot;</span><span class="p">)</span>
 
         <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--json&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output information as JSON&quot;</span><span class="p">)</span>
@@ -192,16 +257,33 @@
         <span class="k">return</span> <span class="n">parser</span></div>
 
 
-<div class="viewcode-block" id="UserInfo.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.UserInfo.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowUserInfo.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowUserInfo.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">cli_userinfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+                            <span class="n">stats</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">stats</span><span class="p">,</span>
                             <span class="n">json</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">json</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_perminfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.cli_perminfo">[docs]</a><span class="k">def</span> <span class="nf">cli_perminfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span>
-                 <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">by_date</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cli_perminfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.cli_perminfo">[docs]</a><span class="k">def</span> <span class="nf">cli_perminfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">permission</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">by_date</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji perminfo`` command</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param permission: the permission name to display information about</span>
+
+<span class="sd">    :param verbose: also display who granted the permission and when</span>
+
+<span class="sd">    :param by_date: sort the user list by the date they were granted the</span>
+<span class="sd">      permission</span>
+
+<span class="sd">    :param json: output the data as JSON</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">perminfo</span> <span class="o">=</span> <span class="n">collect_perminfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">permission</span><span class="p">)</span>
@@ -225,12 +307,12 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">user</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="PermissionInfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.PermissionInfo">[docs]</a><span class="k">class</span> <span class="nc">PermissionInfo</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowPermissionInfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowPermissionInfo">[docs]</a><span class="k">class</span> <span class="nc">ShowPermissionInfo</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
 
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Show information about a permission&quot;</span>
 
 
-<div class="viewcode-block" id="PermissionInfo.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.PermissionInfo.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowPermissionInfo.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowPermissionInfo.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
         <span class="n">addarg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span>
 
         <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;permission&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PERMISSION&quot;</span><span class="p">,</span>
@@ -249,16 +331,28 @@
         <span class="k">return</span> <span class="n">parser</span></div>
 
 
-<div class="viewcode-block" id="PermissionInfo.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.PermissionInfo.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowPermissionInfo.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowPermissionInfo.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">cli_perminfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">permission</span><span class="p">,</span>
                             <span class="n">verbose</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
                             <span class="n">by_date</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">by_date</span><span class="p">,</span>
                             <span class="n">json</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">json</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="cli_cginfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.cli_cginfo">[docs]</a><span class="k">def</span> <span class="nf">cli_cginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cli_cginfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.cli_cginfo">[docs]</a><span class="k">def</span> <span class="nf">cli_cginfo</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji cginfo`` command</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param name: only display information about the content generator with</span>
+<span class="sd">      this name</span>
+
+<span class="sd">    :param json: output the data as JSON</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">cgs</span> <span class="o">=</span> <span class="n">collect_cgs</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
@@ -279,12 +373,12 @@
         <span class="nb">print</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="CGInfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.CGInfo">[docs]</a><span class="k">class</span> <span class="nc">CGInfo</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowCGInfo"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowCGInfo">[docs]</a><span class="k">class</span> <span class="nc">ShowCGInfo</span><span class="p">(</span><span class="n">AnonSmokyDingo</span><span class="p">):</span>
 
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;List content generators and their users&quot;</span>
 
 
-<div class="viewcode-block" id="CGInfo.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.CGInfo.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowCGInfo.arguments"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowCGInfo.arguments">[docs]</a>    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
         <span class="n">addarg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span>
 
         <span class="n">addarg</span><span class="p">(</span><span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -296,7 +390,7 @@
         <span class="k">return</span> <span class="n">parser</span></div>
 
 
-<div class="viewcode-block" id="CGInfo.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.CGInfo.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="ShowCGInfo.handle"><a class="viewcode-back" href="../../../../kojismokydingo/cli/users/#kojismokydingo.cli.users.ShowCGInfo.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">cli_cginfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
                           <span class="n">name</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                           <span class="n">json</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">json</span><span class="p">)</span></div></div>
@@ -316,12 +410,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -335,7 +429,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.cli</a> &#187;</li>
@@ -343,9 +437,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

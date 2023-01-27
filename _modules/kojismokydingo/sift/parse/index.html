@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.sift.parse &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.sift.parse &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.sift</a> &#187;</li>
@@ -75,9 +74,9 @@
 <span class="kn">from</span> <span class="nn">codecs</span> <span class="kn">import</span> <span class="n">decode</span>
 <span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">translate</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">product</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">add_metaclass</span><span class="p">,</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">itervalues</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="n">StringIO</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Sized</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">BadDingo</span>
 
@@ -111,9 +110,8 @@
     <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;Error compiling Regex&quot;</span></div>
 
 
-<div class="viewcode-block" id="Matcher"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Matcher">[docs]</a><span class="nd">@add_metaclass</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Matcher</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Matcher"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Matcher">[docs]</a><span class="k">class</span> <span class="nc">Matcher</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for special comparison types</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -121,7 +119,7 @@
 
 
 <div class="viewcode-block" id="Null"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Null">[docs]</a><span class="k">class</span> <span class="nc">Null</span><span class="p">(</span><span class="n">Matcher</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An empty literal, represented by the symbols ``null`` or</span>
 <span class="sd">    ``None``. Matches only with the python None value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -139,17 +137,17 @@
 
 
 <div class="viewcode-block" id="Symbol"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Symbol">[docs]</a><span class="k">class</span> <span class="nc">Symbol</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Matcher</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An unquoted literal series of characters. A symbol can compare</span>
 <span class="sd">    with python str instances.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Symbol(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Symbol(</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>
 
 
 <div class="viewcode-block" id="SymbolGroup"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.SymbolGroup">[docs]</a><span class="k">class</span> <span class="nc">SymbolGroup</span><span class="p">(</span><span class="n">Matcher</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A symbol group is a literal symbol with multiple permutations. It is</span>
 <span class="sd">    represented as a symbol containing groups within curly-braces</span>
 
@@ -177,27 +175,29 @@
 
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;SymbolGroup(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">src</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;SymbolGroup(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>
 
 
-<span class="k">class</span> <span class="nc">FormattedSeries</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A portion of a SymbolGroup representing a repeatable formatted</span>
+<span class="k">class</span> <span class="nc">FormattedSeries</span><span class="p">(</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A portion of a `SymbolGroup` representing a repeatable formatted</span>
 <span class="sd">    sequence.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">seq</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param fmt: formatting to apply</span>
-<span class="sd">        :type fmt: str</span>
 
 <span class="sd">        :param seq: sequence which can safely have `iter` called on it</span>
 <span class="sd">          multiple times</span>
-<span class="sd">        :type seq: iterable</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_fmt</span> <span class="o">=</span> <span class="n">fmt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_seq</span> <span class="o">=</span> <span class="n">seq</span>
+
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seq</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
 
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -209,7 +209,7 @@
 
 
 <div class="viewcode-block" id="Number"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Number">[docs]</a><span class="k">class</span> <span class="nc">Number</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">Matcher</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A number is a literal made entirely of digits. It can compare with</span>
 <span class="sd">    both the python int and str types.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -223,11 +223,11 @@
 
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Number(</span><span class="si">%i</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Number(</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
 <div class="viewcode-block" id="Regex"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Regex">[docs]</a><span class="k">class</span> <span class="nc">Regex</span><span class="p">(</span><span class="n">Matcher</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A regex is a quoted literal using forward-slashes as quotes</span>
 
 <span class="sd">    Examples:</span>
@@ -261,13 +261,13 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flagstr</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;Regex(</span><span class="si">%r</span><span class="s2">, flags=</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flagstr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Regex(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_src</span><span class="si">!r}</span><span class="s2">, flags=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_flagstr</span><span class="si">!r}</span><span class="s2">)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;Regex(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_src</span></div>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Regex(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_src</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>
 
 
 <div class="viewcode-block" id="Glob"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Glob">[docs]</a><span class="k">class</span> <span class="nc">Glob</span><span class="p">(</span><span class="n">Matcher</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A glob is a quoted literal using pipes as quotes</span>
 
 <span class="sd">    Examples:</span>
@@ -295,17 +295,17 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ignorecase</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;Glob(</span><span class="si">%r</span><span class="s2">, ignorecase=True)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_src</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Glob(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_src</span><span class="si">!r}</span><span class="s2">, ignorecase=True)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;Glob(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_src</span></div>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Glob(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_src</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="Item"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Item">[docs]</a><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Item"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Item">[docs]</a><span class="k">class</span> <span class="nc">Item</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Seeks path members by an int or str key.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Matcher</span><span class="p">]):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -314,7 +314,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
 
 
-<div class="viewcode-block" id="Item.get"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Item.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+<div class="viewcode-block" id="Item.get"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Item.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
         <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
@@ -329,18 +329,18 @@
 
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>
 
 
 <div class="viewcode-block" id="ItemMatch"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.ItemMatch">[docs]</a><span class="k">class</span> <span class="nc">ItemMatch</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Seeks path members by comparison of keys to a matcher (eg. a Glob</span>
-<span class="sd">    or Regex)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Seeks path members by comparison of keys to a matcher (eg. a `Glob`</span>
+<span class="sd">    or `Regex`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ItemMatch.get"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.ItemMatch.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+<div class="viewcode-block" id="ItemMatch.get"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.ItemMatch.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
@@ -351,7 +351,7 @@
 
 
 <div class="viewcode-block" id="AllItems"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.AllItems">[docs]</a><span class="k">class</span> <span class="nc">AllItems</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Seeks all path members</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -359,9 +359,9 @@
         <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="AllItems.get"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.AllItems.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+<div class="viewcode-block" id="AllItems.get"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.AllItems.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">itervalues</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
 
@@ -370,66 +370,66 @@
         <span class="k">return</span> <span class="s2">&quot;AllItems()&quot;</span></div>
 
 
-<div class="viewcode-block" id="ItemPath"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.ItemPath">[docs]</a><span class="k">class</span> <span class="nc">ItemPath</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="n">ItemPathSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Item</span><span class="p">,</span> <span class="n">Matcher</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="ItemPath"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.ItemPath">[docs]</a><span class="k">class</span> <span class="nc">ItemPath</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Represents a collection of elements inside a nested tree of lists</span>
 <span class="sd">    and dicts</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">paths</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">paths</span><span class="p">:</span> <span class="n">ItemPathSpec</span><span class="p">):</span>
+        <span class="n">ipaths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Item</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">ipaths</span>
 
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Item</span><span class="p">):</span>
-                <span class="k">continue</span>
+                <span class="n">ipaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">)):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Item</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">ipaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Item</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Matcher</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ItemMatch</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">ipaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ItemMatch</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unexpected path element in ItemPath: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">p</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unexpected path element in ItemPath: </span><span class="si">{</span><span class="n">p</span><span class="si">!r}</span><span class="s2">&quot;</span>
                 <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ItemPath.get"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.ItemPath.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="n">work</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+<div class="viewcode-block" id="ItemPath.get"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.ItemPath.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">:</span>
             <span class="n">work</span> <span class="o">=</span> <span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">work</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">work</span></div>
 
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;ItemPath(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">))</span></div>
+        <span class="n">paths</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">))</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ItemPath(</span><span class="si">{</span><span class="n">paths</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
 <div class="viewcode-block" id="Reader"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Reader">[docs]</a><span class="k">class</span> <span class="nc">Reader</span><span class="p">(</span><span class="n">StringIO</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
-        <span class="c1"># overridden to mandate a source for read-mode. But we cannot</span>
-        <span class="c1"># use super due to our py2 support, where StringIO is an</span>
-        <span class="c1"># old-style class.</span>
-        <span class="n">StringIO</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># force it to be readonly</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Reader.peek"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Reader.peek">[docs]</a>    <span class="k">def</span> <span class="nf">peek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Reader.peek"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.Reader.peek">[docs]</a>    <span class="k">def</span> <span class="nf">peek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">where</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
         <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">where</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">val</span></div></div>
 
 
-<span class="k">def</span> <span class="nf">split_symbol_groups</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">split_symbol_groups</span><span class="p">(</span>
+        <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Invoked to by `convert_token` to split up a symbol into a series</span>
 <span class="sd">    of groups which can then be combined to form a SymbolGroup.</span>
-
-<span class="sd">    :rtype: generator[list[str]]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
-
-    <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">token</span><span class="p">:</span> <span class="n">StringIO</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">esc</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="n">srciter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -449,7 +449,7 @@
             <span class="k">if</span> <span class="n">token</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="p">[</span><span class="n">token</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()]</span>
                 <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">yield</span> <span class="n">convert_group</span><span class="p">(</span><span class="n">parse_quoted</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="s1">&#39;}&#39;</span><span class="p">))</span>
+            <span class="k">yield</span> <span class="n">convert_group</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">parse_quoted</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="s1">&#39;}&#39;</span><span class="p">)))</span>
             <span class="k">continue</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -463,27 +463,29 @@
         <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">_trailing_esc</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_trailing_esc</span><span class="p">(</span>
+        <span class="n">val</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="c1"># a count of trailing escapes, just to figure out if there&#39;s an</span>
     <span class="c1"># odd or even amount (and hence whether there&#39;s an unterminated</span>
     <span class="c1"># escape at the end</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">))</span>
 
 
-<span class="k">def</span> <span class="nf">convert_group</span><span class="p">(</span><span class="n">grp</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">convert_group</span><span class="p">(</span>
+        <span class="n">grp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">FormattedSeries</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A helper function for `split_symbol_groups`</span>
 
-<span class="sd">    :rtype: list[str] or FormattedSeries</span>
+<span class="sd">    :param grp: group eg. ``&quot;1,2,3&quot;`` or range specifier eg. ``&quot;1..3&quot;``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="s2">&quot;,&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grp</span><span class="p">:</span>
         <span class="k">if</span> <span class="s2">&quot;..&quot;</span> <span class="ow">in</span> <span class="n">grp</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">convert_range</span><span class="p">(</span><span class="n">grp</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">grp</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">))]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">grp</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">]</span>
 
-    <span class="n">work</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">work</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">brk</span> <span class="ow">in</span> <span class="n">grp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">work</span> <span class="ow">and</span> <span class="n">work</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">_trailing_esc</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">work</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">work</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">brk</span><span class="p">))</span>
@@ -491,13 +493,13 @@
             <span class="n">work</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">brk</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">work</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">work</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;}&quot;</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">work</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">work</span>
 
 
-<span class="k">def</span> <span class="nf">convert_range</span><span class="p">(</span><span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">convert_range</span><span class="p">(</span><span class="n">rng</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">FormattedSeries</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A helper function for `convert_group` to work with the group range</span>
 <span class="sd">    notation.</span>
 
@@ -505,41 +507,47 @@
 <span class="sd">    ``START..STOP..STEP``. note that any zero-prefix padding is honored,</span>
 <span class="sd">    and padding will be applied to values that</span>
 
-<span class="sd">    produces a FormattedSeries built on a range instance</span>
+<span class="sd">    produces a `FormattedSeries` built on a range instance</span>
 
-<span class="sd">    :rtype: FormattedSeries</span>
+<span class="sd">    if the range specifier is invalid, then returns a list with the</span>
+<span class="sd">    specifier as the only value</span>
+
+<span class="sd">    :param rng: range specifier, eg ``&quot;1..3&quot;``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">broken</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">)</span>
+    <span class="n">broken</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">)</span>
     <span class="n">blen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">blen</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">broken</span>
-        <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">step</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">elif</span> <span class="n">blen</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
         <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">broken</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">rng</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">]</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">istart</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
         <span class="n">istop</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">istep</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">rng</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">]</span>
 
     <span class="n">sss</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">),</span> <span class="n">sss</span><span class="p">)):</span>
         <span class="n">pad_to</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">sss</span><span class="p">))</span>
-        <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;{0:0</span><span class="si">%i</span><span class="s2">d}&quot;</span> <span class="o">%</span> <span class="n">pad_to</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">0:0</span><span class="si">{</span><span class="n">pad_to</span><span class="si">}</span><span class="s2">d</span><span class="se">}}</span><span class="s2">&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0:d}</span><span class="s2">&quot;</span>
 
     <span class="k">return</span> <span class="n">FormattedSeries</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">istart</span><span class="p">,</span> <span class="n">istop</span><span class="p">,</span> <span class="n">istep</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="parse_exprs"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.parse_exprs">[docs]</a><span class="k">def</span> <span class="nf">parse_exprs</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="parse_exprs"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.parse_exprs">[docs]</a><span class="k">def</span> <span class="nf">parse_exprs</span><span class="p">(</span>
+        <span class="n">reader</span><span class="p">:</span> <span class="n">Reader</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">stop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple s-expr parser. Reads from a string or character iterator,</span>
 <span class="sd">    emits expressions as nested lists.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -551,19 +559,18 @@
     <span class="c1"># for Sibilant&#39;s parser as well. And now it lives here, in Koji</span>
     <span class="c1"># Smoky Dingo.</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">start</span> <span class="ow">and</span> <span class="n">stop</span><span class="p">):</span>
         <span class="n">unterminated</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="s1">&#39;()&#39;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="s1">&#39;(&#39;</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="s1">&#39;)&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">unterminated</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="n">token_breaks</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="s1">&#39; [;#|/</span><span class="se">\&quot;\&#39;\n\r\t</span><span class="s1">&#39;</span><span class="p">))</span>
+    <span class="c1"># bandit thinks this is a password, haha</span>
+    <span class="n">token_breaks</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">start</span><span class="si">}{</span><span class="n">stop</span><span class="si">}</span><span class="s2"> [;#|/</span><span class="se">\&quot;\&#39;\n\r\t</span><span class="s2">&quot;</span>  <span class="c1"># nosec</span>
 
-    <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">esc</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">token</span><span class="p">:</span> <span class="n">StringIO</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">esc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">srciter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">srciter</span><span class="p">:</span>
@@ -573,7 +580,7 @@
             <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">token_breaks</span><span class="p">:</span>
                 <span class="n">token</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">esc</span><span class="p">)</span>
             <span class="n">token</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-            <span class="n">esc</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">esc</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">continue</span>
 
         <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">:</span>
@@ -603,7 +610,8 @@
             <span class="n">token</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
             <span class="k">continue</span>
 
-        <span class="c1"># c is in token_breaks</span>
+        <span class="c1"># if we get this far, then c is in token_breaks</span>
+
         <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="s1">&#39;;#&#39;</span><span class="p">:</span>
             <span class="c1"># comments run to end of line</span>
             <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
@@ -613,7 +621,7 @@
 
         <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="n">stop</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">unterminated</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="s2">&quot;Unexpected closing </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">c</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected closing </span><span class="si">{</span><span class="n">c</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span>
 
@@ -626,7 +634,7 @@
             <span class="k">yield</span> <span class="n">convert_token</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># we shouldn&#39;t have reached this</span>
-        <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="s2">&quot;Unexpected EOF, missing closing </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">stop</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected EOF, missing closing </span><span class="si">{</span><span class="n">stop</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 <span class="n">ESCAPE_SEQUENCE_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&#39;&#39;</span>
@@ -639,11 +647,11 @@
 <span class="s1">)&#39;&#39;&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="convert_escapes"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.convert_escapes">[docs]</a><span class="k">def</span> <span class="nf">convert_escapes</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="convert_escapes"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.convert_escapes">[docs]</a><span class="k">def</span> <span class="nf">convert_escapes</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decodes common escape sequences embedded in a str</span>
 
-<span class="sd">    :rtype: str</span>
+<span class="sd">    :param val: source str to decode</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">descape</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
@@ -654,21 +662,18 @@
 <span class="n">NUMBER_RE</span> <span class="o">=</span> <span class="n">Regex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^-?\d+$&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="convert_token"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.convert_token">[docs]</a><span class="k">def</span> <span class="nf">convert_token</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts unquoted values to a Matcher instance.</span>
+<div class="viewcode-block" id="convert_token"><a class="viewcode-back" href="../../../../kojismokydingo/sift/parse/#kojismokydingo.sift.parse.convert_token">[docs]</a><span class="k">def</span> <span class="nf">convert_token</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Matcher</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts unquoted values to a `Matcher` instance.</span>
 
-<span class="sd">    * An all-digit value will become Number</span>
-<span class="sd">    * None, null, nil become a Null</span>
-<span class="sd">    * True becomes the boolean True</span>
-<span class="sd">    * False becomes the boolean False</span>
-<span class="sd">    * Use of {} may become a SymbolGroup or Symbol</span>
-<span class="sd">    * Everything else becomes a Symbol.</span>
+<span class="sd">    * An all-digit value will become `Number`</span>
+<span class="sd">    * None, null, nil become a `Null`</span>
+<span class="sd">    * True becomes the boolean `True`</span>
+<span class="sd">    * False becomes the boolean `False`</span>
+<span class="sd">    * Use of ``{}`` may become a `SymbolGroup` or `Symbol`</span>
+<span class="sd">    * Everything else becomes a `Symbol`</span>
 
 <span class="sd">    :param val: token value to be converted</span>
-<span class="sd">    :type val: str</span>
-
-<span class="sd">    :rtype: Matcher</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="s2">&quot;null&quot;</span><span class="p">,</span> <span class="s2">&quot;nil&quot;</span><span class="p">):</span>
@@ -702,17 +707,23 @@
             <span class="k">return</span> <span class="n">Symbol</span><span class="p">(</span><span class="n">val</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">parse_itempath</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">char</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Parses an ItemPath definition from the given reader.</span>
+<span class="k">def</span> <span class="nf">parse_itempath</span><span class="p">(</span>
+        <span class="n">reader</span><span class="p">:</span> <span class="n">Reader</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">char</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemPath</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses an `ItemPath` definition from the given reader.</span>
 
-<span class="sd">    :rtype: ItemPath</span>
+<span class="sd">    :param reader: source reader to parse from</span>
+
+<span class="sd">    :param prefix: an initial path token to convert as the start of the</span>
+<span class="sd">      path</span>
+
+<span class="sd">    :param char: the initiating character that has already been read from</span>
+<span class="sd">      the reader, if any</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
-
-    <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ItemPathSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
         <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">convert_token</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
@@ -720,10 +731,11 @@
     <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="s1">&#39;[&#39;</span><span class="p">:</span>
         <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parse_index</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">char</span><span class="p">))</span>
 
-    <span class="n">token_breaks</span> <span class="o">=</span> <span class="s1">&#39; .[]();#|/</span><span class="se">\&quot;\&#39;\n\r\t</span><span class="s1">&#39;</span>
+    <span class="c1"># bandit thinks this is a password, haha</span>
+    <span class="n">token_breaks</span> <span class="o">=</span> <span class="s1">&#39; .[]();#|/</span><span class="se">\&quot;\&#39;\n\r\t</span><span class="s1">&#39;</span>  <span class="c1"># nosec</span>
 
-    <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">esc</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">token</span><span class="p">:</span> <span class="n">StringIO</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">esc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">srciter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">peek</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">srciter</span><span class="p">:</span>
@@ -733,7 +745,7 @@
             <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">token_breaks</span><span class="p">:</span>
                 <span class="n">token</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">esc</span><span class="p">)</span>
             <span class="n">token</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-            <span class="n">esc</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">esc</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">:</span>
             <span class="n">esc</span> <span class="o">=</span> <span class="n">c</span>
@@ -744,10 +756,12 @@
                 <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;[&quot;</span><span class="p">:</span>
-                <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parse_index</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parse_index</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
                 <span class="k">continue</span>
             <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;]&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="s2">&quot;Unexpected closer: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected closer: </span><span class="si">{</span><span class="n">c</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span><span class="p">:</span>
                 <span class="k">pass</span>
             <span class="k">else</span><span class="p">:</span>
@@ -777,8 +791,8 @@
                     <span class="sa">r</span><span class="s2">&quot;)$&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">convert_slice</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">convert_slice</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">slice</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converted a colon-separated string into a slice. Raises a TypeError</span>
 <span class="sd">    if the elements do not convert cleanly to integers</span>
 
@@ -786,23 +800,18 @@
 <span class="sd">    * val of ``1:`` results in ``slice(1, None, None)``</span>
 <span class="sd">    * val of ``:1`` results in ``slice(None, 1, None)``</span>
 <span class="sd">    * val of ``&quot;1:2:3&quot;`` results in ``slice(1, 2, 3)``</span>
-
-<span class="sd">    :rtype: slice</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">vals</span> <span class="o">=</span> <span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">))</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)]</span>
     <span class="k">return</span> <span class="nb">slice</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">parse_index</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Parse an index portion of an ItemPath from the reader</span>
-
-<span class="sd">    :rtype: AllItems or slice or Matcher</span>
+<span class="k">def</span> <span class="nf">parse_index</span><span class="p">(</span>
+        <span class="n">reader</span><span class="p">:</span> <span class="n">Reader</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemPathSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse an index portion of an `ItemPath` from the reader</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">start</span><span class="p">:</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -811,7 +820,7 @@
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unterminated item index, missing closing &#39;]&#39;&quot;</span>
         <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">start</span> <span class="o">!=</span> <span class="s1">&#39;[&#39;</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unknown item index start: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">start</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unknown item index start: </span><span class="si">{</span><span class="n">start</span><span class="si">!r}</span><span class="s2">&quot;</span>
         <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="n">val</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">parse_exprs</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">))</span>
@@ -821,18 +830,25 @@
         <span class="k">return</span> <span class="n">AllItems</span><span class="p">()</span>
 
     <span class="k">elif</span> <span class="n">lval</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">_slice_like</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">convert_slice</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">val</span>
+        <span class="n">sval</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">_slice_like</span> <span class="o">==</span> <span class="n">sval</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">convert_slice</span><span class="p">(</span><span class="n">sval</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sval</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Too many arguments in item index: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">val</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Too many arguments in item index: </span><span class="si">{</span><span class="n">val</span><span class="si">!r}</span><span class="s2">&quot;</span>
         <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">parse_quoted</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">quotec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">advanced_escapes</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="n">QuotedSpec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Glob</span><span class="p">,</span> <span class="n">Regex</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">parse_quoted</span><span class="p">(</span>
+        <span class="n">reader</span><span class="p">:</span> <span class="n">Reader</span><span class="p">,</span>
+        <span class="n">quotec</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">advanced_escapes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuotedSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function for `parse_exprs`, will parse quoted values and</span>
 <span class="sd">    return the appropriate wrapper type depending on the quoting</span>
 <span class="sd">    character.</span>
@@ -849,19 +865,26 @@
 <span class="sd">    that is not the case, and the first quoting character is still in</span>
 <span class="sd">    the src iterable, then a quotec of None can be used to indicate</span>
 <span class="sd">    that it should be taken from the first character of the src.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+<span class="sd">    :param reader: source to read from</span>
+
+<span class="sd">    :param quotec: initiating quote character, or None if the first</span>
+<span class="sd">      character should be read from the reader</span>
+
+<span class="sd">    :param advanced_escapes: if True then the escaped character will</span>
+<span class="sd">      be parsed for character escape sequences which will be replaced</span>
+<span class="sd">      with their relevant unicode value. if False then escaped</span>
+<span class="sd">      character will simply be inlined into the value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">quotec</span><span class="p">:</span>
         <span class="n">quotec</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quotec</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unterminated matcher: missing closing </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">quotec</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unterminated matcher: missing closing </span><span class="si">{</span><span class="n">quotec</span><span class="si">!r}</span><span class="s2">&quot;</span>
             <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="n">token</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
-    <span class="n">esc</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">esc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">srciter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">srciter</span><span class="p">:</span>
@@ -869,7 +892,7 @@
             <span class="k">if</span> <span class="n">advanced_escapes</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">quotec</span><span class="p">:</span>
                 <span class="n">token</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">esc</span><span class="p">)</span>
             <span class="n">token</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-            <span class="n">esc</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">esc</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="n">quotec</span><span class="p">:</span>
             <span class="k">break</span>
         <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">:</span>
@@ -878,7 +901,7 @@
             <span class="n">token</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Unterminated matcher: missing closing </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">quotec</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unterminated matcher: missing closing </span><span class="si">{</span><span class="n">quotec</span><span class="si">!r}</span><span class="s2">&quot;</span>
         <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="n">val</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
@@ -887,19 +910,23 @@
 
     <span class="k">if</span> <span class="n">quotec</span> <span class="o">==</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># hard-coding the flags we support for regex</span>
         <span class="k">while</span> <span class="n">reader</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="ow">in</span> <span class="s2">&quot;aiLmsux&quot;</span><span class="p">:</span>
             <span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 
-        <span class="n">val</span> <span class="o">=</span> <span class="n">Regex</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Regex</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span>
 
     <span class="k">elif</span> <span class="n">quotec</span> <span class="o">==</span> <span class="s2">&quot;|&quot;</span><span class="p">:</span>
-        <span class="n">flags</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">iflag</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># hard-coding that we only support a single flag for glob</span>
         <span class="k">if</span> <span class="n">reader</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span>
             <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">flags</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">val</span> <span class="o">=</span> <span class="n">Glob</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">ignorecase</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+            <span class="n">iflag</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">Glob</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">ignorecase</span><span class="o">=</span><span class="n">iflag</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">val</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># plain ol&#39; string</span>
+        <span class="k">return</span> <span class="n">val</span>
 
 
 <span class="c1">#</span>
@@ -916,12 +943,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -935,7 +962,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.sift</a> &#187;</li>
@@ -943,9 +970,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

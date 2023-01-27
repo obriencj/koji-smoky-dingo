@@ -4,14 +4,14 @@
 <html lang="English">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Frequently Asked Questions &#8212; kojismokydingo 1.1.0 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Frequently Asked Questions &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="prev" title="Koji Smoky Dingo preview 0.9.0 Release Notes" href="../release_notes/v0.9.0/" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../release_notes/v0.9.0/" title="Koji Smoky Dingo preview 0.9.0 Release Notes"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Frequently Asked Questions</a></li> 
       </ul>
     </div>  
@@ -45,12 +45,12 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="frequently-asked-questions">
-<h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this headline">¶</a></h1>
+  <section id="frequently-asked-questions">
+<h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this heading">¶</a></h1>
 <p>Nobody actually asks these things. But if they did, these would be the
 answers!</p>
-<div class="section" id="what-s-the-purpose-of-this-project">
-<h2>What's the Purpose of this Project?<a class="headerlink" href="#what-s-the-purpose-of-this-project" title="Permalink to this headline">¶</a></h2>
+<section id="what-s-the-purpose-of-this-project">
+<h2>What's the Purpose of this Project?<a class="headerlink" href="#what-s-the-purpose-of-this-project" title="Permalink to this heading">¶</a></h2>
 <p>I've worked with a Koji deployment on a nearly daily basis as part of
 my job for more than a decade. Over that time I have collected a fair
 number of scripts, aliases, and little tricks. This project represents
@@ -59,9 +59,9 @@ that anyone else working with Koji can use.</p>
 <p>The more I develop Koji Smoky Dingo, the more opportunities I've
 realized for additional features. In a way, this project is the
 manifestation of my own Koji wish list.</p>
-</div>
-<div class="section" id="why-is-it-called-koji-smoky-dingo">
-<h2>Why Is It Called Koji Smoky Dingo?<a class="headerlink" href="#why-is-it-called-koji-smoky-dingo" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="why-is-it-called-koji-smoky-dingo">
+<h2>Why Is It Called Koji Smoky Dingo?<a class="headerlink" href="#why-is-it-called-koji-smoky-dingo" title="Permalink to this heading">¶</a></h2>
 <p>Because project naming is a right pain in the butt. I ran through a
 few 2-slugs from <a class="reference external" href="https://pypi.org/project/coolname/">coolname</a> until
 the words &quot;Smoky Dingo&quot; popped up, and that tickled my fancy so I went
@@ -73,9 +73,9 @@ base exception class is a <code class="xref py py-obj docutils literal notransla
 me happy.</p>
 <p>Since the name &quot;Koji Smoky Dingo&quot; is fairly long, I frequently refer
 to it as simply &quot;KSD&quot;.</p>
-</div>
-<div class="section" id="why-not-contribute-directly-to-koji">
-<h2>Why Not Contribute Directly to Koji?<a class="headerlink" href="#why-not-contribute-directly-to-koji" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="why-not-contribute-directly-to-koji">
+<h2>Why Not Contribute Directly to Koji?<a class="headerlink" href="#why-not-contribute-directly-to-koji" title="Permalink to this heading">¶</a></h2>
 <p>Because it's unreasonable to expect the Koji project to maintain some
 of these ideas. In a few cases, sure a given command could have been a
 good fit for the core client. However, the Koji project is
@@ -87,16 +87,16 @@ developers have to worry about feature creep, stale code, API
 compatability, etc. As a totally separate entity, KSD can iterate very
 fast to try and match my ever-changing vision of what an ideal
 &quot;helper&quot; layer should look like.</p>
-<p>Since KSD finally reached version 1.0, I do have to worry about API
+<p>Since KSD finally reached version 1.0.0, I do have to worry about API
 stability. However even then I will still have more flexibility than a
 project that has to worry about being a critical component in the
 build infrastructure for so many organizations. Therefore it's
 extremely likely that KSD will always remain separate... but hopefully
 popular enough one day that any advanced Koji user will also be a Koji
 Smoky Dingo user.</p>
-</div>
-<div class="section" id="why-is-there-an-entire-mini-language-in-here">
-<h2>Why Is There An Entire Mini Language In Here?<a class="headerlink" href="#why-is-there-an-entire-mini-language-in-here" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="why-is-there-an-entire-mini-language-in-here">
+<h2>Why Is There An Entire Mini Language In Here?<a class="headerlink" href="#why-is-there-an-entire-mini-language-in-here" title="Permalink to this heading">¶</a></h2>
 <p>I discovered that a number of my more complicated scripts were simply
 taking a big collection of things (usually builds, but sometimes
 tags), and trying to identify relationships or features to filter
@@ -126,34 +126,15 @@ similar concept, filtering through bookmarks in the (now defunct)
 del.icio.us service. So I took parts of that old parser and ported it
 into what became Koji Sifty Dingo, an s-expression based predicate
 language!</p>
-</div>
-<div class="section" id="why-do-you-still-support-python-2-6">
-<h2>Why Do You Still Support Python 2.6?<a class="headerlink" href="#why-do-you-still-support-python-2-6" title="Permalink to this headline">¶</a></h2>
-<p>Because I use a number of hosts that have RHEL 6 on them, and I very
-much want to be able to use Koji Smoky Dingo in those environments.</p>
-<p>As much as people complain about Python 2, it feels pretty darn
-trivial to support older versions. Even when these hosts get upgraded
-to newer versions of RHEL or CentOS, I will mostly likely maintain
-backwards compatibility for a pretty long time. The only feature I
-truly yearn for is syntactic changes in Python 3 where keyword-only
-arguments can be expressed after variadic positionals. I'd really
-prefer to use that in the Sieve API instead of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options</span></code>
-method.</p>
-<p>Honestly, the biggest struggle has been in working with multiple
-versions of Koji. Or working with multiple versions of libraries under
-Python 3 to dodge the deprecation churn.</p>
-<p>KSD version 2.0 will drop Python 2 support. I'm not sure how long
-I'll provide backports to the 1.0 line after that... it likely depends
-on how long I have to use a RHEL 6 machine.</p>
-</div>
-<div class="section" id="can-i-write-my-own-tools-on-top-of-koji-smoky-dingo">
-<h2>Can I Write My Own Tools On Top of Koji Smoky Dingo?<a class="headerlink" href="#can-i-write-my-own-tools-on-top-of-koji-smoky-dingo" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="can-i-write-my-own-tools-on-top-of-koji-smoky-dingo">
+<h2>Can I Write My Own Tools On Top of Koji Smoky Dingo?<a class="headerlink" href="#can-i-write-my-own-tools-on-top-of-koji-smoky-dingo" title="Permalink to this heading">¶</a></h2>
 <p>You absolutely can. There's an examples directory which highlights how
 to use it to create your own scripts, commands, and custom sieve
 predicates.</p>
-</div>
-<div class="section" id="can-i-get-involved">
-<h2>Can I Get Involved?<a class="headerlink" href="#can-i-get-involved" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="can-i-get-involved">
+<h2>Can I Get Involved?<a class="headerlink" href="#can-i-get-involved" title="Permalink to this heading">¶</a></h2>
 <p>It's open source software, you don't have to ask! File an RFE, fork
 the project on GitHub, write the code you want to see in the world,
 and submit a PR. If you have questions about how things work we can
@@ -161,8 +142,8 @@ communicate in the tracker.</p>
 <p>I'd also be happy to receive patches or pull requests for
 documentation and unit tests.</p>
 <p>No hate though, you keep that stuff in your tummy.</p>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -171,23 +152,26 @@ documentation and unit tests.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Frequently Asked Questions</a><ul>
 <li><a class="reference internal" href="#what-s-the-purpose-of-this-project">What's the Purpose of this Project?</a></li>
 <li><a class="reference internal" href="#why-is-it-called-koji-smoky-dingo">Why Is It Called Koji Smoky Dingo?</a></li>
 <li><a class="reference internal" href="#why-not-contribute-directly-to-koji">Why Not Contribute Directly to Koji?</a></li>
 <li><a class="reference internal" href="#why-is-there-an-entire-mini-language-in-here">Why Is There An Entire Mini Language In Here?</a></li>
-<li><a class="reference internal" href="#why-do-you-still-support-python-2-6">Why Do You Still Support Python 2.6?</a></li>
 <li><a class="reference internal" href="#can-i-write-my-own-tools-on-top-of-koji-smoky-dingo">Can I Write My Own Tools On Top of Koji Smoky Dingo?</a></li>
 <li><a class="reference internal" href="#can-i-get-involved">Can I Get Involved?</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../release_notes/v0.9.0/"
-                        title="previous chapter">Koji Smoky Dingo preview 0.9.0 Release Notes</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../release_notes/v0.9.0/"
+                          title="previous chapter">Koji Smoky Dingo preview 0.9.0 Release Notes</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -199,12 +183,12 @@ documentation and unit tests.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -221,14 +205,14 @@ documentation and unit tests.</p>
         <li class="right" >
           <a href="../release_notes/v0.9.0/" title="Koji Smoky Dingo preview 0.9.0 Release Notes"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Frequently Asked Questions</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

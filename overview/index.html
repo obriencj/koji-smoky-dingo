@@ -4,14 +4,14 @@
 <html lang="English">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Overview &#8212; kojismokydingo 1.1.0 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Overview &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="next" title="Plugin Commands" href="../commands/" />
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../" title="Koji Smoky Dingo"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Overview</a></li> 
       </ul>
     </div>  
@@ -49,16 +49,16 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="overview">
-<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+  <section id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h1>
 <p>Koji Smoky Dingo is a collection of client command-line plugins for the
 <a class="reference external" href="https://pagure.io/koji">Koji</a> build system, and a set of utility
 modules for writing your own commands or scripts.</p>
 <p>The phrase “smoky-dingo” was provided by
 <a class="reference external" href="https://pypi.org/project/coolname/">coolname</a> and has no particular
 relevance.</p>
-<div class="section" id="meta-plugin">
-<h2>Meta Plugin<a class="headerlink" href="#meta-plugin" title="Permalink to this headline">¶</a></h2>
+<section id="meta-plugin">
+<h2>Meta Plugin<a class="headerlink" href="#meta-plugin" title="Permalink to this heading">¶</a></h2>
 <p>This project provides a relatively tiny CLI plugin for koji, named
 kojismokydingometa. The meta plugin acts as an adapter between koji’s
 existing CLI plugin loading framework and Python entry_points.</p>
@@ -67,18 +67,14 @@ provided as part of this project. Simply register your commands with the
 <code class="docutils literal notranslate"><span class="pre">&quot;koji_smoky_dingo&quot;</span></code> entry point key. See the <a class="reference external" href="https://github.com/obriencj/koji-smoky-dingo/blob/master/examples/command/">example
 command</a>
 as a reference.</p>
-</div>
-<div class="section" id="tag-commands">
-<h2>Tag Commands<a class="headerlink" href="#tag-commands" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="tag-commands">
+<h2>Tag Commands<a class="headerlink" href="#tag-commands" title="Permalink to this heading">¶</a></h2>
 <p>These commands modify tag features, requiring either the tag permission
 (koji &gt;=
 <a class="reference external" href="https://docs.pagure.org/koji/release_notes/release_notes_1.18/">1.18</a>)
 or the admin permission.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 41%" />
-<col style="width: 59%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Command</p></th>
 <th class="head"><p>Description</p></th>
@@ -135,16 +131,12 @@ tag, then swap the priority of the two.</p></td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="information-commands">
-<h2>Information Commands<a class="headerlink" href="#information-commands" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="information-commands">
+<h2>Information Commands<a class="headerlink" href="#information-commands" title="Permalink to this heading">¶</a></h2>
 <p>These commands are informational only, and do not require any special
 permissions in koji.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 41%" />
-<col style="width: 59%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Command</p></th>
 <th class="head"><p>Description</p></th>
@@ -163,126 +155,131 @@ permitted users</p></td>
 <td><p>Show builder hosts which haven’t been
 checking in lately</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">client-config</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">check-repo</span></code></p></td>
+<td><p>Shows whether a tag’s repo is
+up-to-date with its history</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">client-config</span></code></p></td>
 <td><p>Show settings for client profiles</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filter-builds</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">filter-builds</span></code></p></td>
 <td><p>Filter a list of NVRs by various
 criteria</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">filter-tags</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filter-tags</span></code></p></td>
 <td><p>Filter a list of tags by various
 criteria</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">latest-archives</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">latest-archives</span></code></p></td>
 <td><p>Show selected latest archives from a
 tag</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list-btypes</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list-btypes</span></code></p></td>
 <td><p>Show build types</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list-build-archives</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list-build-archives</span></code></p></td>
 <td><p>Show selected archives attached to a
 build</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list-cgs</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list-cgs</span></code></p></td>
 <td><p>Show content generators</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list-component-builds</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list-component-builds</span></code></p></td>
 <td><p>Show builds which were used to produce
 others</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list-env-vars</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list-env-vars</span></code></p></td>
 <td><p>Show all inherited mock environment
 variables for a tag</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list-rpm-macros</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list-rpm-macros</span></code></p></td>
 <td><p>Show all inherited mock RPM macros for
 a tag</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list-tag-extras</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list-tag-extras</span></code></p></td>
 <td><p>Show all inherited extra fields for a
 tag</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">open</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">open</span></code></p></td>
 <td><p>Opens a brower to the info page for
 koji data types</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">perminfo</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">perminfo</span></code></p></td>
 <td><p>Show information about a permission</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pull-container</span></code></p></td>
+<td><p>Pull an image from a container build</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">userinfo</span></code></p></td>
 <td><p>Show information about a user account</p></td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="install">
-<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this heading">¶</a></h2>
 <p>The kojismokydingo package utilizes setuptools and can be built and
-installed as an egg or wheel.</p>
+installed as a wheel.</p>
 <p>Because of how koji loads client plugins, if you want the meta plugin
 available by default system-wide, then the package needs to be installed
 into the default site-packages for the python installation.</p>
-<div class="section" id="as-an-rpm-via-dnf">
-<h3>As an RPM via DNF<a class="headerlink" href="#as-an-rpm-via-dnf" title="Permalink to this headline">¶</a></h3>
+<section id="as-an-rpm-via-dnf">
+<h3>As an RPM via DNF<a class="headerlink" href="#as-an-rpm-via-dnf" title="Permalink to this heading">¶</a></h3>
 <p>If using an RPM-based distribution, this is easily achieved using the
 included spec to produce an RPM and install that.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-1.1.0-1.fc32.noarch.rpm
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span>rpm
+dnf<span class="w"> </span>install<span class="w"> </span>dist/noarch/python3-kojismokydingo-2.0.0-1.fc38.noarch.rpm
 </pre></div>
 </div>
-</div>
-<div class="section" id="as-a-system-wide-wheel-via-pip">
-<h3>As a System-wide Wheel via Pip<a class="headerlink" href="#as-a-system-wide-wheel-via-pip" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="as-a-system-wide-wheel-via-pip">
+<h3>As a System-wide Wheel via Pip<a class="headerlink" href="#as-a-system-wide-wheel-via-pip" title="Permalink to this heading">¶</a></h3>
 <p>Using traditional setuptools or pip installation methods can also
 achieve this by specifying the specific root or prefix parameter</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Python 2.7 global install</span>
-python2 setup.py bdist_wheel
-pip2 install --prefix /usr -I dist/kojismokydingo-1.1.0-py2-none-any.whl
-
-<span class="c1"># Python 3 global install</span>
-python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-1.1.0-py3-none-any.whl
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>setup.py<span class="w"> </span>bdist_wheel
+pip3<span class="w"> </span>install<span class="w"> </span>--prefix<span class="w"> </span>/usr<span class="w"> </span>-I<span class="w"> </span>dist/kojismokydingo-2.0.0-py3-none-any.whl
 </pre></div>
 </div>
-</div>
-<div class="section" id="as-a-user-only-wheel-via-pip">
-<h3>As a User-only Wheel via Pip<a class="headerlink" href="#as-a-user-only-wheel-via-pip" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="as-a-user-only-wheel-via-pip">
+<h3>As a User-only Wheel via Pip<a class="headerlink" href="#as-a-user-only-wheel-via-pip" title="Permalink to this heading">¶</a></h3>
 <p>However, if you only want the plugin available for yourself, you can
 install it anywhere and tell koji to look in that particular
 <code class="docutils literal notranslate"><span class="pre">site-package/koji_cli_plugins</span></code> instance</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Python 3 user install</span>
-python3 setup.py bdist_wheel
-pip3 install --user -I dist/kojismokydingo-1.1.0-py3-none-any.whl
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>setup.py<span class="w"> </span>bdist_wheel
+pip3<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>-I<span class="w"> </span>dist/kojismokydingo-2.0.0-py3-none-any.whl
 </pre></div>
 </div>
-<p>And the following setting in ~/.koji/config assuming Python version 3.7
+<p>Additionally, you can install straight from PyPI</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>kojismokydingo<span class="w"> </span>--user
+</pre></div>
+</div>
+<p>And the following setting in ~/.koji/config assuming Python version 3.8
 – read the output of the install command above to verify your install
 path. Note that the section title needs to match your koji profile, and
 that you need to configure this setting for each profile you’ll want to
 use the meta plugin with.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">koji</span><span class="p">]</span>
-<span class="n">plugin_paths</span> <span class="o">=</span> <span class="o">~/.</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">koji_cli_plugins</span><span class="o">/</span>
+<span class="n">plugin_paths</span> <span class="o">=</span> <span class="o">~/.</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.8</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">koji_cli_plugins</span><span class="o">/</span>
 </pre></div>
 </div>
 <p>With koji &gt;=
 <a class="reference external" href="https://docs.pagure.org/koji/release_notes/release_notes_1.18/">1.18</a>,
 the meta plugin can also be symlinked into <code class="docutils literal notranslate"><span class="pre">~/.koji/plugins</span></code></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p ~/.koji/plugins
-ln -s ~/.local/lib/python<span class="k">$(</span>python3 -c <span class="s1">&#39;import sys; print(&quot;{}.{}&quot;.format(*sys.version_info))&#39;</span><span class="k">)</span>/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.koji/plugins
+ln<span class="w"> </span>-s<span class="w"> </span>~/.local/lib/python<span class="k">$(</span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;import sys; print(&quot;{}.{}&quot;.format(*sys.version_info))&#39;</span><span class="k">)</span>/site-packages/koji_cli_plugins/kojismokydingometa.py<span class="w"> </span>~/.koji/plugins
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="contact">
-<h2>Contact<a class="headerlink" href="#contact" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Permalink to this heading">¶</a></h2>
 <p>Author: Christopher O’Brien <a class="reference external" href="mailto:obriencj&#37;&#52;&#48;gmail&#46;com">obriencj<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
 <p>Original Git Repository: <a class="reference external" href="https://github.com/obriencj/koji-smoky-dingo">https://github.com/obriencj/koji-smoky-dingo</a></p>
 <p>Documentation: <a class="reference external" href="https://obriencj.github.io/koji-smoky-dingo">https://obriencj.github.io/koji-smoky-dingo</a></p>
-</div>
-<div class="section" id="license">
-<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h2>
 <p>This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
 Free Software Foundation; either version 3 of the License, or (at your
@@ -293,8 +290,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 Public License for more details.</p>
 <p>You should have received a copy of the GNU General Public License along
 with this library; if not, see <a class="reference external" href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -303,8 +300,9 @@ with this library; if not, see <a class="reference external" href="http://www.gn
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Overview</a><ul>
 <li><a class="reference internal" href="#meta-plugin">Meta Plugin</a></li>
 <li><a class="reference internal" href="#tag-commands">Tag Commands</a></li>
@@ -321,12 +319,17 @@ with this library; if not, see <a class="reference external" href="http://www.gn
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../"
-                        title="previous chapter">Koji Smoky Dingo</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../commands/"
-                        title="next chapter">Plugin Commands</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../"
+                          title="previous chapter">Koji Smoky Dingo</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../commands/"
+                          title="next chapter">Plugin Commands</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -338,12 +341,12 @@ with this library; if not, see <a class="reference external" href="http://www.gn
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -363,14 +366,14 @@ with this library; if not, see <a class="reference external" href="http://www.gn
         <li class="right" >
           <a href="../" title="Koji Smoky Dingo"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Overview</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

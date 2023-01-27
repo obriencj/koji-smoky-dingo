@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.sift.common &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.sift.common &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.sift</a> &#187;</li>
@@ -70,12 +69,15 @@
 
 <span class="kn">import</span> <span class="nn">operator</span>
 
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">ClientSession</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">map</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">SifterError</span><span class="p">,</span> <span class="n">Sieve</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">iter_bulk_load</span>
-<span class="kn">from</span> <span class="nn">..builds</span> <span class="kn">import</span> <span class="n">latest_maven_builds</span>
+<span class="kn">from</span> <span class="nn">..builds</span> <span class="kn">import</span> <span class="n">GAV</span><span class="p">,</span> <span class="n">latest_maven_builds</span>
+<span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BuildInfo</span><span class="p">,</span> <span class="n">TagGroupInfo</span><span class="p">,</span> <span class="n">TagPackageInfo</span><span class="p">,</span> <span class="p">)</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CacheMixin&quot;</span><span class="p">,</span> <span class="s2">&quot;ensure_comparison&quot;</span><span class="p">,</span> <span class="p">)</span>
@@ -91,42 +93,41 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="ensure_comparison"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.ensure_comparison">[docs]</a><span class="k">def</span> <span class="nf">ensure_comparison</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ensure_comparison"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.ensure_comparison">[docs]</a><span class="k">def</span> <span class="nf">ensure_comparison</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a comparison operator symbol into a comparison function.</span>
 
 <span class="sd">    :param value: The symbol or string to convert. Should be one of</span>
 <span class="sd">      &#39;==&#39;, &#39;!=&#39;, &#39;&gt;&#39;, &#39;&gt;=&#39;, &#39;&lt;&#39;, &#39;&lt;=&#39;</span>
 
-<span class="sd">    :type value: str</span>
-
-<span class="sd">    :rtype: callable</span>
+<span class="sd">    :raises SifterError: if the value isn&#39;t one of the known operators</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">_OPMAP</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_OPMAP</span><span class="p">[</span><span class="n">value</span><span class="p">]</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid comparison operator: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span>
-        <span class="k">raise</span> <span class="n">SifterError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">SifterError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid comparison operator: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CacheMixin"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin">[docs]</a><span class="k">class</span> <span class="nc">CacheMixin</span><span class="p">(</span><span class="n">Sieve</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mixin providing some caching interfaces to various koji calls.</span>
 <span class="sd">    These will store cached results on the instance&#39;s sifter. The</span>
 <span class="sd">    cache is cleared when the sifter&#39;s `reset` method is invoked.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_mixin_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_mixin_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sifter</span><span class="o">.</span><span class="n">get_cache</span><span class="p">(</span><span class="s2">&quot;*mixin&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="CacheMixin.latest_builds"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_builds">[docs]</a>    <span class="k">def</span> <span class="nf">latest_builds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        a caching wrapper for session.getLatestBuilds</span>
-
-<span class="sd">        :rtype: list[dict]</span>
+<div class="viewcode-block" id="CacheMixin.latest_builds"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_builds">[docs]</a>    <span class="k">def</span> <span class="nf">latest_builds</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">BuildInfo</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a caching wrapper for ``session.getLatestBuilds``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;latest_builds&quot;</span><span class="p">)</span>
@@ -141,12 +142,14 @@
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.latest_build_ids"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_build_ids">[docs]</a>    <span class="k">def</span> <span class="nf">latest_build_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        a caching wrapper for session.getLatestBuilds which returns a set</span>
-<span class="sd">        containing only the build IDs</span>
-
-<span class="sd">        :rtype: set[int]</span>
+<div class="viewcode-block" id="CacheMixin.latest_build_ids"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_build_ids">[docs]</a>    <span class="k">def</span> <span class="nf">latest_build_ids</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a caching wrapper for ``session.getLatestBuilds`` which returns a</span>
+<span class="sd">        set containing only the build IDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;latest_build_ids&quot;</span><span class="p">)</span>
@@ -161,12 +164,14 @@
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.latest_builds_by_name"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_builds_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">latest_builds_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CacheMixin.latest_builds_by_name"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_builds_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">latest_builds_by_name</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BuildInfo</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        a caching wrapper for session.getLatestBuilds which returns a dict</span>
 <span class="sd">        mapping the build names to the build info</span>
-
-<span class="sd">        :rtype: dict[str, dict]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;latest_builds_by_name&quot;</span><span class="p">)</span>
@@ -176,16 +181,18 @@
 
         <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">blds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherit</span><span class="p">)</span>
-            <span class="n">found</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blds</span><span class="p">)</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]:</span> <span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blds</span><span class="p">}</span>
 
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.latest_maven_builds"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_maven_builds">[docs]</a>    <span class="k">def</span> <span class="nf">latest_maven_builds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CacheMixin.latest_maven_builds"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_maven_builds">[docs]</a>    <span class="k">def</span> <span class="nf">latest_maven_builds</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">GAV</span><span class="p">,</span> <span class="n">BuildInfo</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        a caching wrapper for `kojismokydingo.builds.latest_maven_builds`</span>
-
-<span class="sd">        :rtype: dict[tuple[str], dict]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;latest_maven_builds&quot;</span><span class="p">)</span>
@@ -200,12 +207,14 @@
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.latest_maven_build_ids"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_maven_build_ids">[docs]</a>    <span class="k">def</span> <span class="nf">latest_maven_build_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CacheMixin.latest_maven_build_ids"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.latest_maven_build_ids">[docs]</a>    <span class="k">def</span> <span class="nf">latest_maven_build_ids</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">inherit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        a caching wrapper for `kojismokydingo.builds.latest_maven_builds`</span>
 <span class="sd">        which returns a set containing only the build IDs</span>
-
-<span class="sd">        :rtype: set[int]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;latest_maven_build_ids&quot;</span><span class="p">)</span>
@@ -220,26 +229,29 @@
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.bulk_list_packages"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.bulk_list_packages">[docs]</a>    <span class="k">def</span> <span class="nf">bulk_list_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_ids</span><span class="p">,</span> <span class="n">inherited</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        a multicall caching wrapper for session.listPackages</span>
+<div class="viewcode-block" id="CacheMixin.bulk_list_packages"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.bulk_list_packages">[docs]</a>    <span class="k">def</span> <span class="nf">bulk_list_packages</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+            <span class="n">inherited</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">TagPackageInfo</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a multicall caching wrapper for ``session.listPackages``</span>
 
 <span class="sd">        shares the same cache as `list_packages` (and therefore</span>
 <span class="sd">        `allowed_packages` and `blocked_packages`)</span>
-
-<span class="sd">        :rtype: dict[int,list[dict]]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixing_cache</span><span class="p">(</span><span class="s2">&quot;list_packages&quot;</span><span class="p">)</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">TagPackageInfo</span><span class="p">]],</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;list_packages&quot;</span><span class="p">))</span>
 
-        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">TagPackageInfo</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">needed</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tag_ids</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">inherited</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
                 <span class="n">needed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[(</span><span class="n">tid</span><span class="p">,</span> <span class="n">inherited</span><span class="p">)]</span>
 
         <span class="n">fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">listPackages</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">inherited</span><span class="o">=</span><span class="n">inherited</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">pkgs</span> <span class="ow">in</span> <span class="n">iter_bulk_load</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">needed</span><span class="p">):</span>
@@ -248,11 +260,13 @@
         <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.list_packages"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.list_packages">[docs]</a>    <span class="k">def</span> <span class="nf">list_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherited</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        a caching wrapper for session.listPackages</span>
-
-<span class="sd">        :rtype: list[dict]</span>
+<div class="viewcode-block" id="CacheMixin.list_packages"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.list_packages">[docs]</a>    <span class="k">def</span> <span class="nf">list_packages</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">inherited</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">TagPackageInfo</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a caching wrapper for ``session.listPackages``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;list_packages&quot;</span><span class="p">)</span>
@@ -267,12 +281,14 @@
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.allowed_packages"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.allowed_packages">[docs]</a>    <span class="k">def</span> <span class="nf">allowed_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherited</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        a caching wrapper for session.listPackages which returns a set</span>
+<div class="viewcode-block" id="CacheMixin.allowed_packages"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.allowed_packages">[docs]</a>    <span class="k">def</span> <span class="nf">allowed_packages</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">inherited</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a caching wrapper for ``session.listPackages`` which returns a set</span>
 <span class="sd">        containing only the package names which are not blocked.</span>
-
-<span class="sd">        :rtype: set[str]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;allowed_packages&quot;</span><span class="p">)</span>
@@ -290,12 +306,14 @@
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.blocked_packages"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.blocked_packages">[docs]</a>    <span class="k">def</span> <span class="nf">blocked_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">,</span> <span class="n">inherited</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        a caching wrapper for session.listPackages which returns a set</span>
+<div class="viewcode-block" id="CacheMixin.blocked_packages"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.blocked_packages">[docs]</a>    <span class="k">def</span> <span class="nf">blocked_packages</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">inherited</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a caching wrapper for ``session.listPackages`` which returns a set</span>
 <span class="sd">        containing only the package names which are blocked.</span>
-
-<span class="sd">        :rtype: set[str]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;blocked_packages&quot;</span><span class="p">)</span>
@@ -313,11 +331,12 @@
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.get_tag_groups"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.get_tag_groups">[docs]</a>    <span class="k">def</span> <span class="nf">get_tag_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        a caching wrapper for session.getTagGroups</span>
-
-<span class="sd">        :rtype: list[dict]</span>
+<div class="viewcode-block" id="CacheMixin.get_tag_groups"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.get_tag_groups">[docs]</a>    <span class="k">def</span> <span class="nf">get_tag_groups</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">TagGroupInfo</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a caching wrapper for ``session.getTagGroups``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">)</span>
@@ -329,12 +348,13 @@
         <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="CacheMixin.bulk_get_tag_groups"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.bulk_get_tag_groups">[docs]</a>    <span class="k">def</span> <span class="nf">bulk_get_tag_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">tag_ids</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        a multicall caching wrapper for session.getTagGroups. Shares a</span>
+<div class="viewcode-block" id="CacheMixin.bulk_get_tag_groups"><a class="viewcode-back" href="../../../../kojismokydingo/sift/common/#kojismokydingo.sift.common.CacheMixin.bulk_get_tag_groups">[docs]</a>    <span class="k">def</span> <span class="nf">bulk_get_tag_groups</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+            <span class="n">tag_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">TagGroupInfo</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a multicall caching wrapper for ``session.getTagGroups``. Shares a</span>
 <span class="sd">        cache with `get_tag_groups`</span>
-
-<span class="sd">        :rtype: dict[int, list[dict]]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixin_cache</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">)</span>
@@ -355,6 +375,7 @@
         <span class="k">return</span> <span class="n">result</span></div></div>
 
 
+<span class="c1">#</span>
 <span class="c1"># The end.</span>
 </pre></div>
 
@@ -368,12 +389,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -387,7 +408,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.sift</a> &#187;</li>
@@ -395,9 +416,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

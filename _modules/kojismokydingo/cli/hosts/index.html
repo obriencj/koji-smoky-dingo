@@ -5,13 +5,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.cli.hosts &#8212; kojismokydingo 1.1.0 documentation</title>
+    <title>kojismokydingo.cli.hosts &#8212; kojismokydingo 2.0.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/pyramid.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex/" />
     <link rel="search" title="Search" href="../../../../search/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -31,7 +30,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" accesskey="U">kojismokydingo.cli</a> &#187;</li>
@@ -70,9 +69,9 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
-
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">ClientSession</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">AnonSmokyDingo</span>
 <span class="kn">from</span> <span class="nn">..hosts</span> <span class="kn">import</span> <span class="n">gather_hosts_checkins</span>
@@ -85,13 +84,19 @@
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="cli_check_hosts"><a class="viewcode-back" href="../../../../kojismokydingo/cli/hosts/#kojismokydingo.cli.hosts.cli_check_hosts">[docs]</a><span class="k">def</span> <span class="nf">cli_check_hosts</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">arches</span><span class="o">=</span><span class="p">(),</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">ignore</span><span class="o">=</span><span class="p">(),</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shush</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cli_check_hosts"><a class="viewcode-back" href="../../../../kojismokydingo/cli/hosts/#kojismokydingo.cli.hosts.cli_check_hosts">[docs]</a><span class="k">def</span> <span class="nf">cli_check_hosts</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="n">arches</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">channel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ignore</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">shush</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the ``koji check-hosts`` command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">timeout</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="p">(</span><span class="n">timeout</span> <span class="o">*</span> <span class="mi">60</span><span class="p">))</span>
+    <span class="n">dtimeout</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="p">(</span><span class="n">timeout</span> <span class="o">*</span> <span class="mi">60</span><span class="p">))</span>
 
     <span class="n">bldr_data</span> <span class="o">=</span> <span class="n">gather_hosts_checkins</span><span class="p">(</span><span class="n">session</span><span class="p">,</span>
                                       <span class="n">arches</span><span class="o">=</span><span class="n">arches</span><span class="p">,</span>
@@ -101,18 +106,18 @@
     <span class="n">collected</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">bldr</span> <span class="ow">in</span> <span class="n">bldr_data</span><span class="p">:</span>
-        <span class="n">lup</span> <span class="o">=</span> <span class="n">bldr</span><span class="p">[</span><span class="s2">&quot;last_update&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">lup</span> <span class="ow">and</span> <span class="n">lup</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">lup</span> <span class="o">=</span> <span class="n">lup</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">lupd</span> <span class="o">=</span> <span class="n">bldr</span><span class="p">[</span><span class="s2">&quot;last_update&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lupd</span> <span class="ow">and</span> <span class="n">lupd</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lupd</span> <span class="o">=</span> <span class="n">lupd</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">lup</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">lup</span> <span class="o">&lt;</span> <span class="n">timeout</span><span class="p">:</span>
-                <span class="n">collected</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">bldr</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">lup</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">lupd</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">lupd</span> <span class="o">&lt;</span> <span class="n">dtimeout</span><span class="p">:</span>
+                <span class="n">collected</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">bldr</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">lupd</span><span class="p">)))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">collected</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">bldr</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot; --&quot;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">quiet</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">_lup</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">collected</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">lup</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">collected</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -198,12 +203,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -217,7 +222,7 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 1.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../../" >kojismokydingo</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="../" >kojismokydingo.cli</a> &#187;</li>
@@ -225,9 +230,9 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Christopher O&#39;Brien.
-      Last updated on 2021-10-14.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-01-27.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>
