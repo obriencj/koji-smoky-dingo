@@ -89,6 +89,9 @@ permissions in koji.
 | ``check—hosts``            | Show builder hosts which haven’t been   |
 |                            | checking in lately                      |
 +----------------------------+-----------------------------------------+
+| ``check-repo``             | Shows whether a tag’s repo is           |
+|                            | up-to-date with its history             |
++----------------------------+-----------------------------------------+
 | ``client-config``          | Show settings for client profiles       |
 +----------------------------+-----------------------------------------+
 | ``filter-builds``          | Filter a list of NVRs by various        |
@@ -148,7 +151,7 @@ included spec to produce an RPM and install that.
 .. code:: bash
 
    make clean rpm
-   dnf install dist/noarch/python3-kojismokydingo-2.0.0-0.fc32.noarch.rpm
+   dnf install dist/noarch/python3-kojismokydingo-2.0.0-1.fc38.noarch.rpm
 
 As a System-wide Wheel via Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
