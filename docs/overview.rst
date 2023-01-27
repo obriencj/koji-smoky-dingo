@@ -148,7 +148,7 @@ included spec to produce an RPM and install that.
 .. code:: bash
 
    make clean rpm
-   dnf install dist/noarch/python3-kojismokydingo-2.0.0-0.fc32.noarch.rpm
+   dnf install dist/noarch/python3-kojismokydingo-2.0.0-1.fc38.noarch.rpm
 
 As a System-wide Wheel via Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
