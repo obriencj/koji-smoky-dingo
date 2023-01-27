@@ -89,6 +89,9 @@ permissions in koji.
 | ``check—hosts``            | Show builder hosts which haven’t been   |
 |                            | checking in lately                      |
 +----------------------------+-----------------------------------------+
+| ``check-repo``             | Shows whether a tag’s repo is           |
+|                            | up-to-date with its history             |
++----------------------------+-----------------------------------------+
 | ``client-config``          | Show settings for client profiles       |
 +----------------------------+-----------------------------------------+
 | ``filter-builds``          | Filter a list of NVRs by various        |

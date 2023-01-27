@@ -121,9 +121,9 @@ overview: docs/overview.rst  ## rebuilds the overview from README.md
 
 
 docs/overview.rst: README.md
-	@sed 's/^\[\!.*/ /g' $< > overview.md
-	@pandoc --from=markdown --to=rst -o $@ "overview.md"
-	@rm -f overview.md
+	@sed 's/^\[\!.*/ /g' $< > overview.md && \
+	pandoc --from=markdown --to=rst -o $@ "overview.md" && \
+	rm -f overview.md
 
 
 pull-docs:	## Refreshes the gh-pages submodule

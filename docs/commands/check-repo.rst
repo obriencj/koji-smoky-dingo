@@ -34,3 +34,10 @@ In addition to determining whether the repo is fresh or stale, the
 tags in the inheritance past the point that the current repo was
 created. This allows review of what changes may have happened between
 then and now.
+
+
+References
+----------
+
+* :py:obj:`kojismokydingo.cli.tags.CheckRepo`
+* :py:func:`kojismokydingo.cli.tags.cli_check_repo`

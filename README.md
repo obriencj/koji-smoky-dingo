@@ -59,6 +59,7 @@ permissions in koji.
 |`affected—targets` |Show targets which would be impacted by modifications to the given tag |
 |`cginfo` |Show content generators and their permitted users |
 |`check—hosts` |Show builder hosts which haven't been checking in lately |
+|`check-repo` |Shows whether a tag's repo is up-to-date with its history |
 |`client-config` |Show settings for client profiles |
 |`filter-builds` |Filter a list of NVRs by various criteria |
 |`filter-tags` |Filter a list of tags by various criteria |
