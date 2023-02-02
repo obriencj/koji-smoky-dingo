@@ -175,18 +175,18 @@ def cli_userinfo(
     data = userinfo.get("statistics", None)
     if data:
         print("Statistics:")
-        print(" Owned packages:", data.get("package_count", 0))
-        print(" Submitted tasks:", data.get("task_count", 0))
-        print(" Created builds:", data.get("build_count", 0))
+        print("  Owned packages:", data.get("package_count", 0))
+        print("  Submitted tasks:", data.get("task_count", 0))
+        print("  Created builds:", data.get("build_count", 0))
 
         tdat = data.get("last_task")
         if tdat:
-            print(f" Last task: {tdat['method']} [{tdat['id']}]"
+            print(f"  Last task: {tdat['method']} [{tdat['id']}]"
                   f" {tdat['create_time'].split('.')[0]}")
 
         bdat = data.get("last_build")
         if bdat:
-            print(f" Last build: {bdat['nvr']} [{bdat['build_id']}]"
+            print(f"  Last build: {bdat['nvr']} [{bdat['build_id']}]"
                   f" {bdat['creation_time'].split('.')[0]}")
 
 

@@ -51,7 +51,8 @@ Configuration
 -------------
 
 The default value for the open command can also be set under the
-``[open]`` plugin configuration using the setting ``command``
+``[open]`` plugin configuration using the setting ``command``, which
+supports a single ``{url}`` variable
 
 eg. in ``~/.config/ksd/common.conf``
 

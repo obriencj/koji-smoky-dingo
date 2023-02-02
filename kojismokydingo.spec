@@ -1,7 +1,7 @@
 
 %global srcname kojismokydingo
-%global srcver 2.0.0
-%global srcrel 1
+%global srcver 2.0.1
+%global srcrel 0
 
 
 Summary: Koji Smoky Dingo
@@ -122,6 +122,9 @@ Koji Smoky Dingo
 
 
 %changelog
+* Thu Feb 2 2023 Christopher O'Brien <obriencj@gmail.com> - 2.0.1-0
+- See the v2.0.1 release notes for a full list of changes
+
 * Fri Jan 27 2023 Christopher O'Brien <obriencj@gmail.com> - 2.0.0-1
 - Dropped RHEL 6, RHEL 7, and Python 2 support
 - See the v2.0.0 release notes for a full list of changes

@@ -66,11 +66,12 @@ eg. in ``~/.config/ksd/common.conf``
    tag_command = podman image tag {pullspec} {profile}/{nvr}
 
 
-The pull command only accepts the pullspec variable.
+The pull command only accepts the ``{pullspec}`` variable.
 
-The push command accepts the pullspec, profile, and nvr variables. The
-profile is the name of the current koji profile that the command is
-invoked with. The nvr varialbe is the discovered koji build's NVR.
+The tag command accepts the ``{pullspec}``, ``{profile}``, and
+``{nvr}`` variables. The profile is the name of the current koji
+profile that the command is invoked with. The nvr varialbe is the
+discovered koji build's NVR.
 
 
 References
