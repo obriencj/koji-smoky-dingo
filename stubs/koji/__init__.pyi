@@ -34,8 +34,8 @@ from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
-    ChannelInfo, CGInfo, HostInfo, ListTasksOptsType, PackageInfo,
-    PermInfo, QueryOptsType, RepoInfo, RepoState, RPMInfo, RPMSignature,
+    ChannelInfo, CGInfo, HostInfo, ListTasksOptions, PackageInfo,
+    PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo, RPMSignature,
     SearchResult, TagInfo, TagGroupInfo, TagInheritance, TagPackageInfo,
     TargetInfo, TaskInfo, UserInfo, )
 
@@ -329,7 +329,7 @@ class ClientSession:
             event: Optional[int] = None,
             buildTagID: Optional[int] = None,
             destTagID: Optional[int] = None,
-            queryOpts: Optional[QueryOptsType] = None) -> List[TargetInfo]:
+            queryOpts: Optional[QueryOptions] = None) -> List[TargetInfo]:
         ...
 
     def getBuildType(
@@ -510,7 +510,7 @@ class ClientSession:
             size: Optional[int] = None,
             checksum: Optional[str] = None,
             typeInfo: Optional[dict] = None,
-            queryOpts: Optional[QueryOptsType] = None,
+            queryOpts: Optional[QueryOptions] = None,
             imageID: Optional[int] = None,
             archiveID: Optional[int] = None,
             strict: bool = False) -> List[ArchiveInfo]:
@@ -519,7 +519,7 @@ class ClientSession:
     def listBTypes(
             self,
             query: Optional[Dict[str, str]] = None,
-            queryOpts: Optional[QueryOptsType] = None) -> List[BTypeInfo]:
+            queryOpts: Optional[QueryOptions] = None) -> List[BTypeInfo]:
         ...
 
     def listCGs(self) -> Dict[str, CGInfo]:
@@ -532,7 +532,7 @@ class ClientSession:
             ready: Optional[bool] = None,
             enabled: Optional[bool] = None,
             userID: Optional[int] = None,
-            queryOpts: Optional[QueryOptsType] = None) -> List[HostInfo]:
+            queryOpts: Optional[QueryOptions] = None) -> List[HostInfo]:
         ...
 
     def listPackages(
@@ -556,7 +556,7 @@ class ClientSession:
             componentBuildrootID: Optional[int] = None,
             hostID: Optional[int] = None,
             arches: Optional[str] = None,
-            queryOpts: Optional[QueryOptsType] = None) -> List[RPMInfo]:
+            queryOpts: Optional[QueryOptions] = None) -> List[RPMInfo]:
         ...
 
     def listTagged(
@@ -587,14 +587,14 @@ class ClientSession:
             build: Optional[Union[int, str]] = None,
             package: Optional[Union[int, str]] = None,
             perms: bool = True,
-            queryOpts: Optional[QueryOptsType] = None,
+            queryOpts: Optional[QueryOptions] = None,
             pattern: Optional[str] = None) -> List[TagInfo]:
         ...
 
     def listTasks(
             self,
-            opts: Optional[ListTasksOptsType] = None,
-            queryOpts: Optional[QueryOptsType] = None) -> List[TaskInfo]:
+            opts: Optional[ListTasksOptions] = None,
+            queryOpts: Optional[QueryOptions] = None) -> List[TaskInfo]:
         ...
 
     def login(
@@ -638,7 +638,7 @@ class ClientSession:
             self,
             rpm_id: Optional[int] = None,
             sigkey: Optional[str] = None,
-            queryOpts: Optional[QueryOptsType] = None) -> List[RPMSignature]:
+            queryOpts: Optional[QueryOptions] = None) -> List[RPMSignature]:
         ...
 
     def repoInfo(
@@ -657,7 +657,7 @@ class ClientSession:
             terms: str,
             type: str,
             matchType: str,
-            queryOpts: Optional[QueryOptsType] = None) -> List[SearchResult]:
+            queryOpts: Optional[QueryOptions] = None) -> List[SearchResult]:
         ...
 
     def setInheritanceData(

@@ -73,12 +73,14 @@ __all__ = (
     "HostInfo",
     "HubVersionSpec",
     "KeySpec",
+    "ListTasksOptions",
     "NamedCGInfo",
     "PackageInfo",
     "PackageSpec",
     "PathSpec",
     "PermInfo",
     "PermSpec",
+    "QueryOptions",
     "RepoInfo",
     "RepoState",
     "RPMInfo",
@@ -1297,8 +1299,12 @@ class GOptions(Values):
 HistoryEntry = Tuple[int, str, bool, Dict[str, Any]]
 
 
-class QueryOptsType(TypedDict, total=False):
-    """Various API calls use queryOpts dictionary for altering output format"""
+class QueryOptions(TypedDict, total=False):
+    """
+    Various API calls use queryOpts dictionary for altering output
+    format
+    """
+
     countOnly: bool
     order: str
     offset: int
@@ -1307,8 +1313,11 @@ class QueryOptsType(TypedDict, total=False):
     asList: bool
 
 
-class ListTasksOptsType(TypedDict, total=False):
-    """Specific filter dictionary for listTasks API call"""
+class ListTasksOptions(TypedDict, total=False):
+    """
+    Specific filter dictionary for listTasks API call
+    """
+
     arch: List[str]
     not_arch: List[str]
     state: List[int]
