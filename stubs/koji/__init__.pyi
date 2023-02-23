@@ -32,10 +32,10 @@ from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
-    ChannelInfo, CGInfo, HostInfo, PackageInfo, PermInfo,
-    RepoInfo, RepoState, RPMInfo, RPMSignature, SearchResult,
-    TagInfo, TagGroupInfo, TagInheritance, TagPackageInfo, TargetInfo,
-    TaskInfo, UserInfo, )
+    ChannelInfo, CGInfo, HostInfo, ListTasksOptsType, PackageInfo,
+    PermInfo, QueryOptsType, RepoInfo, RepoState, RPMInfo, RPMSignature,
+    SearchResult, TagInfo, TagGroupInfo, TagInheritance, TagPackageInfo,
+    TargetInfo, TaskInfo, UserInfo, )
 
 
 AUTHTYPE_NORMAL: int
@@ -327,7 +327,7 @@ class ClientSession:
             event: Optional[int] = None,
             buildTagID: Optional[int] = None,
             destTagID: Optional[int] = None,
-            queryOpts: Optional[Dict[str, Any]] = None) -> List[TargetInfo]:
+            queryOpts: Optional[QueryOptsType] = None) -> List[TargetInfo]:
         ...
 
     def getBuildType(
@@ -456,10 +456,16 @@ class ClientSession:
 
     def getTaskInfo(
             self,
-            task_id: int,
+            task_id: Union[int, List[int]],
             request: bool = False,
-            strict: bool = False) -> TaskInfo:
+            strict: bool = False) -> Union[TaskInfo, List[TaskInfo]]:
         ...
+
+    def getTaskChildren(
+            self,
+            task_id: int,
+            request: Optional[bool] = False,
+            strict: Optional[bool] = False) -> List[TaskInfo]
 
     def getUser(
             self,
@@ -492,7 +498,7 @@ class ClientSession:
             size: Optional[int] = None,
             checksum: Optional[str] = None,
             typeInfo: Optional[dict] = None,
-            queryOpts: Optional[Dict] = None,
+            queryOpts: Optional[QueryOptsType] = None,
             imageID: Optional[int] = None,
             archiveID: Optional[int] = None,
             strict: bool = False) -> List[ArchiveInfo]:
@@ -501,7 +507,7 @@ class ClientSession:
     def listBTypes(
             self,
             query: Optional[Dict[str, str]] = None,
-            queryOpts: Optional[dict] = None) -> List[BTypeInfo]:
+            queryOpts: Optional[QueryOptsType] = None) -> List[BTypeInfo]:
         ...
 
     def listCGs(self) -> Dict[str, CGInfo]:
@@ -514,7 +520,7 @@ class ClientSession:
             ready: Optional[bool] = None,
             enabled: Optional[bool] = None,
             userID: Optional[int] = None,
-            queryOpts: Optional[dict] = None) -> List[HostInfo]:
+            queryOpts: Optional[QueryOptsType] = None) -> List[HostInfo]:
         ...
 
     def listPackages(
@@ -538,7 +544,7 @@ class ClientSession:
             componentBuildrootID: Optional[int] = None,
             hostID: Optional[int] = None,
             arches: Optional[str] = None,
-            queryOpts: Optional[dict] = None) -> List[RPMInfo]:
+            queryOpts: Optional[QueryOptsType] = None) -> List[RPMInfo]:
         ...
 
     def listTagged(
@@ -569,8 +575,14 @@ class ClientSession:
             build: Optional[Union[int, str]] = None,
             package: Optional[Union[int, str]] = None,
             perms: bool = True,
-            queryOpts: Optional[dict] = None,
+            queryOpts: Optional[QueryOptsType] = None,
             pattern: Optional[str] = None) -> List[TagInfo]:
+        ...
+
+    def listTasks(
+            self,
+            opts: Optional[ListTasksOptsType] = None,
+            queryOpts: Optional[QueryOptsType] = None) -> List[TaskInfo]:
         ...
 
     def login(
@@ -614,7 +626,7 @@ class ClientSession:
             self,
             rpm_id: Optional[int] = None,
             sigkey: Optional[str] = None,
-            queryOpts: Optional[dict] = None) -> List[RPMSignature]:
+            queryOpts: Optional[QueryOptsType] = None) -> List[RPMSignature]:
         ...
 
     def repoInfo(
@@ -623,12 +635,17 @@ class ClientSession:
             struct: bool = False) -> RepoInfo:
         ...
 
+    def resubmitTask(
+            self,
+            taskID: int) -> int:
+        ...
+
     def search(
             self,
             terms: str,
             type: str,
             matchType: str,
-            queryOpts: Optional[dict] = None) -> List[SearchResult]:
+            queryOpts: Optional[QueryOptsType] = None) -> List[SearchResult]:
         ...
 
     def setInheritanceData(
