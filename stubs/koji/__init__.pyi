@@ -24,10 +24,12 @@ calls are being used correctly.
 :license: GPL v3
 """
 
+
 from configparser import ConfigParser, RawConfigParser
 from datetime import datetime
 from typing import (
-    Any, Dict, List, Optional, Tuple, TypedDict, Union, Set, )
+    Any, Dict, List, Optional, Tuple, TypedDict, TypeVar, Union, Set,
+    overload, )
 from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
@@ -454,18 +456,28 @@ class ClientSession:
             incl_blocked: bool = False) -> List[TagGroupInfo]:
         ...
 
+    @overload
     def getTaskInfo(
             self,
-            task_id: Union[int, List[int]],
+            task_id: int,
             request: bool = False,
-            strict: bool = False) -> Union[TaskInfo, List[TaskInfo]]:
+            strict: bool = False) -> TaskInfo:
+        ...
+
+    @overload
+    def getTaskInfo(
+            self,
+            task_id: List[int],
+            request: bool = False,
+            strict: bool = False) -> List[TaskInfo]:
         ...
 
     def getTaskChildren(
             self,
             task_id: int,
             request: Optional[bool] = False,
-            strict: Optional[bool] = False) -> List[TaskInfo]
+            strict: Optional[bool] = False) -> List[TaskInfo]:
+        ...
 
     def getUser(
             self,
