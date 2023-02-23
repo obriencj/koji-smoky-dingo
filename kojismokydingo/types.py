@@ -1297,5 +1297,39 @@ class GOptions(Values):
 HistoryEntry = Tuple[int, str, bool, Dict[str, Any]]
 
 
+class QueryOptsType(TypedDict, total=False):
+    """Various API calls use queryOpts dictionary for altering output format"""
+    countOnly: bool
+    order: str
+    offset: int
+    limit: int
+    group: str
+    asList: bool
+
+
+class ListTasksOptsType(TypedDict, total=False):
+    """Specific filter dictionary for listTasks API call"""
+    arch: List[str]
+    not_arch: List[str]
+    state: List[int]
+    not_state: List[int]
+    owner: Union[int, List[int]]
+    not_owner: Union[int, List[int]]
+    host_id: Union[int, List[int]]
+    not_host_id: Union[int, List[int]]
+    channel_id: Union[int, List[int]]
+    not_channel_id: Union[int, List[int]]
+    parent: Union[int, List[int]]
+    not_parent: Union[int, List[int]]
+    decode: bool
+    method: str
+    createdBefore: Union[float, str]
+    createdAfter: Union[float, str]
+    startedBefore: Union[float, str]
+    startedAfter: Union[float, str]
+    completeBeforer: Union[float, str]
+    completeAfter: Union[float, str]
+
+
 #
 # The end.

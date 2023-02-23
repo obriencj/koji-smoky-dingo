@@ -32,41 +32,10 @@ from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
-    ChannelInfo, CGInfo, HostInfo, PackageInfo, PermInfo,
-    RepoInfo, RepoState, RPMInfo, RPMSignature, SearchResult,
-    TagInfo, TagGroupInfo, TagInheritance, TagPackageInfo, TargetInfo,
-    TaskInfo, UserInfo, )
-
-
-class QueryOptsType(TypedDict, total=False):
-    countOnly: bool
-    order: str
-    offset: int
-    limit: int
-    group: str
-    asList: bool
-
-class listTasksOptsType(TypedDict, total=False):
-    arch: List[str]
-    not_arch: List[str]
-    state: List[int]
-    not_state: List[int]
-    owner: Union[int, List[int]]
-    not_owner: Union[int, List[int]]
-    host_id: Union[int, List[int]]
-    not_host_id: Union[int, List[int]]
-    channel_id: Union[int, List[int]]
-    not_channel_id: Union[int, List[int]]
-    parent: Union[int, List[int]]
-    not_parent: Union[int, List[int]]
-    decode: bool
-    method: str
-    createdBefore: Union[float, str]
-    createdAfter: Union[float, str]
-    startedBefore: Union[float, str]
-    startedAfter: Union[float, str]
-    completeBeforer: Union[float, str]
-    completeAfter: Union[float, str]
+    ChannelInfo, CGInfo, HostInfo, ListTasksOptsType, PackageInfo,
+    PermInfo, QueryOptsType, RepoInfo, RepoState, RPMInfo, RPMSignature,
+    SearchResult, TagInfo, TagGroupInfo, TagInheritance, TagPackageInfo,
+    TargetInfo, TaskInfo, UserInfo, )
 
 
 AUTHTYPE_NORMAL: int
@@ -612,7 +581,7 @@ class ClientSession:
 
     def listTasks(
             self,
-            opts: Optional[listTasksOptsType] = None,
+            opts: Optional[ListTasksOptsType] = None,
             queryOpts: Optional[QueryOptsType] = None) -> List[TaskInfo]:
         ...
 
