@@ -719,7 +719,7 @@ def hex_string(s: str) -> str:
     ...
 
 
-def load_json(filepath: str):
+def load_json(filepath: str) -> Any:
     ...
 
 
@@ -735,7 +735,9 @@ class RawHeader:
     def __init__(self, data: bytes):
         ...
 
-    def get(self, key: int, default: Any = None):
+    def get(self,
+            key: int,
+            default: Any = None) -> Option[Union[int, bytes]]:
         ...
 
 
@@ -753,7 +755,7 @@ def parse_NVRA(nvra: str) -> Dict[str, Union[str, int]]:
     ...
 
 
-def get_sigpacket_key_id(str):
+def get_sigpacket_key_id(str) -> str:
     ...
 
 
