@@ -39,30 +39,30 @@ jobs:
       fail-fast: false
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.9
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get install libkrb5-dev
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install libkrb5-dev
 
-    - name: Install python dependencies
-      run: |
-        pip install tox tox-gh-actions wheel
+      - name: Install python dependencies
+        run: |
+          pip install tox tox-gh-actions wheel
 
-    - name: Run Flake8
-      run: tox -e flake8
+      - name: Run Flake8
+        run: tox -e flake8
 
-    - name: Run MyPy
-      run: tox -e mypy
+      - name: Run MyPy
+        run: tox -e mypy
 
-    - name: Run Bandit
-      run: tox -e bandit
+      - name: Run Bandit
+        run: tox -e bandit
 
   tests:
     runs-on: ubuntu-latest
@@ -80,29 +80,29 @@ jobs:
       - pre-tests
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get install libkrb5-dev
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install libkrb5-dev
 
-    - name: Install python dependencies
-      run: |
-        pip install tox tox-gh-actions wheel
+      - name: Install python dependencies
+        run: |
+          pip install tox tox-gh-actions wheel
 
-    - name: Running tox
-      run: tox
+      - name: Running tox
+        run: tox
 
-    - name: Collect coverage results
-      uses: actions/upload-artifact@v3
-      with:
-        name: coverage-data
+      - name: Collect coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-data
         path: '.coverage.py*'
 
   coverage:
@@ -127,6 +127,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install libkrb5-dev
 
       - name: Install python dependencies
         run: |
