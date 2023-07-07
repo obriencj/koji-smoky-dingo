@@ -67,22 +67,23 @@ jobs:
     - name: Collect coverage results
       uses: actions/upload-artifact@v3
       with:
+        name: coverage-data
         path: '.coverage.py*'
 
   coverage:
     runs-on: ubuntu-latest
 
-    needs:
-      - tests
-
     strategy:
       fail-fast: true
+
+    needs:
+      - tests
 
     steps:
       - name: Fetch coverage results
         uses: actions/download-artifact@v3
         with:
-          path: '.coverage.py*'
+          name: coverage-data
 
       - name: Set up Python
         uses: actions/setup-python@v4
