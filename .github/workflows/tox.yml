@@ -32,6 +32,38 @@ on:
 
 
 jobs:
+  pre-tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get install libkrb5-dev
+
+    - name: Install python dependencies
+      run: |
+        pip install tox tox-gh-actions wheel
+
+    - name: Run Flake8
+      run: tox -e flake8
+
+    - name: Run MyPy
+      run: tox -e mypy
+
+    - name: Run Bandit
+      run: tox -e bandit
+
   tests:
     runs-on: ubuntu-latest
 
@@ -43,6 +75,9 @@ jobs:
           - '3.8'
           - '3.9'
           - '3.10'
+
+    needs:
+      - pre-tests
 
     steps:
     - name: Checkout
