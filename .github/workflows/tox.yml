@@ -105,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-data
-        path: '.coverage.py*'
+          path: '.coverage.py*'
 
   coverage:
     runs-on: ubuntu-latest
