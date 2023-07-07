@@ -1,6 +1,6 @@
 # Overview
 
-[![Build Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/obriencj/koji-smoky-dingo/actions/workflows/tox.yml)
+[![Build Status](https://github.com/github/docs/actions/workflows/tox.yml/badge.svg?branch=master)](https://github.com/obriencj/koji-smoky-dingo/actions/workflows/tox.yml)
 [![Coverage Status](https://coveralls.io/repos/obriencj/koji-smoky-dingo/badge.svg?branch=master)](https://coveralls.io/r/obriencj/koji-smoky-dingo)
 
 Koji Smoky Dingo is a collection of client command-line plugins for
