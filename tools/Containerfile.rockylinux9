@@ -1,0 +1,21 @@
+
+FROM quay.io/rockylinux/rockylinux:9
+
+WORKDIR /src
+
+RUN \
+    dnf upgrade -y && \
+    dnf install -qy dnf-plugins-core epel-release && \
+    dnf install -qy \
+        dnf-plugins-core make rpm-build which \
+        python3-pip python3-docutils koji && \
+    pip3 install nose-py3
+
+ARG VERSION
+
+COPY kojismokydingo-${VERSION}.tar.gz tools/*.sh /src/
+
+RUN /src/rpmbuild.sh \
+        /src /src/kojismokydingo-${VERSION}.tar.gz
+
+# The end.
