@@ -1,0 +1,93 @@
+
+on:
+  workflow_call:
+
+
+jobs:
+  build-srpm:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Determine version
+        id: version
+        run: |
+          echo -n '::set-output name=version::'
+          python -B setup.py --version
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install bash git make
+
+      - name: Generate archive
+        run: |
+          make archive
+
+      - name: Generate Source RPM
+        uses: next-actions/build-srpm@master
+        with:
+          tarball: kojismokydingo-${{ steps.version.output.version }}.tar.gz
+          specfile: kojismokydingo.spec
+
+      - name: Store Source RPM
+        uses: actions/upload-artifact@v3
+        with:
+          name: RPM
+          path: ${{ steps.srpm.outputs.path }}
+
+
+  build-platform-rpm:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - 'fedora30'
+          - 'fedora32'
+          - 'fedora34'
+          - 'fedora36'
+          - 'fedora37'
+          - 'fedora38'
+          - 'rockylinux8'
+          - 'rockylinux9'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install bash git make podman
+
+      - name: Generate archive
+        run: |
+          make archive
+
+      - name: Generate ${{ matrix.platform }} RPM
+        run: |
+          tools/launch-build.sh Containerfile.${{ matrix.platform }}
+
+      - name: Store ${{ matrix.platform }} RPM
+        uses: actions/upload-artifact@v3
+        with:
+          name: RPM
+          path: dist/${{ matrix.platform }}/RPMS/noarch/*.rpm
+
+
+# The end.
