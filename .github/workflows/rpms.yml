@@ -26,8 +26,7 @@ jobs:
       - name: Determine version
         id: version
         run: |
-          echo -n '::set-output name=version::'
-          python -B setup.py --version
+          echo "ksd_version=$(python -B setup.py --version)" >> "$GITHUB_ENV"
 
       - name: Install system dependencies
         run: |
@@ -40,7 +39,7 @@ jobs:
       - name: Generate Source RPM
         uses: next-actions/build-srpm@master
         with:
-          tarball: kojismokydingo-${{ steps.version.output.version }}.tar.gz
+          tarball: kojismokydingo-${{ env.ksd_version }}.tar.gz
           specfile: kojismokydingo.spec
 
       - name: Store Source RPM
@@ -85,7 +84,7 @@ jobs:
 
       - name: Generate ${{ matrix.platform }} RPM
         run: |
-          tools/launch-build.sh Containerfile.${{ matrix.platform }}
+          tools/launch-build.sh ${{ matrix.platform }}
 
       - name: Store ${{ matrix.platform }} RPM
         uses: actions/upload-artifact@v3
