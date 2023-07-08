@@ -1,6 +1,10 @@
 
+name: RPM Build
+
+
 on:
   workflow_call:
+  workflow_dispatch:
 
 
 jobs:
