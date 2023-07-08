@@ -205,7 +205,7 @@ function ksd_platforms() {
 
     local BASE="tools/Containerfile"
 
-    if [ ! "$@" ] ; then
+    if [ ! "$1" ] ; then
         for N in $(ls "$BASE".* | grep -v '~$\|^#') ; do
             echo "$N" | rev | cut -f1 -d. | rev
         done
