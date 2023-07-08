@@ -37,6 +37,7 @@ jobs:
           make archive
 
       - name: Generate Source RPM
+        id: srpm
         uses: next-actions/build-srpm@master
         with:
           tarball: kojismokydingo-${{ env.ksd_version }}.tar.gz
