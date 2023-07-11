@@ -737,7 +737,9 @@ class RawHeader:
 
     def get(self,
             key: int,
-            default: Any = None) -> Option[Union[int, bytes]]:
+            default: Any = None,
+            decode: Optional[bool] = None,
+            single: bool = False) -> Any:
         ...
 
 
