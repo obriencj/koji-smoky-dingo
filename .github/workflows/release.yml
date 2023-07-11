@@ -2,7 +2,7 @@
 # tagged.
 
 
-name: PyPI
+name: Release Assets
 
 
 on:
@@ -19,37 +19,74 @@ jobs:
       fail-fast: true
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.9
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
 
-    - name: Install system packages
-      run: |
-        sudo apt-get install -y libssl-dev openssl swig
+      - name: Install system packages
+        run: |
+          sudo apt-get install -y libssl-dev openssl swig
 
-    - name: Install python dependencies
-      run: |
-        pip install wheel
+      - name: Install python dependencies
+        run: |
+          pip install wheel
 
-    - name: Build source distribution
-      run: |
-        python setup.py sdist --output dist
+      - name: Build source distribution
+        run: |
+          python setup.py sdist --output dist
 
-    - name: Build binary wheel distribution
-      run: |
-        python setup.py bdist_wheel --output dist
+      - name: Build binary wheel distribution
+        run: |
+          python setup.py bdist_wheel --output dist
 
-    - name: Save content
-      uses: actions/upload-artifact@v3
-      with:
-        path: dist/
+      - name: Save python dist content
+        uses: actions/upload-artifact@v3
+        with:
+          name: py-dist
+          path: dist/
 
+  rpms:
+    name: Trigger RPM builds
+    uses: ./.github/workflows/rpms.yml
 
-  publish:
+  assets:
+    name: Attach assets to release
+    runs-on: ubuntu-latest
+
+    needs:
+      - build
+      - rpms
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install hub
+
+      - name: Fetch python dist content
+        uses: actions/download-artifact@v3
+        with:
+          name: py-dist
+
+      - name: Fetch RPMs
+        uses: actions/download-artifact@v3
+        with:
+          name: RPM
+
+      - name: Upload python dist content
+        run: |
+          gh release upload ${{ github.ref_name }} \
+            dist/*.whl \
+            dist/*.src.rpm \
+            dist/*/RPMS/noarch/*.rpm
+
+  pypi:
     name: Upload release to PyPI
     runs-on: ubuntu-latest
 
@@ -61,26 +98,26 @@ jobs:
       url: https://pypi.org/p/kojismokydingo
 
     steps:
-    - name: Fetch content
-      uses: actions/download-artifact@v3
-      with:
-        path: dist/
+      - name: Fetch python dist content
+        uses: actions/download-artifact@v3
+        with:
+          name: py-dist
 
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
 
   announce:
     name: Announce release to @obriencj@fosstodon.org
     runs-on: ubuntu-latest
 
     needs:
-      - publish
+      - artifacts
+      - pypi
 
     steps:
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+        run: echo "RELEASE_DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
 
       - name: Create announcement post
         uses: rzr/fediverse-action@master
@@ -89,8 +126,8 @@ jobs:
           access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
 
           message: |
-            Version ${{ github.ref }} of koji-smoky-dingo was released on ${{ steps.date.outputs.date }}
-            https://github.com/obriencj/koji-smoky-dingo/releases/tag/${{ github.ref }}
+            Version ${{ github.ref_name }} of koji-smoky-dingo was released on ${{ env.RELEASE_DATE }}
+            https://github.com/obriencj/koji-smoky-dingo/releases/tag/${{ github.ref_name }}
             \#koji \#koji-smoky-dingo
 
 
