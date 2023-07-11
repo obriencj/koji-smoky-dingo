@@ -43,11 +43,16 @@ jobs:
           tarball: kojismokydingo-${{ env.ksd_version }}.tar.gz
           specfile: kojismokydingo.spec
 
+      - name: Move Source RPM to dist
+        run: |
+          mkdir -p dist
+          mv -v ${{ steps.srpm.outputs.path }} dist/
+
       - name: Store Source RPM
         uses: actions/upload-artifact@v3
         with:
           name: RPM
-          path: ${{ steps.srpm.outputs.path }}
+          path: dist/*.src.rpm
 
 
   build-platform-rpm:
