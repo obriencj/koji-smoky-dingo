@@ -34,7 +34,7 @@ from datetime import datetime, timezone
 from fnmatch import fnmatchcase
 from functools import lru_cache
 from glob import glob
-from itertools import filterfalse
+from itertools import filterfalse, islice
 from operator import itemgetter
 from os.path import expanduser, isdir, join
 from typing import (
@@ -58,6 +58,7 @@ __all__ = (
     "find_config_files",
     "get_plugin_config",
     "globfilter",
+    "ichunkseq",
     "load_full_config",
     "load_plugin_config",
     "merge_extend",
@@ -87,6 +88,38 @@ def chunkseq(
 
     return (seq[offset:offset + chunksize] for
             offset in range(0, seqlen, chunksize))
+
+
+def ichunkseq(
+        seq: Iterable,
+        chunksize: int) -> Iterator[Iterable]:
+    """
+    Similar to chunkseq, but lazy. Note that each chunk must be
+    exhausted before beginning a new chunk, as the chunks will be
+    reading from the original sequence only when they themselves are
+    iterated over.
+
+    :param seq: a sequence to chunk up
+
+    :param chunksize: max length for chunks
+
+    :since: 2.1
+    """
+
+    it = iter(seq)
+    cs = chunksize - 1
+
+    def chunk(primer):
+        yield primer
+        yield from islice(it, cs)
+
+    while True:
+        try:
+            primer = next(it)
+        except StopIteration:
+            break
+        else:
+            yield chunk(primer)
 
 
 def escapable_replace(
