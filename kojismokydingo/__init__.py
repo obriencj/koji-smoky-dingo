@@ -571,20 +571,20 @@ def bulk_load_tasks(
     :param results: mapping to store the results in. Default, produce
       a new dict
 
-    :raises NoSuchTask: if err is True and a task couldn'tb e loaded
+    :raises NoSuchTask: if err is True and a task couldn't be loaded
 
     :since: 1.0
     """
 
     results = {} if results is None else results
+    fn = partial(session.getTaskInfo, request=request, strict=False)
 
-    fn = partial(session.getTaskInfo, request=request)
-
-    for key, info in iter_bulk_load(session, fn, task_ids, False, size):
-        if err and not info:
-            raise NoSuchTask(key)
-        else:
-            results[key] = info
+    for key_chunk in chunkseq(task_ids, size):
+        for key, info in zip(key_chunk, fn(key_chunk)):
+            if err and not info:
+                raise NoSuchTask(key)
+            else:
+                results[key] = info
 
     return results
 
