@@ -17,8 +17,8 @@ on:
       - 'tools/**'
     paths:
       - 'setup.cfg'
-      - '*.py'
-      - '*.pyi'
+      - '**/*.py'
+      - '**/*.pyi'
 
   pull_request:
     ignore-paths:
@@ -27,8 +27,8 @@ on:
       - 'tools/**'
     paths:
       - 'setup.cfg'
-      - '*.py'
-      - '*.pyi'
+      - '**/*.py'
+      - '**/*.pyi'
 
 
 jobs:
