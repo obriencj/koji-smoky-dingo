@@ -1,0 +1,39 @@
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: package version to announce
+        required: true
+        type: string
+
+      date:
+        description: date the package version was released
+        required: true
+        type: string
+
+      ref:
+        description: tag name for this version
+        required: true
+        type: string
+
+
+jobs:
+
+  announce:
+    name: Announce release to @obriencj@fosstodon.org
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create announcement post
+        uses: rzr/fediverse-action@master
+        with:
+          host: fosstodon.org
+          access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+
+          message: |
+            Version ${{ inputs.version }} of koji-smoky-dingo was released on ${{ inputs.date }}
+            https://github.com/obriencj/koji-smoky-dingo/releases/tag/${{ inputs.ref }}
+            \#koji \#koji-smoky-dingo
+
+
+# The end.
