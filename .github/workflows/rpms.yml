@@ -62,9 +62,9 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - 'fedora30'
-          - 'fedora32'
-          - 'fedora34'
+          # - 'fedora30'
+          # - 'fedora32'
+          # - 'fedora34'
           - 'fedora36'
           - 'fedora37'
           - 'fedora38'
