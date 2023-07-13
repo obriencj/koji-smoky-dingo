@@ -55,10 +55,14 @@ jobs:
           host: fosstodon.org
           access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
 
-          message: |-
-            Version ${{ inputs.version }} of koji-smoky-dingo was released on ${{ inputs.date }}
-            https://github.com/obriencj/koji-smoky-dingo/releases/tag/${{ inputs.ref }}
-            #koji #koji-smoky-dingo
+          message: "\
+          Version ${{ inputs.version }} of koji-smoky-dingo was
+          released on ${{ inputs.date }}
+
+          https://github.com/obriencj/koji-smoky-dingo/releases/tag/\
+          ${{ inputs.ref }}
+
+          #koji #kojismokydingo"
 
 
 # The end.
