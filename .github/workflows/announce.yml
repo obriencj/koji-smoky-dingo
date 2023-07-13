@@ -24,7 +24,7 @@ on:
         required: true
         type: string
 
-    workflow_dispatch:
+  workflow_dispatch:
     inputs:
       version:
         description: package version to announce
