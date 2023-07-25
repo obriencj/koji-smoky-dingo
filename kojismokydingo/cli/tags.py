@@ -37,6 +37,7 @@ from .. import (
     BadDingo, FeatureUnavailable, NoSuchTag,
     as_taginfo, bulk_load_tags, iter_bulk_load, version_require, )
 from ..common import unique
+from ..dnf import ENABLED as DNF_ENABLED, dnfuq
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
@@ -1099,6 +1100,46 @@ class CheckRepo(AnonSmokyDingo):
                               quiet=options.quiet,
                               show_events=options.events,
                               utc=options.utc)
+
+
+def cli_repoquery(
+        session: ClientSession,
+        tagname: Union[int, str],
+        target: bool = False):
+
+    if not dnf.ENABLED:
+        raise BadDingo("repoquery requires the dnf package,"
+                       " which is not available")
+
+    query = dnfuq(tagurl, label=tagname)
+
+
+class RepoQuery(AnonSmokyDingo):
+
+    description = "Query the contents of a tag's repo"
+
+
+    @property
+    def enabled(self):
+        return DNF_ENABLED
+
+
+    def arguments(self, parser):
+
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        return parser
+
+
+    def handle(self, options):
+        return cli_repoquery(self.session, options.tag,
+                             target=options.target)
 
 
 #
