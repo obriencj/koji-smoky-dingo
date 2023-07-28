@@ -32,18 +32,20 @@ from . import (
     AnonSmokyDingo, TagSmokyDingo,
     convert_history, int_or_str, printerr, pretty_json, print_history,
     read_clean_lines, tabulate, )
+from .clients import _get_tag_repo_dir_url
 from .sift import TagSifting, output_sifted
 from .. import (
     BadDingo, FeatureUnavailable, NoSuchTag,
     as_taginfo, bulk_load_tags, iter_bulk_load, version_require, )
+from ..builds import correlate_build_repo_tags
 from ..common import unique
-from ..dnf import ENABLED as DNF_ENABLED, dnfuq
+from ..dnf import ENABLED as DNF_ENABLED, correlate_query_builds, dnfuq
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
 from ..sift import Sifter
 from ..types import (
-    HistoryEntry, TagInheritance, TagInheritanceEntry, TagSpec, )
+    GOptions, HistoryEntry, TagInheritance, TagInheritanceEntry, TagSpec, )
 
 
 SORT_BY_ID = "sort-by-id"
@@ -1104,14 +1106,43 @@ class CheckRepo(AnonSmokyDingo):
 
 def cli_repoquery(
         session: ClientSession,
+        goptions: GOptions,
         tagname: Union[int, str],
-        target: bool = False):
+        target: bool = False,
+        arch: str = None,
+        whatprovides: str = None,
+        whatrequires: str = None,
+        quiet: bool = False) -> int:
 
-    if not dnf.ENABLED:
-        raise BadDingo("repoquery requires the dnf package,"
-                       " which is not available")
+    # TODO: use some config for this I guess?
+    cachedir = "/tmp"
 
-    query = dnfuq(tagurl, label=tagname)
+    if arch is None:
+        # TODO: get the first arch on the repo
+        arch = "x86_64"
+
+    taginfo = resolve_tag(session, tagname, target)
+    tagurl = _get_tag_repo_dir_url(session, goptions, taginfo)
+    tagurl = f"{tagurl}/{arch}"
+
+    with dnfuq(tagurl, label=taginfo['name'], cachedir=cachedir) as df:
+        q = df.query()
+        if whatprovides:
+            q = q.filterm(provides__glob=whatprovides)
+        if whatrequires:
+            q = q.filterm(requires__glob=whatrequires)
+        found = q.run()
+
+        res = correlate_query_builds(session, found)
+
+    bids = set(binfo['id'] for _hp, binfo in res)
+    tags = correlate_build_repo_tags(session, bids, taginfo['id'])
+
+    data = [(str(hp), binfo["nvr"], tags[binfo['id']]['name']) for
+            hp, binfo in res]
+
+    tabulate(["RPM", "Build", "Tag"], data, quiet=quiet)
+    return 0
 
 
 class RepoQuery(AnonSmokyDingo):
@@ -1134,12 +1165,28 @@ class RepoQuery(AnonSmokyDingo):
         addarg("--target", action="store_true", default=False,
                help="Specify by target rather than a tag")
 
+        addarg("--arch", action="store", default=None,
+               help="Tag repository architecture")
+
+        addarg("--whatprovides", action="store", default=None,
+               help="What provides")
+
+        addarg("--whatrequires", action="store", default=None,
+               help="What requires")
+
+        addarg("--quiet", "-q", action="store_true", default=False,
+               help="Omit column headings")
+
         return parser
 
 
     def handle(self, options):
         return cli_repoquery(self.session, options.tag,
-                             target=options.target)
+                             target=options.target,
+                             arch=options.arch,
+                             whatprovides=options.whatprovides,
+                             whatrequires=options.whatrequires,
+                             quiet=options.quiet)
 
 
 #

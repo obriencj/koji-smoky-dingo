@@ -1419,5 +1419,34 @@ class BuildFilter():
         return work
 
 
+def correlate_build_repo_tags(
+        session: ClientSession,
+        builds: Iterable[Union[int, str]],
+        repotag: TagSpec) -> Dict[Union[int, str], Dict]:
+
+    # load the tag
+    tinfo = as_taginfo(session, repotag)
+
+    # get the event ID of the current repo for the tag
+    repo = session.getRepo(tinfo['id'])
+    event = repo['create_event']
+
+    # ask for the latest builds for the tag at the event ID
+    # create a mapping of the bid and nvr to the taginfo
+    found = session.listTagged(tinfo['id'], event=event,
+                               inherit=True, latest=True)
+
+    tagged: Dict[Union[int, str], Dict] = {}
+    for tbld in found:
+        # technically this is a decorated BuildInfo with extra fields,
+        # but we don't model that, so we'll tell mypy to ignore
+        t = {'id': tbld['tag_id'], 'name': tbld['tag_name']}  # type: ignore
+        tagged[tbld['id']] = t
+        tagged[tbld['nvr']] = t
+
+    # return a mapping of the input builds to the taginfos
+    return {want: tagged.get(want) for want in builds}
+
+
 #
 # The end.
