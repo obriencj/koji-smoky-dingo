@@ -126,7 +126,7 @@ def correlate_query_builds(
 @contextmanager
 def dnfuq(path: str,
           label: str = "koji",
-          cachedir: str = "/tmp") -> Generator["DNFuq", None, None]:
+          cachedir: str = None) -> Generator["DNFuq", None, None]:
 
     """
     context manager providing a DNFuq instance configured with a
@@ -148,7 +148,7 @@ class DNFuq:
             self,
             path: str,
             label: str = "koji",
-            cachedir: str = "/tmp"):
+            cachedir: str = None):
 
         self.path: str = path
         self.label: str = label

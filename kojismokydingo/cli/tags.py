@@ -26,6 +26,7 @@ from json import dumps
 from koji import ClientSession
 from koji_cli.lib import arg_filter
 from operator import itemgetter
+from tempfile import gettempdir
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from . import (
@@ -1115,7 +1116,7 @@ def cli_repoquery(
         quiet: bool = False) -> int:
 
     # TODO: use some config for this I guess?
-    cachedir = "/tmp"
+    cachedir = gettempdir()
 
     if arch is None:
         # TODO: get the first arch on the repo
@@ -1181,7 +1182,8 @@ class RepoQuery(AnonSmokyDingo):
 
 
     def handle(self, options):
-        return cli_repoquery(self.session, options.tag,
+        return cli_repoquery(self.session, self.goptions,
+                             options.tag,
                              target=options.target,
                              arch=options.arch,
                              whatprovides=options.whatprovides,
