@@ -20,12 +20,11 @@ Koji Smoky Dingo - DNF ease-of-use wrapper
 """
 
 
-from collections.abc import Generator
 from contextlib import contextmanager
 from koji import ClientSession
 from os.path import abspath
 from tempfile import TemporaryDirectory
-from typing import Any, List, Tuple
+from typing import Any, Generator, List, Tuple
 
 from . import BadDingo, bulk_load_builds
 from .types import BuildInfo
