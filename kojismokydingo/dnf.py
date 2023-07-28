@@ -21,17 +21,15 @@ Koji Smoky Dingo - DNF ease-of-use wrapper
 
 
 from os.path import abspath
+from tempfile import TemporaryDirectory
 
 from . import BadDingo
 
 
 try:
-    from hawkey import Query, Sack
-    from libdnf.conf import ConfigMain, ConfigRepo, Option
-    from libdnf.repo import Repo
-
-    PRIO_RUNTIME = Option.Priority_RUNTIME
-    PRIO_REPO = Option.Priority_REPOCONFIG
+    from dnf.base import Base
+    from dnf.conf.config import MainConf
+    from dnf.sack import _build_sack
 
 except ImportError:
     ENABLED = False
@@ -45,74 +43,66 @@ def __requirednf():
         raise BadDingo("requires libdnf")
 
 
-def dnf_config():
+def dnf_config(tmpdir):
     __requirednf()
 
-    cm = ConfigMain()
+    if not tmpdir:
+        raise BadDingo("cannot execute query without cache dir")
 
-    # cm.gpgcheck().set(PRIO_RUNTIME, False)
-    # cm.max_parallel_downloads().set(PRIO_RUNTIME, 1)
-    # cm.password().set(PRIO_RUNTIME, "")
-    # cm.proxy().set(PRIO_RUNTIME, "")
-    # cm.proxy_username().set(PRIO_RUNTIME, "")
-    # cm.proxy_password().set(PRIO_RUNTIME, "")
-    # cm.proxy_sslcacert().set(PRIO_RUNTIME, "")
-    # cm.proxy_sslclientcert().set(PRIO_RUNTIME, "")
-    # cm.proxy_sslclientkey().set(PRIO_RUNTIME, "")
-    # cm.proxy_sslverify().set(PRIO_RUNTIME, False)
-    # cm.reposdir().set(PRIO_RUNTIME, "")
-    # cm.sslcacert().set(PRIO_RUNTIME, "")
-    # cm.sslclientcert().set(PRIO_RUNTIME, "")
-    # cm.sslclientkey().set(PRIO_RUNTIME, "")
-    # cm.sslverify().set(PRIO_RUNTIME, False)
-    # cm.username().set(PRIO_RUNTIME, "")
-    # cm.user_agent().set(PRIO_RUNTIME, "koji-smoky-dingo")
+    mc = MainConf()
+    mc.cachedir = tmpdir
 
-    # TODO: where should the cache actually live?
-    cm.cachedir().set(PRIO_REPO, "/tmp")
-
-    return cm
+    return mc
 
 
-def dnf_repo(path, label="koji"):
+def dnf_sack(config, path, label="koji"):
     __requirednf()
 
     if "://" not in path:
         path = "file://" + abspath(path)
 
-    repoconf = ConfigRepo(dnf_config())
+    base = Base(config)
+    base.repos.add_new_repo(label, config, baseurl=path)
 
-    repoconf.enabled().set(PRIO_REPO, True)
-    repoconf.name().set(PRIO_REPO, label)
-    repoconf.baseurl().set(PRIO_REPO, path)
+    base._sack = _build_sack(base)
+    base._add_repo_to_sack(base.repos[label])
 
-    repoconf.this.disown()
-    return Repo(label, repoconf)
-
-
-def dnfuq(path, label="koji"):
-    __requirednf()
-
-    r = dnf_repo(path, label)
-    r.load()
-
-    sack = Sack()
-    sack.load_repo(r, build_cache=True)
-
-    q = Query(sack, 0)
-    return q.available()
+    return base.sack
 
 
-def whatprovides(path, ask, label="koji"):
-    q = dnfuq(path, label)
+@contextmanager
+def dnfuq(path, label="koji", cachedir="/tmp"):
+    with TemporaryDirectory(dir=cachedir) as tmpdir:
+        d = DNFuq(path, label, tmpdir)
+        yield d
+        d.cachedir = None
+        d._sack = None
 
-    qwp = q.filter(provides__glob=ask)
-    if qwp:
-        q = qwp
-    else:
-        q = q.filterm(file__glob=ask)
 
-    return q
+class DNFuq:
+
+    def __init__(path, label="koji", cachedir="/tmp"):
+        self.path = path
+        self.label = label
+        self.cachedir = cachedir
+        self.sack = None
+
+
+    def query(self):
+        if self.sack is None:
+            conf = dnf_conf(self.cachedir)
+            self.sack = dnf_sack(conf, self.path, self.label)
+        return self.sack.query()
+
+
+    def whatprovides(self, ask):
+        q = self.query().filterm(provides__glob=ask)
+        return q.run()
+
+
+    def whatrequires(self, ask):
+        q = self.query().filterm(requires__glob=ask)
+        return q.run()
 
 
 # The end.
