@@ -11,6 +11,7 @@ extensions = [
 
 intersphinx_mapping = {
     "python": ('https://docs.python.org/3', None),
+    "dnf": ('https://dnf.readthedocs.io/en/latest', None),
 
     # koji currently doesn't offer autodoc output as objects.inv, but
     # maybe one day...
