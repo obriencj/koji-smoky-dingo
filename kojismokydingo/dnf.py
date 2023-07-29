@@ -49,18 +49,20 @@ SackType: TypeAlias
 
 try:
     from dnf.base import Base
+    from dnf.conf import Conf
     from dnf.conf.config import MainConf
+    from dnf.package import Package
+    from dnf.query import Query
     from dnf.sack import Sack, _build_sack
-    from hawkey import Package, Query
 
 except ImportError:
     __ENABLED = False
 
-    BaseType = Any
-    MainConfType = Any
-    PackageType = Any
-    QueryType = Any
-    SackType = Any
+    BaseType = "dnf.base.Base"
+    MainConfType = "dnf.conf.config.MainConf"
+    PackageType = "dnf.package.Package"
+    QueryType = "dnf.query.Query"
+    SackType = "dnf.sack.Sack"
 
 else:
     __ENABLED = True
@@ -112,7 +114,7 @@ def dnf_config(cachedir: str) -> MainConfType:
     of managing a local system
 
     :param cachedir: the base directory to create per-repository
-    caches in
+      caches in
 
     :raises DNFUnavailable: if the dnf module is not available
 
@@ -144,7 +146,7 @@ def dnf_sack(config: MainConfType,
     :param path: repository path
 
     :param label: repository label. This will be used to determine the
-    specific caching directory
+      specific caching directory
 
     :raises DNFUnavailable: if the dnf module is not availaable
 
@@ -176,10 +178,10 @@ def dnfuq(path: str,
     :param path: path to the repository
 
     :param label: repository label, for use in storing the repository
-    cache
+      cache
 
     :param cachedir: the base directory for storing repository
-    caches. If omitted the system temp directory will be used.
+      caches. If omitted the system temp directory will be used.
 
     :raises DNFUnavailable: if the dnf module is not available
 
@@ -211,10 +213,10 @@ class DNFuq:
         :param path: path to the repository
 
         :param label: repository label, for use in storing the
-        repository cache
+          repository cache
 
         :param cachedir: the base directory for storing repository
-        caches. If omitted the system temp directory will be used.
+          caches. If omitted the system temp directory will be used.
         """
 
         self.path: str = path
@@ -273,7 +275,8 @@ def correlate_query_builds(
     :param session: an active koji client session
 
     :param found: the results of a dnf query, to be correlated back to
-    koji build infos based on their source_name, version, and release
+      koji build infos based on their source_name, version, and
+      release
 
     :since: 2.1
     """
