@@ -40,7 +40,7 @@ from .. import (
     as_taginfo, bulk_load_tags, iter_bulk_load, version_require, )
 from ..builds import correlate_build_repo_tags
 from ..common import unique
-from ..dnf import ENABLED as DNF_ENABLED, correlate_query_builds, dnfuq
+from ..dnf import correlate_query_builds, dnf_available, dnfuq
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
@@ -1153,7 +1153,7 @@ class RepoQuery(AnonSmokyDingo):
 
     @property
     def enabled(self):
-        return DNF_ENABLED
+        return dnf_available()
 
 
     def arguments(self, parser):

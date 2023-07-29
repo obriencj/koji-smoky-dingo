@@ -21,6 +21,7 @@ Koji Smoky Dingo - DNF ease-of-use wrapper
 
 
 from contextlib import contextmanager
+from functools import wraps
 from koji import ClientSession
 from os.path import abspath
 from tempfile import TemporaryDirectory
@@ -36,6 +37,9 @@ except ImportError:
     from typing_extensions import TypeAlias
 
 
+# this tomfoolery is to work around situations where we want to use
+# mypy on a system where dnf is not available
+
 BaseType: TypeAlias
 MainConfType: TypeAlias
 PackageType: TypeAlias
@@ -50,7 +54,7 @@ try:
     from hawkey import Package, Query
 
 except ImportError:
-    ENABLED = False
+    __ENABLED = False
 
     BaseType = Any
     MainConfType = Any
@@ -59,7 +63,7 @@ except ImportError:
     SackType = Any
 
 else:
-    ENABLED = True
+    __ENABLED = True
 
     BaseType = Base
     MainConfType = MainConf
@@ -68,21 +72,57 @@ else:
     SackType = Sack
 
 
-class DNFuqError(BadDingo):
-    complaint = "dnf error"
+__all__ = (
+    "DNFuq",
+    "DNFUnavailable",
+    "correlate_query_builds",
+    "dnf_available",
+    "dnf_config",
+    "dnf_sack",
+    "dnfuq",
+)
 
 
-def __requirednf():
-    if not ENABLED:
-        raise DNFuqError("dnf package not found")
+class DNFUnavailable(BadDingo):
+    complaint = "dnf package unavailable"
 
 
+def dnf_available():
+    """
+    True if the dnf package and assorted internals could be
+    successfully imported. False otherwise.
+    """
+
+    return __ENABLED
+
+
+def requires_dnf(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwds):
+        if not __ENABLED:
+            raise DNFUnavailable(f"API call {fn.__name__} requires dnf")
+        return fn(*args, **kwds)
+    return wrapper
+
+
+@requires_dnf
 def dnf_config(cachedir: str) -> MainConfType:
+    """
+    produces a dnf main configuration appropriate for use outside
+    of managing a local system
 
-    __requirednf()
+    :param cachedir: the base directory to create per-repository
+    caches in
+
+    :raises DNFUnavailable: if the dnf module is not available
+
+    :raises ValueError: if cachedir is not suppled
+
+    :since: 2.1
+    """
 
     if not cachedir:
-        raise DNFuqError("cannot execute query without a cachedir")
+        raise ValueError("cannot execute query without a cachedir")
 
     mc = MainConf()
     mc.cachedir = cachedir
@@ -90,11 +130,26 @@ def dnf_config(cachedir: str) -> MainConfType:
     return mc
 
 
+@requires_dnf
 def dnf_sack(config: MainConfType,
              path: str,
              label: str = "koji") -> SackType:
 
-    __requirednf()
+    """
+    Creates a dnf sack with a single repository, in order for
+    queries to be created against that repo.
+
+    :param config: a dnf main configuration
+
+    :param path: repository path
+
+    :param label: repository label. This will be used to determine the
+    specific caching directory
+
+    :raises DNFUnavailable: if the dnf module is not availaable
+
+    :since: 2.1
+    """
 
     if "://" not in path:
         path = "file://" + abspath(path)
@@ -108,21 +163,8 @@ def dnf_sack(config: MainConfType,
     return base.sack
 
 
-def correlate_query_builds(
-        session: ClientSession,
-        found: List[PackageType]) -> List[Tuple[PackageType, BuildInfo]]:
-
-    """
-    Given a list of dnf query result Packages, correlate the packages
-    back to koji builds
-    """
-
-    nvrs = [f"{p.source_name}-{p.v}-{p.r}" for p in found]
-    blds = bulk_load_builds(session, nvrs)
-    return [(p, blds[nvr]) for nvr, p in zip(nvrs, found)]
-
-
 @contextmanager
+@requires_dnf
 def dnfuq(path: str,
           label: str = "koji",
           cachedir: str = None) -> Generator["DNFuq", None, None]:
@@ -130,9 +172,19 @@ def dnfuq(path: str,
     """
     context manager providing a DNFuq instance configured with a
     temporary cache directory which will be cleaned up on exit
-    """
 
-    __requirednf()
+    :param path: path to the repository
+
+    :param label: repository label, for use in storing the repository
+    cache
+
+    :param cachedir: the base directory for storing repository
+    caches. If omitted the system temp directory will be used.
+
+    :raises DNFUnavailable: if the dnf module is not available
+
+    :since: 2.1
+    """
 
     with TemporaryDirectory(dir=cachedir) as tmpdir:
         d = DNFuq(path, label, tmpdir)
@@ -142,12 +194,28 @@ def dnfuq(path: str,
 
 
 class DNFuq:
+    """
+    Utility class for creating queries against a dnf repository.
+    Takes care of most of the dnf wiring lazily.
+
+    :since: 2.1
+    """
 
     def __init__(
             self,
             path: str,
             label: str = "koji",
             cachedir: str = None):
+
+        """
+        :param path: path to the repository
+
+        :param label: repository label, for use in storing the
+        repository cache
+
+        :param cachedir: the base directory for storing repository
+        caches. If omitted the system temp directory will be used.
+        """
 
         self.path: str = path
         self.label: str = label
@@ -156,6 +224,12 @@ class DNFuq:
 
 
     def query(self) -> QueryType:
+        """
+        produces a new query for the repository
+
+        :raises DNFUnavailable: if the dnf module is not available
+        """
+
         if self.sack is None:
             conf = dnf_config(self.cachedir)
             self.sack = dnf_sack(conf, self.path, self.label)
@@ -163,13 +237,50 @@ class DNFuq:
 
 
     def whatprovides(self, ask: str) -> List[PackageType]:
+        """
+        runs a provides query on the repository
+
+        :param ask: the provides glob term to search for
+
+        :raises DNFUnavailable: if the dnf module is not available
+        """
+
         q = self.query().filterm(provides__glob=ask)
         return q.run()
 
 
     def whatrequires(self, ask: str) -> List[PackageType]:
+        """
+        runs a requires query on the repository
+
+        :param ask: the requires glob term to search for
+
+        :raises DNFUnavailable: if the dnf module is not available
+        """
+
         q = self.query().filterm(requires__glob=ask)
         return q.run()
+
+
+def correlate_query_builds(
+        session: ClientSession,
+        found: List[PackageType]) -> List[Tuple[PackageType, BuildInfo]]:
+
+    """
+    Given a list of dnf query result Packages, correlate the
+    packages back to koji builds
+
+    :param session: an active koji client session
+
+    :param found: the results of a dnf query, to be correlated back to
+    koji build infos based on their source_name, version, and release
+
+    :since: 2.1
+    """
+
+    nvrs = [f"{p.source_name}-{p.v}-{p.r}" for p in found]
+    blds = bulk_load_builds(session, nvrs)
+    return [(p, blds[nvr]) for nvr, p in zip(nvrs, found)]
 
 
 #
