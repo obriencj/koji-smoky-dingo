@@ -13,7 +13,9 @@
 
 
 """
-Koji Smoky Dingo - DNF ease-of-use wrapper
+Koji Smoky Dingo - DNF ease-of-use wrappers
+
+:since: 2.1
 
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
@@ -59,7 +61,7 @@ except ImportError:
     __ENABLED = False
 
     BaseType = "dnf.base.Base"
-    MainConfType = "dnf.conf.config.MainConf"
+    MainConfType = "dnf.conf.Conf"
     PackageType = "dnf.package.Package"
     QueryType = "dnf.query.Query"
     SackType = "dnf.sack.Sack"
@@ -68,7 +70,7 @@ else:
     __ENABLED = True
 
     BaseType = Base
-    MainConfType = MainConf
+    MainConfType = Conf
     PackageType = Package
     QueryType = Query
     SackType = Sack
@@ -108,13 +110,13 @@ def requires_dnf(fn):
 
 
 @requires_dnf
-def dnf_config(cachedir: str) -> MainConfType:
+def dnf_config(cachedir: str = None) -> MainConfType:
     """
     produces a dnf main configuration appropriate for use outside
     of managing a local system
 
     :param cachedir: the base directory to create per-repository
-      caches in
+      caches in. If omitted the system temp directory will be used
 
     :raises DNFUnavailable: if the dnf module is not available
 
@@ -172,8 +174,8 @@ def dnfuq(path: str,
           cachedir: str = None) -> Generator["DNFuq", None, None]:
 
     """
-    context manager providing a DNFuq instance configured with a
-    temporary cache directory which will be cleaned up on exit
+    context manager providing a DNFuq instance configured with
+    either a re-usable or temporary cache directory.
 
     :param path: path to the repository
 
@@ -181,18 +183,23 @@ def dnfuq(path: str,
       cache
 
     :param cachedir: the base directory for storing repository
-      caches. If omitted the system temp directory will be used.
+      caches. If omitted the system temp directory will be used, and
+      the cache will be deleted afterwards.
 
     :raises DNFUnavailable: if the dnf module is not available
 
     :since: 2.1
     """
 
-    with TemporaryDirectory(dir=cachedir) as tmpdir:
-        d = DNFuq(path, label, tmpdir)
-        yield d
-        d.cachedir = None
-        d.sack = None
+    if cachedir:
+        yield DNFuq(path, label, cachedir)
+
+    else:
+        with TemporaryDirectory() as cachedir:
+            d = DNFuq(path, label, cachedir)
+            yield d
+            d.cachedir = None
+            d.sack = None
 
 
 class DNFuq:
