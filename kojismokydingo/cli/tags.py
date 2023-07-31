@@ -26,7 +26,6 @@ from json import dumps
 from koji import ClientSession
 from koji_cli.lib import arg_filter
 from operator import itemgetter
-from tempfile import gettempdir
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from . import (
@@ -987,11 +986,11 @@ class FilterTags(AnonSmokyDingo, TagSifting):
                                strict=options.strict)
 
 
-REPO_CHECK_TABLES = [
+REPO_CHECK_TABLES = (
     "build_target_config", "group_config", "group_package_listing",
     "group_req_listing", "tag_config", "tag_external_repos", "tag_extra",
     "tag_inheritance", "tag_listing", "tag_packages",
-]
+)
 
 
 def cli_check_repo(
@@ -1116,7 +1115,7 @@ def cli_repoquery(
         quiet: bool = False) -> int:
 
     # TODO: use some config for this I guess?
-    cachedir = gettempdir()
+    cachedir = None
 
     if arch is None:
         # TODO: get the first arch on the repo
@@ -1134,7 +1133,7 @@ def cli_repoquery(
             q = q.filterm(requires__glob=whatrequires)
         found = q.run()
 
-        res = correlate_query_builds(session, found)
+    res = correlate_query_builds(session, found)
 
     bids = set(binfo['id'] for _hp, binfo in res)
     tags = correlate_build_repo_tags(session, bids, taginfo['id'])
@@ -1142,8 +1141,12 @@ def cli_repoquery(
     data = [(str(hp), binfo["nvr"], tags[binfo['id']]['name']) for
             hp, binfo in res]
 
-    tabulate(["RPM", "Build", "Tag"], data, quiet=quiet)
-    return 0
+    if data:
+        tabulate(("RPM", "Build", "Tag"), data, quiet=quiet)
+        return 0
+
+    else:
+        return 1
 
 
 class RepoQuery(AnonSmokyDingo):
@@ -1182,10 +1185,13 @@ class RepoQuery(AnonSmokyDingo):
 
 
     def handle(self, options):
+        cachedir = self.get_plugin_config("cachedir", None) or None
+
         return cli_repoquery(self.session, self.goptions,
                              options.tag,
                              target=options.target,
                              arch=options.arch,
+                             cachedir=cachedir, keepcache=keep,
                              whatprovides=options.whatprovides,
                              whatrequires=options.whatrequires,
                              quiet=options.quiet)
