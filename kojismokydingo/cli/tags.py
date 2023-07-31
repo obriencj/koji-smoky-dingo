@@ -1110,27 +1110,32 @@ def cli_repoquery(
         tagname: Union[int, str],
         target: bool = False,
         arch: str = None,
+        cachedir: str = None,
         whatprovides: str = None,
         whatrequires: str = None,
         quiet: bool = False) -> int:
 
-    # TODO: use some config for this I guess?
-    cachedir = None
-
-    if arch is None:
-        # TODO: get the first arch on the repo
-        arch = "x86_64"
-
     taginfo = resolve_tag(session, tagname, target)
+    tagarches = taginfo.get("arches", "").split()
+
+    if not tagarches:
+        raise BadDingo(f"No architecture configured for tag"
+                       f" {taginfo['name']}")
+    elif arch is None:
+        arch = "x86_64" if "x86_64" in tagarches else tagarches[0]
+    elif arch not in tagarches:
+        raise BadDingo(f"Architecture {arch} not configured for tag"
+                       f" {taginfo['name']}")
+
     tagurl = _get_tag_repo_dir_url(session, goptions, taginfo)
     tagurl = f"{tagurl}/{arch}"
 
     with dnfuq(tagurl, label=taginfo['name'], cachedir=cachedir) as df:
         q = df.query()
-        if whatprovides:
-            q = q.filterm(provides__glob=whatprovides)
-        if whatrequires:
-            q = q.filterm(requires__glob=whatrequires)
+        for wut in whatprovides:
+            q = q.filterm(provides__glob=wut)
+        for wut in whatrequires:
+            q = q.filterm(requires__glob=wut)
         found = q.run()
 
     res = correlate_query_builds(session, found)
@@ -1170,30 +1175,57 @@ class RepoQuery(AnonSmokyDingo):
                help="Specify by target rather than a tag")
 
         addarg("--arch", action="store", default=None,
-               help="Tag repository architecture")
-
-        addarg("--whatprovides", action="store", default=None,
-               help="What provides")
-
-        addarg("--whatrequires", action="store", default=None,
-               help="What requires")
+               help="Override tag repo's architecture")
 
         addarg("--quiet", "-q", action="store_true", default=False,
                help="Omit column headings")
+
+        grp = parser.add_argument_group("Cache Options")
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--cachedir", action="store", dest="cachedir",
+               default=None)
+
+        addarg("--nocache", action="store_const", dest="cachedir",
+               const=False)
+
+        grp = parser.add_argument_group("Reposotiry Queries")
+        addarg = grp.add_argument
+
+        addarg("--whatprovides", action="append", default=[],
+               help="Search for packages with these Provides")
+
+        addarg("--whatrequires", action="append", default=[],
+               help="Search for packages with these Requires")
 
         return parser
 
 
     def handle(self, options):
-        cachedir = self.get_plugin_config("cachedir", None) or None
+
+        # kind of wonky, but there are three possible behaviors
+        # embedded in the cachedir option. None means undefined,
+        # therefore try to use the plugin config value. False means
+        # explicitly disabled, therefore force the actual value to
+        # None. Anything else is a path (including empty string, for
+        # current dir).
+        cachedir = options.cachedir
+        if cachedir is None:
+            cachedir = self.get_plugin_config("cachedir", None) or None
+        elif cachedir is False:
+            cachedir = None
+
+        whatprovides = resplit(options.whatprovides)
+        whatrequires = resplit(options.whatrequires)
 
         return cli_repoquery(self.session, self.goptions,
                              options.tag,
                              target=options.target,
                              arch=options.arch,
-                             cachedir=cachedir, keepcache=keep,
-                             whatprovides=options.whatprovides,
-                             whatrequires=options.whatrequires,
+                             cachedir=cachedir,
+                             whatprovides=whatprovides,
+                             whatrequires=whatrequires,
                              quiet=options.quiet)
 
 
