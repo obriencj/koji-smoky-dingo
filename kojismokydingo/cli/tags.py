@@ -39,7 +39,9 @@ from .. import (
     as_taginfo, bulk_load_tags, iter_bulk_load, version_require, )
 from ..builds import correlate_build_repo_tags
 from ..common import unique
-from ..dnf import correlate_query_builds, dnf_available, dnfuq
+from ..dnf import (
+    DNFUQ_FILTER_TERMS, DNFuqFilterTerms,
+    correlate_query_builds, dnf_available, dnfuq, )
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
@@ -1111,9 +1113,8 @@ def cli_repoquery(
         target: bool = False,
         arch: str = None,
         cachedir: str = None,
-        whatprovides: str = None,
-        whatrequires: str = None,
-        quiet: bool = False) -> int:
+        quiet: bool = False,
+        filterms: DNFuqFilterTerms = None) -> int:
 
     taginfo = resolve_tag(session, tagname, target)
     tagarches = taginfo.get("arches", "").split()
@@ -1131,11 +1132,10 @@ def cli_repoquery(
     tagurl = f"{tagurl}/{arch}"
 
     with dnfuq(tagurl, label=taginfo['name'], cachedir=cachedir) as df:
-        q = df.query()
-        for wut in whatprovides:
-            q = q.filterm(provides__glob=wut)
-        for wut in whatrequires:
-            q = q.filterm(requires__glob=wut)
+        if filterms:
+            q = df.search(**filterms)
+        else:
+            q = df.query()
         found = q.run()
 
     res = correlate_query_builds(session, found)
@@ -1148,12 +1148,11 @@ def cli_repoquery(
              binfo["nvr"], tags[binfo['id']]['name']) for
             hp, binfo in res]
 
-    if data:
-        tabulate(("RPM", "Build", "Tag"), data, quiet=quiet)
-        return 0
-
-    else:
+    if not data:
         return 1
+
+    tabulate(("RPM", "Build", "Tag"), data, quiet=quiet)
+    return 0
 
 
 class RepoQuery(AnonSmokyDingo):
@@ -1195,11 +1194,35 @@ class RepoQuery(AnonSmokyDingo):
         grp = parser.add_argument_group("Query Options")
         addarg = grp.add_argument
 
+        addarg("--file", action="append", dest="ownsfiles", default=[],
+               help="Filter for packages containing these files")
+
+        addarg("--whatconflicts", action="append", default=[],
+               help="Filter for packages with these Conflicts")
+
+        addarg("--whatdepends", action="append", default=[],
+               help="filter for packages with these Depends")
+
+        addarg("--whatobsoletes", action="append", default=[],
+               help="filter for packages with these Obsoletes")
+
         addarg("--whatprovides", action="append", default=[],
-               help="Search for packages with these Provides")
+               help="Filter for packages with these Provides")
 
         addarg("--whatrequires", action="append", default=[],
-               help="Search for packages with these Requires")
+               help="Filter for packages with these Requires")
+
+        addarg("--whatrecommends", action="append", default=[],
+               help="filter for packages with these Recommends")
+
+        addarg("--whatenhances", action="append", default=[],
+               help="filter for packages with these Enhances")
+
+        addarg("--whatsuggests", action="append", default=[],
+               help="filter for packages with these Suggests")
+
+        addarg("--whatsupplements", action="append", default=[],
+               help="filter for packages with these Supplements")
 
         return parser
 
@@ -1218,17 +1241,17 @@ class RepoQuery(AnonSmokyDingo):
         elif cachedir is False:
             cachedir = None
 
-        whatprovides = resplit(options.whatprovides)
-        whatrequires = resplit(options.whatrequires)
+        terms = DNFuqFilterTerms()
+        for opt in DNFUQ_FILTER_TERMS:
+            terms[opt] = resplit(getattr(options, opt, ()))
 
         return cli_repoquery(self.session, self.goptions,
                              options.tag,
                              target=options.target,
                              arch=options.arch,
+                             quiet=options.quiet,
                              cachedir=cachedir,
-                             whatprovides=whatprovides,
-                             whatrequires=whatrequires,
-                             quiet=options.quiet)
+                             filterms=terms)
 
 
 #

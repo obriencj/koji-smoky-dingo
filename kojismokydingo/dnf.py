@@ -27,10 +27,10 @@ from functools import wraps
 from koji import ClientSession
 from os.path import abspath
 from tempfile import TemporaryDirectory
-from typing import Any, Generator, List, Tuple
+from typing import Any, Generator, List, Optional, Tuple
 
 from . import BadDingo, bulk_load_builds
-from .types import BuildInfo
+from .types import BuildInfo, TypedDict
 
 
 try:
@@ -85,6 +85,26 @@ __all__ = (
     "dnf_sack",
     "dnfuq",
 )
+
+
+class DNFuqFilterTerms(TypedDict):
+    ownsfiles: Optional[List[str]]
+    whatconflicts: Optional[List[str]]
+    whatdepends: Optional[List[str]]
+    whatobsoletes: Optional[List[str]]
+    whatprovides: Optional[List[str]]
+    whatrequires: Optional[List[str]]
+    whatrecommends: Optional[List[str]]
+    whatenhances: Optional[List[str]]
+    whatsuggests: Optional[List[str]]
+    whatsupplements: Optional[List[str]]
+
+
+DNFUQ_FILTER_TERMS = (
+    "ownsfiles", "whatconflicts", "whatdepends",
+    "whatobsoletes", "whatprovides", "whatrequires",
+    "whatrecommends", "whatenhances",
+    "whatsuggests", "whatsupplements", )
 
 
 class DNFUnavailable(BadDingo):
@@ -245,30 +265,46 @@ class DNFuq:
         return self.sack.query()
 
 
-    def whatprovides(self, ask: str) -> List[PackageType]:
-        """
-        runs a provides query on the repository
+    def search(self,
+               ownsfiles: List[str] = None,
+               whatconflicts: List[str] = None,
+               whatdepends: List[str] = None,
+               whatobsoletes: List[str] = None,
+               whatprovides: List[str] = None,
+               whatrequires: List[str] = None,
+               whatrecommends: List[str] = None,
+               whatenhances: List[str] = None,
+               whatsuggests: List[str] = None,
+               whatsupplements: List[str] = None) -> QueryType:
 
-        :param ask: the provides glob term to search for
+        q = self.query()
 
-        :raises DNFUnavailable: if the dnf module is not available
-        """
+        if ownsfiles:
+            q = q.filterm(file__glob=ownsfiles)
+        if whatconflicts:
+            q = q.filterm(conflicts__glob=whatconflicts)
+        if whatdepends:
+            # TODO: dnf with exactdeps enabled considers depends to
+            # also include requires, recommends, enhances,
+            # supplements, and suggests. We might want to support
+            # that, too
+            q = q.filterm(depends__glob=whatdepends)
+        if whatobsoletes:
+            q = q.filterm(obsoletes__glob=whatobsoletes)
+        if whatprovides:
+            q = q.filterm(provides__glob=whatprovides)
+        if whatrequires:
+            q = q.filterm(requires__glob=whatrequires)
+        if whatrecommends:
+            q = q.filterm(recommends__glob=whatrecommends)
+        if whatenhances:
+            q = q.filterm(enhances__glob=whatenhances)
+        if whatsuggests:
+            q = q.filterm(suggests__glob=whatsuggests)
+        if whatsupplements:
+            q = q.filterm(supplements__glob=whatsupplements)
 
-        q = self.query().filterm(provides__glob=ask)
-        return q.run()
-
-
-    def whatrequires(self, ask: str) -> List[PackageType]:
-        """
-        runs a requires query on the repository
-
-        :param ask: the requires glob term to search for
-
-        :raises DNFUnavailable: if the dnf module is not available
-        """
-
-        q = self.query().filterm(requires__glob=ask)
-        return q.run()
+        return q
 
 
 def correlate_query_builds(
