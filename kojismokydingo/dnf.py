@@ -288,7 +288,16 @@ def correlate_query_builds(
     :since: 2.1
     """
 
-    nvrs = [f"{p.source_name}-{p.v}-{p.r}" for p in found]
+    # we cannot simply rely on source_name alone, because annoyingly
+    # some subpackages will have a different version. Fortunately most
+    # have a sourcerpm value which we can just trip the ".src.rpm" off
+    # of.
+
+    # nvrs = [f"{p.source_name}-{p.v}-{p.r}" for p in found]
+
+    nvrs = [f"{p.sourcerpm[:-8]}" or
+            f"{p.source_name}-{p.v}-{p.r}" for p in found]
+
     blds = bulk_load_builds(session, nvrs)
     return [(p, blds[nvr]) for nvr, p in zip(nvrs, found)]
 

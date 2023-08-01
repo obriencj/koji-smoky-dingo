@@ -31,7 +31,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
     convert_history, int_or_str, printerr, pretty_json, print_history,
-    read_clean_lines, tabulate, )
+    read_clean_lines, resplit, tabulate, )
 from .clients import _get_tag_repo_dir_url
 from .sift import TagSifting, output_sifted
 from .. import (
@@ -1143,7 +1143,9 @@ def cli_repoquery(
     bids = set(binfo['id'] for _hp, binfo in res)
     tags = correlate_build_repo_tags(session, bids, taginfo['id'])
 
-    data = [(str(hp), binfo["nvr"], tags[binfo['id']]['name']) for
+    # print in a format where `koji open` will work with each value
+    data = [(f"{hp.name}-{hp.v}-{hp.r}.{hp.a}",
+             binfo["nvr"], tags[binfo['id']]['name']) for
             hp, binfo in res]
 
     if data:
@@ -1190,7 +1192,7 @@ class RepoQuery(AnonSmokyDingo):
         addarg("--nocache", action="store_const", dest="cachedir",
                const=False)
 
-        grp = parser.add_argument_group("Reposotiry Queries")
+        grp = parser.add_argument_group("Query Options")
         addarg = grp.add_argument
 
         addarg("--whatprovides", action="append", default=[],
