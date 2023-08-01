@@ -41,7 +41,7 @@ from ..builds import correlate_build_repo_tags
 from ..common import unique
 from ..dnf import (
     DNFUQ_FILTER_TERMS, DNFuqFilterTerms,
-    correlate_query_builds, dnf_available, dnfuq, )
+    correlate_query_builds, dnf_available, dnfuq, dnfuq_formatter, )
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
@@ -1114,6 +1114,7 @@ def cli_repoquery(
         arch: str = None,
         cachedir: str = None,
         quiet: bool = False,
+        queryformat: str = None,
         filterms: DNFuqFilterTerms = None) -> int:
 
     taginfo = resolve_tag(session, tagname, target)
@@ -1131,27 +1132,37 @@ def cli_repoquery(
     tagurl = _get_tag_repo_dir_url(session, goptions, taginfo)
     tagurl = f"{tagurl}/{arch}"
 
-    with dnfuq(tagurl, label=taginfo['name'], cachedir=cachedir) as df:
+    with dnfuq(tagurl, label=taginfo['name'], arch=arch,
+               cachedir=cachedir) as df:
+
         if filterms:
             q = df.search(**filterms)
         else:
             q = df.query()
         found = q.run()
 
+    if not found:
+        return 1
+
     res = correlate_query_builds(session, found)
 
     bids = set(binfo['id'] for _hp, binfo in res)
     tags = correlate_build_repo_tags(session, bids, taginfo['id'])
 
-    # print in a format where `koji open` will work with each value
-    data = [(f"{hp.name}-{hp.v}-{hp.r}.{hp.a}",
-             binfo["nvr"], tags[binfo['id']]['name']) for
-            hp, binfo in res]
+    if queryformat:
+        formatter = dnfuq_formatter(queryformat)
+        for hp, binfo in res:
+            print(formatter(hp, build=binfo, tag=tags[binfo['id']]))
 
-    if not data:
-        return 1
+    else:
+        # by default we print in a format where `koji open` will work
+        # with each value
+        data = [(f"{hp.name}-{hp.v}-{hp.r}.{hp.a}",
+                 binfo["nvr"], tags[binfo['id']]['name']) for
+                hp, binfo in res]
 
-    tabulate(("RPM", "Build", "Tag"), data, quiet=quiet)
+        tabulate(("RPM", "Build", "Tag"), data, quiet=quiet)
+
     return 0
 
 
@@ -1176,10 +1187,17 @@ class RepoQuery(AnonSmokyDingo):
                help="Specify by target rather than a tag")
 
         addarg("--arch", action="store", default=None,
-               help="Override tag repo's architecture")
+               help="Select tag repo's architecture")
+
+        grp = parser.add_argument_group("Output Options")
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
 
         addarg("--quiet", "-q", action="store_true", default=False,
                help="Omit column headings")
+
+        addarg("--queryformat", action="store", default=None,
+               help="Output format for listing results")
 
         grp = parser.add_argument_group("Cache Options")
         grp = grp.add_mutually_exclusive_group()
@@ -1250,6 +1268,7 @@ class RepoQuery(AnonSmokyDingo):
                              target=options.target,
                              arch=options.arch,
                              quiet=options.quiet,
+                             queryformat=options.queryformat,
                              cachedir=cachedir,
                              filterms=terms)
 

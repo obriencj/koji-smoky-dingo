@@ -26,11 +26,13 @@ from contextlib import contextmanager
 from functools import wraps
 from koji import ClientSession
 from os.path import abspath
+from re import compile as compile_re
 from tempfile import TemporaryDirectory
-from typing import Any, Generator, List, Optional, Tuple
+from types import SimpleNamespace
+from typing import Any, Callable, Generator, List, Optional, Tuple
 
 from . import BadDingo, bulk_load_builds
-from .types import BuildInfo, TypedDict
+from .types import BuildInfo, TagInfo, TypedDict
 
 
 try:
@@ -53,6 +55,7 @@ try:
     from dnf.base import Base
     from dnf.conf import Conf
     from dnf.conf.config import MainConf
+    from dnf.i18n import ucd
     from dnf.package import Package
     from dnf.query import Query
     from dnf.sack import Sack, _build_sack
@@ -84,6 +87,7 @@ __all__ = (
     "dnf_config",
     "dnf_sack",
     "dnfuq",
+    "dnfuq_formatter",
 )
 
 
@@ -111,6 +115,22 @@ class DNFUnavailable(BadDingo):
     complaint = "dnf package unavailable"
 
 
+class PackageWrapper:
+
+    def __init__(self, pkg: PackageType):
+        self._pkg = pkg
+
+
+    def __getattr__(self, attr):
+        found = getattr(self._pkg, attr)
+        if found is None:
+            return "(none)"
+        elif isinstance(found, list):
+            return "\n".join(sorted(map(ucd, found)))
+        else:
+            return ucd(found)
+
+
 def dnf_available():
     """
     True if the dnf package and assorted internals could be
@@ -130,13 +150,18 @@ def requires_dnf(fn):
 
 
 @requires_dnf
-def dnf_config(cachedir: str = None) -> MainConfType:
+def dnf_config(
+        cachedir: str,
+        arch: str = None) -> MainConfType:
     """
     produces a dnf main configuration appropriate for use outside
     of managing a local system
 
     :param cachedir: the base directory to create per-repository
-      caches in. If omitted the system temp directory will be used
+      caches in.
+
+    :param arch: override the architecture. By default the local
+      system architecture is used.
 
     :raises DNFUnavailable: if the dnf module is not available
 
@@ -150,6 +175,9 @@ def dnf_config(cachedir: str = None) -> MainConfType:
 
     mc = MainConf()
     mc.cachedir = cachedir
+
+    if arch:
+        mc.arch = arch
 
     return mc
 
@@ -191,6 +219,7 @@ def dnf_sack(config: MainConfType,
 @requires_dnf
 def dnfuq(path: str,
           label: str = "koji",
+          arch: str = None,
           cachedir: str = None) -> Generator["DNFuq", None, None]:
 
     """
@@ -202,6 +231,9 @@ def dnfuq(path: str,
     :param label: repository label, for use in storing the repository
       cache
 
+    :param arch: override the architecture. By default the local
+      system architecture is used.
+
     :param cachedir: the base directory for storing repository
       caches. If omitted the system temp directory will be used, and
       the cache will be deleted afterwards.
@@ -212,11 +244,11 @@ def dnfuq(path: str,
     """
 
     if cachedir:
-        yield DNFuq(path, label, cachedir)
+        yield DNFuq(path, label=label, arch=arch, cachedir=cachedir)
 
     else:
         with TemporaryDirectory() as cachedir:
-            d = DNFuq(path, label, cachedir)
+            d = DNFuq(path, label=label, arch=arch, cachedir=cachedir)
             yield d
             d.cachedir = None
             d.sack = None
@@ -234,6 +266,7 @@ class DNFuq:
             self,
             path: str,
             label: str = "koji",
+            arch: str = None,
             cachedir: str = None):
 
         """
@@ -242,6 +275,9 @@ class DNFuq:
         :param label: repository label, for use in storing the
           repository cache
 
+        :param arch: override the architecture. By default the local
+          system architecture is used.
+
         :param cachedir: the base directory for storing repository
           caches. If omitted the system temp directory will be used.
         """
@@ -249,6 +285,7 @@ class DNFuq:
         self.path: str = path
         self.label: str = label
         self.cachedir: str = cachedir
+        self.arch: str = arch
         self.sack: SackType = None
 
 
@@ -260,7 +297,7 @@ class DNFuq:
         """
 
         if self.sack is None:
-            conf = dnf_config(self.cachedir)
+            conf = dnf_config(self.cachedir, arch=self.arch)
             self.sack = dnf_sack(conf, self.path, self.label)
         return self.sack.query()
 
@@ -336,6 +373,72 @@ def correlate_query_builds(
 
     blds = bulk_load_builds(session, nvrs)
     return [(p, blds[nvr]) for nvr, p in zip(nvrs, found)]
+
+
+DNFuqFormatter: TypeAlias = Callable[[PackageType, BuildInfo, TagInfo], str]
+
+
+_FMT_MATCH = compile_re(r'%(-?\d*?){(build\.|tag\.)?([:\w]+?)}')
+
+_FMT_TAGS = (
+    'arch', 'buildtime', 'conflicts', 'debug_name', 'description',
+    'downloadsize', 'enhances', 'epoch', 'evr', 'from_repo', 'group',
+    'installsize', 'installtime', 'license', 'name', 'obsoletes',
+    'packager', 'provides', 'reason', 'recommends', 'release', 'repoid',
+    'reponame', 'requires', 'size', 'source_debug_name', 'source_name',
+    'sourcerpm', 'suggests', 'summary', 'supplements', 'url', 'vendor',
+    'version', )
+
+
+def _escape_brackets(txt: str) -> str:
+    return txt.replace('{', '{{').replace('}', '}}')
+
+
+def _fmt_repl(matchobj):
+    fill = matchobj.groups()[0]
+    obj = matchobj.groups()[1]
+    key = matchobj.groups()[2].lower()
+
+    if not obj:
+        if key not in _FMT_TAGS:
+            return _escape_brackets(matchobj.group())
+        else:
+            obj = "rpm."
+
+    if fill:
+        if fill[0] == '-':
+            fill = ':>' + fill[1:]
+        else:
+            fill = ':<' + fill
+
+    return f"{{{obj}{key}{fill}}}"
+
+
+def dnfuq_formatter(queryformat: str) -> DNFuqFormatter:
+    # TODO: I'd love to support the rpm query format convention for
+    # arrays here, but for now it's only an adaptation of what's in
+    # dnf
+
+    queryformat = queryformat.replace("\\n", "\n").replace("\\t", "\t")
+
+    fmtl = []
+    spos = 0
+    for item in _FMT_MATCH.finditer(queryformat):
+        fmtl.append(_escape_brackets(queryformat[spos:item.start()]))
+        fmtl.append(_fmt_repl(item))
+        spos = item.end()
+    fmtl.append(_escape_brackets(queryformat[spos:]))
+
+    fmts = "".join(fmtl)
+    fmt = fmts.format
+
+    def formatter(pkg: PackageType, build: BuildInfo, tag: TagInfo) -> str:
+
+        return fmt(rpm=PackageWrapper(pkg),
+                   build=SimpleNamespace(**build),
+                   tag=SimpleNamespace(**tag))
+
+    return formatter
 
 
 #
