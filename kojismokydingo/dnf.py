@@ -115,22 +115,6 @@ class DNFUnavailable(BadDingo):
     complaint = "dnf package unavailable"
 
 
-class PackageWrapper:
-
-    def __init__(self, pkg: PackageType):
-        self._pkg = pkg
-
-
-    def __getattr__(self, attr):
-        found = getattr(self._pkg, attr)
-        if found is None:
-            return "(none)"
-        elif isinstance(found, list):
-            return "\n".join(sorted(map(ucd, found)))
-        else:
-            return ucd(found)
-
-
 def dnf_available():
     """
     True if the dnf package and assorted internals could be
@@ -375,9 +359,6 @@ def correlate_query_builds(
     return [(p, blds[nvr]) for nvr, p in zip(nvrs, found)]
 
 
-DNFuqFormatter: TypeAlias = Callable[[PackageType, BuildInfo, TagInfo], str]
-
-
 _FMT_MATCH = compile_re(r'%(-?\d*?){(build\.|tag\.)?([:\w]+?)}')
 
 _FMT_TAGS = (
@@ -395,9 +376,8 @@ def _escape_brackets(txt: str) -> str:
 
 
 def _fmt_repl(matchobj):
-    fill = matchobj.groups()[0]
-    obj = matchobj.groups()[1]
-    key = matchobj.groups()[2].lower()
+    fill, obj, key = matchobj.groups()
+    key = key.lower()
 
     if not obj:
         if key not in _FMT_TAGS:
@@ -406,12 +386,32 @@ def _fmt_repl(matchobj):
             obj = "rpm."
 
     if fill:
-        if fill[0] == '-':
-            fill = ':>' + fill[1:]
-        else:
-            fill = ':<' + fill
+        fill = f":>{fill[1:]}" if fill[0] == '-' else f":<{fill}"
+        return f"{{{obj}{key}{fill}}}"
+    else:
+        return f"{{{obj}{key}}}"
 
-    return f"{{{obj}{key}{fill}}}"
+
+class PackageWrapper:
+    """
+    Used as a format adapter for hawkey packages
+    """
+
+    def __init__(self, pkg: PackageType):
+        self._pkg = pkg
+
+
+    def __getattr__(self, attr):
+        found = getattr(self._pkg, attr)
+        if found is None:
+            return "(none)"
+        elif isinstance(found, list):
+            return "\n".join(sorted(map(ucd, found)))
+        else:
+            return ucd(found)
+
+
+DNFuqFormatter: TypeAlias = Callable[[PackageType, BuildInfo, TagInfo], str]
 
 
 def dnfuq_formatter(queryformat: str) -> DNFuqFormatter:
@@ -419,7 +419,21 @@ def dnfuq_formatter(queryformat: str) -> DNFuqFormatter:
     # arrays here, but for now it's only an adaptation of what's in
     # dnf
 
-    queryformat = queryformat.replace("\\n", "\n").replace("\\t", "\t")
+    # ref:
+    # https://rpm-software-management.github.io/rpm/manual/queryformat.html
+
+    """
+    Produces a formatter function based on a queryformat input
+    string. This formatter can be invoked with three parameters -- a
+    hawkey package, a build info dict, and a tag info dict. The result
+    will be a string that interpolates fields from the three params.
+
+    :param queryformat: The format string
+
+    :since: 2.1
+    """
+
+    queryformat = queryformat.replace(r"\n", "\n").replace(r"\t", "\t")
 
     fmtl = []
     spos = 0
