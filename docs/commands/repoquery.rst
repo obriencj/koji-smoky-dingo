@@ -65,6 +65,27 @@ in.
 This is similar to running dnf directly on the repository, but with
 the added ability to perform build and tag correlation.
 
+Introduced in version 2.1.0
+
+
+Configuration
+-------------
+
+This command keeps a local repo cachedir by default. This value can be
+overridden under the ``[repoquery]`` plugin configuration using the
+setting named ``cachedir``
+
+If the cachedir value is empty, then caches will be created in the
+system temporary directory and purged immediately after each command.
+
+eg. in ``~/.config/ksd/common.conf``
+
+::
+
+   [repoquery]
+   # this is also the default value if left unspecified
+   cachedir = ~/.cache/ksd/repoquery/
+
 
 Command Availability
 --------------------
