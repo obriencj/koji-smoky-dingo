@@ -38,7 +38,7 @@ from .. import (
     BadDingo, FeatureUnavailable, NoSuchTag,
     as_taginfo, bulk_load_tags, iter_bulk_load, version_require, )
 from ..builds import correlate_build_repo_tags
-from ..common import unique
+from ..common import find_cache_dir, unique
 from ..dnf import (
     DNFUQ_FILTER_TERMS, DNFuqFilterTerms,
     correlate_query_builds, dnf_available, dnfuq, dnfuq_formatter, )
@@ -1260,7 +1260,10 @@ class RepoQuery(AnonSmokyDingo):
         # current dir).
         cachedir = options.cachedir
         if cachedir is None:
-            cachedir = self.get_plugin_config("cachedir", None) or None
+            # plugin config value, else the default user cache dir,
+            # else nothing to indicate disabled
+            ucd = find_cache_dir("repoquery")
+            cachedir = self.get_plugin_config("cachedir", ucd) or None
         elif cachedir is False:
             cachedir = None
 
