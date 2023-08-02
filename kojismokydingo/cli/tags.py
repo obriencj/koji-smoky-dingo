@@ -1115,6 +1115,7 @@ def cli_repoquery(
         cachedir: str = None,
         quiet: bool = False,
         queryformat: str = None,
+        keys: List[str] = None,
         filterms: DNFuqFilterTerms = None) -> int:
 
     taginfo = resolve_tag(session, tagname, target)
@@ -1135,8 +1136,8 @@ def cli_repoquery(
     with dnfuq(tagurl, label=taginfo['name'], arch=arch,
                cachedir=cachedir) as df:
 
-        if filterms:
-            q = df.search(**filterms)
+        if keys or filterms:
+            q = df.search(keys=keys, **filterms)
         else:
             q = df.query()
         found = q.run()
@@ -1152,7 +1153,8 @@ def cli_repoquery(
     if queryformat:
         formatter = dnfuq_formatter(queryformat)
         for hp, binfo in res:
-            print(formatter(hp, build=binfo, tag=tags[binfo['id']]))
+            for line in formatter(hp, build=binfo, tag=tags[binfo['id']]):
+                print(line)
 
     else:
         # by default we print in a format where `koji open` will work
@@ -1212,6 +1214,9 @@ class RepoQuery(AnonSmokyDingo):
         grp = parser.add_argument_group("Query Options")
         addarg = grp.add_argument
 
+        addarg("key", action="store", nargs="*", metavar="KEY",
+               help="The key(s) to search for")
+
         addarg("--file", action="append", dest="ownsfiles", default=[],
                help="Filter for packages containing these files")
 
@@ -1270,6 +1275,7 @@ class RepoQuery(AnonSmokyDingo):
                              quiet=options.quiet,
                              queryformat=options.queryformat,
                              cachedir=cachedir,
+                             keys=options.key,
                              filterms=terms)
 
 

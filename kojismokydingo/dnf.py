@@ -24,6 +24,7 @@ Koji Smoky Dingo - DNF ease-of-use wrappers
 
 from contextlib import contextmanager
 from functools import wraps
+from itertools import cycle, repeat
 from koji import ClientSession
 from os.path import abspath
 from re import compile as compile_re
@@ -59,6 +60,7 @@ try:
     from dnf.package import Package
     from dnf.query import Query
     from dnf.sack import Sack, _build_sack
+    from dnf.subject import Subject
 
 except ImportError:
     __ENABLED = False
@@ -287,6 +289,7 @@ class DNFuq:
 
 
     def search(self,
+               keys: List[str] = None,
                ownsfiles: List[str] = None,
                whatconflicts: List[str] = None,
                whatdepends: List[str] = None,
@@ -299,6 +302,15 @@ class DNFuq:
                whatsupplements: List[str] = None) -> QueryType:
 
         q = self.query()
+
+        if keys:
+            kq = q.filter(empty=True)
+            for key in keys:
+                subj = Subject(key, ignore_case=True)
+                sq = subj.get_best_query(self.sack, with_provides=False,
+                                         query=q)
+                kq = kq.union(sq)
+            q = kq
 
         if ownsfiles:
             q = q.filterm(file__glob=ownsfiles)
@@ -393,25 +405,73 @@ def _fmt_repl(matchobj):
 
 
 class PackageWrapper:
-    """
-    Used as a format adapter for hawkey packages
-    """
 
     def __init__(self, pkg: PackageType):
         self._pkg = pkg
+        self._fields = None
+        self._iters = None
 
 
     def __getattr__(self, attr):
-        found = getattr(self._pkg, attr)
-        if found is None:
-            return "(none)"
-        elif isinstance(found, list):
-            return "\n".join(sorted(map(ucd, found)))
+        if self._iters is not None:
+            fi = next(self._iters)
+            result = next(fi)
+
         else:
-            return ucd(found)
+            found = getattr(self._pkg, attr)
+
+            if isinstance(found, list):
+                if found:
+                    found = sorted(map(ucd, found))
+                    result = found[0]
+                    found = found[1:]
+                else:
+                    found = result = "(none)"
+
+            elif found is None:
+                found = result = "(none)"
+
+            else:
+                found = result = ucd(found)
+                result = ucd(found)
+
+            if self._fields is not None:
+                self._fields.append(found)
+
+        return result
 
 
-DNFuqFormatter: TypeAlias = Callable[[PackageType, BuildInfo, TagInfo], str]
+    def iter_format(self, formatter, build, tag):
+        # first we populate the internal list of fields. Note that
+        # this is a list and not a map, because there may be
+        # duplicates in the formatter.
+
+        self._fields = []
+        res = formatter(rpm=self, build=build, tag=tag)
+        yield res
+
+        for f in self._fields:
+            if isinstance(f, list):
+                break
+        else:
+            # no lists, we're done.
+            self._field = None
+            return
+
+        its = [iter(f) if isinstance(f, list) else repeat(f)
+               for f in self._fields]
+        self._iters = cycle(its)
+
+        try:
+            while True:
+                yield formatter(rpm=self, build=build, tag=tag)
+        except StopIteration:
+            self._fields = None
+            self._iters = None
+
+
+DNFuqFormatter: TypeAlias = Callable[[PackageType, BuildInfo, TagInfo],
+                                     Generator[str, None, None]]
 
 
 def dnfuq_formatter(queryformat: str) -> DNFuqFormatter:
@@ -444,13 +504,12 @@ def dnfuq_formatter(queryformat: str) -> DNFuqFormatter:
     fmtl.append(_escape_brackets(queryformat[spos:]))
 
     fmts = "".join(fmtl)
-    fmt = fmts.format
 
-    def formatter(pkg: PackageType, build: BuildInfo, tag: TagInfo) -> str:
-
-        return fmt(rpm=PackageWrapper(pkg),
-                   build=SimpleNamespace(**build),
-                   tag=SimpleNamespace(**tag))
+    def formatter(pkg: PackageType, build: BuildInfo, tag: TagInfo):
+        i = PackageWrapper(pkg)
+        yield from i.iter_format(fmts.format,
+                                 build=SimpleNamespace(**build),
+                                 tag=SimpleNamespace(**tag))
 
     return formatter
 
