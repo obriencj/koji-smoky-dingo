@@ -59,8 +59,9 @@ try:
     from dnf.i18n import ucd
     from dnf.package import Package
     from dnf.query import Query
-    from dnf.sack import Sack, _build_sack
+    from dnf.sack import Sack
     from dnf.subject import Subject
+    from dnf.util import ensure_dir
 
 except ImportError:
     __ENABLED = False
@@ -159,6 +160,8 @@ def dnf_config(
     if not cachedir:
         raise ValueError("cannot execute query without a cachedir")
 
+    ensure_dir(cachedir)
+
     mc = MainConf()
     mc.cachedir = cachedir
 
@@ -195,7 +198,10 @@ def dnf_sack(config: MainConfType,
     base = Base(config)
     base.repos.add_new_repo(label, config, baseurl=[path])
 
-    base._sack = _build_sack(base)
+    base._sack = Sack(pkgcls=Package, pkginitval=base,
+                      arch=config.substitutions["arch"],
+                      cachedir=config.cachedir, logdebug=False)
+
     base._add_repo_to_sack(base.repos[label])
 
     return base.sack
