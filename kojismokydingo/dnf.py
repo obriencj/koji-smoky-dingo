@@ -26,7 +26,7 @@ from contextlib import contextmanager
 from functools import wraps
 from itertools import cycle, repeat
 from koji import ClientSession
-from os.path import abspath
+from os.path import abspath, expanduser
 from re import compile as compile_re
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -164,6 +164,7 @@ def dnf_config(
 
     mc = MainConf()
     mc.cachedir = cachedir
+    mc.cacheonly = False
 
     if arch:
         mc.arch = arch
@@ -193,16 +194,21 @@ def dnf_sack(config: MainConfType,
     """
 
     if "://" not in path:
-        path = "file://" + abspath(path)
+        path = "file://" + abspath(expanduser(path))
 
     base = Base(config)
     base.repos.add_new_repo(label, config, baseurl=[path])
+
+    repo = base.repos[label]
+
+    repo._repo.expire()
+    repo._repo.loadCache(throwExcept=False, ignoreMissing=False)
 
     base._sack = Sack(pkgcls=Package, pkginitval=base,
                       arch=config.substitutions["arch"],
                       cachedir=config.cachedir, logdebug=False)
 
-    base._add_repo_to_sack(base.repos[label])
+    base._add_repo_to_sack(repo)
 
     return base.sack
 
@@ -276,7 +282,7 @@ class DNFuq:
 
         self.path: str = path
         self.label: str = label
-        self.cachedir: str = cachedir
+        self.cachedir: str = abspath(expanduser(cachedir))
         self.arch: str = arch
         self.sack: SackType = None
 
