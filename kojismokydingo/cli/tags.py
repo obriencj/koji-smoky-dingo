@@ -1206,10 +1206,12 @@ class RepoQuery(AnonSmokyDingo):
         addarg = grp.add_argument
 
         addarg("--cachedir", action="store", dest="cachedir",
-               default=None)
+               default=None,
+               help="Override the default or configured cache directory")
 
         addarg("--nocache", action="store_const", dest="cachedir",
-               const=False)
+               const=False,
+               help="Use a temporary cache, removed after use")
 
         grp = parser.add_argument_group("Query Options")
         addarg = grp.add_argument
