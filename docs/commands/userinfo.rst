@@ -23,15 +23,16 @@ blocked), their type (user or group), their kerberos identities if
 any, and a listing of any permissions they have. If the user is
 configured to perform a CG import, this will also be presented.
 
-User statistics include
+For groups this command will also show the list of members.
+
+The ``--stats`` option was introduced in version 2.0.0, and provides
+additional output:
 
 * Owned package count
 * Submitted task count
 * Created builds count
 * Last task summary
 * Last build summary
-
-For groups this command will also show the members.
 
 
 References
