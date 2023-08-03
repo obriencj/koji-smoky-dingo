@@ -48,6 +48,8 @@ build of the matching package name in the given tag, and then pulls
 that instead. It is similar to invoking with the build argument set to
 the result of ``koji latest-build KOJI_TAG BUILD``
 
+Introduced in version 2.0.0
+
 
 Configuration
 -------------

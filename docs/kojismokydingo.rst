@@ -17,8 +17,8 @@ Core Modules
    kojismokydingo/builds
    kojismokydingo/clients
    kojismokydingo/common
+   kojismokydingo/dnf
    kojismokydingo/hosts
-   kojismokydingo/rpm
    kojismokydingo/tags
    kojismokydingo/types
    kojismokydingo/users

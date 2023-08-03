@@ -32,6 +32,7 @@ do not require any special permissions to run.
    commands/open
    commands/perminfo
    commands/pull-container
+   commands/repoquery
    commands/userinfo
 
 

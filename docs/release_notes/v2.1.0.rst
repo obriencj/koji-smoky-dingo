@@ -1,0 +1,34 @@
+Koji Smoky Dingo 2.1.0 Release Notes
+====================================
+
+*Unreleased*
+
+This release adds the following:
+
+
+Commands
+--------
+
+* Introduces the ``repoquery`` command, which will perform a dnf query on
+  the contents of a tag or target's repository and correlate the results
+  back to the underlying koji build.
+
+
+API
+---
+
+* optimizes the ``bulk_load_tasks`` call to use the list version of
+  ``getTaskInfo``
+
+
+Other
+-----
+
+* begin using GitHub Actions for CI
+
+
+Issues
+------
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/10?closed=1>

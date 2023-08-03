@@ -42,7 +42,7 @@ from .common import (
 from .rpm import evr_compare
 from .types import (
     BuildInfo, BuildInfos, BuildState, DecoratedBuildInfo,
-    DecoratedBuildInfos, TagSpec, )
+    DecoratedBuildInfos, TagBuildInfo, TagSpec, )
 
 
 __all__ = (
@@ -1417,6 +1417,47 @@ class BuildFilter():
         work = self.filter_imported(work)
 
         return work
+
+
+def correlate_build_repo_tags(
+        session: ClientSession,
+        builds: Iterable[Union[int, str]],
+        repotag: TagSpec) -> Dict[Union[int, str], Dict]:
+    """
+    Given a collection of builds by ID or NVR, and a build tag,
+    identify what parent tag in the build tag's inheritance provided
+    the build. Returns a mapping of the input build values to a dict
+    indicating the tag's ID and name.
+
+    :param session: an active koji client session
+
+    :param builds: builds specified by ID or NVR
+
+    :param repotag: build tag to search within
+
+    :since: 2.1
+    """
+
+    # load the tag
+    tinfo = as_taginfo(session, repotag)
+
+    # get the event ID of the current repo for the tag
+    repo = session.getRepo(tinfo['id'])
+    event = repo.get('create_event') if repo else None
+
+    # ask for the latest builds for the tag at the event ID
+    # create a mapping of the bid and nvr to the taginfo
+    found = session.listTagged(tinfo['id'], event=event,
+                               inherit=True, latest=True)
+
+    tagged: Dict[Union[int, str], Dict] = {}
+    for tbld in found:
+        t = {'id': tbld['tag_id'], 'name': tbld['tag_name']}
+        tagged[tbld['id']] = t
+        tagged[tbld['nvr']] = t
+
+    # return a mapping of the input builds to the taginfos
+    return {want: tagged.get(want) for want in builds}
 
 
 #

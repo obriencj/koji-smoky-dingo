@@ -24,5 +24,5 @@ on behalf of that content generator.
 References
 ----------
 
-* :py:obj:`kojismokydingo.cli.users.CGInfo`
+* :py:obj:`kojismokydingo.cli.users.ShowCGInfo`
 * :py:func:`kojismokydingo.cli.users.cli_cginfo`

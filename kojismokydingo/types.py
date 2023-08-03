@@ -37,11 +37,8 @@ from typing import (
 
 
 try:
-    from typing import TypedDict
-
+    from typing import TypedDict  # type: ignore
 except ImportError:
-    # Python < 3.8 doesn't have TypedDict yet, need to pull it in from
-    # the typing_extensions backport instead.
     from typing_extensions import TypedDict
 
 
@@ -88,6 +85,7 @@ __all__ = (
     "RPMSignature",
     "RPMSpec",
     "SearchResult",
+    "TagBuildInfo",
     "TagInfo",
     "TagInfos",
     "TagInheritance",
@@ -498,6 +496,20 @@ class BuildInfo(TypedDict):
     platform: Optional[str]
     """ only present on Windows builds which have been loaded with type
     information """
+
+
+class TagBuildInfo(BuildInfo):
+    """
+    Decorated form of BuildInfo as returned by listTagged
+
+    :since: 2.1
+    """
+
+    tag_id: int
+    """ the ID of the tag this build was found in """
+
+    tag_name: str
+    """ the name of the tag this build was found in """
 
 
 class DecoratedBuildInfo(BuildInfo):

@@ -27,6 +27,6 @@ what user granted the permission to them, and when.
 References
 ----------
 
-* :py:obj:`kojismokydingo.cli.users.PermissionInfo`
+* :py:obj:`kojismokydingo.cli.users.ShowPermissionInfo`
 * :py:func:`kojismokydingo.cli.users.cli_perminfo`
 * :py:func:`kojismokydingo.users.collect_perminfo`

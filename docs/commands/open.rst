@@ -46,6 +46,10 @@ points to the actual repo ID path rather than the ``latest`` symlink.
 The type ``build-dir`` accepts a build as the argument, and will open
 the storage directory for that build's archives and logs.
 
+Version 2.0.0 added the ``--print`` option to facilitate simply
+outputting the relevant URL without needing to execute a command such
+as ``echo``
+
 
 Configuration
 -------------

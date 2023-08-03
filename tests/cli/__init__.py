@@ -49,6 +49,7 @@ ENTRY_POINTS = {
     "remove-env-var": "kojismokydingo.cli.tags:RemoveEnvVar",
     "remove-rpm-macro": "kojismokydingo.cli.tags:RemoveRPMMacro",
     "renum-tag-inheritance": "kojismokydingo.cli.tags:RenumTagInheritance",
+    "repoquery": "kojismokydingo.cli.tags:RepoQuery",
     "set-env-var": "kojismokydingo.cli.tags:SetEnvVar",
     "set-rpm-macro": "kojismokydingo.cli.tags:SetRPMMacro",
     "swap-tag-inheritance": "kojismokydingo.cli.tags:SwapTagInheritance",

@@ -53,7 +53,7 @@ jobs:
 
       - name: Install python dependencies
         run: |
-          pip install tox tox-gh-actions wheel
+          pip install tox wheel
 
       - name: Run Flake8
         run: tox -e flake8

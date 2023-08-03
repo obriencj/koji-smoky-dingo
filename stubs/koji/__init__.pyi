@@ -36,8 +36,8 @@ from kojismokydingo.types import (
     ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
     ChannelInfo, CGInfo, HostInfo, ListTasksOptions, PackageInfo,
     PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo, RPMSignature,
-    SearchResult, TagInfo, TagGroupInfo, TagInheritance, TagPackageInfo,
-    TargetInfo, TaskInfo, UserInfo, )
+    SearchResult, TagBuildInfo, TagInfo, TagGroupInfo, TagInheritance,
+    TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
 
 
 AUTHTYPE_NORMAL: int
@@ -389,7 +389,7 @@ class ClientSession:
             tag: Union[int, str],
             event: Optional[int] = None,
             package: Optional[Union[int, str]] = None,
-            type: Optional[str] = None) -> List[BuildInfo]:
+            type: Optional[str] = None) -> List[TagBuildInfo]:
         ...
 
     def getLatestMavenArchives(
@@ -568,7 +568,7 @@ class ClientSession:
             latest: bool = False,
             package: Optional[Union[int, str]] = None,
             owner: Optional[Union[int, str]] = None,
-            type: Optional[str] = None) -> List[BuildInfo]:
+            type: Optional[str] = None) -> List[TagBuildInfo]:
         ...
 
     def listTaggedArchives(

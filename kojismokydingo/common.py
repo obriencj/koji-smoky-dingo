@@ -54,6 +54,7 @@ __all__ = (
     "chunkseq",
     "escapable_replace",
     "fnmatches",
+    "find_cache_dir",
     "find_config_dirs",
     "find_config_files",
     "get_plugin_config",
@@ -437,6 +438,28 @@ def parse_datetime(
             raise ValueError(f"Invalid date-time format, {src!r}")
         else:
             return None
+
+
+def find_cache_dir(usage: str = None) -> str:
+    """
+    The use cache dir for koji-smoky-dingo for the given usage
+    (eg. repoquery). Attempts to use the ``appdirs`` package of it is
+    available.
+
+    :param usage: nested directory to apply to the cache path
+
+    :since: 2.1
+    """
+
+    if appdirs is None:
+        user_cache_dir = expanduser("~/.cache/ksd/")
+    else:
+        user_cache_dir = appdirs.user_cache_dir("ksd")
+
+    if usage:
+        return join(user_cache_dir, usage)
+    else:
+        return user_cache_dir
 
 
 def find_config_dirs() -> Tuple[str, str]:

@@ -31,18 +31,23 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from . import (
     AnonSmokyDingo, TagSmokyDingo,
     convert_history, int_or_str, printerr, pretty_json, print_history,
-    read_clean_lines, tabulate, )
+    read_clean_lines, resplit, tabulate, )
+from .clients import _get_tag_repo_dir_url
 from .sift import TagSifting, output_sifted
 from .. import (
     BadDingo, FeatureUnavailable, NoSuchTag,
     as_taginfo, bulk_load_tags, iter_bulk_load, version_require, )
-from ..common import unique
+from ..builds import correlate_build_repo_tags
+from ..common import find_cache_dir, unique
+from ..dnf import (
+    DNFUQ_FILTER_TERMS, DNFuqFilterTerms,
+    correlate_query_builds, dnf_available, dnfuq, dnfuq_formatter, )
 from ..tags import (
     collect_tag_extras, find_inheritance_parent, gather_affected_targets,
     renum_inheritance, resolve_tag, tag_dedup, )
 from ..sift import Sifter
 from ..types import (
-    HistoryEntry, TagInheritance, TagInheritanceEntry, TagSpec, )
+    GOptions, HistoryEntry, TagInheritance, TagInheritanceEntry, TagSpec, )
 
 
 SORT_BY_ID = "sort-by-id"
@@ -983,11 +988,11 @@ class FilterTags(AnonSmokyDingo, TagSifting):
                                strict=options.strict)
 
 
-REPO_CHECK_TABLES = [
+REPO_CHECK_TABLES = (
     "build_target_config", "group_config", "group_package_listing",
     "group_req_listing", "tag_config", "tag_external_repos", "tag_extra",
     "tag_inheritance", "tag_listing", "tag_packages",
-]
+)
 
 
 def cli_check_repo(
@@ -1099,6 +1104,191 @@ class CheckRepo(AnonSmokyDingo):
                               quiet=options.quiet,
                               show_events=options.events,
                               utc=options.utc)
+
+
+def cli_repoquery(
+        session: ClientSession,
+        goptions: GOptions,
+        tagname: Union[int, str],
+        target: bool = False,
+        arch: str = None,
+        cachedir: str = None,
+        cacheonly: bool = False,
+        quiet: bool = False,
+        queryformat: str = None,
+        keys: List[str] = None,
+        filterms: DNFuqFilterTerms = None) -> int:
+
+    taginfo = resolve_tag(session, tagname, target)
+    tagarches = taginfo.get("arches", "").split()
+
+    if not tagarches:
+        raise BadDingo(f"No architecture configured for tag"
+                       f" {taginfo['name']}")
+    elif arch is None:
+        arch = "x86_64" if "x86_64" in tagarches else tagarches[0]
+    elif arch not in tagarches:
+        raise BadDingo(f"Architecture {arch} not configured for tag"
+                       f" {taginfo['name']}")
+
+    tagurl = _get_tag_repo_dir_url(session, goptions, taginfo)
+    tagurl = f"{tagurl}/{arch}"
+
+    with dnfuq(tagurl, label=taginfo['name'], arch=arch,
+               cachedir=cachedir, cacheonly=cacheonly) as df:
+
+        if keys or filterms:
+            q = df.search(keys=keys, **filterms)
+        else:
+            q = df.query()
+        found = q.run()
+
+    if not found:
+        return 1
+
+    res = correlate_query_builds(session, found)
+
+    bids = set(binfo['id'] for _hp, binfo in res)
+    tags = correlate_build_repo_tags(session, bids, taginfo['id'])
+
+    if queryformat:
+        formatter = dnfuq_formatter(queryformat)
+        for hp, binfo in res:
+            for line in formatter(hp, build=binfo, tag=tags[binfo['id']]):
+                print(line)
+
+    else:
+        # by default we print in a format where `koji open` will work
+        # with each value
+        data = [(f"{hp.name}-{hp.v}-{hp.r}.{hp.a}",
+                 binfo["nvr"], tags[binfo['id']]['name']) for
+                hp, binfo in res]
+
+        tabulate(("RPM", "Build", "Tag"), data, quiet=quiet)
+
+    return 0
+
+
+class RepoQuery(AnonSmokyDingo):
+
+    description = "Query the contents of a tag's repo"
+
+
+    @property
+    def enabled(self):
+        return dnf_available()
+
+
+    def arguments(self, parser):
+
+        addarg = parser.add_argument
+
+        addarg("tag", action="store", metavar="TAGNAME",
+               help="Name of tag")
+
+        addarg("--target", action="store_true", default=False,
+               help="Specify by target rather than a tag")
+
+        addarg("--arch", action="store", default=None,
+               help="Select tag repo's architecture")
+
+        grp = parser.add_argument_group("Output Options")
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--quiet", "-q", action="store_true", default=False,
+               help="Omit column headings")
+
+        addarg("--queryformat", action="store", default=None,
+               help="Output format for listing results")
+
+        grp = parser.add_argument_group("Cache Options")
+        addarg = grp.add_argument
+
+        addarg("-C", "--cacheonly", action="store_true", default=False,
+               help="Restrict to local cache if it exists")
+
+        grp = grp.add_mutually_exclusive_group()
+        addarg = grp.add_argument
+
+        addarg("--cachedir", action="store", dest="cachedir",
+               default=None,
+               help="Override the default or configured cache directory")
+
+        addarg("--nocache", action="store_const", dest="cachedir",
+               const=False,
+               help="Use a temporary cache, removed after use")
+
+        grp = parser.add_argument_group("Query Options")
+        addarg = grp.add_argument
+
+        addarg("key", action="store", nargs="*", metavar="KEY",
+               help="The key(s) to search for")
+
+        addarg("--file", action="append", dest="ownsfiles", default=[],
+               help="Filter for packages containing these files")
+
+        addarg("--whatconflicts", action="append", default=[],
+               help="Filter for packages with these Conflicts")
+
+        addarg("--whatdepends", action="append", default=[],
+               help="filter for packages with these Depends")
+
+        addarg("--whatobsoletes", action="append", default=[],
+               help="filter for packages with these Obsoletes")
+
+        addarg("--whatprovides", action="append", default=[],
+               help="Filter for packages with these Provides")
+
+        addarg("--whatrequires", action="append", default=[],
+               help="Filter for packages with these Requires")
+
+        addarg("--whatrecommends", action="append", default=[],
+               help="filter for packages with these Recommends")
+
+        addarg("--whatenhances", action="append", default=[],
+               help="filter for packages with these Enhances")
+
+        addarg("--whatsuggests", action="append", default=[],
+               help="filter for packages with these Suggests")
+
+        addarg("--whatsupplements", action="append", default=[],
+               help="filter for packages with these Supplements")
+
+        return parser
+
+
+    def handle(self, options):
+
+        # kind of wonky, but there are three possible behaviors
+        # embedded in the cachedir option. None means undefined,
+        # therefore try to use the plugin config value. False means
+        # explicitly disabled, therefore force the actual value to
+        # None. Anything else is a path (including empty string, for
+        # current dir).
+        cachedir = options.cachedir
+        if cachedir is None:
+            # plugin config value, else the default user cache dir,
+            # else nothing to indicate disabled
+            ucd = find_cache_dir("repoquery")
+            cachedir = self.get_plugin_config("cachedir", ucd) or None
+        elif cachedir is False:
+            cachedir = None
+
+        terms = DNFuqFilterTerms()
+        for opt in DNFUQ_FILTER_TERMS:
+            terms[opt] = resplit(getattr(options, opt, ()))
+
+        return cli_repoquery(self.session, self.goptions,
+                             options.tag,
+                             target=options.target,
+                             arch=options.arch,
+                             quiet=options.quiet,
+                             queryformat=options.queryformat,
+                             cachedir=cachedir,
+                             cacheonly=options.cacheonly,
+                             keys=options.key,
+                             filterms=terms)
 
 
 #
