@@ -1113,6 +1113,7 @@ def cli_repoquery(
         target: bool = False,
         arch: str = None,
         cachedir: str = None,
+        cacheonly: bool = False,
         quiet: bool = False,
         queryformat: str = None,
         keys: List[str] = None,
@@ -1134,7 +1135,7 @@ def cli_repoquery(
     tagurl = f"{tagurl}/{arch}"
 
     with dnfuq(tagurl, label=taginfo['name'], arch=arch,
-               cachedir=cachedir) as df:
+               cachedir=cachedir, cacheonly=cacheonly) as df:
 
         if keys or filterms:
             q = df.search(keys=keys, **filterms)
@@ -1202,6 +1203,11 @@ class RepoQuery(AnonSmokyDingo):
                help="Output format for listing results")
 
         grp = parser.add_argument_group("Cache Options")
+        addarg = grp.add_argument
+
+        addarg("-C", "--cacheonly", action="store_true", default=False,
+               help="Restrict to local cache if it exists")
+
         grp = grp.add_mutually_exclusive_group()
         addarg = grp.add_argument
 
@@ -1280,6 +1286,7 @@ class RepoQuery(AnonSmokyDingo):
                              quiet=options.quiet,
                              queryformat=options.queryformat,
                              cachedir=cachedir,
+                             cacheonly=options.cacheonly,
                              keys=options.key,
                              filterms=terms)
 

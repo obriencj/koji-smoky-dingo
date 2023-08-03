@@ -26,8 +26,10 @@ from contextlib import contextmanager
 from functools import wraps
 from itertools import cycle, repeat
 from koji import ClientSession
-from os.path import abspath, expanduser
-from re import compile as compile_re
+from os import listdir
+from os.path import abspath, basename, expanduser, isdir, join
+from re import compile as compile_re, escape as escape_re
+from shutil import rmtree
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from typing import Any, Callable, Generator, List, Optional, Tuple
@@ -49,16 +51,17 @@ BaseType: TypeAlias
 MainConfType: TypeAlias
 PackageType: TypeAlias
 QueryType: TypeAlias
+RepoType: TypeAlias
 SackType: TypeAlias
 
 
 try:
     from dnf.base import Base
-    from dnf.conf import Conf
     from dnf.conf.config import MainConf
     from dnf.i18n import ucd
     from dnf.package import Package
     from dnf.query import Query
+    from dnf.repo import Repo
     from dnf.sack import Sack
     from dnf.subject import Subject
     from dnf.util import ensure_dir
@@ -67,18 +70,18 @@ except ImportError:
     __ENABLED = False
 
     BaseType = "dnf.base.Base"
-    MainConfType = "dnf.conf.Conf"
     PackageType = "dnf.package.Package"
     QueryType = "dnf.query.Query"
+    RepoType = "dnf.repo.Repo"
     SackType = "dnf.sack.Sack"
 
 else:
     __ENABLED = True
 
     BaseType = Base
-    MainConfType = Conf
     PackageType = Package
     QueryType = Query
+    RepoType = Repo
     SackType = Sack
 
 
@@ -87,7 +90,7 @@ __all__ = (
     "DNFUnavailable",
     "correlate_query_builds",
     "dnf_available",
-    "dnf_config",
+    "dnf_base",
     "dnf_sack",
     "dnfuq",
     "dnfuq_formatter",
@@ -137,9 +140,10 @@ def requires_dnf(fn):
 
 
 @requires_dnf
-def dnf_config(
+def dnf_base(
         cachedir: str,
-        arch: str = None) -> MainConfType:
+        arch: str = None,
+        cacheonly: bool = False) -> BaseType:
     """
     produces a dnf main configuration appropriate for use outside
     of managing a local system
@@ -149,6 +153,9 @@ def dnf_config(
 
     :param arch: override the architecture. By default the local
       system architecture is used.
+
+    :param cacheonly: use existing cache if it exists, without trying
+      to fetch updated repo metadata
 
     :raises DNFUnavailable: if the dnf module is not available
 
@@ -164,16 +171,47 @@ def dnf_config(
 
     mc = MainConf()
     mc.cachedir = cachedir
-    mc.cacheonly = False
+    mc.cacheonly = cacheonly
 
     if arch:
         mc.arch = arch
 
-    return mc
+    return Base(mc)
+
+
+def _clear_old_cache(cachedir: str,
+                     repo: RepoType) -> int:
+
+    if not (cachedir and isdir(cachedir)):
+        return -1
+
+    active = basename(repo._repo.getCachedir())
+    if not active:
+        return -1
+
+    repoid = escape_re(repo._repo.getId())
+    if not repoid:
+        return -1
+
+    match = compile_re(f"^{repoid}-[0-9a-f]{{16}}$").match
+
+    count = 0
+    for found in listdir(cachedir):
+        if match(found) and found != active:
+            olddir = abspath(join(cachedir, found))
+            if isdir(olddir):
+                try:
+                    rmtree(olddir)
+                except IOError:
+                    pass
+                else:
+                    count += 1
+
+    return count
 
 
 @requires_dnf
-def dnf_sack(config: MainConfType,
+def dnf_sack(base: BaseType,
              path: str,
              label: str = "koji") -> SackType:
 
@@ -181,7 +219,7 @@ def dnf_sack(config: MainConfType,
     Creates a dnf sack with a single repository, in order for
     queries to be created against that repo.
 
-    :param config: a dnf main configuration
+    :param base: a dnf main configuration
 
     :param path: repository path
 
@@ -196,20 +234,21 @@ def dnf_sack(config: MainConfType,
     if "://" not in path:
         path = "file://" + abspath(expanduser(path))
 
-    base = Base(config)
-    base.repos.add_new_repo(label, config, baseurl=[path])
-
-    repo = base.repos[label]
-
-    repo._repo.expire()
+    repo = Repo(label, base.conf)
+    repo.baseurl.append(path)
     repo._repo.loadCache(throwExcept=False, ignoreMissing=False)
 
-    base._sack = Sack(pkgcls=Package, pkginitval=base,
-                      arch=config.substitutions["arch"],
-                      cachedir=config.cachedir, logdebug=False)
+    base.repos.add(repo)
 
+    base._sack = Sack(pkgcls=Package, pkginitval=base,
+                      arch=base.conf.substitutions["arch"],
+                      cachedir=base.conf.cachedir, logdebug=False)
+
+    # note: this calls repo.load()
     base._add_repo_to_sack(repo)
 
+    # removes stale metadata dirs
+    _clear_old_cache(base.conf.cachedir, repo)
     return base.sack
 
 
@@ -218,7 +257,8 @@ def dnf_sack(config: MainConfType,
 def dnfuq(path: str,
           label: str = "koji",
           arch: str = None,
-          cachedir: str = None) -> Generator["DNFuq", None, None]:
+          cachedir: str = None,
+          cacheonly: bool = False) -> Generator["DNFuq", None, None]:
 
     """
     context manager providing a DNFuq instance configured with
@@ -242,14 +282,18 @@ def dnfuq(path: str,
     """
 
     if cachedir:
-        yield DNFuq(path, label=label, arch=arch, cachedir=cachedir)
+        d = DNFuq(path, label=label, arch=arch,
+                  cachedir=cachedir, cacheonly=cacheonly)
+        yield d
+        d.close()
 
     else:
         with TemporaryDirectory() as cachedir:
-            d = DNFuq(path, label=label, arch=arch, cachedir=cachedir)
+            d = DNFuq(path, label=label, arch=arch,
+                      cachedir=cachedir, cacheonly=cacheonly)
             yield d
             d.cachedir = None
-            d.sack = None
+            d.base.close()
 
 
 class DNFuq:
@@ -265,7 +309,8 @@ class DNFuq:
             path: str,
             label: str = "koji",
             arch: str = None,
-            cachedir: str = None):
+            cachedir: str = None,
+            cacheonly: bool = False):
 
         """
         :param path: path to the repository
@@ -283,7 +328,9 @@ class DNFuq:
         self.path: str = path
         self.label: str = label
         self.cachedir: str = abspath(expanduser(cachedir))
+        self.cacheonly: bool = cacheonly
         self.arch: str = arch
+        self.base: BaseType = None
         self.sack: SackType = None
 
 
@@ -295,8 +342,9 @@ class DNFuq:
         """
 
         if self.sack is None:
-            conf = dnf_config(self.cachedir, arch=self.arch)
-            self.sack = dnf_sack(conf, self.path, self.label)
+            self.base = dnf_base(self.cachedir, arch=self.arch,
+                                 cacheonly=self.cacheonly)
+            self.sack = dnf_sack(self.base, self.path, self.label)
         return self.sack.query()
 
 
@@ -350,6 +398,12 @@ class DNFuq:
             q = q.filterm(supplements__glob=whatsupplements)
 
         return q
+
+
+    def close(self):
+        self.base.close()
+        self.base = None
+        self.sack = None
 
 
 def correlate_query_builds(
@@ -487,18 +541,14 @@ DNFuqFormatter: TypeAlias = Callable[[PackageType, BuildInfo, TagInfo],
 
 
 def dnfuq_formatter(queryformat: str) -> DNFuqFormatter:
-    # TODO: I'd love to support the rpm query format convention for
-    # arrays here, but for now it's only an adaptation of what's in
-    # dnf
-
-    # ref:
-    # https://rpm-software-management.github.io/rpm/manual/queryformat.html
-
     """
     Produces a formatter function based on a queryformat input
     string. This formatter can be invoked with three parameters -- a
     hawkey package, a build info dict, and a tag info dict. The result
-    will be a string that interpolates fields from the three params.
+    will be a sequence of one or more strings that interpolates fields
+    from the three params. In the event that any of the fields are
+    arrays, the results will be the zip of all fields, repeating,
+    until the shortest array expires.
 
     :param queryformat: The format string
 

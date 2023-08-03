@@ -5,7 +5,7 @@ koji repoquery
 
 ::
 
- usage: koji repoquery [-h] [--target] [--arch ARCH] [--quiet | --queryformat QUERYFORMAT] [--cachedir CACHEDIR | --nocache]
+ usage: koji repoquery [-h] [--target] [--arch ARCH] [--quiet | --queryformat QUERYFORMAT] [-C] [--cachedir CACHEDIR | --nocache]
                        [--file OWNSFILES] [--whatconflicts WHATCONFLICTS] [--whatdepends WHATDEPENDS] [--whatobsoletes WHATOBSOLETES]
                        [--whatprovides WHATPROVIDES] [--whatrequires WHATREQUIRES] [--whatrecommends WHATRECOMMENDS]
                        [--whatenhances WHATENHANCES] [--whatsuggests WHATSUGGESTS] [--whatsupplements WHATSUPPLEMENTS]
@@ -27,6 +27,7 @@ koji repoquery
                          Output format for listing results
 
  Cache Options:
+   -C, --cacheonly       Restrict to local cache if it exists
    --cachedir CACHEDIR   Override the default or configured cache directory
    --nocache             Use a temporary cache, removed after use
 
