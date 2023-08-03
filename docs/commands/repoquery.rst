@@ -123,7 +123,7 @@ architecture.
 References
 ----------
 
-* :py:obj: `kojismokydingo.cli.tags.RepoQuery`
-* :py:func: `kojismokydingo.cli.tags.cli_repoquery`
+* :py:obj:`kojismokydingo.cli.tags.RepoQuery`
+* :py:func:`kojismokydingo.cli.tags.cli_repoquery`
 * `DNF, the next-generation replacement for YUM <https://dnf.readthedocs.io/en/latest/>`_
 * `DNF Command Reference - Repoquery Command <https://dnf.readthedocs.io/en/latest/command_ref.html?highlight=repoquery#repoquery-command>`_

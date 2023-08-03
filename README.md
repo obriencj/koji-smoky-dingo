@@ -74,6 +74,7 @@ permissions in koji.
 |`open` |Opens a brower to the info page for koji data types |
 |`perminfo` |Show information about a permission |
 |`pull-container` |Pull an image from a container build |
+|`repoquery` |Use DNF to query the contents of a tag's repo |
 |`userinfo` |Show information about a user account |
 
 
