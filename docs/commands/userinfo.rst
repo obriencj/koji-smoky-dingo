@@ -24,6 +24,7 @@ any, and a listing of any permissions they have. If the user is
 configured to perform a CG import, this will also be presented.
 
 User statistics include
+
 * Owned package count
 * Submitted task count
 * Created builds count
@@ -36,6 +37,6 @@ For groups this command will also show the members.
 References
 ----------
 
-* :py:obj:`kojismokydingo.cli.users.UserInfo`
+* :py:obj:`kojismokydingo.cli.users.ShowUserInfo`
 * :py:func:`kojismokydingo.cli.users.cli_userinfo`
 * :py:func:`kojismokydingo.users.collect_userinfo`
