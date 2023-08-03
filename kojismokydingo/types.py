@@ -85,6 +85,7 @@ __all__ = (
     "RPMSignature",
     "RPMSpec",
     "SearchResult",
+    "TagBuildInfo",
     "TagInfo",
     "TagInfos",
     "TagInheritance",
@@ -495,6 +496,18 @@ class BuildInfo(TypedDict):
     platform: Optional[str]
     """ only present on Windows builds which have been loaded with type
     information """
+
+
+class TagBuildInfo(BuildInfo):
+    """
+    Decorated form of BuildInfo as returned by listTagged
+    """
+
+    tag_id: int
+    """ the ID of the tag this build was found in """
+
+    tag_name: str
+    """ the name of the tag this build was found in """
 
 
 class DecoratedBuildInfo(BuildInfo):
