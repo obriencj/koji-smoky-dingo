@@ -501,6 +501,8 @@ class BuildInfo(TypedDict):
 class TagBuildInfo(BuildInfo):
     """
     Decorated form of BuildInfo as returned by listTagged
+
+    :since: 2.1
     """
 
     tag_id: int

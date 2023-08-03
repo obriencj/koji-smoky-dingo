@@ -1434,6 +1434,8 @@ def correlate_build_repo_tags(
     :param builds: builds specified by ID or NVR
 
     :param repotag: build tag to search within
+
+    :since: 2.1
     """
 
     # load the tag
