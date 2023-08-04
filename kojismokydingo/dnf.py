@@ -43,8 +43,10 @@ try:
     from typing import TypeAlias  # type: ignore
 except ImportError:
     try:
+        # pre 3.10 TypeAlias is only available from typing_extensions
         from typing_extensions import TypeAlias
     except ImportError:
+        # some older platforms don't even have that, so fall back to Any
         TypeAlias = Any
 
 
@@ -52,12 +54,10 @@ except ImportError:
 # mypy on a system where dnf is not available
 
 BaseType: TypeAlias
-MainConfType: TypeAlias
 PackageType: TypeAlias
 QueryType: TypeAlias
 RepoType: TypeAlias
 SackType: TypeAlias
-
 
 try:
     from dnf.base import Base
@@ -576,8 +576,7 @@ class PackageWrapper:
             self._iters = None
 
 
-DNFuqFormatter: TypeAlias = Callable[[PackageType, BuildInfo, TagInfo],
-                                     Generator[str, None, None]]
+DNFuqFormatter: TypeAlias = Callable[..., Generator[str, None, None]]
 
 
 def dnfuq_formatter(queryformat: str) -> DNFuqFormatter:
