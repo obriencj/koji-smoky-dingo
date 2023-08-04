@@ -54,9 +54,9 @@ koji repoquery
                          filter for packages with these Supplements
 
 
-Performs an query on the current repository for a koji tag using
-DNF. Correlates any matching RPM packages back to their owning koji
-build and the inherited tag which holds that build.
+Performs a query on the current repository for a koji tag using DNF.
+Correlates any matching RPM packages back to their owning koji build
+and the inherited tag which holds that build.
 
 This command can be used to assist in the debugging of dependencies in
 a buildroot, allowing the user to easily identify where provides and
