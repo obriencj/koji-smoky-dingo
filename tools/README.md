@@ -27,22 +27,22 @@ introduced.
 
 It should be safe to run `podman system prune` every now and then to
 clean up orphaned layers, as the latest image builds will be safely
-tagged, eg. ksd-test:centos6 or ksd-test:fedora32
+tagged, eg. ksd-test:rockylinux6 or ksd-test:fedora32
 
 
 ## Building Individual Containers
 
 Running `./tools/launch-build.sh` will build and tag each
 Containerfile in the ./tools directory. These files are named with a
-suffix that indicates their platform, eg. Containerfile.centos6 is for
-building on CentOS 6.
+suffix that indicates their platform, eg. Containerfile.rockylinux6 is
+for building on Rocky Linux 6.
 
 You can launch builds for individual platforms by name by specifiying
 the platform as an argument to the launch-build.sh script.
 
-`./tools/launch-build.sh centos6` will cause only the
-Containerfile.centos6 to be used, producing an image tagged
-ksd-test:centos6
+`./tools/launch-build.sh rockylinux8` will cause only the
+Containerfile.rockylinux8 to be used, producing an image tagged
+ksd-test:rockylinux8
 
 Any invocation of launch-build.sh is reliant on the archive having
 been created first. This can be done by committing your work and

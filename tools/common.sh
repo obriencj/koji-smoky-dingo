@@ -199,9 +199,9 @@ function ksd_test_platform() {
 function ksd_platforms() {
     # hunt through the available platforms and emit the Containerfile
     # for that platform. These will be denoted by the extension of the
-    # Containerfile itself. So eg. a platform of centos6 will be
-    # Containerfile.centos6. If no arguments are given, emits all the
-    # Containerfiles for all the platforms.
+    # Containerfile itself. So eg. a platform of rockylinux8 will be
+    # Containerfile.rockylinux8. If no arguments are given, emits all
+    # the Containerfiles for all the platforms.
 
     local BASE="tools/Containerfile"
 
