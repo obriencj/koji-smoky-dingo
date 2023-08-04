@@ -53,7 +53,7 @@ jobs:
 
       - name: Install python dependencies
         run: |
-          pip install tox wheel
+          pip install tox tox-gh-actions wheel
 
       - name: Run Flake8
         run: tox -e flake8
@@ -75,6 +75,7 @@ jobs:
           - '3.8'
           - '3.9'
           - '3.10'
+          - '3.11'
 
     needs:
       - pre-tests
