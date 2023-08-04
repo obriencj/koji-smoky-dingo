@@ -42,7 +42,10 @@ from .types import BuildInfo, TagInfo, TypedDict
 try:
     from typing import TypeAlias  # type: ignore
 except ImportError:
-    from typing_extensions import TypeAlias
+    try:
+        from typing_extensions import TypeAlias
+    except ImportError:
+        TypeAlias = Any
 
 
 # this tomfoolery is to work around situations where we want to use
