@@ -28,7 +28,7 @@ from os import system
 from shlex import quote
 from typing import Any, Callable, Dict, Optional, Sequence, Union
 
-from . import AnonSmokyDingo, int_or_str, pretty_json
+from . import AnonSmokyDingo, BadArgument, int_or_str, pretty_json
 from .. import (
     BadDingo,
     as_archiveinfo, as_buildinfo, as_channelinfo, as_hostinfo,
@@ -287,7 +287,7 @@ def get_open_url(
 
     opener: Union[str, Callable] = OPEN_URL.get(datatype)
     if opener is None:
-        raise BadDingo(f"Unsupported type for open: {datatype}")
+        raise BadArgument(f"Unsupported type for open: {datatype}")
 
     if callable(opener):
         url = opener(session, goptions, element)
@@ -329,7 +329,7 @@ def get_open_command(
     command = conf.get("command", default_command)
 
     if err and command is None:
-        raise BadDingo("Unable to determine default open command")
+        raise BadArgument("Unable to determine default open command")
 
     return command
 

@@ -32,7 +32,7 @@ from . import (
     AnonSmokyDingo, TagSmokyDingo,
     convert_history, int_or_str, printerr, pretty_json, print_history,
     read_clean_lines, resplit, tabulate, )
-from .clients import _get_tag_repo_dir_url
+from .clients import _get_tag_latest_dir_url
 from .sift import TagSifting, output_sifted
 from .. import (
     BadDingo, FeatureUnavailable, NoSuchTag,
@@ -72,6 +72,10 @@ class NoSuchMacro(NoSuchTagExtra):
 
 class NoSuchEnvVar(NoSuchTagExtra):
     complaint = "Environment variable is not defined at this tag"
+
+
+class BadArch(BadDingo):
+    complaint = "Architecture problem"
 
 
 def cli_affected_targets(
@@ -1123,15 +1127,15 @@ def cli_repoquery(
     tagarches = taginfo.get("arches", "").split()
 
     if not tagarches:
-        raise BadDingo(f"No architecture configured for tag"
-                       f" {taginfo['name']}")
+        raise BadArch(f"No architecture configured for tag"
+                      f" {taginfo['name']}")
     elif arch is None:
         arch = "x86_64" if "x86_64" in tagarches else tagarches[0]
     elif arch not in tagarches:
-        raise BadDingo(f"Architecture {arch} not configured for tag"
-                       f" {taginfo['name']}")
+        raise BadArch(f"{arch} not configured for tag"
+                      f" {taginfo['name']}")
 
-    tagurl = _get_tag_repo_dir_url(session, goptions, taginfo)
+    tagurl = _get_tag_latest_dir_url(session, goptions, taginfo)
     tagurl = f"{tagurl}/{arch}"
 
     with dnfuq(tagurl, label=taginfo['name'], arch=arch,

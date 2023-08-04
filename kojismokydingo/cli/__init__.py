@@ -52,6 +52,7 @@ from ..types import GOptions, HistoryEntry
 __all__ = (
     "AdminSmokyDingo",
     "AnonSmokyDingo",
+    "BadArgument",
     "HostSmokyDingo",
     "SmokyDingo",
     "TagSmokyDingo",
@@ -72,6 +73,16 @@ __all__ = (
     "space_normalize",
     "tabulate",
 )
+
+
+class BadArgument(BadDingo):
+    """
+    Error indicating a bad argument was supplied to a CLI function.
+
+    :since: 2.1
+    """
+
+    complaint = "Bad command argument"
 
 
 # these mimic the default format for jq output

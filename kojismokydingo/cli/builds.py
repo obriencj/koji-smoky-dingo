@@ -38,7 +38,7 @@ from . import (
     printerr, read_clean_lines, resplit, )
 from .sift import BuildSifting, Sifter, output_sifted
 from .. import (
-    as_buildinfo, as_taginfo, as_userinfo,
+    NoSuchBuild, as_buildinfo, as_taginfo, as_userinfo,
     bulk_load, bulk_load_builds, bulk_load_tags, iter_bulk_load,
     version_check, )
 from ..builds import (
@@ -1191,7 +1191,7 @@ def cli_pull_container(
         tinfo = as_taginfo(session, tag)
         latest = session.getLatestBuilds(tinfo['id'], package=bld)
         if not latest:
-            raise BadDingo(f"No latest build of {bld} in {tag}")
+            raise NoSuchBuild(f"No latest build of {bld} in {tag}")
         binfo = as_buildinfo(session, latest[0]['build_id'])
 
     else:
