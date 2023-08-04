@@ -37,11 +37,11 @@ jobs:
         run: |
           pip install wheel
 
-      - name: Build binary wheel distribution
+      - name: Build Wheel
         run: |
-          python setup.py bdist_wheel --output dist
+          python setup.py sdist bdist_wheel --output dist
 
-      - name: Save python dist content
+      - name: Store Wheel
         uses: actions/upload-artifact@v3
         with:
           name: Wheel
@@ -59,7 +59,7 @@ jobs:
       contents: write
 
     needs:
-      - build-dist
+      - build-wheel
       - build-rpms
 
     steps:
@@ -70,7 +70,7 @@ jobs:
         run: |
           sudo apt-get install hub
 
-      - name: Fetch python dist content
+      - name: Fetch Wheel
         uses: actions/download-artifact@v3
         with:
           name: Wheel
