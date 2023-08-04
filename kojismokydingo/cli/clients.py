@@ -36,7 +36,7 @@ from .. import (
     as_taskinfo, as_userinfo, )
 from ..clients import rebuild_client_config
 from ..common import load_plugin_config
-from ..types import BuildState, GOptions, TagSpec
+from ..types import BuildSpec, BuildState, GOptions, TagSpec
 
 
 __all__ = (
@@ -145,7 +145,7 @@ class ClientConfig(AnonSmokyDingo):
 def _get_build_dir_url(
         session: ClientSession,
         goptions: GOptions,
-        buildid: Union[str, int]) -> str:
+        buildid: BuildSpec) -> str:
     """
     :since: 2.0
     """
@@ -189,7 +189,7 @@ def _get_tag_repo_dir_url(
 def _get_tag_latest_dir_url(
         session: ClientSession,
         goptions: GOptions,
-        tagid: Union[str, int]) -> str:
+        tagid: TagSpec) -> str:
     """
     :since: 2.0
     """

@@ -32,7 +32,8 @@ from re import compile as compile_re, escape as escape_re
 from shutil import rmtree
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
-from typing import Any, Callable, Generator, List, Optional, Tuple
+from typing import (
+    Any, Callable, Generator, Iterator, List, Optional, Tuple, )
 
 from . import BadDingo, bulk_load_builds
 from .types import BuildInfo, TagInfo, TypedDict
@@ -87,6 +88,7 @@ else:
 
 __all__ = (
     "DNFuq",
+    "DNFuqFilterTerms",
     "DNFUnavailable",
     "correlate_query_builds",
     "dnf_available",
@@ -98,6 +100,13 @@ __all__ = (
 
 
 class DNFuqFilterTerms(TypedDict):
+    """
+    Represents the available filters applicable to the
+    ``DNFuq.search`` method
+
+    :since: 2.1
+    """
+
     ownsfiles: Optional[List[str]]
     whatconflicts: Optional[List[str]]
     whatdepends: Optional[List[str]]
@@ -118,6 +127,11 @@ DNFUQ_FILTER_TERMS = (
 
 
 class DNFUnavailable(BadDingo):
+    """
+    Raised when an API calls a function in this module which
+    requires the system dnf package, but dnf isn't available
+    """
+
     complaint = "dnf package unavailable"
 
 
@@ -179,8 +193,15 @@ def dnf_base(
     return Base(mc)
 
 
-def _clear_old_cache(cachedir: str,
-                     repo: RepoType) -> int:
+def _clear_old_cache(
+        cachedir: str,
+        repo: RepoType) -> int:
+    """
+    Attempts to identify older metadata cache dirs for the given
+    repository, and remove them.
+
+    :returns: count of directories removed, or -1 for failure
+    """
 
     if not (cachedir and isdir(cachedir)):
         return -1
@@ -211,9 +232,10 @@ def _clear_old_cache(cachedir: str,
 
 
 @requires_dnf
-def dnf_sack(base: BaseType,
-             path: str,
-             label: str = "koji") -> SackType:
+def dnf_sack(
+        base: BaseType,
+        path: str,
+        label: str = "koji") -> SackType:
 
     """
     Creates a dnf sack with a single repository, in order for
@@ -254,11 +276,12 @@ def dnf_sack(base: BaseType,
 
 @contextmanager
 @requires_dnf
-def dnfuq(path: str,
-          label: str = "koji",
-          arch: str = None,
-          cachedir: str = None,
-          cacheonly: bool = False) -> Generator["DNFuq", None, None]:
+def dnfuq(
+        path: str,
+        label: str = "koji",
+        arch: str = None,
+        cachedir: str = None,
+        cacheonly: bool = False) -> Generator["DNFuq", None, None]:
 
     """
     context manager providing a DNFuq instance configured with
@@ -471,14 +494,20 @@ def _fmt_repl(matchobj):
 
 
 class PackageWrapper:
+    """
+    Used to assist in the formatting of dnf query results that
+    have been correlated to a koji build and tag.
+
+    :since: 2.1
+    """
 
     def __init__(self, pkg: PackageType):
         self._pkg = pkg
-        self._fields = None
-        self._iters = None
+        self._fields: List[str] = None
+        self._iters: Iterator[Iterator] = None
 
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         if self._iters is not None:
             fi = next(self._iters)
             result = next(fi)
@@ -507,13 +536,21 @@ class PackageWrapper:
         return result
 
 
-    def iter_format(self, formatter, build, tag):
+    def iter_format(
+            self,
+            formatter: Callable[..., str],
+            build: BuildInfo,
+            tag: TagInfo) -> Generator[str, None, None]:
+
         # first we populate the internal list of fields. Note that
         # this is a list and not a map, because there may be
         # duplicates in the formatter.
 
+        bns = SimpleNamespace(**build)
+        tns = SimpleNamespace(**tag)
+
         self._fields = []
-        res = formatter(rpm=self, build=build, tag=tag)
+        res = formatter(rpm=self, build=bns, tag=tns)
         yield res
 
         for f in self._fields:
@@ -530,7 +567,7 @@ class PackageWrapper:
 
         try:
             while True:
-                yield formatter(rpm=self, build=build, tag=tag)
+                yield formatter(rpm=self, build=bns, tag=tns)
         except StopIteration:
             self._fields = None
             self._iters = None
@@ -569,9 +606,7 @@ def dnfuq_formatter(queryformat: str) -> DNFuqFormatter:
 
     def formatter(pkg: PackageType, build: BuildInfo, tag: TagInfo):
         i = PackageWrapper(pkg)
-        yield from i.iter_format(fmts.format,
-                                 build=SimpleNamespace(**build),
-                                 tag=SimpleNamespace(**tag))
+        yield from i.iter_format(fmts.format, build=build, tag=tag)
 
     return formatter
 
