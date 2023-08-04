@@ -101,9 +101,10 @@ when it detects that the relevant dependencies are present.
 This can be an issue if the koji application is installed using a
 different python version than dnf.
 
-Warning: attempting to do a ``pip install dnf --user`` will leave an
-intentionally broken ``dnf.py`` module in site-packages, which will
-need to be removed to restore functionality.
+*Warning*: attempting to do a ``pip install dnf --user`` will leave
+an `intentionally broken <https://pypi.org/project/dnf/>`_ ``dnf.py``
+module in site-packages, which will need to be removed to restore
+functionality.
 
 
 Query Format
@@ -127,3 +128,4 @@ References
 * :py:func:`kojismokydingo.cli.tags.cli_repoquery`
 * `DNF, the next-generation replacement for YUM <https://dnf.readthedocs.io/en/latest/>`_
 * `DNF Command Reference - Repoquery Command <https://dnf.readthedocs.io/en/latest/command_ref.html?highlight=repoquery#repoquery-command>`_
+* `DNF on PyPI <https://pypi.org/project/dnf/>`_
