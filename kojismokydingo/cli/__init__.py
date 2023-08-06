@@ -663,8 +663,8 @@ class SmokyDingo(metaclass=ABCMeta):
 
     def get_plugin_config(self, key: str, default: Any = None) -> Any:
         """
-        fetch a configuration value for this command under the given key. If
-        no configuration is found, returns the default.
+        fetch a configuration value for this command under the given
+        key. If no configuration is found, returns the default.
 
         :param key: the configuration key name
         :param default: value to return if no configuration is found
@@ -699,8 +699,8 @@ class SmokyDingo(metaclass=ABCMeta):
             self,
             parser: ArgumentParser) -> Optional[ArgumentParser]:
         """
-        Override to add relevant arguments to the given parser instance.
-        May return an alternative parser instance or None.
+        Override to add relevant arguments to the given parser
+        instance.  May return an alternative parser instance or None.
 
         :param parser: the parser to decorate with additional arguments
         """
