@@ -1180,7 +1180,7 @@ class RepoQuery(AnonSmokyDingo):
 
     @property
     def enabled(self):
-        return dnf_available()
+        return super().enabled and dnf_available()
 
 
     def arguments(self, parser):
@@ -1216,7 +1216,7 @@ class RepoQuery(AnonSmokyDingo):
         addarg = grp.add_argument
 
         addarg("--cachedir", action="store", dest="cachedir",
-               default=None,
+               default=True,
                help="Override the default or configured cache directory")
 
         addarg("--nocache", action="store_const", dest="cachedir",
@@ -1262,22 +1262,30 @@ class RepoQuery(AnonSmokyDingo):
         return parser
 
 
-    def handle(self, options):
+    def validate(self, parser, options):
+        # we receive cachedir as three possible settings, but the api
+        # needs it to simply become Optional[str]
 
-        # kind of wonky, but there are three possible behaviors
-        # embedded in the cachedir option. None means undefined,
-        # therefore try to use the plugin config value. False means
-        # explicitly disabled, therefore force the actual value to
-        # None. Anything else is a path (including empty string, for
-        # current dir).
+        # * True meaning use it as-configured or as-default -> str or None
+        # * False meaning no cache (ie. use a temp dir) -> None
+        # * str meaning use this explicit path -> str
+
         cachedir = options.cachedir
-        if cachedir is None:
-            # plugin config value, else the default user cache dir,
-            # else nothing to indicate disabled
+
+        if cachedir is True:
+            # plugin config value, or the default user cache dir if
+            # undefined. An empty value means disabled, thus None
             ucd = find_cache_dir("repoquery")
             cachedir = self.get_plugin_config("cachedir", ucd) or None
+
         elif cachedir is False:
+            # explicitly disabled, thus None
             cachedir = None
+
+        options.cachedir = cachedir
+
+
+    def handle(self, options):
 
         terms = DNFuqFilterTerms()
         for opt in DNFUQ_FILTER_TERMS:
@@ -1289,7 +1297,7 @@ class RepoQuery(AnonSmokyDingo):
                              arch=options.arch,
                              quiet=options.quiet,
                              queryformat=options.queryformat,
-                             cachedir=cachedir,
+                             cachedir=options.cachedir,
                              cacheonly=options.cacheonly,
                              keys=options.key,
                              filterms=terms)
