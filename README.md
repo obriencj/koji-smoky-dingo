@@ -95,7 +95,7 @@ included spec to produce an RPM and install that.
 
 ```bash
 make clean rpm
-dnf install dist/noarch/python3-kojismokydingo-2.0.0-1.fc38.noarch.rpm
+dnf install dist/noarch/python3-kojismokydingo-2.1.0-1.fc38.noarch.rpm
 ```
 
 
@@ -106,7 +106,7 @@ achieve this by specifying the specific root or prefix parameter
 
 ```bash
 python3 setup.py bdist_wheel
-pip3 install --prefix /usr -I dist/kojismokydingo-2.0.0-py3-none-any.whl
+pip3 install --prefix /usr -I dist/kojismokydingo-2.1.0-py3-none-any.whl
 ```
 
 
@@ -118,7 +118,7 @@ install it anywhere and tell koji to look in that particular
 
 ```bash
 python3 setup.py bdist_wheel
-pip3 install --user -I dist/kojismokydingo-2.0.0-py3-none-any.whl
+pip3 install --user -I dist/kojismokydingo-2.1.0-py3-none-any.whl
 ```
 
 Additionally, you can install straight from PyPI
