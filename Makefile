@@ -16,6 +16,14 @@ ARCHIVE := $(PROJECT)-$(VERSION).tar.gz
 ORIGIN_PUSH = $(shell git remote get-url --push origin)
 
 
+define checkfor =
+	@if ! which $(1) >/dev/null 2>&1 ; then \
+		echo $(1) "is required, but not available" ; \
+		exit 1 ; \
+	fi
+endef
+
+
 ##@ Basic Targets
 default: quick-test	## Runs the quick-test target
 
@@ -43,6 +51,7 @@ install: quick-test	## Installs using the default python for the current user
 ##@ Cleanup
 tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
+	$(call checkfor,find)
 	@find -H . \
 		\( -iname '.tox' -o -iname '.eggs' -prune \) -o \
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
@@ -69,19 +78,19 @@ packaging-test: packaging-build	## Launches all containerized tests
 
 
 ##@ Testing
-test: clean	## Launches tox
+test: clean requires-tox	## Launches tox
 	@tox
 
 
-bandit: ## Launches bandit via tox
+bandit:	requires-tox	## Launches bandit via tox
 	@tox -e bandit
 
 
-flake8:	## Launches flake8 via tox
+flake8:	requires-tox	## Launches flake8 via tox
 	@tox -e flake8
 
 
-mypy:	## Launches mypy via tox
+mypy:	requires-tox	## Launches mypy via tox
 	@tox -e mypy
 
 
@@ -91,6 +100,7 @@ quick-test: build	## Launches nosetest using the default python
 
 ##@ RPMs
 srpm: $(ARCHIVE)	## Produce an SRPM from the archive
+	$(call checkfor,rpmbuild)
 	@rpmbuild \
 		--define "_srcrpmdir dist" \
 		--define "dist %{nil}" \
@@ -98,6 +108,7 @@ srpm: $(ARCHIVE)	## Produce an SRPM from the archive
 
 
 rpm: $(ARCHIVE)		## Produce an RPM from the archive
+	$(call checkfor,rpmbuild)
 	@rpmbuild --define "_rpmdir dist" -tb "$(ARCHIVE)"
 
 
@@ -106,14 +117,14 @@ archive: $(ARCHIVE)	## Extracts an archive from the current git commit
 
 # newer versions support the --format tar.gz but we're intending to work all
 # the way back to RHEL 6 which does not have that.
-$(ARCHIVE):
+$(ARCHIVE):	requires-git
 	@git archive HEAD \
 		--format tar --prefix "$(PROJECT)-$(VERSION)/" \
 		| gzip > "$(ARCHIVE)"
 
 
 ##@ Documentation
-docs: clean-docs docs/overview.rst	## Build sphinx docs
+docs: clean-docs requires-tox docs/overview.rst	## Build sphinx docs
 	@tox -e sphinx
 
 
@@ -121,12 +132,14 @@ overview: docs/overview.rst  ## rebuilds the overview from README.md
 
 
 docs/overview.rst: README.md
+	$(call checkfor,sed)
+	$(call checkfor,pandoc)
 	@sed 's/^\[\!.*/ /g' $< > overview.md && \
 	pandoc --from=markdown --to=rst -o $@ "overview.md" && \
 	rm -f overview.md
 
 
-pull-docs:	## Refreshes the gh-pages submodule
+pull-docs: requires-git	## Refreshes the gh-pages submodule
 	@git submodule init
 	@git submodule update --remote gh-pages
 
@@ -139,7 +152,7 @@ stage-docs: docs pull-docs	## Builds docs and stages them in gh-pages
 	cp -vr build/sphinx/dirhtml/* gh-pages/
 
 
-deploy-docs: stage-docs	## Builds, stages, and deploys docs to gh-pages
+deploy-docs: stage-docs requires-git	## Builds, stages, and deploys docs to gh-pages
 	@pushd gh-pages >/dev/null && \
 	git remote set-url --push origin $(ORIGIN_PUSH) ; \
 	git add -A && git commit -m "deploying sphinx update" && git push ; \
@@ -154,7 +167,14 @@ clean-docs:	## Remove built docs
 	@rm -rf build/sphinx/*
 
 
-.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test quick-test rpm srpm stage-docs test tidy
+requires-git:
+	$(call checkfor,git)
+
+requires-tox:
+	$(call checkfor,tox)
+
+
+.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test quick-test requires-git requires-tox rpm srpm stage-docs test tidy
 
 
 # The end.
