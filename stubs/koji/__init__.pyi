@@ -608,7 +608,7 @@ class ClientSession:
     def massTag(
             self,
             tag: Union[int, str],
-            builds: List[str]) -> None:
+            builds: List[Union[int, str]]) -> None:
         ...
 
     def multiCall(
@@ -757,15 +757,18 @@ def parse_NVRA(nvra: str) -> Dict[str, Union[str, int]]:
     ...
 
 
-def get_sigpacket_key_id(str) -> str:
+def get_sigpacket_key_id(
+        sigpacket: str) -> str:
     ...
 
 
-def ensuredir(str) -> None:
+def ensuredir(
+        directory: str) -> None:
     ...
 
 
-def grab_session_options(options) -> Dict[str, Any]:
+def grab_session_options(
+        options: Union[Dict[str, Any], Any]) -> Dict[str, Any]:
     ...
 
 
@@ -777,19 +780,24 @@ def parse_arches(
     ...
 
 
-def canonArch(arch: str) -> str:
+def canonArch(
+        arch: str) -> str:
     ...
 
 
-def is_debuginfo(name: str) -> bool:
+def is_debuginfo(
+        name: str) -> bool:
     ...
 
 
-def _fix_print(value: Union[str, bytes]) -> str:
+def _fix_print(
+        value: Union[str, bytes]) -> str:
     ...
 
 
-def _open_text_file(path: str, mode: str = 'rt'):
+def _open_text_file(
+        path: str,
+        mode: str = 'rt'):
     ...
 
 
@@ -832,7 +840,8 @@ def get_rpm_header(
     ...
 
 
-def maven_info_to_nvr(maveinfo: Dict[str, Any]) -> Dict[str, Any]:
+def maven_info_to_nvr(
+        maveninfo: Dict[str, Any]) -> Dict[str, Any]:
     ...
 
 
@@ -867,18 +876,19 @@ def fix_encoding(
 
 
 def add_file_logger(
-        logger: Any,
+        logger: str,
         fn: str) -> None:
     ...
 
 
 def add_mail_logger(
-        logger: Any,
+        logger: str,
         addr: str) -> None:
     ...
 
 
-def add_stderr_logger(Any) -> None:
+def add_stderr_logger(
+        logger: str) -> None:
     ...
 
 
