@@ -124,7 +124,7 @@ class ManagedClientSession(ClientSession):
         Invokes `koji_cli.lib.activate_session` with this session's
         options, which will trigger the appropriate login method.
 
-        :since 2.0:
+        :since: 2.0
         """
         return activate_session(self, self.opts)
 
@@ -211,7 +211,7 @@ class AnonClientSession(ProfileClientSession):
         Ensures the anonymous session is connected, but does not attempt
         to login.
 
-        :since 2.0:
+        :since: 2.0
         """
 
         ensure_connection(self)

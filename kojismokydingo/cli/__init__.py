@@ -137,7 +137,7 @@ def find_action(
 
     :returns: the first matching Action, or None
 
-    :since 1.0:
+    :since: 1.0
     """
 
     for act in parser._actions:
@@ -158,7 +158,7 @@ def remove_action(
 
     :param key: value to identify the action by
 
-    :since 1.0:
+    :since: 1.0
     """
 
     found = find_action(parser, key)
@@ -195,7 +195,7 @@ def resplit(
 
     :param sep: separator character
 
-    :since 1.0:
+    :since: 1.0
     """
 
     work = map(str.strip, sep.join(arglist).split(sep))

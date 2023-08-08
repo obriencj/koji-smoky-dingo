@@ -376,6 +376,9 @@ class ClientSession:
         ...
 
     def getKojiVersion(self) -> str:
+        """
+        :since: koji 1.23
+        """
         ...
 
     def getLastHostUpdate(
@@ -609,6 +612,9 @@ class ClientSession:
             self,
             tag: Union[int, str],
             builds: List[Union[int, str]]) -> None:
+        """
+        :since: koji 1.30
+        """
         ...
 
     def multiCall(
