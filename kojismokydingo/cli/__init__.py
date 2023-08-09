@@ -338,7 +338,7 @@ def printerr(
 def tabulate(
         headings: Sequence[str],
         data: Any,
-        key: Union[Callable[[Any],Tuple],List,Tuple] = None,
+        key: Union[Callable[[Any], Tuple], List, Tuple] = None,
         sorting: int = 0,
         quiet: Optional[bool] = None,
         out: TextIO = None):
