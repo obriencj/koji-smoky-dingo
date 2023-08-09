@@ -141,10 +141,11 @@ def gather_affected_targets(
     :since: 1.0
     """
 
-    tags = [as_taginfo(session, t) for t in set(tagnames)]
+    tags = unique((as_taginfo(session, t) for t in tagnames),
+                  key="id")
 
-    ifn = lambda tag: session.getFullInheritance(tag['id'], reverse=True)
-    loaded = bulk_load(session, ifn, tags)
+    ifn = lambda tid: session.getFullInheritance(tid, reverse=True)
+    loaded = bulk_load(session, ifn, (t['id'] for t in tags))
     parents = filter(None, loaded.values())
 
     tagids = set(chain(*((ch['tag_id'] for ch in ti) for ti in parents)))

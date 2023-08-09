@@ -1185,6 +1185,8 @@ def cli_pull_container(
 
     """
     Implements the ``koji pull-container`` command
+
+    :since: 2.0
     """
 
     if tag:
