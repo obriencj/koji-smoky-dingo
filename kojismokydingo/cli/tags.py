@@ -152,6 +152,9 @@ def cli_affected_targets(
     tags = unique((as_taginfo(session, t) for t in tag_list), key="id")
     targets = gather_affected_targets(session, tags)
 
+    if build_tags:
+        targets = unique(targets, key="build_tag_name")
+
     if not quiet:
         if build_tags:
             printerr(f"Found {len(targets)} affected build tags inheriting:")
@@ -174,12 +177,17 @@ def cli_affected_targets(
                  sorting=1,
                  quiet=quiet)
 
-    else:
-        attr = 'build_tag_name' if build_tags else 'name'
-        albl = "Build Tag" if build_tags else "Target"
-        tabulate((albl,),
+    elif build_tags:
+        tabulate(("Build Tag", ),
                  targets,
-                 key=(attr,),
+                 key=("build_tag_name", ),
+                 sorting=1,
+                 quiet=quiet)
+
+    else:
+        tabulate(("Target", ),
+                 targets,
+                 key=("name", ),
                  sorting=1,
                  quiet=quiet)
 

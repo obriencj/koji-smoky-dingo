@@ -384,7 +384,7 @@ def tabulate(
 
     if key is not None:
         if isinstance(key, (tuple, list)):
-            key = itemgetter(*key)
+            key = itemsgetter(*key)
         elif not callable(key):
             key = itemsgetter(key)
 
@@ -410,7 +410,7 @@ def tabulate(
 
     # now we create the format string based on the max width of each
     # column plus some spacing.
-    fmt = "  ".join(f"{{!s:<{w}}}" for w in widths)
+    fmt = "  ".join(f"{{{c}!s:<{w}}}" for (c, w) in enumerate(widths))
 
     if headings and not quiet:
         print(fmt.format(*headings), file=out)
