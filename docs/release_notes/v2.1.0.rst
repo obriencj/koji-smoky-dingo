@@ -14,6 +14,8 @@ Commands
   back to the underlying koji build.
 * Fixed the ``affected-targets`` command, and switched to using tabulated
   output.
+* Filtered some unnecessary output in the ``check-repo`` command which
+  was showing inheritance events that didn't impact the repository.
 
 
 API
