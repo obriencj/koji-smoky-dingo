@@ -1127,9 +1127,8 @@ def cli_check_repo(
     # creation event
     timeline: List[HistoryEntry] = []
 
-    tables = REPO_CHECK_TABLES
     def query(tag_id):
-        return session.queryHistory(tables=tables,
+        return session.queryHistory(tables=REPO_CHECK_TABLES,
                                     tag=tag_id,
                                     afterEvent=create_event)
 
