@@ -83,7 +83,7 @@ def itemsgetter(
     if keys:
         return itemgetter(key, *keys)
     else:
-        return lambda v: (v[key],)
+        return lambda v: (v[key], )
 
 
 def chunkseq(
