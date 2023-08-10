@@ -1066,8 +1066,8 @@ class FilterTags(AnonSmokyDingo, TagSifting):
 
 
 REPO_CHECK_TABLES = (
-    "build_target_config", "group_config", "group_package_listing",
-    "group_req_listing", "tag_config", "tag_external_repos", "tag_extra",
+    "group_config", "group_package_listing", "group_req_listing",
+    "tag_config", "tag_external_repos", "tag_extra",
     "tag_inheritance", "tag_listing", "tag_packages",
 )
 
@@ -1127,18 +1127,26 @@ def cli_check_repo(
     # creation event
     timeline: List[HistoryEntry] = []
 
+    tables = REPO_CHECK_TABLES
     def query(tag_id):
-        return session.queryHistory(tables=REPO_CHECK_TABLES,
+        return session.queryHistory(tables=tables,
                                     tag=tag_id,
                                     afterEvent=create_event)
 
     # merge and linearize the events of tag and its parents
     updates: Dict[str, List[Dict[str, Any]]]
-    for _tid, updates in iter_bulk_load(session, query, tag_ids):
+    for tid, updates in iter_bulk_load(session, query, tag_ids):
+        # filter out cases where our tags become parents, as those are
+        # immaterial to the inheritance we're checking. We only want
+        # to see events wherein the parents of our tags changes.
+        inhers = updates["tag_inheritance"]
+        if inhers:
+            inhers = [i for i in inhers if i["tag_id"] == tid]
+            updates["tag_inheritance"] = inhers
+
         timeline.extend(convert_history(updates))
 
     timeline.sort(key=itemgetter(0, 1, 2))
-
     print_history(timeline, utc=utc, show_events=show_events)
 
     return 1
