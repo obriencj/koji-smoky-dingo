@@ -45,7 +45,7 @@ from typing import (
     Sequence, TextIO, Tuple, Union, )
 
 from .. import BadDingo, NotPermitted
-from ..common import load_plugin_config
+from ..common import itemsgetter, load_plugin_config
 from ..types import GOptions, HistoryEntry
 
 
@@ -338,7 +338,7 @@ def printerr(
 def tabulate(
         headings: Sequence[str],
         data: Any,
-        key: Callable = None,
+        key: Union[Callable[[Any], Tuple], List, Tuple] = None,
         sorting: int = 0,
         quiet: Optional[bool] = None,
         out: TextIO = None):
@@ -383,8 +383,10 @@ def tabulate(
         quiet = not out.isatty()
 
     if key is not None:
-        if not callable(key):
-            key = itemgetter(key)
+        if isinstance(key, (tuple, list)):
+            key = itemsgetter(*key)
+        elif not callable(key):
+            key = itemsgetter(key)
 
         # convert data to a list, and apply the key if necessary to find
         # the real columns
@@ -408,7 +410,7 @@ def tabulate(
 
     # now we create the format string based on the max width of each
     # column plus some spacing.
-    fmt = "  ".join(f"{{!s:<{w}}}" for w in widths)
+    fmt = "  ".join(f"{{{c}!s:<{w}}}" for (c, w) in enumerate(widths))
 
     if headings and not quiet:
         print(fmt.format(*headings), file=out)

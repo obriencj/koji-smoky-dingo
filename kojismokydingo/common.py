@@ -60,6 +60,7 @@ __all__ = (
     "get_plugin_config",
     "globfilter",
     "ichunkseq",
+    "itemsgetter",
     "load_full_config",
     "load_plugin_config",
     "merge_extend",
@@ -67,6 +68,22 @@ __all__ = (
     "unique",
     "update_extend",
 )
+
+
+def itemsgetter(
+        key: Any, *keys: Any) -> Callable[[Any], Tuple]:
+    """
+    Similar to `operator.itemgetter`. However, the returned unary
+    callable always returns a tuple of results, even if there's only
+    one key.
+
+    :since: 2.1
+    """
+
+    if keys:
+        return itemgetter(key, *keys)
+    else:
+        return lambda v: (v[key], )
 
 
 def chunkseq(

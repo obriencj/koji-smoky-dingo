@@ -50,6 +50,43 @@ from ..types import (
     GOptions, HistoryEntry, TagInheritance, TagInheritanceEntry, TagSpec, )
 
 
+__all__ = (
+    "AffectedTargets",
+    "BadArch",
+    "BadSwap",
+    "BlockEnvVar",
+    "BlockRPMMacro",
+    "CheckRepo",
+    "FilterTags",
+    "ListEnvVars",
+    "ListRPMMacros",
+    "ListTagExtras",
+    "NoSuchInheritance",
+    "NoSuchEnvVar",
+    "NoSuchMacro",
+    "NoSuchTagExtra",
+    "RemoveEnvVar",
+    "RemoveRPMMacro",
+    "RenumTagInheritance",
+    "RepoQuery",
+    "SetEnvVar",
+    "SetRPMMacro",
+    "SwapTagInheritance",
+
+    "cli_affected_targets",
+    "cli_check_repo",
+    "cli_filter_tags",
+    "cli_list_env_vars",
+    "cli_list_rpm_macros",
+    "cli_list_tag_extras",
+    "cli_renum_tag",
+    "cli_repoquery",
+    "cli_set_env_var",
+    "cli_set_rpm_macro",
+    "cli_swap_inheritance",
+)
+
+
 SORT_BY_ID = "sort-by-id"
 SORT_BY_NAME = "sort-by-name"
 
@@ -80,43 +117,81 @@ class BadArch(BadDingo):
 
 def cli_affected_targets(
         session: ClientSession,
-        tag_list: List[Union[int, str]],
+        tag_list: List[TagSpec],
         build_tags: bool = False,
         info: bool = False,
-        quiet: bool = None):
+        quiet: bool = None) -> int:
+
+    """
+    Implements the ``koji affected-targets`` command
+
+    :param session: an active koji client session
+
+    :param tag_list: list of tags by name or ID
+
+    :param build_tags: output the names of the child build tags rather
+      than the impacted targets
+
+    :param info: print the info for impacted targets rather than just
+      the name
+
+    :param quiet: suppress summary output
+
+    :raises NoSuchTag: if any of the tags in tag_list could not be
+      found
+
+    :returns: 0 indicating there were impacted targets, or 1 if no
+      impacted targets were found
+
+    :since: 1.0
+    """
 
     if quiet is None:
         quiet = not sys.stdout.isatty()
 
-    targets = gather_affected_targets(session, tag_list)
-
-    debug = printerr if not quiet else lambda *m: None
-
-    if info:
-        # convert the targets into info tuples
-        infos = sorted((t['name'], t['build_tag_name'], t['dest_tag_name'])
-                       for t in targets)
-        output = [" ".join(t) for t in infos]
-
-    else:
-        # get a unique sorted list of either the target names or the
-        # build tag names for the targets
-        attr = 'build_tag_name' if build_tags else 'name'
-        output = sorted(set(targ[attr] for targ in targets))  # type: ignore
+    tags = unique((as_taginfo(session, t) for t in tag_list), key="id")
+    targets = gather_affected_targets(session, tags)
 
     if build_tags:
-        debug(f"Found {len(output)} affected build tags inheriting:")
+        targets = unique(targets, key="build_tag_name")
+
+    if not quiet:
+        if build_tags:
+            printerr(f"Found {len(targets)} affected build tags inheriting:")
+        else:
+            printerr(f"Found {len(targets)} affected targets inheriting:")
+
+        for tagname in sorted(tag["name"] for tag in tags):
+            printerr(" ", tagname)
+
+        if targets:
+            printerr()
+
+    if not targets:
+        return 1
+
+    if info:
+        tabulate(("Target", "Build Tag", "Dest Tag"),
+                 targets,
+                 key=itemgetter("name", "build_tag_name", "dest_tag_name"),
+                 sorting=1,
+                 quiet=quiet)
+
+    elif build_tags:
+        tabulate(("Build Tag", ),
+                 targets,
+                 key=("build_tag_name", ),
+                 sorting=1,
+                 quiet=quiet)
+
     else:
-        debug(f"Found {len(output)} affected targets inheriting:")
+        tabulate(("Target", ),
+                 targets,
+                 key=("name", ),
+                 sorting=1,
+                 quiet=quiet)
 
-    # for debugging we re-print the tags we operated on
-    for tag in sorted(set(tag_list)):
-        debug(" ", tag)
-
-    if output:
-        debug('-' * 40)
-        for o in output:
-            print(o)
+    return 0
 
 
 class AffectedTargets(AnonSmokyDingo):
@@ -895,6 +970,12 @@ def cli_filter_tags(
         outputs: Optional[dict] = None,
         strict: bool = False):
 
+    """
+    Implements the ``koji filter-tags`` command
+
+    :since: 1.0
+    """
+
     if search:
         tag_list.extend(t["id"] for t in
                         session.search(search, "tag", "glob") if t)
@@ -1007,6 +1088,12 @@ def cli_check_repo(
         verbose: bool = False,
         show_events: bool = False,
         utc: bool = False) -> int:
+
+    """
+    Implements the ``koji check-repo`` command
+
+    :since: 2.0
+    """
 
     tag = resolve_tag(session, tagname, target)
     tagname = tag['name']
