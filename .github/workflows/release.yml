@@ -30,6 +30,7 @@ jobs:
 
       - name: Record package version
         run: |
+          mkdir -p dist
           python setup.py --version > dist/VERSION
           cat dist/VERSION >> $GITHUB_STEP_SUMMARY
 
