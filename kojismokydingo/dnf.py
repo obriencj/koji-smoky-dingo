@@ -133,6 +133,8 @@ class DNFUnavailable(BadDingo):
     """
     Raised when an API calls a function in this module which
     requires the system dnf package, but dnf isn't available
+
+    :since: 2.1
     """
 
     complaint = "dnf package unavailable"
@@ -142,6 +144,8 @@ def dnf_available():
     """
     True if the dnf package and assorted internals could be
     successfully imported. False otherwise.
+
+    :since: 2.1
     """
 
     return __ENABLED
@@ -174,6 +178,8 @@ def dnf_base(
     :param cacheonly: use existing cache if it exists, without trying
       to fetch updated repo metadata
 
+    :returns: a prepared DNF base
+
     :raises DNFUnavailable: if the dnf module is not available
 
     :raises ValueError: if cachedir is not suppled
@@ -203,7 +209,11 @@ def _clear_old_cache(
     Attempts to identify older metadata cache dirs for the given
     repository, and remove them.
 
+    :param cachedir: directory storing per-repository caches
+
     :returns: count of directories removed, or -1 for failure
+
+    :since: 2.1
     """
 
     if not (cachedir and isdir(cachedir)):
@@ -244,14 +254,16 @@ def dnf_sack(
     Creates a dnf sack with a single repository, in order for
     queries to be created against that repo.
 
-    :param base: a dnf main configuration
+    :param base: a DNF base
 
-    :param path: repository path
+    :param path: repository path or URL
 
     :param label: repository label. This will be used to determine the
       specific caching directory
 
     :raises DNFUnavailable: if the dnf module is not availaable
+
+    :returns: a DNF sack for use in generating queries
 
     :since: 2.1
     """
@@ -290,7 +302,7 @@ def dnfuq(
     context manager providing a DNFuq instance configured with
     either a re-usable or temporary cache directory.
 
-    :param path: path to the repository
+    :param path: path or URL to the repository
 
     :param label: repository label, for use in storing the repository
       cache
@@ -324,7 +336,7 @@ def dnfuq(
 
 class DNFuq:
     """
-    Utility class for creating queries against a dnf repository.
+    Utility class for creating queries against a DNF repository.
     Takes care of most of the dnf wiring lazily.
 
     :since: 2.1
@@ -339,7 +351,7 @@ class DNFuq:
             cacheonly: bool = False):
 
         """
-        :param path: path to the repository
+        :param path: path or URL to the repository
 
         :param label: repository label, for use in storing the
           repository cache
@@ -362,7 +374,7 @@ class DNFuq:
 
     def query(self) -> QueryType:
         """
-        produces a new query for the repository
+        produces a new query for use against the repository
 
         :raises DNFUnavailable: if the dnf module is not available
         """
@@ -386,6 +398,44 @@ class DNFuq:
                whatenhances: List[str] = None,
                whatsuggests: List[str] = None,
                whatsupplements: List[str] = None) -> QueryType:
+        """
+        produces a new query against the repository, with the
+        given search keys and filters applied
+
+        :param keys: search terms. All items are matched if these are
+          omitted.
+
+        :param ownsfiles: limit to matches owning files in this list
+
+        :param whatconflicts: limit to matches that have matching
+          Conflicts header
+
+        :param whatdepends: limit to matches that have matching
+          Depends header
+
+        :param whatobsoletes: limit to matches that have matching
+          Obsoletes header
+
+        :param whatprovides: limit to matches that have matching
+          Provides header
+
+        :param whatrequires: limit to matches that have matching
+          Requires header
+
+        :param whatrecommends: limit to matches that have matching
+          Recommends header
+
+        :param whatenhances: limit to matches that have matching
+          Enhances header
+
+        :param whatsuggests: limit to matches that have matching
+          Suggests header
+
+        :param whatsupplements: limit to matches that have matching
+          Supplements header
+
+        :returns: query with the given filters applied
+        """
 
         q = self.query()
 
@@ -434,17 +484,31 @@ class DNFuq:
 
 def correlate_query_builds(
         session: ClientSession,
-        found: List[PackageType]) -> List[Tuple[PackageType, BuildInfo]]:
+        found: List[PackageType],
+        err: bool = False) -> List[Tuple[PackageType, BuildInfo]]:
 
     """
     Given a list of dnf query result Packages, correlate the
-    packages back to koji builds
+    packages back to koji builds. This uses a simple heuristic based
+    on the sourcerpm header of the package. If the sourcerpm header is
+    not available, then an NVR is guessed from the package
+    source_name, version, and release.
 
     :param session: an active koji client session
 
     :param found: the results of a dnf query, to be correlated back to
       koji build infos based on their source_name, version, and
       release
+
+    :param err: whether to raise an error if a build could not be
+      found. If err is False (the default), then any missing builds
+      will be represented as a None value
+
+    :returns: list of tuples. Each tuple contains the initial DNF
+      Package and the correlated koji build info dict
+
+    :raises NoSuchBuild: if err is True and a build could be
+      correlated for a given DNF package
 
     :since: 2.1
     """
@@ -459,7 +523,7 @@ def correlate_query_builds(
     nvrs = [f"{p.sourcerpm[:-8]}" or
             f"{p.source_name}-{p.v}-{p.r}" for p in found]
 
-    blds = bulk_load_builds(session, nvrs)
+    blds = bulk_load_builds(session, nvrs, err=err)
     return [(p, blds[nvr]) for nvr, p in zip(nvrs, found)]
 
 
@@ -494,6 +558,18 @@ def _fmt_repl(matchobj):
         return f"{{{obj}{key}{fill}}}"
     else:
         return f"{{{obj}{key}}}"
+
+
+class EmptyNamespace(SimpleNamespace):
+    """
+    A SimpleNamespace that returns None for undefined attributes.
+    Only used by the PackageWrapper during formatting.
+
+    :since: 2.1
+    """
+
+    def __getattr__(self, attr):
+        return "(none)"
 
 
 class PackageWrapper:
@@ -545,12 +621,18 @@ class PackageWrapper:
             build: BuildInfo,
             tag: TagInfo) -> Generator[str, None, None]:
 
+        # wrap the build and tag into objects so that the formatter's
+        # dotted accessor works right. We use EmptyNamespace as a
+        # safety net in the event that a build or tag was not found,
+        # so that rather than crashing we just print "(none)" for the
+        # fields.
+
+        bns = SimpleNamespace(**build) if build else EmptyNamespace()
+        tns = SimpleNamespace(**tag) if tag else EmptyNamespace()
+
         # first we populate the internal list of fields. Note that
         # this is a list and not a map, because there may be
         # duplicates in the formatter.
-
-        bns = SimpleNamespace(**build)
-        tns = SimpleNamespace(**tag)
 
         self._fields = []
         res = formatter(rpm=self, build=bns, tag=tns)
