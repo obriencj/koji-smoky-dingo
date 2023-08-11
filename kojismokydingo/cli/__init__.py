@@ -597,6 +597,8 @@ class SmokyDingo(metaclass=ABCMeta):
 
       * the `SmokyDingo.handle` method invokes the actual work of the
         sub-command
+
+    :since: 1.0
     """
 
     group: str = "misc"
@@ -833,6 +835,8 @@ class AnonSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     will not authenticate. This means only hub RPC endpoints which do
     not require some permission will work. This is normal for most
     read-only informational endpoints.
+
+    :since: 1.0
     """
 
     group = "info"
@@ -864,6 +868,8 @@ class AdminSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'admin' permission after
     activation.
+
+    :since: 1.0
     """
 
     group = "admin"
@@ -874,6 +880,8 @@ class TagSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'tag' or 'admin' permission after
     activation.
+
+    :since: 1.0
     """
 
     group = "admin"
@@ -884,6 +892,8 @@ class TargetSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'target' or 'admin' permission
     after activation.
+
+    :since: 1.0
     """
 
     group = "admin"
@@ -894,6 +904,8 @@ class HostSmokyDingo(SmokyDingo, metaclass=ABCMeta):
     """
     A SmokyDingo which checks for the 'host' or 'admin' permisson
     after activation.
+
+    :since: 1.0
     """
 
     group = "admin"
