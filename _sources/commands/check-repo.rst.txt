@@ -35,6 +35,8 @@ tags in the inheritance past the point that the current repo was
 created. This allows review of what changes may have happened between
 then and now.
 
+Introduced in version 2.0.0
+
 
 References
 ----------

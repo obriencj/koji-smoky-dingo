@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Overview &#8212; kojismokydingo 2.0.0 documentation</title>
+    <title>Overview &#8212; kojismokydingo 2.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../" title="Koji Smoky Dingo"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Overview</a></li> 
       </ul>
     </div>  
@@ -210,7 +210,11 @@ koji data types</p></td>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pull-container</span></code></p></td>
 <td><p>Pull an image from a container build</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">userinfo</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">repoquery</span></code></p></td>
+<td><p>Use DNF to query the contents of a
+tag’s repo</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">userinfo</span></code></p></td>
 <td><p>Show information about a user account</p></td>
 </tr>
 </tbody>
@@ -228,7 +232,7 @@ into the default site-packages for the python installation.</p>
 <p>If using an RPM-based distribution, this is easily achieved using the
 included spec to produce an RPM and install that.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span>rpm
-dnf<span class="w"> </span>install<span class="w"> </span>dist/noarch/python3-kojismokydingo-2.0.0-1.fc38.noarch.rpm
+dnf<span class="w"> </span>install<span class="w"> </span>dist/noarch/python3-kojismokydingo-2.1.0-1.fc38.noarch.rpm
 </pre></div>
 </div>
 </section>
@@ -237,7 +241,7 @@ dnf<span class="w"> </span>install<span class="w"> </span>dist/noarch/python3-ko
 <p>Using traditional setuptools or pip installation methods can also
 achieve this by specifying the specific root or prefix parameter</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>setup.py<span class="w"> </span>bdist_wheel
-pip3<span class="w"> </span>install<span class="w"> </span>--prefix<span class="w"> </span>/usr<span class="w"> </span>-I<span class="w"> </span>dist/kojismokydingo-2.0.0-py3-none-any.whl
+pip3<span class="w"> </span>install<span class="w"> </span>--prefix<span class="w"> </span>/usr<span class="w"> </span>-I<span class="w"> </span>dist/kojismokydingo-2.1.0-py3-none-any.whl
 </pre></div>
 </div>
 </section>
@@ -247,7 +251,7 @@ pip3<span class="w"> </span>install<span class="w"> </span>--prefix<span class="
 install it anywhere and tell koji to look in that particular
 <code class="docutils literal notranslate"><span class="pre">site-package/koji_cli_plugins</span></code> instance</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>setup.py<span class="w"> </span>bdist_wheel
-pip3<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>-I<span class="w"> </span>dist/kojismokydingo-2.0.0-py3-none-any.whl
+pip3<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>-I<span class="w"> </span>dist/kojismokydingo-2.1.0-py3-none-any.whl
 </pre></div>
 </div>
 <p>Additionally, you can install straight from PyPI</p>
@@ -366,14 +370,14 @@ with this library; if not, see <a class="reference external" href="http://www.gn
         <li class="right" >
           <a href="../" title="Koji Smoky Dingo"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Overview</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Christopher O&#39;Brien.
-      Last updated on 2023-01-27.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

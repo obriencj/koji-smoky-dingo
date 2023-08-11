@@ -20,8 +20,8 @@ koji affected-targets
 
 
 This command uses reversed tag inheritance to discover what targets
-are inheriting (and are therefore affected by changes to) a given list
-of tags.
+are inheriting (and are therefore affected by changes to) any of a
+given list of tags.
 
 When the ``--build-tags`` option is specified, then rather than
 outputting a list of target names, the underlying build tag names are

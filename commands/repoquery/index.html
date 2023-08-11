@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+
+<html lang="English">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>koji repoquery &#8212; kojismokydingo 2.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="koji userinfo" href="../userinfo/" />
+    <link rel="prev" title="koji pull-container" href="../pull-container/" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../userinfo/" title="koji userinfo"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../pull-container/" title="koji pull-container"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Plugin Commands</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">koji repoquery</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="koji-repoquery">
+<h1>koji repoquery<a class="headerlink" href="#koji-repoquery" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>usage: koji repoquery [-h] [--target] [--arch ARCH] [--quiet | --queryformat QUERYFORMAT] [-C] [--cachedir CACHEDIR | --nocache]
+                      [--file OWNSFILES] [--whatconflicts WHATCONFLICTS] [--whatdepends WHATDEPENDS] [--whatobsoletes WHATOBSOLETES]
+                      [--whatprovides WHATPROVIDES] [--whatrequires WHATREQUIRES] [--whatrecommends WHATRECOMMENDS]
+                      [--whatenhances WHATENHANCES] [--whatsuggests WHATSUGGESTS] [--whatsupplements WHATSUPPLEMENTS]
+                      TAGNAME [KEY ...]
+
+Query the contents of a tag&#39;s repo
+
+positional arguments:
+  TAGNAME               Name of tag
+
+options:
+  -h, --help            show this help message and exit
+  --target              Specify by target rather than a tag
+  --arch ARCH           Select tag repo&#39;s architecture
+
+Output Options:
+  --quiet, -q           Omit column headings
+  --queryformat QUERYFORMAT
+                        Output format for listing results
+
+Cache Options:
+  -C, --cacheonly       Restrict to local cache if it exists
+  --cachedir CACHEDIR   Override the default or configured cache directory
+  --nocache             Use a temporary cache, removed after use
+
+Query Options:
+  KEY                   The key(s) to search for
+  --file OWNSFILES      Filter for packages containing these files
+  --whatconflicts WHATCONFLICTS
+                        Filter for packages with these Conflicts
+  --whatdepends WHATDEPENDS
+                        filter for packages with these Depends
+  --whatobsoletes WHATOBSOLETES
+                        filter for packages with these Obsoletes
+  --whatprovides WHATPROVIDES
+                        Filter for packages with these Provides
+  --whatrequires WHATREQUIRES
+                        Filter for packages with these Requires
+  --whatrecommends WHATRECOMMENDS
+                        filter for packages with these Recommends
+  --whatenhances WHATENHANCES
+                        filter for packages with these Enhances
+  --whatsuggests WHATSUGGESTS
+                        filter for packages with these Suggests
+  --whatsupplements WHATSUPPLEMENTS
+                        filter for packages with these Supplements
+</pre></div>
+</div>
+<p>Performs a query on the current repository for a koji tag using DNF.
+Correlates any matching RPM packages back to their owning koji build
+and the inherited tag which holds that build.</p>
+<p>This command can be used to assist in the debugging of dependencies in
+a buildroot, allowing the user to easily identify where provides and
+requires are being produced, and how those packages are being pulled
+in.</p>
+<p>This is similar to running dnf directly on the repository, but with
+the added ability to perform build and tag correlation.</p>
+<p>Introduced in version 2.1.0</p>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
+<p>This command keeps a local repo cachedir by default. This value can be
+overridden under the <code class="docutils literal notranslate"><span class="pre">[repoquery]</span></code> plugin configuration using the
+setting named <code class="docutils literal notranslate"><span class="pre">cachedir</span></code></p>
+<p>If the cachedir value is empty, then caches will be created in the
+system temporary directory and purged immediately after each command.</p>
+<p>eg. in <code class="docutils literal notranslate"><span class="pre">~/.config/ksd/common.conf</span></code></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[repoquery]
+# this is also the default value if left unspecified
+cachedir = ~/.cache/ksd/repoquery/
+</pre></div>
+</div>
+</section>
+<section id="command-availability">
+<h2>Command Availability<a class="headerlink" href="#command-availability" title="Permalink to this heading">¶</a></h2>
+<p>This command relies on the dnf python package. However dnf is not
+available as a standard wheel on PyPI. Instead, it is only made
+available via system installs, typically on an RPM-managed Linux
+distribution such as Fedora or Rocky Linux. Because of this, the
+<code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">repoquery</span></code> command will dynamically make itself available only
+when it detects that the relevant dependencies are present.</p>
+<p>This can be an issue if the koji application is installed using a
+different python version than dnf.</p>
+<p><em>Warning</em>: attempting to do a <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dnf</span> <span class="pre">--user</span></code> will leave
+an <a class="reference external" href="https://pypi.org/project/dnf/">intentionally broken</a> <code class="docutils literal notranslate"><span class="pre">dnf.py</span></code>
+module in site-packages, which will need to be removed to restore
+functionality.</p>
+</section>
+<section id="query-format">
+<h2>Query Format<a class="headerlink" href="#query-format" title="Permalink to this heading">¶</a></h2>
+<p>In addition to the standard fields available to the <code class="docutils literal notranslate"><span class="pre">--queryformat=</span></code>
+option, this command also provides the fields of the correlating build
+and tag. For example:</p>
+<p><code class="docutils literal notranslate"><span class="pre">--queryformat</span> <span class="pre">&quot;%{tag.name}</span> <span class="pre">%{build.nvr}</span> <span class="pre">%{name}-%{evr}.%{arch}&quot;</span></code></p>
+<p>This will output the name of the tag that the build was inherited
+from, the NVR of the build, and then the RPM's name, evr, and
+architecture.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.RepoQuery" title="kojismokydingo.cli.tags.RepoQuery"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.cli.tags.RepoQuery</span></code></a></p></li>
+<li><p><a class="reference internal" href="../../kojismokydingo/cli/tags/#kojismokydingo.cli.tags.cli_repoquery" title="kojismokydingo.cli.tags.cli_repoquery"><code class="xref py py-func docutils literal notranslate"><span class="pre">kojismokydingo.cli.tags.cli_repoquery()</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dnf.readthedocs.io/en/latest/">DNF, the next-generation replacement for YUM</a></p></li>
+<li><p><a class="reference external" href="https://dnf.readthedocs.io/en/latest/command_ref.html?highlight=repoquery#repoquery-command">DNF Command Reference - Repoquery Command</a></p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/dnf/">DNF on PyPI</a></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">koji repoquery</a><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#command-availability">Command Availability</a></li>
+<li><a class="reference internal" href="#query-format">Query Format</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../pull-container/"
+                          title="previous chapter">koji pull-container</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../userinfo/"
+                          title="next chapter">koji userinfo</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/commands/repoquery.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../userinfo/" title="koji userinfo"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../pull-container/" title="koji pull-container"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Plugin Commands</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">koji repoquery</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    </div>
+  </body>
+</html>

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>koji open &#8212; kojismokydingo 2.0.0 documentation</title>
+    <title>koji open &#8212; kojismokydingo 2.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../list-tag-extras/" title="koji list-tag-extras"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" accesskey="U">Plugin Commands</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">koji open</a></li> 
       </ul>
@@ -87,10 +87,14 @@ open the tag's latest repository directory.</p>
 points to the actual repo ID path rather than the <code class="docutils literal notranslate"><span class="pre">latest</span></code> symlink.</p>
 <p>The type <code class="docutils literal notranslate"><span class="pre">build-dir</span></code> accepts a build as the argument, and will open
 the storage directory for that build's archives and logs.</p>
+<p>Version 2.0.0 added the <code class="docutils literal notranslate"><span class="pre">--print</span></code> option to facilitate simply
+outputting the relevant URL without needing to execute a command such
+as <code class="docutils literal notranslate"><span class="pre">echo</span></code></p>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
 <p>The default value for the open command can also be set under the
-<code class="docutils literal notranslate"><span class="pre">[open]</span></code> plugin configuration using the setting <code class="docutils literal notranslate"><span class="pre">command</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">[open]</span></code> plugin configuration using the setting <code class="docutils literal notranslate"><span class="pre">command</span></code>, which
+supports a single <code class="docutils literal notranslate"><span class="pre">{url}</span></code> variable</p>
 <p>eg. in <code class="docutils literal notranslate"><span class="pre">~/.config/ksd/common.conf</span></code></p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[open]
 command = firefox --new-window {url}
@@ -172,15 +176,15 @@ command = firefox --new-window {url}
         <li class="right" >
           <a href="../list-tag-extras/" title="koji list-tag-extras"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" >Plugin Commands</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">koji open</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Christopher O&#39;Brien.
-      Last updated on 2023-01-27.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

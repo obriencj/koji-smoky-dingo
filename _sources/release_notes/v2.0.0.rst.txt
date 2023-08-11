@@ -60,3 +60,10 @@ Commands
   or to print the pullspec from same
 * Added ``--stats`` option to the ``userinfo`` command to include a
   summary of statistics for the user
+
+
+Issues
+------
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/7?closed=1>

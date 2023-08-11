@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.cli &#8212; kojismokydingo 2.0.0 documentation</title>
+    <title>kojismokydingo.cli &#8212; kojismokydingo 2.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli</a></li> 
@@ -90,13 +90,14 @@
     <span class="n">Sequence</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">BadDingo</span><span class="p">,</span> <span class="n">NotPermitted</span>
-<span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">load_plugin_config</span>
+<span class="kn">from</span> <span class="nn">..common</span> <span class="kn">import</span> <span class="n">itemsgetter</span><span class="p">,</span> <span class="n">load_plugin_config</span>
 <span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">GOptions</span><span class="p">,</span> <span class="n">HistoryEntry</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">&quot;AdminSmokyDingo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;AnonSmokyDingo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BadArgument&quot;</span><span class="p">,</span>
     <span class="s2">&quot;HostSmokyDingo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;SmokyDingo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;TagSmokyDingo&quot;</span><span class="p">,</span>
@@ -117,6 +118,16 @@
     <span class="s2">&quot;space_normalize&quot;</span><span class="p">,</span>
     <span class="s2">&quot;tabulate&quot;</span><span class="p">,</span>
 <span class="p">)</span>
+
+
+<div class="viewcode-block" id="BadArgument"><a class="viewcode-back" href="../../../kojismokydingo/cli/#kojismokydingo.cli.BadArgument">[docs]</a><span class="k">class</span> <span class="nc">BadArgument</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Error indicating a bad argument was supplied to a CLI function.</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;Bad command argument&quot;</span></div>
 
 
 <span class="c1"># these mimic the default format for jq output</span>
@@ -171,7 +182,7 @@
 
 <span class="sd">    :returns: the first matching Action, or None</span>
 
-<span class="sd">    :since 1.0:</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">act</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_actions</span><span class="p">:</span>
@@ -192,7 +203,7 @@
 
 <span class="sd">    :param key: value to identify the action by</span>
 
-<span class="sd">    :since 1.0:</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">found</span> <span class="o">=</span> <span class="n">find_action</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -229,7 +240,7 @@
 
 <span class="sd">    :param sep: separator character</span>
 
-<span class="sd">    :since 1.0:</span>
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">work</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arglist</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">))</span>
@@ -372,7 +383,7 @@
 <div class="viewcode-block" id="tabulate"><a class="viewcode-back" href="../../../kojismokydingo/cli/#kojismokydingo.cli.tabulate">[docs]</a><span class="k">def</span> <span class="nf">tabulate</span><span class="p">(</span>
         <span class="n">headings</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-        <span class="n">key</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">],</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sorting</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">quiet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">out</span><span class="p">:</span> <span class="n">TextIO</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -417,8 +428,10 @@
         <span class="n">quiet</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">out</span><span class="o">.</span><span class="n">isatty</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">itemgetter</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">itemsgetter</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">itemsgetter</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
         <span class="c1"># convert data to a list, and apply the key if necessary to find</span>
         <span class="c1"># the real columns</span>
@@ -442,7 +455,7 @@
 
     <span class="c1"># now we create the format string based on the max width of each</span>
     <span class="c1"># column plus some spacing.</span>
-    <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">!s:&lt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">widths</span><span class="p">)</span>
+    <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">!s:&lt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">widths</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">headings</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">headings</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
@@ -629,6 +642,8 @@
 
 <span class="sd">      * the `SmokyDingo.handle` method invokes the actual work of the</span>
 <span class="sd">        sub-command</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;misc&quot;</span>
@@ -697,8 +712,8 @@
 
 <div class="viewcode-block" id="SmokyDingo.get_plugin_config"><a class="viewcode-back" href="../../../kojismokydingo/cli/#kojismokydingo.cli.SmokyDingo.get_plugin_config">[docs]</a>    <span class="k">def</span> <span class="nf">get_plugin_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        fetch a configuration value for this command under the given key. If</span>
-<span class="sd">        no configuration is found, returns the default.</span>
+<span class="sd">        fetch a configuration value for this command under the given</span>
+<span class="sd">        key. If no configuration is found, returns the default.</span>
 
 <span class="sd">        :param key: the configuration key name</span>
 <span class="sd">        :param default: value to return if no configuration is found</span>
@@ -733,8 +748,8 @@
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">parser</span><span class="p">:</span> <span class="n">ArgumentParser</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArgumentParser</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Override to add relevant arguments to the given parser instance.</span>
-<span class="sd">        May return an alternative parser instance or None.</span>
+<span class="sd">        Override to add relevant arguments to the given parser</span>
+<span class="sd">        instance.  May return an alternative parser instance or None.</span>
 
 <span class="sd">        :param parser: the parser to decorate with additional arguments</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -865,6 +880,8 @@
 <span class="sd">    will not authenticate. This means only hub RPC endpoints which do</span>
 <span class="sd">    not require some permission will work. This is normal for most</span>
 <span class="sd">    read-only informational endpoints.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
@@ -896,6 +913,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A SmokyDingo which checks for the &#39;admin&#39; permission after</span>
 <span class="sd">    activation.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span>
@@ -906,6 +925,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A SmokyDingo which checks for the &#39;tag&#39; or &#39;admin&#39; permission after</span>
 <span class="sd">    activation.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span>
@@ -916,6 +937,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A SmokyDingo which checks for the &#39;target&#39; or &#39;admin&#39; permission</span>
 <span class="sd">    after activation.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span>
@@ -926,6 +949,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A SmokyDingo which checks for the &#39;host&#39; or &#39;admin&#39; permisson</span>
 <span class="sd">    after activation.</span>
+
+<span class="sd">    :since: 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span>
@@ -965,7 +990,7 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.cli</a></li> 
@@ -973,8 +998,8 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Christopher O&#39;Brien.
-      Last updated on 2023-01-27.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

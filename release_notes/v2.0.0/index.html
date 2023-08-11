@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Koji Smoky Dingo 2.0.0 Release Notes &#8212; kojismokydingo 2.0.0 documentation</title>
+    <title>Koji Smoky Dingo 2.0.0 Release Notes &#8212; kojismokydingo 2.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
     <link rel="next" title="Koji Smoky Dingo 1.1.0 Release Notes" href="../v1.1.0/" />
-    <link rel="prev" title="Release Notes" href="../" />
+    <link rel="prev" title="Koji Smoky Dingo 2.1.0 Release Notes" href="../v2.1.0/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -37,9 +37,9 @@
           <a href="../v1.1.0/" title="Koji Smoky Dingo 1.1.0 Release Notes"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../" title="Release Notes"
+          <a href="../v2.1.0/" title="Koji Smoky Dingo 2.1.0 Release Notes"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" accesskey="U">Release Notes</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Koji Smoky Dingo 2.0.0 Release Notes</a></li> 
       </ul>
@@ -74,7 +74,7 @@ accepts both positional and keyword options by default.</p></li>
 <li><p>Removed the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Sieve.receive_options</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">Sieve.set_options</span></code> methods in favor of
 accepting options via keyword parameters in <code class="xref py py-obj docutils literal notranslate"><span class="pre">Sieve.__init__</span></code></p></li>
 <li><p>Moved RPM comparison functions out from <a class="reference internal" href="../../kojismokydingo/common/#module-kojismokydingo.common" title="kojismokydingo.common"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.common</span></code></a> to
-their own new module <a class="reference internal" href="../../kojismokydingo/rpms/#module-kojismokydingo.rpm" title="kojismokydingo.rpm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.rpm</span></code></a></p></li>
+their own new module <a class="reference internal" href="../../kojismokydingo/rpm/#module-kojismokydingo.rpm" title="kojismokydingo.rpm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kojismokydingo.rpm</span></code></a></p></li>
 <li><p>Added <a class="reference internal" href="../../kojismokydingo/#kojismokydingo.as_channelinfo" title="kojismokydingo.as_channelinfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_channelinfo</span></code></a>,
 <a class="reference internal" href="../../kojismokydingo/#kojismokydingo.as_packageinfo" title="kojismokydingo.as_packageinfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_packageinfo</span></code></a>, <a class="reference internal" href="../../kojismokydingo/#kojismokydingo.as_repoinfo" title="kojismokydingo.as_repoinfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_repoinfo</span></code></a>, <a class="reference internal" href="../../kojismokydingo/#kojismokydingo.NoSuchPackage" title="kojismokydingo.NoSuchPackage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoSuchPackage</span></code></a>, <a class="reference internal" href="../../kojismokydingo/#kojismokydingo.NoSuchRepo" title="kojismokydingo.NoSuchRepo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoSuchRepo</span></code></a> to the core API</p></li>
 <li><p>Added <a class="reference internal" href="../../kojismokydingo/#kojismokydingo.ManagedClientSession.activate" title="kojismokydingo.ManagedClientSession.activate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ManagedClientSession.activate</span></code></a> to allow it to be
@@ -103,6 +103,11 @@ or to print the pullspec from same</p></li>
 summary of statistics for the user</p></li>
 </ul>
 </section>
+<section id="issues">
+<h2>Issues<a class="headerlink" href="#issues" title="Permalink to this heading">¶</a></h2>
+<p>Closed Issues:
+&lt;<a class="reference external" href="https://github.com/obriencj/koji-smoky-dingo/milestone/7?closed=1">https://github.com/obriencj/koji-smoky-dingo/milestone/7?closed=1</a>&gt;</p>
+</section>
 </section>
 
 
@@ -119,6 +124,7 @@ summary of statistics for the user</p></li>
 <li><a class="reference internal" href="#general">General</a></li>
 <li><a class="reference internal" href="#api">API</a></li>
 <li><a class="reference internal" href="#commands">Commands</a></li>
+<li><a class="reference internal" href="#issues">Issues</a></li>
 </ul>
 </li>
 </ul>
@@ -126,8 +132,8 @@ summary of statistics for the user</p></li>
   </div>
   <div>
     <h4>Previous topic</h4>
-    <p class="topless"><a href="../"
-                          title="previous chapter">Release Notes</a></p>
+    <p class="topless"><a href="../v2.1.0/"
+                          title="previous chapter">Koji Smoky Dingo 2.1.0 Release Notes</a></p>
   </div>
   <div>
     <h4>Next topic</h4>
@@ -168,17 +174,17 @@ summary of statistics for the user</p></li>
           <a href="../v1.1.0/" title="Koji Smoky Dingo 1.1.0 Release Notes"
              >next</a> |</li>
         <li class="right" >
-          <a href="../" title="Release Notes"
+          <a href="../v2.1.0/" title="Koji Smoky Dingo 2.1.0 Release Notes"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" >Release Notes</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Koji Smoky Dingo 2.0.0 Release Notes</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Christopher O&#39;Brien.
-      Last updated on 2023-01-27.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

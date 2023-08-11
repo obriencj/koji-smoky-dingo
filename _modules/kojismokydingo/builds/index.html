@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.builds &#8212; kojismokydingo 2.0.0 documentation</title>
+    <title>kojismokydingo.builds &#8212; kojismokydingo 2.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.builds</a></li> 
@@ -87,7 +87,7 @@
 <span class="kn">from</span> <span class="nn">.rpm</span> <span class="kn">import</span> <span class="n">evr_compare</span>
 <span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BuildInfo</span><span class="p">,</span> <span class="n">BuildInfos</span><span class="p">,</span> <span class="n">BuildState</span><span class="p">,</span> <span class="n">DecoratedBuildInfo</span><span class="p">,</span>
-    <span class="n">DecoratedBuildInfos</span><span class="p">,</span> <span class="n">TagSpec</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">DecoratedBuildInfos</span><span class="p">,</span> <span class="n">TagBuildInfo</span><span class="p">,</span> <span class="n">TagSpec</span><span class="p">,</span> <span class="p">)</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
@@ -1464,6 +1464,47 @@
         <span class="k">return</span> <span class="n">work</span></div>
 
 
+<span class="k">def</span> <span class="nf">correlate_build_repo_tags</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">builds</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">repotag</span><span class="p">:</span> <span class="n">TagSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a collection of builds by ID or NVR, and a build tag,</span>
+<span class="sd">    identify what parent tag in the build tag&#39;s inheritance provided</span>
+<span class="sd">    the build. Returns a mapping of the input build values to a dict</span>
+<span class="sd">    indicating the tag&#39;s ID and name.</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param builds: builds specified by ID or NVR</span>
+
+<span class="sd">    :param repotag: build tag to search within</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># load the tag</span>
+    <span class="n">tinfo</span> <span class="o">=</span> <span class="n">as_taginfo</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">repotag</span><span class="p">)</span>
+
+    <span class="c1"># get the event ID of the current repo for the tag</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">getRepo</span><span class="p">(</span><span class="n">tinfo</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+    <span class="n">event</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;create_event&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">repo</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="c1"># ask for the latest builds for the tag at the event ID</span>
+    <span class="c1"># create a mapping of the bid and nvr to the taginfo</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">listTagged</span><span class="p">(</span><span class="n">tinfo</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
+                               <span class="n">inherit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">tagged</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">tbld</span> <span class="ow">in</span> <span class="n">found</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">tbld</span><span class="p">[</span><span class="s1">&#39;tag_id&#39;</span><span class="p">],</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">tbld</span><span class="p">[</span><span class="s1">&#39;tag_name&#39;</span><span class="p">]}</span>
+        <span class="n">tagged</span><span class="p">[</span><span class="n">tbld</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="n">tagged</span><span class="p">[</span><span class="n">tbld</span><span class="p">[</span><span class="s1">&#39;nvr&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">t</span>
+
+    <span class="c1"># return a mapping of the input builds to the taginfos</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">want</span><span class="p">:</span> <span class="n">tagged</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">want</span><span class="p">)</span> <span class="k">for</span> <span class="n">want</span> <span class="ow">in</span> <span class="n">builds</span><span class="p">}</span>
+
+
 <span class="c1">#</span>
 <span class="c1"># The end.</span>
 </pre></div>
@@ -1497,7 +1538,7 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.builds</a></li> 
@@ -1505,8 +1546,8 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Christopher O&#39;Brien.
-      Last updated on 2023-01-27.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

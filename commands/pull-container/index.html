@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>koji pull-container &#8212; kojismokydingo 2.0.0 documentation</title>
+    <title>koji pull-container &#8212; kojismokydingo 2.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/pyramid.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -14,7 +14,7 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex/" />
     <link rel="search" title="Search" href="../../search/" />
-    <link rel="next" title="koji userinfo" href="../userinfo/" />
+    <link rel="next" title="koji repoquery" href="../repoquery/" />
     <link rel="prev" title="koji perminfo" href="../perminfo/" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -34,12 +34,12 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../userinfo/" title="koji userinfo"
+          <a href="../repoquery/" title="koji repoquery"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../perminfo/" title="koji perminfo"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" accesskey="U">Plugin Commands</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">koji pull-container</a></li> 
       </ul>
@@ -91,6 +91,7 @@ treated as a package name. The command then tries to find the latest
 build of the matching package name in the given tag, and then pulls
 that instead. It is similar to invoking with the build argument set to
 the result of <code class="docutils literal notranslate"><span class="pre">koji</span> <span class="pre">latest-build</span> <span class="pre">KOJI_TAG</span> <span class="pre">BUILD</span></code></p>
+<p>Introduced in version 2.0.0</p>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
 <p>The default values for the pull and tag commands can also be set under
@@ -103,10 +104,11 @@ pull_command = podman pull {pullspec}
 tag_command = podman image tag {pullspec} {profile}/{nvr}
 </pre></div>
 </div>
-<p>The pull command only accepts the pullspec variable.</p>
-<p>The push command accepts the pullspec, profile, and nvr variables. The
-profile is the name of the current koji profile that the command is
-invoked with. The nvr varialbe is the discovered koji build's NVR.</p>
+<p>The pull command only accepts the <code class="docutils literal notranslate"><span class="pre">{pullspec}</span></code> variable.</p>
+<p>The tag command accepts the <code class="docutils literal notranslate"><span class="pre">{pullspec}</span></code>, <code class="docutils literal notranslate"><span class="pre">{profile}</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">{nvr}</span></code> variables. The profile is the name of the current koji
+profile that the command is invoked with. The nvr varialbe is the
+discovered koji build's NVR.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this heading">¶</a></h2>
@@ -144,8 +146,8 @@ invoked with. The nvr varialbe is the discovered koji build's NVR.</p>
   </div>
   <div>
     <h4>Next topic</h4>
-    <p class="topless"><a href="../userinfo/"
-                          title="next chapter">koji userinfo</a></p>
+    <p class="topless"><a href="../repoquery/"
+                          title="next chapter">koji repoquery</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -178,20 +180,20 @@ invoked with. The nvr varialbe is the discovered koji build's NVR.</p>
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../userinfo/" title="koji userinfo"
+          <a href="../repoquery/" title="koji repoquery"
              >next</a> |</li>
         <li class="right" >
           <a href="../perminfo/" title="koji perminfo"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../" >Plugin Commands</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">koji pull-container</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Christopher O&#39;Brien.
-      Last updated on 2023-01-27.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

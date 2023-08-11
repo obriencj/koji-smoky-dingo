@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kojismokydingo.rpm &#8212; kojismokydingo 2.0.0 documentation</title>
+    <title>kojismokydingo.rpm &#8212; kojismokydingo 2.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.rpm</a></li> 
@@ -164,7 +164,7 @@
         <span class="k">return</span> <span class="mi">0</span>
 
 
-<div class="viewcode-block" id="evr_compare"><a class="viewcode-back" href="../../../kojismokydingo/rpms/#kojismokydingo.rpm.evr_compare">[docs]</a><span class="k">def</span> <span class="nf">evr_compare</span><span class="p">(</span>
+<div class="viewcode-block" id="evr_compare"><a class="viewcode-back" href="../../../kojismokydingo/rpm/#kojismokydingo.rpm.evr_compare">[docs]</a><span class="k">def</span> <span class="nf">evr_compare</span><span class="p">(</span>
         <span class="n">left_evr</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">right_evr</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -201,7 +201,7 @@
         <span class="k">return</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="nevra_split"><a class="viewcode-back" href="../../../kojismokydingo/rpms/#kojismokydingo.rpm.nevra_split">[docs]</a><span class="k">def</span> <span class="nf">nevra_split</span><span class="p">(</span><span class="n">nevra</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="nevra_split"><a class="viewcode-back" href="../../../kojismokydingo/rpm/#kojismokydingo.rpm.nevra_split">[docs]</a><span class="k">def</span> <span class="nf">nevra_split</span><span class="p">(</span><span class="n">nevra</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits an NEVRA into a five-tuple representing the name, epoch,</span>
 <span class="sd">    version, release, and arch.</span>
@@ -239,7 +239,7 @@
     <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">release</span><span class="p">,</span> <span class="n">arch</span></div>
 
 
-<div class="viewcode-block" id="nevr_split"><a class="viewcode-back" href="../../../kojismokydingo/rpms/#kojismokydingo.rpm.nevr_split">[docs]</a><span class="k">def</span> <span class="nf">nevr_split</span><span class="p">(</span><span class="n">nevr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="nevr_split"><a class="viewcode-back" href="../../../kojismokydingo/rpm/#kojismokydingo.rpm.nevr_split">[docs]</a><span class="k">def</span> <span class="nf">nevr_split</span><span class="p">(</span><span class="n">nevr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits an NEVR into a four-tuple represending the name, epoch,</span>
 <span class="sd">    version, and release.</span>
@@ -283,7 +283,7 @@
     <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">release</span></div>
 
 
-<div class="viewcode-block" id="evr_split"><a class="viewcode-back" href="../../../kojismokydingo/rpms/#kojismokydingo.rpm.evr_split">[docs]</a><span class="k">def</span> <span class="nf">evr_split</span><span class="p">(</span><span class="n">evr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="evr_split"><a class="viewcode-back" href="../../../kojismokydingo/rpm/#kojismokydingo.rpm.evr_split">[docs]</a><span class="k">def</span> <span class="nf">evr_split</span><span class="p">(</span><span class="n">evr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits an EVR into a dict with the keys epoch, version, and release.</span>
 
@@ -349,7 +349,7 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kojismokydingo.rpm</a></li> 
@@ -357,8 +357,8 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Christopher O&#39;Brien.
-      Last updated on 2023-01-27.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Core API Reference &#8212; kojismokydingo 2.0.0 documentation</title>
+    <title>Core API Reference &#8212; kojismokydingo 2.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyramid.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../siftylang/" title="Sifty Dingo Filtering Language"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Core API Reference</a></li> 
       </ul>
     </div>  
@@ -85,8 +85,9 @@ configuration locations</p>
 <dd><p>Ensures the anonymous session is connected, but does not attempt
 to login.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Since 2.0<span class="colon">:</span></dt>
-<dd class="field-odd"><p></p></dd>
+<dt class="field-odd">Since<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2.0</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -129,7 +130,7 @@ present on the koji hub, rather than just working with
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kojismokydingo.ManagedClientSession">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ManagedClientSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">baseurl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sinfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#ManagedClientSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.ManagedClientSession" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ManagedClientSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">baseurl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sinfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kojismokydingo/#ManagedClientSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kojismokydingo.ManagedClientSession" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ClientSession</span></code></p>
 <p>A <code class="xref py py-obj docutils literal notranslate"><span class="pre">koji.ClientSession</span></code> that can be used as via the <code class="docutils literal notranslate"><span class="pre">with</span></code>
 keyword to provide a managed session that will handle
@@ -138,6 +139,14 @@ authenticated login and logout.</p>
 <dt class="field-odd">Since<span class="colon">:</span></dt>
 <dd class="field-odd"><p>1.0</p>
 </dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>str</strong> (<em>baseurl</em>) -- hub url</p></li>
+<li><p><strong>opts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) -- dictionary with content varying according to authentication method</p></li>
+<li><p><strong>sinfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) -- session info returned by login method</p></li>
+<li><p><strong>auth_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) -- method for reauthentication, shouldn't be ever set manually</p></li>
+</ul>
+</dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="kojismokydingo.ManagedClientSession.activate">
@@ -145,8 +154,9 @@ authenticated login and logout.</p>
 <dd><p>Invokes <code class="xref py py-obj docutils literal notranslate"><span class="pre">koji_cli.lib.activate_session</span></code> with this session's
 options, which will trigger the appropriate login method.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Since 2.0<span class="colon">:</span></dt>
-<dd class="field-odd"><p></p></dd>
+<dt class="field-odd">Since<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2.0</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -1057,7 +1067,7 @@ a new dict</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.NoSuchTask" title="kojismokydingo.NoSuchTask"><strong>NoSuchTask</strong></a> -- if err is True and a task couldn'tb e loaded</p>
+<dd class="field-even"><p><a class="reference internal" href="#kojismokydingo.NoSuchTask" title="kojismokydingo.NoSuchTask"><strong>NoSuchTask</strong></a> -- if err is True and a task couldn't be loaded</p>
 </dd>
 <dt class="field-odd">Since<span class="colon">:</span></dt>
 <dd class="field-odd"><p>1.0</p>
@@ -1234,7 +1244,9 @@ fails. Default, with a minimum of <code class="docutils literal notranslate"><sp
 <li class="toctree-l1"><a class="reference internal" href="builds/">kojismokydingo.builds</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clients/">kojismokydingo.clients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common/">kojismokydingo.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dnf/">kojismokydingo.dnf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hosts/">kojismokydingo.hosts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rpm/">kojismokydingo.rpm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tags/">kojismokydingo.tags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types/">kojismokydingo.types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="users/">kojismokydingo.users</a></li>
@@ -1306,14 +1318,14 @@ fails. Default, with a minimum of <code class="docutils literal notranslate"><sp
         <li class="right" >
           <a href="../siftylang/" title="Sifty Dingo Filtering Language"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Core API Reference</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Christopher O&#39;Brien.
-      Last updated on 2023-01-27.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

@@ -84,4 +84,4 @@ References
 ----------
 
 * :py:obj:`kojismokydingo.cli.archives.LatestArchives`
-* :py:func:`kojismokydingo.cli.archives.cli_latest_archives`
+* :py:func:`kojismokydingo.cli.archives.cli_latest_tag_archives`

@@ -1,0 +1,788 @@
+
+<!DOCTYPE html>
+
+<html lang="English">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kojismokydingo.dnf &#8212; kojismokydingo 2.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pyramid.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.dnf</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kojismokydingo.dnf</h1><div class="highlight"><pre>
+<span></span><span class="c1"># This library is free software; you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation; either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This library is distributed in the hope that it will be useful, but</span>
+<span class="c1"># WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this library; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Koji Smoky Dingo - DNF ease-of-use wrappers</span>
+
+<span class="sd">:since: 2.1</span>
+
+<span class="sd">:author: Christopher O&#39;Brien &lt;obriencj@gmail.com&gt;</span>
+<span class="sd">:license: GPL v3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">cycle</span><span class="p">,</span> <span class="n">repeat</span>
+<span class="kn">from</span> <span class="nn">koji</span> <span class="kn">import</span> <span class="n">ClientSession</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">listdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">expanduser</span><span class="p">,</span> <span class="n">isdir</span><span class="p">,</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="nb">compile</span> <span class="k">as</span> <span class="n">compile_re</span><span class="p">,</span> <span class="n">escape</span> <span class="k">as</span> <span class="n">escape_re</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">rmtree</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">BadDingo</span><span class="p">,</span> <span class="n">bulk_load_builds</span>
+<span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="n">BuildInfo</span><span class="p">,</span> <span class="n">TagInfo</span><span class="p">,</span> <span class="n">TypedDict</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypeAlias</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># pre 3.10 TypeAlias is only available from typing_extensions</span>
+        <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypeAlias</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="c1"># some older platforms don&#39;t even have that, so fall back to Any</span>
+        <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Any</span>
+
+
+<span class="c1"># this tomfoolery is to work around situations where we want to use</span>
+<span class="c1"># mypy on a system where dnf is not available</span>
+
+<span class="n">BaseType</span><span class="p">:</span> <span class="n">TypeAlias</span>
+<span class="n">PackageType</span><span class="p">:</span> <span class="n">TypeAlias</span>
+<span class="n">QueryType</span><span class="p">:</span> <span class="n">TypeAlias</span>
+<span class="n">RepoType</span><span class="p">:</span> <span class="n">TypeAlias</span>
+<span class="n">SackType</span><span class="p">:</span> <span class="n">TypeAlias</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">dnf.base</span> <span class="kn">import</span> <span class="n">Base</span>
+    <span class="kn">from</span> <span class="nn">dnf.conf.config</span> <span class="kn">import</span> <span class="n">MainConf</span>
+    <span class="kn">from</span> <span class="nn">dnf.i18n</span> <span class="kn">import</span> <span class="n">ucd</span>
+    <span class="kn">from</span> <span class="nn">dnf.package</span> <span class="kn">import</span> <span class="n">Package</span>
+    <span class="kn">from</span> <span class="nn">dnf.query</span> <span class="kn">import</span> <span class="n">Query</span>
+    <span class="kn">from</span> <span class="nn">dnf.repo</span> <span class="kn">import</span> <span class="n">Repo</span>
+    <span class="kn">from</span> <span class="nn">dnf.sack</span> <span class="kn">import</span> <span class="n">Sack</span>
+    <span class="kn">from</span> <span class="nn">dnf.subject</span> <span class="kn">import</span> <span class="n">Subject</span>
+    <span class="kn">from</span> <span class="nn">dnf.util</span> <span class="kn">import</span> <span class="n">ensure_dir</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">__ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">BaseType</span> <span class="o">=</span> <span class="s2">&quot;dnf.base.Base&quot;</span>
+    <span class="n">PackageType</span> <span class="o">=</span> <span class="s2">&quot;dnf.package.Package&quot;</span>
+    <span class="n">QueryType</span> <span class="o">=</span> <span class="s2">&quot;dnf.query.Query&quot;</span>
+    <span class="n">RepoType</span> <span class="o">=</span> <span class="s2">&quot;dnf.repo.Repo&quot;</span>
+    <span class="n">SackType</span> <span class="o">=</span> <span class="s2">&quot;dnf.sack.Sack&quot;</span>
+
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">__ENABLED</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">BaseType</span> <span class="o">=</span> <span class="n">Base</span>
+    <span class="n">PackageType</span> <span class="o">=</span> <span class="n">Package</span>
+    <span class="n">QueryType</span> <span class="o">=</span> <span class="n">Query</span>
+    <span class="n">RepoType</span> <span class="o">=</span> <span class="n">Repo</span>
+    <span class="n">SackType</span> <span class="o">=</span> <span class="n">Sack</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;DNFuq&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DNFuqFilterTerms&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DNFUnavailable&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;correlate_query_builds&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dnf_available&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dnf_base&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dnf_sack&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dnfuq&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dnfuq_formatter&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="DNFuqFilterTerms"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.DNFuqFilterTerms">[docs]</a><span class="k">class</span> <span class="nc">DNFuqFilterTerms</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the available filters applicable to the</span>
+<span class="sd">    ``DNFuq.search`` method</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ownsfiles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatconflicts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatdepends</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatobsoletes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatprovides</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatrequires</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatrecommends</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatenhances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatsuggests</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">whatsupplements</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span></div>
+
+
+<span class="n">DNFUQ_FILTER_TERMS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;ownsfiles&quot;</span><span class="p">,</span> <span class="s2">&quot;whatconflicts&quot;</span><span class="p">,</span> <span class="s2">&quot;whatdepends&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;whatobsoletes&quot;</span><span class="p">,</span> <span class="s2">&quot;whatprovides&quot;</span><span class="p">,</span> <span class="s2">&quot;whatrequires&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;whatrecommends&quot;</span><span class="p">,</span> <span class="s2">&quot;whatenhances&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;whatsuggests&quot;</span><span class="p">,</span> <span class="s2">&quot;whatsupplements&quot;</span><span class="p">,</span> <span class="p">)</span>
+
+
+<div class="viewcode-block" id="DNFUnavailable"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.DNFUnavailable">[docs]</a><span class="k">class</span> <span class="nc">DNFUnavailable</span><span class="p">(</span><span class="n">BadDingo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when an API calls a function in this module which</span>
+<span class="sd">    requires the system dnf package, but dnf isn&#39;t available</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">complaint</span> <span class="o">=</span> <span class="s2">&quot;dnf package unavailable&quot;</span></div>
+
+
+<div class="viewcode-block" id="dnf_available"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.dnf_available">[docs]</a><span class="k">def</span> <span class="nf">dnf_available</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    True if the dnf package and assorted internals could be</span>
+<span class="sd">    successfully imported. False otherwise.</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">__ENABLED</span></div>
+
+
+<span class="k">def</span> <span class="nf">requires_dnf</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">__ENABLED</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DNFUnavailable</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;API call </span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> requires dnf&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+
+<div class="viewcode-block" id="dnf_base"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.dnf_base">[docs]</a><span class="nd">@requires_dnf</span>
+<span class="k">def</span> <span class="nf">dnf_base</span><span class="p">(</span>
+        <span class="n">cachedir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">arch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cacheonly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    produces a dnf main configuration appropriate for use outside</span>
+<span class="sd">    of managing a local system</span>
+
+<span class="sd">    :param cachedir: the base directory to create per-repository</span>
+<span class="sd">      caches in.</span>
+
+<span class="sd">    :param arch: override the architecture. By default the local</span>
+<span class="sd">      system architecture is used.</span>
+
+<span class="sd">    :param cacheonly: use existing cache if it exists, without trying</span>
+<span class="sd">      to fetch updated repo metadata</span>
+
+<span class="sd">    :returns: a prepared DNF base</span>
+
+<span class="sd">    :raises DNFUnavailable: if the dnf module is not available</span>
+
+<span class="sd">    :raises ValueError: if cachedir is not suppled</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cachedir</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cannot execute query without a cachedir&quot;</span><span class="p">)</span>
+
+    <span class="n">ensure_dir</span><span class="p">(</span><span class="n">cachedir</span><span class="p">)</span>
+
+    <span class="n">mc</span> <span class="o">=</span> <span class="n">MainConf</span><span class="p">()</span>
+    <span class="n">mc</span><span class="o">.</span><span class="n">cachedir</span> <span class="o">=</span> <span class="n">cachedir</span>
+    <span class="n">mc</span><span class="o">.</span><span class="n">cacheonly</span> <span class="o">=</span> <span class="n">cacheonly</span>
+
+    <span class="k">if</span> <span class="n">arch</span><span class="p">:</span>
+        <span class="n">mc</span><span class="o">.</span><span class="n">arch</span> <span class="o">=</span> <span class="n">arch</span>
+
+    <span class="k">return</span> <span class="n">Base</span><span class="p">(</span><span class="n">mc</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_clear_old_cache</span><span class="p">(</span>
+        <span class="n">cachedir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">repo</span><span class="p">:</span> <span class="n">RepoType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attempts to identify older metadata cache dirs for the given</span>
+<span class="sd">    repository, and remove them.</span>
+
+<span class="sd">    :param cachedir: directory storing per-repository caches</span>
+
+<span class="sd">    :returns: count of directories removed, or -1 for failure</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">cachedir</span> <span class="ow">and</span> <span class="n">isdir</span><span class="p">(</span><span class="n">cachedir</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">active</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">_repo</span><span class="o">.</span><span class="n">getCachedir</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">active</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">repoid</span> <span class="o">=</span> <span class="n">escape_re</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">_repo</span><span class="o">.</span><span class="n">getId</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">repoid</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">match</span> <span class="o">=</span> <span class="n">compile_re</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;^</span><span class="si">{</span><span class="n">repoid</span><span class="si">}</span><span class="s2">-[0-9a-f]</span><span class="se">{{</span><span class="s2">16</span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">match</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">cachedir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="ow">and</span> <span class="n">found</span> <span class="o">!=</span> <span class="n">active</span><span class="p">:</span>
+            <span class="n">olddir</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">cachedir</span><span class="p">,</span> <span class="n">found</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">isdir</span><span class="p">(</span><span class="n">olddir</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rmtree</span><span class="p">(</span><span class="n">olddir</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">count</span>
+
+
+<div class="viewcode-block" id="dnf_sack"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.dnf_sack">[docs]</a><span class="nd">@requires_dnf</span>
+<span class="k">def</span> <span class="nf">dnf_sack</span><span class="p">(</span>
+        <span class="n">base</span><span class="p">:</span> <span class="n">BaseType</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;koji&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SackType</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a dnf sack with a single repository, in order for</span>
+<span class="sd">    queries to be created against that repo.</span>
+
+<span class="sd">    :param base: a DNF base</span>
+
+<span class="sd">    :param path: repository path or URL</span>
+
+<span class="sd">    :param label: repository label. This will be used to determine the</span>
+<span class="sd">      specific caching directory</span>
+
+<span class="sd">    :raises DNFUnavailable: if the dnf module is not availaable</span>
+
+<span class="sd">    :returns: a DNF sack for use in generating queries</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="s2">&quot;://&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;file://&quot;</span> <span class="o">+</span> <span class="n">abspath</span><span class="p">(</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">Repo</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">conf</span><span class="p">)</span>
+    <span class="n">repo</span><span class="o">.</span><span class="n">baseurl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">repo</span><span class="o">.</span><span class="n">_repo</span><span class="o">.</span><span class="n">loadCache</span><span class="p">(</span><span class="n">throwExcept</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignoreMissing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">base</span><span class="o">.</span><span class="n">repos</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+
+    <span class="n">base</span><span class="o">.</span><span class="n">_sack</span> <span class="o">=</span> <span class="n">Sack</span><span class="p">(</span><span class="n">pkgcls</span><span class="o">=</span><span class="n">Package</span><span class="p">,</span> <span class="n">pkginitval</span><span class="o">=</span><span class="n">base</span><span class="p">,</span>
+                      <span class="n">arch</span><span class="o">=</span><span class="n">base</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">substitutions</span><span class="p">[</span><span class="s2">&quot;arch&quot;</span><span class="p">],</span>
+                      <span class="n">cachedir</span><span class="o">=</span><span class="n">base</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">cachedir</span><span class="p">,</span> <span class="n">logdebug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># note: this calls repo.load()</span>
+    <span class="n">base</span><span class="o">.</span><span class="n">_add_repo_to_sack</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+
+    <span class="c1"># removes stale metadata dirs</span>
+    <span class="n">_clear_old_cache</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">cachedir</span><span class="p">,</span> <span class="n">repo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">sack</span></div>
+
+
+<div class="viewcode-block" id="dnfuq"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.dnfuq">[docs]</a><span class="nd">@contextmanager</span>
+<span class="nd">@requires_dnf</span>
+<span class="k">def</span> <span class="nf">dnfuq</span><span class="p">(</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;koji&quot;</span><span class="p">,</span>
+        <span class="n">arch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cachedir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cacheonly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="s2">&quot;DNFuq&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    context manager providing a DNFuq instance configured with</span>
+<span class="sd">    either a re-usable or temporary cache directory.</span>
+
+<span class="sd">    :param path: path or URL to the repository</span>
+
+<span class="sd">    :param label: repository label, for use in storing the repository</span>
+<span class="sd">      cache</span>
+
+<span class="sd">    :param arch: override the architecture. By default the local</span>
+<span class="sd">      system architecture is used.</span>
+
+<span class="sd">    :param cachedir: the base directory for storing repository</span>
+<span class="sd">      caches. If omitted the system temp directory will be used, and</span>
+<span class="sd">      the cache will be deleted afterwards.</span>
+
+<span class="sd">    :raises DNFUnavailable: if the dnf module is not available</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">cachedir</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">DNFuq</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">arch</span><span class="o">=</span><span class="n">arch</span><span class="p">,</span>
+                  <span class="n">cachedir</span><span class="o">=</span><span class="n">cachedir</span><span class="p">,</span> <span class="n">cacheonly</span><span class="o">=</span><span class="n">cacheonly</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">d</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">cachedir</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">DNFuq</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">arch</span><span class="o">=</span><span class="n">arch</span><span class="p">,</span>
+                      <span class="n">cachedir</span><span class="o">=</span><span class="n">cachedir</span><span class="p">,</span> <span class="n">cacheonly</span><span class="o">=</span><span class="n">cacheonly</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">d</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">cachedir</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DNFuq"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.DNFuq">[docs]</a><span class="k">class</span> <span class="nc">DNFuq</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility class for creating queries against a DNF repository.</span>
+<span class="sd">    Takes care of most of the dnf wiring lazily.</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;koji&quot;</span><span class="p">,</span>
+            <span class="n">arch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">cachedir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">cacheonly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param path: path or URL to the repository</span>
+
+<span class="sd">        :param label: repository label, for use in storing the</span>
+<span class="sd">          repository cache</span>
+
+<span class="sd">        :param arch: override the architecture. By default the local</span>
+<span class="sd">          system architecture is used.</span>
+
+<span class="sd">        :param cachedir: the base directory for storing repository</span>
+<span class="sd">          caches. If omitted the system temp directory will be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cachedir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="n">expanduser</span><span class="p">(</span><span class="n">cachedir</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cacheonly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">cacheonly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">arch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="p">:</span> <span class="n">BaseType</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sack</span><span class="p">:</span> <span class="n">SackType</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="DNFuq.query"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.DNFuq.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QueryType</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        produces a new query for use against the repository</span>
+
+<span class="sd">        :raises DNFUnavailable: if the dnf module is not available</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sack</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">dnf_base</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cachedir</span><span class="p">,</span> <span class="n">arch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">arch</span><span class="p">,</span>
+                                 <span class="n">cacheonly</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cacheonly</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sack</span> <span class="o">=</span> <span class="n">dnf_sack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sack</span><span class="o">.</span><span class="n">query</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DNFuq.search"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.DNFuq.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">ownsfiles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatconflicts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatdepends</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatobsoletes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatprovides</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatrequires</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatrecommends</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatenhances</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatsuggests</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">whatsupplements</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QueryType</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        produces a new query against the repository, with the</span>
+<span class="sd">        given search keys and filters applied</span>
+
+<span class="sd">        :param keys: search terms. All items are matched if these are</span>
+<span class="sd">          omitted.</span>
+
+<span class="sd">        :param ownsfiles: limit to matches owning files in this list</span>
+
+<span class="sd">        :param whatconflicts: limit to matches that have matching</span>
+<span class="sd">          Conflicts header</span>
+
+<span class="sd">        :param whatdepends: limit to matches that have matching</span>
+<span class="sd">          Depends header</span>
+
+<span class="sd">        :param whatobsoletes: limit to matches that have matching</span>
+<span class="sd">          Obsoletes header</span>
+
+<span class="sd">        :param whatprovides: limit to matches that have matching</span>
+<span class="sd">          Provides header</span>
+
+<span class="sd">        :param whatrequires: limit to matches that have matching</span>
+<span class="sd">          Requires header</span>
+
+<span class="sd">        :param whatrecommends: limit to matches that have matching</span>
+<span class="sd">          Recommends header</span>
+
+<span class="sd">        :param whatenhances: limit to matches that have matching</span>
+<span class="sd">          Enhances header</span>
+
+<span class="sd">        :param whatsuggests: limit to matches that have matching</span>
+<span class="sd">          Suggests header</span>
+
+<span class="sd">        :param whatsupplements: limit to matches that have matching</span>
+<span class="sd">          Supplements header</span>
+
+<span class="sd">        :returns: query with the given filters applied</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">kq</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">empty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">subj</span> <span class="o">=</span> <span class="n">Subject</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ignore_case</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">sq</span> <span class="o">=</span> <span class="n">subj</span><span class="o">.</span><span class="n">get_best_query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sack</span><span class="p">,</span> <span class="n">with_provides</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                         <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+                <span class="n">kq</span> <span class="o">=</span> <span class="n">kq</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">sq</span><span class="p">)</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">kq</span>
+
+        <span class="k">if</span> <span class="n">ownsfiles</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">file__glob</span><span class="o">=</span><span class="n">ownsfiles</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatconflicts</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">conflicts__glob</span><span class="o">=</span><span class="n">whatconflicts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatdepends</span><span class="p">:</span>
+            <span class="c1"># TODO: dnf with exactdeps enabled considers depends to</span>
+            <span class="c1"># also include requires, recommends, enhances,</span>
+            <span class="c1"># supplements, and suggests. We might want to support</span>
+            <span class="c1"># that, too</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">depends__glob</span><span class="o">=</span><span class="n">whatdepends</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatobsoletes</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">obsoletes__glob</span><span class="o">=</span><span class="n">whatobsoletes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatprovides</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">provides__glob</span><span class="o">=</span><span class="n">whatprovides</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatrequires</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">requires__glob</span><span class="o">=</span><span class="n">whatrequires</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatrecommends</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">recommends__glob</span><span class="o">=</span><span class="n">whatrecommends</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatenhances</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">enhances__glob</span><span class="o">=</span><span class="n">whatenhances</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatsuggests</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">suggests__glob</span><span class="o">=</span><span class="n">whatsuggests</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">whatsupplements</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">filterm</span><span class="p">(</span><span class="n">supplements__glob</span><span class="o">=</span><span class="n">whatsupplements</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">q</span></div>
+
+
+<div class="viewcode-block" id="DNFuq.close"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.DNFuq.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sack</span> <span class="o">=</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="correlate_query_builds"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.correlate_query_builds">[docs]</a><span class="k">def</span> <span class="nf">correlate_query_builds</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">:</span> <span class="n">ClientSession</span><span class="p">,</span>
+        <span class="n">found</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PackageType</span><span class="p">],</span>
+        <span class="n">err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">PackageType</span><span class="p">,</span> <span class="n">BuildInfo</span><span class="p">]]:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a list of dnf query result Packages, correlate the</span>
+<span class="sd">    packages back to koji builds. This uses a simple heuristic based</span>
+<span class="sd">    on the sourcerpm header of the package. If the sourcerpm header is</span>
+<span class="sd">    not available, then an NVR is guessed from the package</span>
+<span class="sd">    source_name, version, and release.</span>
+
+<span class="sd">    :param session: an active koji client session</span>
+
+<span class="sd">    :param found: the results of a dnf query, to be correlated back to</span>
+<span class="sd">      koji build infos based on their source_name, version, and</span>
+<span class="sd">      release</span>
+
+<span class="sd">    :param err: whether to raise an error if a build could not be</span>
+<span class="sd">      found. If err is False (the default), then any missing builds</span>
+<span class="sd">      will be represented as a None value</span>
+
+<span class="sd">    :returns: list of tuples. Each tuple contains the initial DNF</span>
+<span class="sd">      Package and the correlated koji build info dict</span>
+
+<span class="sd">    :raises NoSuchBuild: if err is True and a build could be</span>
+<span class="sd">      correlated for a given DNF package</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># we cannot simply rely on source_name alone, because annoyingly</span>
+    <span class="c1"># some subpackages will have a different version. Fortunately most</span>
+    <span class="c1"># have a sourcerpm value which we can just trip the &quot;.src.rpm&quot; off</span>
+    <span class="c1"># of.</span>
+
+    <span class="c1"># nvrs = [f&quot;{p.source_name}-{p.v}-{p.r}&quot; for p in found]</span>
+
+    <span class="n">nvrs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">sourcerpm</span><span class="p">[:</span><span class="o">-</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">or</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">source_name</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">v</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">r</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
+
+    <span class="n">blds</span> <span class="o">=</span> <span class="n">bulk_load_builds</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">nvrs</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="n">err</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="n">blds</span><span class="p">[</span><span class="n">nvr</span><span class="p">])</span> <span class="k">for</span> <span class="n">nvr</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nvrs</span><span class="p">,</span> <span class="n">found</span><span class="p">)]</span></div>
+
+
+<span class="n">_FMT_MATCH</span> <span class="o">=</span> <span class="n">compile_re</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;%(-?\d*?){(build\.|tag\.)?([:\w]+?)}&#39;</span><span class="p">)</span>
+
+<span class="n">_FMT_TAGS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">&#39;arch&#39;</span><span class="p">,</span> <span class="s1">&#39;buildtime&#39;</span><span class="p">,</span> <span class="s1">&#39;conflicts&#39;</span><span class="p">,</span> <span class="s1">&#39;debug_name&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;downloadsize&#39;</span><span class="p">,</span> <span class="s1">&#39;enhances&#39;</span><span class="p">,</span> <span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="s1">&#39;evr&#39;</span><span class="p">,</span> <span class="s1">&#39;from_repo&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;installsize&#39;</span><span class="p">,</span> <span class="s1">&#39;installtime&#39;</span><span class="p">,</span> <span class="s1">&#39;license&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;obsoletes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;packager&#39;</span><span class="p">,</span> <span class="s1">&#39;provides&#39;</span><span class="p">,</span> <span class="s1">&#39;reason&#39;</span><span class="p">,</span> <span class="s1">&#39;recommends&#39;</span><span class="p">,</span> <span class="s1">&#39;release&#39;</span><span class="p">,</span> <span class="s1">&#39;repoid&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;reponame&#39;</span><span class="p">,</span> <span class="s1">&#39;requires&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="s1">&#39;source_debug_name&#39;</span><span class="p">,</span> <span class="s1">&#39;source_name&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;sourcerpm&#39;</span><span class="p">,</span> <span class="s1">&#39;suggests&#39;</span><span class="p">,</span> <span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="s1">&#39;supplements&#39;</span><span class="p">,</span> <span class="s1">&#39;url&#39;</span><span class="p">,</span> <span class="s1">&#39;vendor&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_escape_brackets</span><span class="p">(</span><span class="n">txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">txt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;{&#39;</span><span class="p">,</span> <span class="s1">&#39;{{&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">,</span> <span class="s1">&#39;}}&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_fmt_repl</span><span class="p">(</span><span class="n">matchobj</span><span class="p">):</span>
+    <span class="n">fill</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">matchobj</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_FMT_TAGS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_escape_brackets</span><span class="p">(</span><span class="n">matchobj</span><span class="o">.</span><span class="n">group</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="s2">&quot;rpm.&quot;</span>
+
+    <span class="k">if</span> <span class="n">fill</span><span class="p">:</span>
+        <span class="n">fill</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;:&gt;</span><span class="si">{</span><span class="n">fill</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">fill</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;:&lt;</span><span class="si">{</span><span class="n">fill</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">obj</span><span class="si">}{</span><span class="n">key</span><span class="si">}{</span><span class="n">fill</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">obj</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">EmptyNamespace</span><span class="p">(</span><span class="n">SimpleNamespace</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A SimpleNamespace that returns None for undefined attributes.</span>
+<span class="sd">    Only used by the PackageWrapper during formatting.</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;(none)&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">PackageWrapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used to assist in the formatting of dnf query results that</span>
+<span class="sd">    have been correlated to a koji build and tag.</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg</span><span class="p">:</span> <span class="n">PackageType</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pkg</span> <span class="o">=</span> <span class="n">pkg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iters</span><span class="p">:</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Iterator</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fi</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iters</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pkg</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">ucd</span><span class="p">,</span> <span class="n">found</span><span class="p">))</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="n">found</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;(none)&quot;</span>
+
+            <span class="k">elif</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;(none)&quot;</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="n">result</span> <span class="o">=</span> <span class="n">ucd</span><span class="p">(</span><span class="n">found</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">ucd</span><span class="p">(</span><span class="n">found</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">found</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+
+    <span class="k">def</span> <span class="nf">iter_format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">formatter</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="n">build</span><span class="p">:</span> <span class="n">BuildInfo</span><span class="p">,</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="n">TagInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+
+        <span class="c1"># wrap the build and tag into objects so that the formatter&#39;s</span>
+        <span class="c1"># dotted accessor works right. We use EmptyNamespace as a</span>
+        <span class="c1"># safety net in the event that a build or tag was not found,</span>
+        <span class="c1"># so that rather than crashing we just print &quot;(none)&quot; for the</span>
+        <span class="c1"># fields.</span>
+
+        <span class="n">bns</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">build</span><span class="p">)</span> <span class="k">if</span> <span class="n">build</span> <span class="k">else</span> <span class="n">EmptyNamespace</span><span class="p">()</span>
+        <span class="n">tns</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">tag</span><span class="p">)</span> <span class="k">if</span> <span class="n">tag</span> <span class="k">else</span> <span class="n">EmptyNamespace</span><span class="p">()</span>
+
+        <span class="c1"># first we populate the internal list of fields. Note that</span>
+        <span class="c1"># this is a list and not a map, because there may be</span>
+        <span class="c1"># duplicates in the formatter.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">formatter</span><span class="p">(</span><span class="n">rpm</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">build</span><span class="o">=</span><span class="n">bns</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">tns</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">res</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># no lists, we&#39;re done.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_field</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+
+        <span class="n">its</span> <span class="o">=</span> <span class="p">[</span><span class="nb">iter</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">repeat</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+               <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iters</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">(</span><span class="n">its</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">formatter</span><span class="p">(</span><span class="n">rpm</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">build</span><span class="o">=</span><span class="n">bns</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">tns</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_iters</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="n">DNFuqFormatter</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="dnfuq_formatter"><a class="viewcode-back" href="../../../kojismokydingo/dnf/#kojismokydingo.dnf.dnfuq_formatter">[docs]</a><span class="k">def</span> <span class="nf">dnfuq_formatter</span><span class="p">(</span><span class="n">queryformat</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DNFuqFormatter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Produces a formatter function based on a queryformat input</span>
+<span class="sd">    string. This formatter can be invoked with three parameters -- a</span>
+<span class="sd">    hawkey package, a build info dict, and a tag info dict. The result</span>
+<span class="sd">    will be a sequence of one or more strings that interpolates fields</span>
+<span class="sd">    from the three params. In the event that any of the fields are</span>
+<span class="sd">    arrays, the results will be the zip of all fields, repeating,</span>
+<span class="sd">    until the shortest array expires.</span>
+
+<span class="sd">    :param queryformat: The format string</span>
+
+<span class="sd">    :since: 2.1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">queryformat</span> <span class="o">=</span> <span class="n">queryformat</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\n&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\t&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">fmtl</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">spos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">_FMT_MATCH</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">queryformat</span><span class="p">):</span>
+        <span class="n">fmtl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_escape_brackets</span><span class="p">(</span><span class="n">queryformat</span><span class="p">[</span><span class="n">spos</span><span class="p">:</span><span class="n">item</span><span class="o">.</span><span class="n">start</span><span class="p">()]))</span>
+        <span class="n">fmtl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_fmt_repl</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+        <span class="n">spos</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+    <span class="n">fmtl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_escape_brackets</span><span class="p">(</span><span class="n">queryformat</span><span class="p">[</span><span class="n">spos</span><span class="p">:]))</span>
+
+    <span class="n">fmts</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmtl</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">formatter</span><span class="p">(</span><span class="n">pkg</span><span class="p">:</span> <span class="n">PackageType</span><span class="p">,</span> <span class="n">build</span><span class="p">:</span> <span class="n">BuildInfo</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="n">TagInfo</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">PackageWrapper</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
+        <span class="k">yield from</span> <span class="n">i</span><span class="o">.</span><span class="n">iter_format</span><span class="p">(</span><span class="n">fmts</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">build</span><span class="o">=</span><span class="n">build</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">formatter</span></div>
+
+
+<span class="c1">#</span>
+<span class="c1"># The end.</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">kojismokydingo 2.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >kojismokydingo</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kojismokydingo.dnf</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Christopher O&#39;Brien.
+      Last updated on 2023-08-11.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    </div>
+  </body>
+</html>
