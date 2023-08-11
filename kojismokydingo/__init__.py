@@ -948,7 +948,6 @@ def as_channelinfo(
 def as_taginfo(
         session: ClientSession,
         tag: TagSpec) -> TagInfo:
-
     """
     Coerces a tag value into a koji tag info dict.
 

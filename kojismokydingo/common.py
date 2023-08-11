@@ -77,6 +77,14 @@ def itemsgetter(
     callable always returns a tuple of results, even if there's only
     one key.
 
+    :param key: first key to fetch with the returned getter
+
+    :param keys: additional keys to fetch with the returned getter
+
+    :returns: a callabler getter which when called with a value will
+      return the result of getting all of the specified keys, in a
+      tuple.
+
     :since: 2.1
     """
 
@@ -113,9 +121,9 @@ def ichunkseq(
         chunksize: int) -> Iterator[Iterable]:
     """
     Similar to chunkseq, but lazy. Note that each chunk must be
-    exhausted before beginning a new chunk, as the chunks will be
-    reading from the original sequence only when they themselves are
-    iterated over.
+    exhausted before beginning a new chunk, as the chunks will be read
+    from the original sequence only when they themselves are iterated
+    over.
 
     :param seq: a sequence to chunk up
 
