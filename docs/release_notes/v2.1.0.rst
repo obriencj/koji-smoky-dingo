@@ -1,17 +1,18 @@
 Koji Smoky Dingo 2.1.0 Release Notes
 ====================================
 
-*Unreleased*
+*August 11, 2023*
 
-This release adds the following:
+Version 2.1.0 continues compatability from 2.0.0, with some additional
+features as noted below
 
 
 Commands
 --------
 
-* Introduces the ``repoquery`` command, which will perform a dnf query on
-  the contents of a tag or target's repository and correlate the results
-  back to the underlying koji build.
+* Introduced the ``repoquery`` command, which will perform a dnf query
+  on the contents of a tag or target's repository and correlate the
+  results back to the underlying koji build.
 * Fixed the ``affected-targets`` command, and switched to using tabulated
   output.
 * Filtered some unnecessary output in the ``check-repo`` command which
@@ -21,7 +22,9 @@ Commands
 API
 ---
 
-* optimizes the ``bulk_load_tasks`` call to use the list version of
+* introduced a new `kojismokydingo.dnf` module for working with
+  DNF/Yum repositories
+* optimized the ``bulk_load_tasks`` call to use the list version of
   ``getTaskInfo``
 * fixed ``gather_affected_targets`` which was backtracing
 
@@ -29,7 +32,7 @@ API
 Other
 -----
 
-* begin using GitHub Actions for CI
+* began using GitHub Actions for CI
 
 
 Issues
