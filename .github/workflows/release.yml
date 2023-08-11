@@ -75,11 +75,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Wheel
+          path: dist
 
       - name: Fetch RPMs
         uses: actions/download-artifact@v3
         with:
           name: RPMs
+          path: dist
 
       - name: Upload python dist content
         run: |
@@ -101,11 +103,15 @@ jobs:
       name: pypi
       url: https://pypi.org/p/kojismokydingo
 
+    permissions:
+      id-token: write
+
     steps:
       - name: Fetch python dist content
         uses: actions/download-artifact@v3
         with:
           name: Wheel
+          path: dist
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -123,6 +129,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Wheel
+          path: dist
 
       - name: Get the package version
         run: |
