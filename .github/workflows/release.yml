@@ -28,12 +28,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Record package version
-        run: |
-          mkdir -p dist
-          python setup.py --version > dist/VERSION
-          cat dist/VERSION >> $GITHUB_STEP_SUMMARY
-
       - name: Install python dependencies
         run: |
           pip install wheel
@@ -47,6 +41,17 @@ jobs:
         with:
           name: Wheel
           path: dist/
+
+      - name: Record package version
+        run: |
+          python setup.py --version > VERSION
+          cat VERSION >> $GITHUB_STEP_SUMMARY
+
+      - name: Store Version
+        uses: actions/upload-artifact@v3
+        with:
+          name: Version
+          path: VERSION
 
   build-rpms:
     name: Trigger RPM builds
@@ -127,7 +132,7 @@ jobs:
       - name: Fetch python dist content
         uses: actions/download-artifact@v3
         with:
-          name: Wheel
+          name: Version
           path: dist
 
       - name: Get the package version
