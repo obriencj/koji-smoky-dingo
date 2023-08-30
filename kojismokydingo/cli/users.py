@@ -190,7 +190,7 @@ def cli_userinfo(
                   f" {bdat['creation_time'].split('.')[0]}")
 
 
-class ShowUserInfo(AnonSmokyDingo):
+class ShowUserInfo(SmokyDingo):
 
     group = "info"
     description = "Show information about a user"
