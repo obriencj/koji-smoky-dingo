@@ -24,7 +24,7 @@ from koji import ClientSession
 from operator import itemgetter
 from typing import Optional, Union
 
-from . import AnonSmokyDingo, int_or_str, pretty_json
+from . import AnonSmokyDingo, SmokyDingo, int_or_str, pretty_json
 from ..types import (
     AuthType, TaskState, UserInfo, UserSpec, UserStatus, UserType, )
 from ..users import (
