@@ -109,8 +109,9 @@ def get_group_members(
         user: Union[int, str]) -> List[UserInfo]:
 
     """
-    An anonymous version of the admin-only getGroupMembers hub API
-    call. Uses queryHistory to gather still-active group additions
+    An anonymous version of the admin-only ``getGroupMembers`` hub
+    API call. Uses ``queryHistory`` to gather still-active group
+    additions
 
     :param session: an active koji client session
 
