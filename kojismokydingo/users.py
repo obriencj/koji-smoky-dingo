@@ -20,13 +20,13 @@ Koji Smoki Dingo - users and permissions
 """
 
 
-from koji import ClientSession, ParameterError
+from koji import ClientSession, GenericError, ParameterError
 from operator import itemgetter
 from time import asctime, localtime
 from typing import List, Optional, Union, cast
 
 from . import (
-    NoSuchContentGenerator, NoSuchPermission,
+    NoSuchContentGenerator, NoSuchPermission, NoSuchUser,
     as_userinfo, bulk_load_users, )
 from .types import (
     CGInfo, DecoratedPermInfo, DecoratedUserInfo, NamedCGInfo,
@@ -39,7 +39,7 @@ __all__ = (
     "collect_perminfo",
     "collect_userinfo",
     "collect_userstats",
-    "get_group_memebers",
+    "get_group_members",
 )
 
 
@@ -188,7 +188,7 @@ def collect_userinfo(
 
     elif ut == UserType.GROUP:
         # userinfo["members"] = session.getGroupMembers(uid)
-        userinfo["members"] = _get_group_members(session, uid)
+        userinfo["members"] = get_group_members(session, uid)
 
     return userinfo
 
