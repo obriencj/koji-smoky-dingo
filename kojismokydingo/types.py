@@ -65,6 +65,8 @@ __all__ = (
     "DecoratedHostInfos",
     "DecoratedTagExtra",
     "DecoratedTagExtras",
+    "DecoratedPermInfo",
+    "DecoratedUserInfo",
     "GOptions",
     "HistoryEntry",
     "HostInfo",
