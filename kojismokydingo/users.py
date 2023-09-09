@@ -25,7 +25,9 @@ from operator import itemgetter
 from time import asctime, localtime
 from typing import List, Optional, Union, cast
 
-from . import NoSuchContentGenerator, NoSuchPermission, as_userinfo
+from . import (
+    NoSuchContentGenerator, NoSuchPermission,
+    as_userinfo, bulk_load_users, )
 from .types import (
     CGInfo, DecoratedPermInfo, DecoratedUserInfo, NamedCGInfo,
     PermSpec, PermUser, UserInfo, UserSpec, UserStatistics, UserType, )
@@ -37,6 +39,7 @@ __all__ = (
     "collect_perminfo",
     "collect_userinfo",
     "collect_userstats",
+    "get_group_memebers",
 )
 
 
@@ -101,6 +104,44 @@ def collect_userstats(
     return cast(UserStatistics, stats)
 
 
+def get_group_members(
+        session: ClientSession,
+        user: Union[int, str]) -> List[UserInfo]:
+
+    """
+    An anonymous version of the admin-only getGroupMembers hub API
+    call. Uses queryHistory to gather still-active group additions
+
+    :param session: an active koji client session
+
+    :param user: name or ID of a user group
+
+    :raises NoSuchUser: if no matching user group was found
+
+    :since: 2.2
+    """
+
+    # getUserMembers returns a list of dicts, with keys: id,
+    # krb_principals, name, usertype. However, the call requires the
+    # admin permission
+
+    # queryHistory is anonymous, and returns a dict mapping table to a
+    # list of events. In those events are keys: "user.name" and
+    # "user_id" which we can use to then lookup the rest of the
+    # information
+
+    try:
+        hist = session.queryHistory(tables=["user_groups"],
+                                    active=True, user=user)
+    except GenericError:
+        raise NoSuchUser(user)
+
+    uids = map(itemgetter("user_id"), hist["user_groups"])
+    found = bulk_load_users(session, uids, err=False)
+
+    return list(filter(None, found.values()))
+
+
 def collect_userinfo(
         session: ClientSession,
         user: UserSpec,
@@ -146,11 +187,8 @@ def collect_userinfo(
             userinfo["statistics"] = collect_userstats(session, userinfo)
 
     elif ut == UserType.GROUP:
-        try:
-            userinfo["members"] = session.getGroupMembers(uid)
-        except Exception:
-            # non-admin accounts cannot query group membership, so omit
-            userinfo["members"] = None  # type: ignore
+        # userinfo["members"] = session.getGroupMembers(uid)
+        userinfo["members"] = _get_group_members(session, uid)
 
     return userinfo
 

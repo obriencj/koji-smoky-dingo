@@ -24,7 +24,7 @@ from koji import ClientSession
 from operator import itemgetter
 from typing import Optional, Union
 
-from . import AnonSmokyDingo, SmokyDingo, int_or_str, pretty_json
+from . import AnonSmokyDingo, int_or_str, pretty_json
 from ..types import (
     AuthType, TaskState, UserInfo, UserSpec, UserStatus, UserType, )
 from ..users import (
@@ -170,7 +170,7 @@ def cli_userinfo(
     if members:
         print("Members:")
         for member in sorted(members, key=lambda m: m.get("name")):
-            print(f"{member['name']} [{member['id']}]")
+            print(f"  {member['name']} [{member['id']}]")
 
     data = userinfo.get("statistics", None)
     if data:
@@ -190,10 +190,10 @@ def cli_userinfo(
                   f" {bdat['creation_time'].split('.')[0]}")
 
 
-class ShowUserInfo(SmokyDingo):
+class ShowUserInfo(AnonSmokyDingo):
 
     group = "info"
-    description = "Show information about a user"
+    description = "Show information about a user or group"
 
 
     def arguments(self, parser):
