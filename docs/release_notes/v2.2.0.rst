@@ -1,0 +1,29 @@
+Koji Smoky Dingo 2.1.0 Release Notes
+====================================
+
+*Unreleased*
+
+Version 2.2.0 continues compatability from 2.0.0, with some additional
+features as noted below
+
+
+Commands
+--------
+
+* Updated the ``userinfo`` command to use an anonymous-compatible
+  group-membership query. Previously the ``getGroupMembers`` call was
+  being used, which always failed because it required the admin
+  permission and the command was anonymous.
+
+
+API
+---
+
+* introduced a new `kojismokydingo.users.get_group_members` function
+
+
+Issues
+------
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/12?closed=1>

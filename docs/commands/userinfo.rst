@@ -7,7 +7,7 @@ koji userinfo
 
  usage: koji userinfo [-h] [--stats] [--json] USER
 
- Show information about a user
+ Show information about a user or group
 
  positional arguments:
    USER        User name or principal
