@@ -170,7 +170,7 @@ def cli_userinfo(
     if members:
         print("Members:")
         for member in sorted(members, key=lambda m: m.get("name")):
-            print(f"{member['name']} [{member['id']}]")
+            print(f"  {member['name']} [{member['id']}]")
 
     data = userinfo.get("statistics", None)
     if data:
@@ -193,7 +193,7 @@ def cli_userinfo(
 class ShowUserInfo(AnonSmokyDingo):
 
     group = "info"
-    description = "Show information about a user"
+    description = "Show information about a user or group"
 
 
     def arguments(self, parser):
