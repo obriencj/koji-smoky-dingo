@@ -137,7 +137,7 @@ jobs:
         with:
           file: coverage.xml
           allow-empty: true
-          base-path: ${{ GITHUB_WORKSPACE }}
+          base-path: ${{ github.workspace }}
 
 
 # The end.
