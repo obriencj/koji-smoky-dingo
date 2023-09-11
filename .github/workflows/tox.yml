@@ -69,7 +69,6 @@ jobs:
           category: Bandit
           sarif_file: bandit.sarif
 
-
   tests:
     runs-on: ubuntu-latest
 
@@ -103,15 +102,16 @@ jobs:
       - name: Running tox
         run: tox
 
-      - name: Collect coverage results
+      - name: Store coverage
         uses: actions/upload-artifact@v3
         with:
           name: coverage-data
-          path: '.coverage.py*'
+          path: .coverage.py${{ matrix.python-version }}
 
-      - name: Upload coverage for py${{ matrix.python-version }}
+      - name: Upload coverage
         uses: coverallsapp/github-action@v2
         with:
+          file: .coverage.py${{ matrix.python-version }}
           flag-name: py${{ matrix.python-version }}
           parallel: true
 
@@ -128,11 +128,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Fetch coverage results
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-data
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -140,17 +135,21 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install libkrb5-dev
           pip install tox tox-gh-actions
 
-      - name: Local coverage report
-        run: |
-          tox -e coverage
-
-      - name: Complete coveralls
+      - name: Complete coveralls batch
         uses: coverallsapp/github-action@v2
         with:
           parallel-finished: true
+
+      - name: Fetch coverage results
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-data
+
+      - name: Combined coverage report
+        run: |
+          tox -e coverage
 
 
 # The end.
