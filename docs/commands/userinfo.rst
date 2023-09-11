@@ -5,7 +5,7 @@ koji userinfo
 
 ::
 
- usage: koji userinfo [-h] [--stats] [--json] USER
+ usage: koji userinfo [-h] [--stats] [--membership] [--json] USER
 
  Show information about a user or group
 
@@ -15,6 +15,8 @@ koji userinfo
  options:
    -h, --help  show this help message and exit
    --stats     Include user statistics
+   --membership
+               Include group members or membership
    --json      Output information as JSON
 
 
