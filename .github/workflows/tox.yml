@@ -62,7 +62,7 @@ jobs:
         run: tox -e bandit-sarif
 
       - name: Upload Bandit results
-        with: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v2
         with:
           category: Bandit
           sarif_file: bandit.sarif
