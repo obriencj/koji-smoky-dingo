@@ -64,7 +64,7 @@ clean-built:
 
 
 clean: clean-built tidy	## Removes built content, test logs, coverage reports
-	@rm -rf .coverage* htmlcov/* logs/*
+	@rm -rf .coverage* bandit.sarif htmlcov/* logs/*
 
 
 ##@ Containerized RPMs

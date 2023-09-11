@@ -28,13 +28,13 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install python dependencies
+      - name: Install dependencies
         run: |
-          pip install wheel
+          pip install build wheel
 
       - name: Build Wheel
         run: |
-          python setup.py sdist bdist_wheel
+          python -B -m build .
 
       - name: Store Wheel
         uses: actions/upload-artifact@v3
