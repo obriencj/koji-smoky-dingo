@@ -41,10 +41,10 @@ report-python:
 ##@ Local Build and Install
 
 build: clean-built report-python flake8	## Produces a wheel using the default system python
-	@$(PYTHON) setup.py sdist bdist_wheel
+	@tox -e build
 
 
-install: quick-test	## Installs using the default python for the current user
+install: build	## Installs using the default python for the current user
 	@$(PYTHON) -B -m pip.__main__ \
 		install --no-deps --user -I \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl

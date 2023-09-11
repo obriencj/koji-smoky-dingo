@@ -13,7 +13,7 @@ on:
 
 jobs:
 
-  build-wheel:
+  build-metadata:
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,26 +23,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          pip install build wheel
+          sudo apt-get install make pandoc
 
-      - name: Build Wheel
-        run: |
-          python -B -m build .
-
-      - name: Store Wheel
-        uses: actions/upload-artifact@v3
-        with:
-          name: Wheel
-          path: dist/
-
-      - name: Record package version
+      - name: Record Version
         run: |
           make version > VERSION
           cat VERSION >> $GITHUB_STEP_SUMMARY
@@ -53,18 +43,33 @@ jobs:
           name: Version
           path: VERSION
 
+      - name: Record Notes
+        run: |
+          make release-notes > release.md
+
+      - name: Store Notes
+        uses: actions/upload-artifact@v3
+        with:
+          name: Notes
+          path: release.md
+
+  build-wheel:
+    name: Trigger Wheel build
+    uses: ./.github/workflows/wheel.yml
+
   build-rpms:
     name: Trigger RPM builds
     uses: ./.github/workflows/rpms.yml
 
   attach-assets:
-    name: Attach assets to release
+    name: Attach Assets to Release
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     needs:
+      - build-metadata
       - build-wheel
       - build-rpms
 
@@ -72,9 +77,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          sudo apt-get install hub make pandoc
+          sudo apt-get install hub
 
       - name: Fetch Wheel
         uses: actions/download-artifact@v3
@@ -88,9 +93,13 @@ jobs:
           name: RPMs
           path: rpms
 
+      - name: Fetch Notes
+        uses: actions/download-artifact@v3
+        with:
+          name: Notes
+
       - name: Upload release notes
         run: |
-          make release-notes > release.md
           gh release edit ${{ github.ref_name }} \
             -F release.md
 
