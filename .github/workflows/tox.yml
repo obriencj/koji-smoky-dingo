@@ -136,7 +136,8 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           file: coverage.xml
-          base-path: ${{ env.PWD }}
+          allow-empty: true
+          base-path: ${{ GITHUB_WORKSPACE }}
 
 
 # The end.
