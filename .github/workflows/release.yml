@@ -44,7 +44,7 @@ jobs:
 
       - name: Record package version
         run: |
-          python setup.py --version > VERSION
+          make version > VERSION
           cat VERSION >> $GITHUB_STEP_SUMMARY
 
       - name: Store Version
@@ -74,7 +74,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install hub
+          sudo apt-get install hub make pandoc
 
       - name: Fetch Wheel
         uses: actions/download-artifact@v3
@@ -86,13 +86,18 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: RPMs
-          path: dist
+          path: rpms
+
+      - name: Upload release notes
+        run: |
+          make release-notes > release.md
+          gh release edit ${{ github.ref_name }} \
+            -F release.md
 
       - name: Upload python dist content
         run: |
           gh release upload ${{ github.ref_name }} \
-            dist/*.whl \
-            dist/*.rpm
+            dist/*.whl rpms/*.rpm
         env:
           GITHUB_TOKEN: ${{ github.TOKEN }}
 
@@ -136,11 +141,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Version
-          path: dist
 
       - name: Get the package version
         run: |
-          echo "DIST_VERSION=$(cat dist/VERSION)" >> "$GITHUB_ENV"
+          echo "DIST_VERSION=$(cat VERSION)" >> "$GITHUB_ENV"
 
       - name: Get current date
         run: |

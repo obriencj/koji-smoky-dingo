@@ -51,14 +51,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install libkrb5-dev
+          sudo apt-get install libkrb5-dev make
           pip install tox tox-gh-actions
 
       - name: Run Flake8
-        run: tox -e flake8
+        run: make flake8
 
       - name: Run MyPy
-        run: tox -e mypy
+        run: make mypy
 
   tests:
     runs-on: ubuntu-latest
@@ -91,7 +91,8 @@ jobs:
           pip install tox tox-gh-actions coverage
 
       - name: Running tox
-        run: tox
+        run: |
+          make test
 
       - name: Store coverage
         uses: actions/upload-artifact@v3
