@@ -56,7 +56,7 @@ Koji Smoky Dingo
 %py3_build_wheel
 
 %if %{with docs}
-  %{python3} setup.py docs --builder html,man
+  %{python3} setup.py build_sphinx --builder html,man
   %__rm -f build/sphinx/html/.buildinfo
 %endif
 
