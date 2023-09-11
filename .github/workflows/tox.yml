@@ -136,6 +136,7 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           file: coverage.xml
+          base-path: ${{ env.PWD }}
 
 
 # The end.
