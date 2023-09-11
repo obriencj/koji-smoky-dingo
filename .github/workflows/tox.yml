@@ -138,7 +138,6 @@ jobs:
         with:
           file: coverage.xml
           allow-empty: true
-          base-path: ./
 
 
 # The end.
