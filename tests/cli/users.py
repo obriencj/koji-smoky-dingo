@@ -53,8 +53,23 @@ class ShowUserInfoTest(TestCase):
             else:
                 return []
 
+        def do_getUserGroups(userID = None):
+            if userID in (None, 100, "obrienc"):
+                return [{"name": "ldap/CoolGuys",
+                         "id": 500,}]
+            else:
+                return []
+
+        def do_getGroupMembers(userID = None):
+            if userID == 500:
+                return [self.userinfo()]
+            else:
+                return []
+
         sess.getUser.side_effect = do_getUser
         sess.getUserPerms.side_effect = do_getUserPerms
+        sess.getUserGroups.side_effect = do_getUserGroups
+        sess.getKojiVersion.return_value = "1.35"
 
         return sess
 
@@ -76,8 +91,9 @@ class ShowUserInfoTest(TestCase):
             Status: NORMAL (enabled)
             Permissions:
               coolguy
+            Groups:
+              ldap/CoolGuys [500]
             """)
-        print("\ntesting\n", expected)
         self.assertEqual(expected, res[:len(expected)])
 
 

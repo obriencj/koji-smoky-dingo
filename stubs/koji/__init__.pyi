@@ -368,6 +368,11 @@ class ClientSession:
             group: Union[int, str]) -> List[UserInfo]:
         ...
 
+    def getUserGroups(
+            self,
+            user: Union[int, str]) -> List[UserInfo]:
+        ...
+
     def getHost(
             self,
             hostInfo: Union[int, str],

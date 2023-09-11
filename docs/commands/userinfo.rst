@@ -5,7 +5,7 @@ koji userinfo
 
 ::
 
- usage: koji userinfo [-h] [--stats] [--membership] [--json] USER
+ usage: koji userinfo [-h] [--stats] [--json] USER
 
  Show information about a user or group
 
@@ -15,8 +15,6 @@ koji userinfo
  options:
    -h, --help  show this help message and exit
    --stats     Include user statistics
-   --membership
-               Include group members or membership
    --json      Output information as JSON
 
 
@@ -34,8 +32,9 @@ additional output:
 * Last task summary
 * Last build summary
 
-Since version 2.2.0, this command will also show the list of members
-if the specified user ID is actually a group
+Since version 2.2.0, this command will also the groups that a user is
+a member of, and the list of members if the specified user ID is
+actually a group.
 
 
 References
@@ -45,3 +44,4 @@ References
 * :py:func:`kojismokydingo.cli.users.cli_userinfo`
 * :py:func:`kojismokydingo.users.collect_userinfo`
 * :py:func:`kojismokydingo.users.get_group_members`
+* :py:func:`kojismokydingo.users.get_user_groups`

@@ -133,7 +133,7 @@ def cli_userinfo(
     :since: 1.0
     """
 
-    userinfo = collect_userinfo(session, user, stats)
+    userinfo = collect_userinfo(session, user, stats, members=True)
 
     if json:
         pretty_json(userinfo)
@@ -165,6 +165,12 @@ def cli_userinfo(
         print("Permissions:")
         for perm in sorted(perms):
             print(" ", perm)
+
+    groups = userinfo.get("groups", None)
+    if groups:
+        print("Groups:")
+        for group in sorted(groups, key=lambda m: m.get("name")):
+            print(f"  {group['name']} [{group['id']}]")
 
     members = userinfo.get("members", None)
     if members:

@@ -841,6 +841,9 @@ class DecoratedUserInfo(UserInfo):
     members: List[UserInfo]
     """ membership if user is a group """
 
+    groups: List[UserInfo]
+    """ groups that user is a member of """
+
     statistics: Optional[UserStatistics]
     """ user's interaction statistics """
 

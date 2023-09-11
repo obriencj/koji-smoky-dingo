@@ -27,7 +27,7 @@ from typing import List, Optional, Union, cast
 
 from . import (
     NoSuchContentGenerator, NoSuchPermission, NoSuchUser,
-    as_userinfo, bulk_load_users, )
+    as_userinfo, bulk_load_users, version_check, )
 from .types import (
     CGInfo, DecoratedPermInfo, DecoratedUserInfo, NamedCGInfo,
     PermSpec, PermUser, UserInfo, UserSpec, UserStatistics, UserType, )
@@ -104,9 +104,46 @@ def collect_userstats(
     return cast(UserStatistics, stats)
 
 
+def get_user_groups(
+        session: ClientSession,
+        user: UserSpec) -> List[UserInfo]:
+    """
+    Identify groups that a user is a member of
+
+    :param session: an active koji client session
+
+    :param user: name or ID of a potential member
+
+    :returns: list of groups that user is a member of
+
+    :raises NoSuchUser: if user could not be found
+
+    :since: 2.2
+    """
+
+    user = as_userinfo(session, user)
+    uid = user["id"]
+
+    if version_check(session, (1, 35)):
+        # added in 1.35
+        return session.getUserGroups(uid) or []
+
+    else:
+        hist = session.queryHistory(tables=["user_groups"], active=True)
+
+        mems = []
+        for grpmem in hist["user_groups"]:
+            if grpmem["user_id"] == uid:
+                mems.append(grpmem)
+
+        gids = map(itemgetter("group_id"), mems)
+        found = bulk_load_users(session, gids, err=False)
+        return list(filter(None, found.values()))
+
+
 def get_group_members(
         session: ClientSession,
-        user: Union[int, str]) -> List[UserInfo]:
+        user: UserSpec) -> List[UserInfo]:
 
     """
     An anonymous version of the admin-only ``getGroupMembers`` hub
@@ -117,36 +154,46 @@ def get_group_members(
 
     :param user: name or ID of a user group
 
+    :returns: list of users that are members of the given group
+
     :raises NoSuchUser: if no matching user group was found
 
     :since: 2.2
     """
 
-    # getUserMembers returns a list of dicts, with keys: id,
+    # getGroupMembers returns a list of dicts, with keys: id,
     # krb_principals, name, usertype. However, the call requires the
-    # admin permission
+    # admin permission prior to 1.35
 
     # queryHistory is anonymous, and returns a dict mapping table to a
     # list of events. In those events are keys: "user.name" and
     # "user_id" which we can use to then lookup the rest of the
     # information
 
-    try:
+    user = as_userinfo(session, user)
+
+    if user["usertype"] != UserType.GROUP:
+        # we shortcut this because querying by a non-existent group ID
+        # causes hub to return all group memberships
+        return []
+
+    if version_check(session, (1, 35)):
+        return session.getGroupMembers(user["id"]) or []
+
+    else:
         hist = session.queryHistory(tables=["user_groups"],
-                                    active=True, user=user)
-    except GenericError:
-        raise NoSuchUser(user)
+                                    active=True, user=user["id"])
 
-    uids = map(itemgetter("user_id"), hist["user_groups"])
-    found = bulk_load_users(session, uids, err=False)
-
-    return list(filter(None, found.values()))
+        uids = map(itemgetter("user_id"), hist["user_groups"])
+        found = bulk_load_users(session, uids, err=False)
+        return list(filter(None, found.values()))
 
 
 def collect_userinfo(
         session: ClientSession,
         user: UserSpec,
-        stats: bool = True) -> DecoratedUserInfo:
+        stats: bool = False,
+        members: bool = False) -> DecoratedUserInfo:
     """
     Gather information about a named user, including the list of
     permissions the user has.
@@ -159,10 +206,14 @@ def collect_userinfo(
 
     :param user: name of a user or their kerberos ID
 
+    :param stats: collect user statistics
+
+    :param members: look up group members and memberships
+
     :raises NoSuchUser: if user is an ID or name which cannot be
       resolved
 
-    :since: 1.0
+    :since: 2.2
     """
 
     userinfo = cast(DecoratedUserInfo, as_userinfo(session, user))
@@ -187,9 +238,12 @@ def collect_userinfo(
         if stats:
             userinfo["statistics"] = collect_userstats(session, userinfo)
 
+        if members:
+            userinfo["groups"] = get_user_groups(session, uid)
+
     elif ut == UserType.GROUP:
-        # userinfo["members"] = session.getGroupMembers(uid)
-        userinfo["members"] = get_group_members(session, uid)
+        if members:
+            userinfo["members"] = get_group_members(session, uid)
 
     return userinfo
 
