@@ -88,7 +88,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get install libkrb5-dev
-          pip install tox tox-gh-actions
+          pip install tox tox-gh-actions coverage
 
       - name: Running tox
         run: tox
@@ -98,13 +98,6 @@ jobs:
         with:
           name: coverage-data
           path: .coverage.py*
-
-      - name: Upload coverage
-        uses: coverallsapp/github-action@v2
-        with:
-          files: .coverage.py*
-          flag-name: py${{ matrix.python-version }}
-          parallel: true
 
   coverage:
     runs-on: ubuntu-latest
@@ -126,21 +119,23 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install tox tox-gh-actions
-
-      - name: Complete coveralls batch
-        uses: coverallsapp/github-action@v2
-        with:
-          parallel-finished: true
+          pip install coverage
 
       - name: Fetch coverage results
         uses: actions/download-artifact@v3
         with:
           name: coverage-data
 
-      - name: Combined coverage report
+      - name: Combine and report coverage
         run: |
-          tox -e coverage
+          coverage combine
+          coverage xml
+          coverage report
+
+      - name: Upload to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coverage.xml
 
 
 # The end.
