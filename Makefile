@@ -18,13 +18,14 @@ ORIGIN_PUSH = $(shell git remote get-url --push origin)
 
 define checkfor =
 	@if ! which $(1) >/dev/null 2>&1 ; then \
-		echo $(1) "is required, but not available" ; \
+		echo $(1) "is required, but not available" 1>&2 ; \
 		exit 1 ; \
 	fi
 endef
 
 
 ##@ Basic Targets
+
 default: quick-test	## Runs the quick-test target
 
 
@@ -38,8 +39,9 @@ report-python:
 
 
 ##@ Local Build and Install
+
 build: clean-built report-python flake8	## Produces a wheel using the default system python
-	@$(PYTHON) setup.py bdist_wheel
+	@$(PYTHON) setup.py sdist bdist_wheel
 
 
 install: quick-test	## Installs using the default python for the current user
@@ -49,6 +51,7 @@ install: quick-test	## Installs using the default python for the current user
 
 
 ##@ Cleanup
+
 tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
 	$(call checkfor,find)
@@ -68,6 +71,7 @@ clean: clean-built tidy	## Removes built content, test logs, coverage reports
 
 
 ##@ Containerized RPMs
+
 packaging-build: $(ARCHIVE)	## Launches all containerized builds
 	@./tools/launch-build.sh
 
@@ -78,6 +82,7 @@ packaging-test: packaging-build	## Launches all containerized tests
 
 
 ##@ Testing
+
 test: clean requires-tox	## Launches tox
 	@tox
 
@@ -92,6 +97,10 @@ flake8:	requires-tox	## Launches flake8 via tox
 
 mypy:	requires-tox	## Launches mypy via tox
 	@tox -e mypy
+
+
+coverage: requires-tox	## Collects coverage report
+	@tox -e coverage
 
 
 quick-test: build	## Launches nosetest using the default python
@@ -124,6 +133,7 @@ $(ARCHIVE):	requires-git
 
 
 ##@ Documentation
+
 docs: clean-docs requires-tox docs/overview.rst	## Build sphinx docs
 	@tox -e sphinx
 
@@ -167,6 +177,23 @@ clean-docs:	## Remove built docs
 	@rm -rf build/sphinx/*
 
 
+##@ Workflow Features
+
+project:	## project name
+	@echo $(PROJECT)
+
+version:	## project version
+	@echo $(VERSION)
+
+python:		## detected python executable
+	@echo $(PYTHON)
+
+release-notes:	## markdown variation of current version release notes
+	$(call checkfor,pandoc)
+	@pandoc --from=rst --to=markdown -o - \
+		docs/release_notes/v$(VERSION).rst
+
+
 requires-git:
 	$(call checkfor,git)
 
@@ -174,7 +201,7 @@ requires-tox:
 	$(call checkfor,tox)
 
 
-.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test quick-test requires-git requires-tox rpm srpm stage-docs test tidy
+.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test project python quick-test release-notes report-python requires-git requires-tox rpm srpm stage-docs test tidy version
 
 
 # The end.
