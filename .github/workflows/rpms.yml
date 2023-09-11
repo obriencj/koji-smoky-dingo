@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: RPMs
-          path: kojismokydingo-*.src.rpm
+          path: ${{ steps.srpm.outputs.path }}
 
   build-rpm:
     runs-on: ubuntu-latest
