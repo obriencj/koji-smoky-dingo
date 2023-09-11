@@ -19,6 +19,7 @@ on:
       - 'setup.cfg'
       - '**/*.py'
       - '**/*.pyi'
+      - '.github/workflows/tox.yml'
 
   pull_request:
     ignore-paths:
@@ -29,6 +30,7 @@ on:
       - 'setup.cfg'
       - '**/*.py'
       - '**/*.pyi'
+      - '.github/workflows/tox.yml'
 
 
 jobs:
