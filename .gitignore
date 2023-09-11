@@ -13,6 +13,7 @@
 .DS_Store
 .coverage*
 .eggs
+.sarif
 .tox
 .venv
 MANIFEST
