@@ -18,13 +18,14 @@ ORIGIN_PUSH = $(shell git remote get-url --push origin)
 
 define checkfor =
 	@if ! which $(1) >/dev/null 2>&1 ; then \
-		echo $(1) "is required, but not available" ; \
+		echo $(1) "is required, but not available" 1>&2 ; \
 		exit 1 ; \
 	fi
 endef
 
 
 ##@ Basic Targets
+
 default: quick-test	## Runs the quick-test target
 
 
@@ -38,17 +39,19 @@ report-python:
 
 
 ##@ Local Build and Install
+
 build: clean-built report-python flake8	## Produces a wheel using the default system python
-	@$(PYTHON) setup.py bdist_wheel
+	@tox -e build
 
 
-install: quick-test	## Installs using the default python for the current user
+install: build	## Installs using the default python for the current user
 	@$(PYTHON) -B -m pip.__main__ \
 		install --no-deps --user -I \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
 
 
 ##@ Cleanup
+
 tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
 	$(call checkfor,find)
@@ -64,10 +67,11 @@ clean-built:
 
 
 clean: clean-built tidy	## Removes built content, test logs, coverage reports
-	@rm -rf .coverage* htmlcov/* logs/*
+	@rm -rf .coverage* bandit.sarif htmlcov/* logs/*
 
 
 ##@ Containerized RPMs
+
 packaging-build: $(ARCHIVE)	## Launches all containerized builds
 	@./tools/launch-build.sh
 
@@ -78,6 +82,7 @@ packaging-test: packaging-build	## Launches all containerized tests
 
 
 ##@ Testing
+
 test: clean requires-tox	## Launches tox
 	@tox
 
@@ -94,8 +99,12 @@ mypy:	requires-tox	## Launches mypy via tox
 	@tox -e mypy
 
 
-quick-test: build	## Launches nosetest using the default python
-	@$(PYTHON) -B setup.py test $(NOSEARGS)
+coverage: requires-tox	## Collects coverage report
+	@tox -e coverage
+
+
+quick-test: requires-tox flake8	## Launches nosetest using the default python
+	@tox -e quicktest
 
 
 ##@ RPMs
@@ -124,6 +133,7 @@ $(ARCHIVE):	requires-git
 
 
 ##@ Documentation
+
 docs: clean-docs requires-tox docs/overview.rst	## Build sphinx docs
 	@tox -e sphinx
 
@@ -167,6 +177,23 @@ clean-docs:	## Remove built docs
 	@rm -rf build/sphinx/*
 
 
+##@ Workflow Features
+
+project:	## project name
+	@echo $(PROJECT)
+
+version:	## project version
+	@echo $(VERSION)
+
+python:		## detected python executable
+	@echo $(PYTHON)
+
+release-notes:	## markdown variation of current version release notes
+	$(call checkfor,pandoc)
+	@pandoc --from=rst --to=markdown -o - \
+		docs/release_notes/v$(VERSION).rst
+
+
 requires-git:
 	$(call checkfor,git)
 
@@ -174,7 +201,7 @@ requires-tox:
 	$(call checkfor,tox)
 
 
-.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test quick-test requires-git requires-tox rpm srpm stage-docs test tidy
+.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test project python quick-test release-notes report-python requires-git requires-tox rpm srpm stage-docs test tidy version
 
 
 # The end.

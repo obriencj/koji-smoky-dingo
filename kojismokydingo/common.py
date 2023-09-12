@@ -538,10 +538,7 @@ def find_config_files(
 
 @lru_cache(maxsize=1)
 def _load_full_config(
-        config_files: Optional[Tuple[str]] = None) -> ConfigParser:
-
-    if config_files is None:
-        config_files = find_config_files()  # type: ignore
+        config_files: Optional[Iterable[str]]) -> ConfigParser:
 
     conf = ConfigParser()
     conf.read(config_files)
@@ -571,10 +568,10 @@ def load_full_config(
     # this is actually just a wrapper to a cached call, but we need to
     # convert to a hashable argument type first.
 
-    if config_files is not None:
-        config_files = tuple(config_files)
+    if config_files is None:
+        config_files = find_config_files()  # type: ignore
 
-    return _load_full_config(config_files)
+    return _load_full_config(tuple(config_files))
 
 
 def get_plugin_config(

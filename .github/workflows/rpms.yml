@@ -18,21 +18,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      - name: Determine version
-        id: version
-        run: |
-          echo "ksd_version=$(python -B setup.py --version)" >> "$GITHUB_ENV"
-
-      - name: Install system dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get install bash git make
 
-      - name: Generate archive
+      - name: Determine Version
+        id: version
+        run: |
+          echo "ksd_version=$(make version)" >> "$GITHUB_ENV"
+
+      - name: Generate Archive
         run: |
           make archive
 
@@ -43,19 +43,13 @@ jobs:
           tarball: kojismokydingo-${{ env.ksd_version }}.tar.gz
           specfile: kojismokydingo.spec
 
-      - name: Move Source RPM to dist
-        run: |
-          mkdir -p dist
-          mv -v ${{ steps.srpm.outputs.path }} dist/
-
       - name: Store Source RPM
         uses: actions/upload-artifact@v3
         with:
           name: RPMs
-          path: dist/*.src.rpm
+          path: ${{ steps.srpm.outputs.path }}
 
-
-  build-platform-rpm:
+  build-rpm:
     runs-on: ubuntu-latest
 
     strategy:
@@ -75,16 +69,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      - name: Install system dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get install bash git make podman
 
-      - name: Generate archive
+      - name: Generate Archive
         run: |
           make archive
 

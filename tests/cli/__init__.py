@@ -103,12 +103,7 @@ class TestExpectedEntryPoints(TestCase):
             cmd = "=".join(nameref)
             ep = EntryPoint.parse(cmd)
 
-            if hasattr(ep, "resolve"):
-                #new environments
-                cmd_cls = ep.resolve()
-            else:
-                # old environments
-                cmd_cls = ep.load(require=False)
+            cmd_cls = ep.resolve()
 
             self.assertTrue(issubclass(cmd_cls, SmokyDingo))
 

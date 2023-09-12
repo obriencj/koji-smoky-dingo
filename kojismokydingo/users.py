@@ -40,6 +40,7 @@ __all__ = (
     "collect_userinfo",
     "collect_userstats",
     "get_group_members",
+    "get_user_groups",
 )
 
 

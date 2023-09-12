@@ -13,7 +13,7 @@ on:
 
 jobs:
 
-  build-wheel:
+  build-metadata:
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,28 +23,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      - name: Install python dependencies
+      - name: Install Dependencies
         run: |
-          pip install wheel
+          sudo apt-get install make pandoc
 
-      - name: Build Wheel
+      - name: Record Version
         run: |
-          python setup.py sdist bdist_wheel
-
-      - name: Store Wheel
-        uses: actions/upload-artifact@v3
-        with:
-          name: Wheel
-          path: dist/
-
-      - name: Record package version
-        run: |
-          python setup.py --version > VERSION
+          make version > VERSION
           cat VERSION >> $GITHUB_STEP_SUMMARY
 
       - name: Store Version
@@ -53,18 +43,33 @@ jobs:
           name: Version
           path: VERSION
 
+      - name: Record Notes
+        run: |
+          make release-notes > release.md
+
+      - name: Store Notes
+        uses: actions/upload-artifact@v3
+        with:
+          name: Notes
+          path: release.md
+
+  build-wheel:
+    name: Trigger Wheel build
+    uses: ./.github/workflows/wheel.yml
+
   build-rpms:
     name: Trigger RPM builds
     uses: ./.github/workflows/rpms.yml
 
   attach-assets:
-    name: Attach assets to release
+    name: Attach Assets to Release
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     needs:
+      - build-metadata
       - build-wheel
       - build-rpms
 
@@ -72,7 +77,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get install hub
 
@@ -86,13 +91,22 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: RPMs
-          path: dist
+          path: rpms
+
+      - name: Fetch Notes
+        uses: actions/download-artifact@v3
+        with:
+          name: Notes
+
+      - name: Upload release notes
+        run: |
+          gh release edit ${{ github.ref_name }} \
+            -F release.md
 
       - name: Upload python dist content
         run: |
           gh release upload ${{ github.ref_name }} \
-            dist/*.whl \
-            dist/*.rpm
+            dist/*.whl rpms/*.rpm
         env:
           GITHUB_TOKEN: ${{ github.TOKEN }}
 
@@ -136,11 +150,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Version
-          path: dist
 
       - name: Get the package version
         run: |
-          echo "DIST_VERSION=$(cat dist/VERSION)" >> "$GITHUB_ENV"
+          echo "DIST_VERSION=$(cat VERSION)" >> "$GITHUB_ENV"
 
       - name: Get current date
         run: |

@@ -8,6 +8,8 @@ name: Tox
 
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - master
@@ -19,6 +21,7 @@ on:
       - 'setup.cfg'
       - '**/*.py'
       - '**/*.pyi'
+      - '.github/workflows/tox.yml'
 
   pull_request:
     ignore-paths:
@@ -29,6 +32,7 @@ on:
       - 'setup.cfg'
       - '**/*.py'
       - '**/*.pyi'
+      - '.github/workflows/tox.yml'
 
 
 jobs:
@@ -47,22 +51,18 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get install libkrb5-dev
-
-      - name: Install python dependencies
-        run: |
-          pip install tox tox-gh-actions wheel
+          pip install tox tox-gh-actions
 
       - name: Run Flake8
-        run: tox -e flake8
+        run: |
+          tox -e flake8
 
       - name: Run MyPy
-        run: tox -e mypy
-
-      - name: Run Bandit
-        run: tox -e bandit
+        run: |
+          tox -e mypy
 
   tests:
     runs-on: ubuntu-latest
@@ -89,22 +89,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get install libkrb5-dev
-
-      - name: Install python dependencies
-        run: |
-          pip install tox tox-gh-actions wheel
+          pip install tox tox-gh-actions
 
       - name: Running tox
-        run: tox
+        run: |
+          tox
 
-      - name: Collect coverage results
+      - name: Store coverage
         uses: actions/upload-artifact@v3
         with:
           name: coverage-data
-          path: '.coverage.py*'
+          path: .coverage.py*
 
   coverage:
     runs-on: ubuntu-latest
@@ -119,30 +117,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Fetch coverage results
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-data
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get install libkrb5-dev
+          pip install coverage
 
-      - name: Install python dependencies
+      - name: Fetch coverage results
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-data
+
+      - name: Combine and report coverage
         run: |
-          pip install tox tox-gh-actions
+          coverage combine
+          coverage lcov
+          coverage report
 
-      - name: Coverage report
-        run: |
-          tox -e coverage
-
-      - name: Upload to coveralls
+      - name: Upload to Coveralls
         uses: coverallsapp/github-action@v2
+        with:
+          file: coverage.lcov
+          allow-empty: true
+          fail-on-error: false
 
 
 # The end.
