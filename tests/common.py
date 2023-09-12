@@ -309,15 +309,15 @@ class TestConfig(TestCase):
 
 
     def faux_appdir(self):
-        fakes = self.data_dirs()
+        sys, usr = self.data_dirs()
 
         obj = MagicMock()
 
         site_config_dir = obj.site_config_dir
-        site_config_dir.side_effect = [fakes[0]]
+        site_config_dir.return_value = sys
 
         user_config_dir = obj.user_config_dir
-        user_config_dir.side_effect = [fakes[1]]
+        user_config_dir.return_value = usr
 
         return obj
 
