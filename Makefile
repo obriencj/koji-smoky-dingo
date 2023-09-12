@@ -103,8 +103,8 @@ coverage: requires-tox	## Collects coverage report
 	@tox -e coverage
 
 
-quick-test: build	## Launches nosetest using the default python
-	@$(PYTHON) -B setup.py test $(NOSEARGS)
+quick-test: requires-tox flake8	## Launches nosetest using the default python
+	@tox -e quicktest
 
 
 ##@ RPMs
