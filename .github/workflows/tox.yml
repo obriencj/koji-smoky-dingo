@@ -134,13 +134,13 @@ jobs:
       - name: Combine and report coverage
         run: |
           coverage combine
-          coverage xml
+          coverage lcov
           coverage report
 
       - name: Upload to Coveralls
         uses: coverallsapp/github-action@v2
         with:
-          file: coverage.xml
+          file: coverage.lcov
           allow-empty: true
           fail-on-error: false
 
