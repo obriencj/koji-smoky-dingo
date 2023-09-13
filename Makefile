@@ -48,6 +48,9 @@ install: build	## Installs using the default python for the current user
 	@$(PYTHON) -B -m pip.__main__ \
 		install --no-deps --user -I \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
+	@mkdir -p ~/.koji/plugins
+	@rm -f ~/.koji/plugins/kojismokydingometa.py
+	@ln -s `$(PYTHON) -c 'import koji_cli_plugins.kojismokydingometa as ksdm ; print(ksdm.__file__);'` ~/.koji/plugins/kojismokydingometa.py
 
 
 ##@ Cleanup
