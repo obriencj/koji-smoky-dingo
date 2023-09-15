@@ -41,7 +41,7 @@ report-python:
 ##@ Local Build and Install
 
 build: clean-built report-python flake8	## Produces a wheel using the default system python
-	@tox -e build
+	@tox -qe build
 
 
 install: build	## Installs using the default python for the current user
@@ -87,27 +87,27 @@ packaging-test: packaging-build	## Launches all containerized tests
 ##@ Testing
 
 test: clean requires-tox	## Launches tox
-	@tox
+	@tox -q
 
 
 bandit:	requires-tox	## Launches bandit via tox
-	@tox -e bandit
+	@tox -qe bandit
 
 
 flake8:	requires-tox	## Launches flake8 via tox
-	@tox -e flake8
+	@tox -qe flake8
 
 
 mypy:	requires-tox	## Launches mypy via tox
-	@tox -e mypy
+	@tox -qe mypy
 
 
 coverage: requires-tox	## Collects coverage report
-	@tox -e coverage
+	@tox -qe coverage
 
 
 quick-test: requires-tox flake8	## Launches nosetest using the default python
-	@tox -e quicktest
+	@tox -qe quicktest
 
 
 ##@ RPMs
@@ -138,7 +138,7 @@ $(ARCHIVE):	requires-git
 ##@ Documentation
 
 docs: clean-docs requires-tox docs/overview.rst	## Build sphinx docs
-	@tox -e sphinx
+	@tox -qe sphinx
 
 
 overview: docs/overview.rst  ## rebuilds the overview from README.md
