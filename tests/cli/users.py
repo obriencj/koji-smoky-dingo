@@ -89,10 +89,10 @@ class ShowUserInfoTest(TestCase):
               obriencj@PREOCCUPIED.NET
             Type: NORMAL (user)
             Status: NORMAL (enabled)
-            Permissions:
-              coolguy
             Groups:
               ldap/CoolGuys [500]
+            Permissions:
+              coolguy
             """)
         self.assertEqual(expected, res[:len(expected)])
 
