@@ -1,5 +1,4 @@
-
-name: RPM Build
+name: "Build: RPMs"
 
 
 on:
@@ -8,6 +7,7 @@ on:
 
 
 jobs:
+
   build-srpm:
     runs-on: ubuntu-latest
 
@@ -82,11 +82,11 @@ jobs:
         run: |
           make archive
 
-      - name: Generate ${{ matrix.platform }} RPM
+      - name: Generate RPM ${{ matrix.platform }}
         run: |
           tools/launch-build.sh ${{ matrix.platform }}
 
-      - name: Store ${{ matrix.platform }} RPM
+      - name: Store RPM ${{ matrix.platform }}
         uses: actions/upload-artifact@v3
         with:
           name: RPMs

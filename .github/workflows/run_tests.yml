@@ -1,38 +1,9 @@
-# Github Action definition for running tox across the supported python
-# versions. Intended to be triggered on push to master and on filing
-# of a pull_request, when those pushes hit something that impacts the
-# running of the tests.
-
-
-name: Tox
+name: "Run: Unit Tests"
 
 
 on:
+  workflow_call:
   workflow_dispatch:
-
-  push:
-    branches:
-      - master
-    ignore-paths:
-      - 'docs/**'
-      - 'examples/**'
-      - 'tools/**'
-    paths:
-      - 'setup.cfg'
-      - '**/*.py'
-      - '**/*.pyi'
-      - '.github/workflows/tox.yml'
-
-  pull_request:
-    ignore-paths:
-      - 'docs/**'
-      - 'examples/**'
-      - 'tools/**'
-    paths:
-      - 'setup.cfg'
-      - '**/*.py'
-      - '**/*.pyi'
-      - '.github/workflows/tox.yml'
 
 
 jobs:
@@ -46,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9

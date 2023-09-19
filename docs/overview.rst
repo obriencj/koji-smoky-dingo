@@ -26,9 +26,7 @@ Tag Commands
 ------------
 
 These commands modify tag features, requiring either the tag permission
-(koji >=
-`1.18 <https://docs.pagure.org/koji/release_notes/release_notes_1.18/>`__)
-or the admin permission.
+(koji >= [1.18]) or the admin permission.
 
 +----------------------------+-----------------------------------------+
 | Command                    | Description                             |
@@ -154,56 +152,45 @@ included spec to produce an RPM and install that.
 .. code:: bash
 
    make clean rpm
-   dnf install dist/noarch/python3-kojismokydingo-2.1.0-1.fc38.noarch.rpm
+   dnf install dist/noarch/python3-kojismokydingo-2.2.0-0.fc38.noarch.rpm
 
 As a System-wide Wheel via Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Using traditional setuptools or pip installation methods can also
-achieve this by specifying the specific root or prefix parameter
+The pip3 tool can also achieve this by specifying the specific root or
+prefix parameter
 
 .. code:: bash
 
-   python3 setup.py bdist_wheel
-   pip3 install --prefix /usr -I dist/kojismokydingo-2.1.0-py3-none-any.whl
+   make clean build
+   pip3 install --prefix /usr -I dist/kojismokydingo-2.2.0-py3-none-any.whl
+
+or you can install the most recent release straight from PyPI
+
+.. code:: bash
+
+   pip3 install --prefix /usr -I kojismokydingo
 
 As a User-only Wheel via Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-However, if you only want the plugin available for yourself, you can
-install it anywhere and tell koji to look in that particular
-``site-package/koji_cli_plugins`` instance
+If you only want the plugin available for yourself, you can use the
+``install`` target of the Makefile to easily build the wheel, install it
+using pip3, then symlink the meta plugin into your koji user plugins
+directory.
 
 .. code:: bash
 
-   python3 setup.py bdist_wheel
-   pip3 install --user -I dist/kojismokydingo-2.1.0-py3-none-any.whl
+   make clean install
 
-Additionally, you can install straight from PyPI
-
-.. code:: bash
-
-   pip3 install kojismokydingo --user
-
-And the following setting in ~/.koji/config assuming Python version 3.8
-– read the output of the install command above to verify your install
-path. Note that the section title needs to match your koji profile, and
-that you need to configure this setting for each profile you’ll want to
-use the meta plugin with.
-
-::
-
-   [koji]
-   plugin_paths = ~/.local/lib/python3.8/site-packages/koji_cli_plugins/
-
-With koji >=
-`1.18 <https://docs.pagure.org/koji/release_notes/release_notes_1.18/>`__,
-the meta plugin can also be symlinked into ``~/.koji/plugins``
+or you can install the most recent release straight from PyPI, and then
+copy the meta plugin into place
 
 .. code:: bash
 
+   pip3 install --user -I kojismokydingo
    mkdir -p ~/.koji/plugins
-   ln -s ~/.local/lib/python$(python3 -c 'import sys; print("{}.{}".format(*sys.version_info))')/site-packages/koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins
+   cp $(python3 -c 'import koji_cli_plugins.kojismokydingometa as k ; print(k.__file__);' ~/.koji/plugins
 
 Contact
 -------
