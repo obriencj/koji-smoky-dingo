@@ -160,17 +160,17 @@ def cli_userinfo(
         for cg in sorted(cgs, key=itemgetter("name")):
             print(f"{cg['name']} [{cg['id']}]")
 
-    perms = userinfo.get("permissions", None)
-    if perms:
-        print("Permissions:")
-        for perm in sorted(perms):
-            print(" ", perm)
-
     groups = userinfo.get("groups", None)
     if groups:
         print("Groups:")
         for group in sorted(groups, key=lambda m: m.get("name")):
             print(f"  {group['name']} [{group['id']}]")
+
+    perms = userinfo.get("permissions", None)
+    if perms:
+        print("Permissions:")
+        for perm in sorted(perms):
+            print(" ", perm)
 
     members = userinfo.get("members", None)
     if members:
