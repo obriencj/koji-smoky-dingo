@@ -1,14 +1,14 @@
-
-name: Wheel Build
+name: "Build: Documentation"
 
 
 on:
-  workflow_call:
   workflow_dispatch:
+  workflow_call:
 
 
 jobs:
-  build-wheel:
+
+  build-documentation:
     runs-on: ubuntu-latest
 
     strategy:
@@ -22,20 +22,22 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
+          cache: pip
 
       - name: Install Dependencies
         run: |
-          pip install build
+          sudo apt-get install make pandoc
+          pip install tox tox-gh-actions
 
-      - name: Build Wheel
+      - name: Generate Documentation
         run: |
-          python -B -m build .
+          make docs
 
-      - name: Store Wheel
-        uses: actions/upload-artifact@v3
+      - name: Store Documentation
+        uses: actions/upload-pages-artifact@v2
         with:
-          name: Wheel
-          path: dist/
+          path:
+            build/sphinx/dirhtml
 
 
 # The end.

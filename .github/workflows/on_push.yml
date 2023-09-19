@@ -1,0 +1,42 @@
+name: "Trigger: on Push/PR"
+
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - master
+    ignore-paths:
+      - 'docs/**'
+      - 'examples/**'
+      - 'tools/**'
+    paths:
+      - 'setup.cfg'
+      - '**/*.py'
+      - '**/*.pyi'
+      - '.github/workflows/run_bandit.yml'
+      - '.github/workflows/run_tests.yml'
+
+  pull_request:
+    ignore-paths:
+      - 'docs/**'
+      - 'examples/**'
+      - 'tools/**'
+    paths:
+      - 'setup.cfg'
+      - '**/*.py'
+      - '**/*.pyi'
+      - '.github/workflows/run_bandit.yml'
+      - '.github/workflows/run_tests.yml'
+
+
+jobs:
+  run-bandit:
+    uses: ./.github/workflows/run_bandit.yml
+
+  run-tests:
+    uses: ./.github/workflows/run_tests.yml
+
+
+# The end.

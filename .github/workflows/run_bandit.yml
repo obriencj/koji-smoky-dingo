@@ -1,34 +1,9 @@
-# Github Action definitions for running a Bandit scan and storing the
-# results in the security tab
-
-
-name: Bandit
+name: "Run: Bandit Scan"
 
 
 on:
-  push:
-    branches:
-      - master
-    ignore-paths:
-      - 'docs/**'
-      - 'examples/**'
-      - 'tools/**'
-    paths:
-      - 'setup.cfg'
-      - '**/*.py'
-      - '**/*.pyi'
-      - '.github/workflows/bandit.yml'
-
-  pull_request:
-    ignore-paths:
-      - 'docs/**'
-      - 'examples/**'
-      - 'tools/**'
-    paths:
-      - 'setup.cfg'
-      - '**/*.py'
-      - '**/*.pyi'
-      - '.github/workflows/bandit.yml'
+  workflow_call:
+  workflow_dispatch:
 
 
 jobs:
@@ -42,10 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
+          cache: pip
 
       - name: Install dependencies
         run: |

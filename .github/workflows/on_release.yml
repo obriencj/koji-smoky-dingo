@@ -1,9 +1,4 @@
-# Github Action definition for publishing assets to the release and to
-# PyPI when a release is tagged. Also emits a notification post to
-# mastodon
-
-
-name: Release Assets
+name: "Trigger: on Release"
 
 
 on:
@@ -54,15 +49,16 @@ jobs:
           path: release.md
 
   build-wheel:
-    name: Trigger Wheel build
-    uses: ./.github/workflows/wheel.yml
+    uses: ./.github/workflows/build_wheel.yml
 
   build-rpms:
-    name: Trigger RPM builds
-    uses: ./.github/workflows/rpms.yml
+    uses: ./.github/workflows/build_rpms.yml
 
-  attach-assets:
-    name: Attach Assets to Release
+  build-docs:
+    uses: ./.github/workflows/build_docs.yml
+
+  deploy-release:
+    name: Deploy assets to release
     runs-on: ubuntu-latest
 
     permissions:
@@ -74,9 +70,6 @@ jobs:
       - build-rpms
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
       - name: Install Dependencies
         run: |
           sudo apt-get install hub
@@ -102,6 +95,8 @@ jobs:
         run: |
           gh release edit ${{ github.ref_name }} \
             -F release.md
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
 
       - name: Upload python dist content
         run: |
@@ -110,7 +105,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.TOKEN }}
 
-  pypi:
+  deploy-docs:
+    name: Deploy documentation
+    runs-on: ubuntu-latest
+
+    needs:
+      - build-docs
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Deploy site
+        id: deploy
+        uses: actions/deploy-pages@v2
+
+  deploy-pypi:
     name: Upload release to PyPI
     runs-on: ubuntu-latest
 
@@ -139,13 +154,11 @@ jobs:
     runs-on: ubuntu-latest
 
     needs:
-      - attach-assets
-      - pypi
+      - deploy-release
+      - deploy-docs
+      - deploy-pypi
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
       - name: Fetch python dist content
         uses: actions/download-artifact@v3
         with:
@@ -159,10 +172,8 @@ jobs:
         run: |
           echo "RELEASE_DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
 
-      - name: "\
-        Trigger announcement for ${{ env.DIST_VERSION }}(tag
-        ${{ github.ref_name }}) on ${{ env.RELEASE_DATE }}"
-        uses: ./.github/workflows/announce.yml
+      - name: Post announcement
+        uses: ./.github/workflows/run_announce.yml
         with:
           version: ${{ env.DIST_VERSION }}
           date: ${{ env.RELEASE_DATE }}
