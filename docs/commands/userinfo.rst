@@ -32,9 +32,9 @@ additional output:
 * Last task summary
 * Last build summary
 
-Since version 2.2.0, this command will also the groups that a user is
-a member of, and the list of members if the specified user ID is
-actually a group.
+Since version 2.2.0, this command will also list the groups that a
+user is a member of, or the list of members if the specified user ID
+is actually a group.
 
 
 References
