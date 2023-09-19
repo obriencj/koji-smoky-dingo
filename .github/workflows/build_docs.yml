@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get install make pandoc
+          sudo apt-get install libkrb5-dev make pandoc
           pip install tox tox-gh-actions
 
       - name: Generate Documentation
