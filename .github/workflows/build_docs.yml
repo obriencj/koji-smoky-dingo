@@ -1,0 +1,42 @@
+name: "Build: Documentation"
+
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+
+jobs:
+
+  build-documentation:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install libkrb5-dev make pandoc
+          pip install tox tox-gh-actions
+
+      - name: Generate Documentation
+        run: |
+          make docs
+
+      - name: Store Documentation
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path:
+            build/sphinx/dirhtml
+
+
+# The end.

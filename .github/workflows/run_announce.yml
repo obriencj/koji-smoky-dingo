@@ -1,13 +1,8 @@
-# Github Action definition for creating a mastodon release for this
-# project.
-
-
-name: Announce Release
+name: "Run: Announcement"
 
 
 on:
   workflow_call:
-    # shame github actions parses yaml with anchors disabled
     inputs:
       version:
         description: package version to announce
@@ -43,7 +38,6 @@ on:
 
 
 jobs:
-
   announce:
     name: Announce release to @obriencj@fosstodon.org
     runs-on: ubuntu-latest
@@ -56,11 +50,15 @@ jobs:
           access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
 
           message: "\
-          Version ${{ inputs.version }} of koji-smoky-dingo was
+          koji-smoky-dingo ${{ inputs.version }} was
           released on ${{ inputs.date }}
+
+
+          View the release on GitHub:
 
           https://github.com/obriencj/koji-smoky-dingo/releases/tag/\
           ${{ inputs.ref }}
+
 
           #koji #kojismokydingo"
 
