@@ -4,6 +4,9 @@
 PYTHON ?= $(shell which python3 python 2>/dev/null | head -n1)
 PYTHON := $(PYTHON)
 
+TOX ?= $(shell which tox 2>/dev/null | head -n1)
+TOX := $(TOX)
+
 
 PROJECT := $(shell $(PYTHON) ./setup.py --name)
 VERSION := $(shell $(PYTHON) ./setup.py --version)
@@ -41,7 +44,7 @@ report-python:
 ##@ Local Build and Install
 
 build: clean-built report-python flake8	## Produces a wheel using the default system python
-	@tox -qe build
+	@$(TOX) -qe build
 
 
 install: build	## Installs using the default python for the current user
@@ -59,7 +62,7 @@ tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
 	$(call checkfor,find)
 	@find -H . \
-		\( -iname '.tox' -o -iname '.eggs' -prune \) -o \
+		\( -iname '.$(TOX)' -o -iname '.eggs' -prune \) -o \
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
 		\( -type f -iname '*.pyc' -exec rm -f {} + \)
 
@@ -87,27 +90,27 @@ packaging-test: packaging-build	## Launches all containerized tests
 ##@ Testing
 
 test: clean requires-tox	## Launches tox
-	@tox -q
+	@$(TOX) -q
 
 
 bandit:	requires-tox	## Launches bandit via tox
-	@tox -qe bandit
+	@$(TOX) -qe bandit
 
 
 flake8:	requires-tox	## Launches flake8 via tox
-	@tox -qe flake8
+	@$(TOX) -qe flake8
 
 
 mypy:	requires-tox	## Launches mypy via tox
-	@tox -qe mypy
+	@$(TOX) -qe mypy
 
 
 coverage: requires-tox	## Collects coverage report
-	@tox -qe coverage
+	@$(TOX) -qe coverage
 
 
 quick-test: requires-tox flake8	## Launches nosetest using the default python
-	@tox -qe quicktest
+	@$(TOX) -qe quicktest
 
 
 ##@ RPMs
@@ -138,18 +141,15 @@ $(ARCHIVE):	requires-git
 ##@ Documentation
 
 docs: clean-docs requires-tox docs/overview.rst	## Build sphinx docs
-	@tox -qe sphinx
+	@$(TOX) -qe sphinx
 
 
 overview: docs/overview.rst  ## rebuilds the overview from README.md
 
 
 docs/overview.rst: README.md
-	$(call checkfor,sed)
 	$(call checkfor,pandoc)
-	@sed 's/^\[\!.*/ /g' $< > overview.md && \
-	pandoc --from=markdown --to=rst -o $@ "overview.md" && \
-	rm -f overview.md
+	@pandoc --from=markdown --to=rst -o $@ $<
 
 
 clean-docs:	## Remove built docs
@@ -177,7 +177,7 @@ requires-git:
 	$(call checkfor,git)
 
 requires-tox:
-	$(call checkfor,tox)
+	$(call checkfor,$(TOX))
 
 
 .PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test project python quick-test release-notes report-python requires-git requires-tox rpm srpm stage-docs test tidy version
