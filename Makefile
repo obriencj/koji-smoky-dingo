@@ -50,11 +50,11 @@ build: clean-built report-python flake8	## Produces a wheel using the default sy
 install: build	## Installs using the default python for the current user
 ifeq ($(UID),"0")
 	@$(PYTHON) -B -m pip.__main__ \
-		install -I \
+		install -I --no-deps \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
 else
 	@$(PYTHON) -B -m pip.__main__ \
-		install --user -I \
+		install -I --no-deps --user \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
 	@mkdir -p ~/.koji/plugins
 	@rm -f ~/.koji/plugins/kojismokydingometa.py
