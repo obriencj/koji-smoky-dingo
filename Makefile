@@ -48,12 +48,18 @@ build: clean-built report-python flake8	## Produces a wheel using the default sy
 
 
 install: build	## Installs using the default python for the current user
+ifeq ($(UID),"0")
 	@$(PYTHON) -B -m pip.__main__ \
-		install --no-deps --user -I \
+		install -I \
+		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
+else
+	@$(PYTHON) -B -m pip.__main__ \
+		install --user -I \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
 	@mkdir -p ~/.koji/plugins
 	@rm -f ~/.koji/plugins/kojismokydingometa.py
 	@ln -s `$(PYTHON) -c 'import koji_cli_plugins.kojismokydingometa as ksdm ; print(ksdm.__file__);'` ~/.koji/plugins/kojismokydingometa.py
+endif
 
 
 ##@ Cleanup
@@ -62,7 +68,7 @@ tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
 	$(call checkfor,find)
 	@find -H . \
-		\( -iname '.$(TOX)' -o -iname '.eggs' -prune \) -o \
+		\( -iname '.tox' -o -iname '.eggs' -prune \) -o \
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
 		\( -type f -iname '*.pyc' -exec rm -f {} + \)
 
