@@ -1,5 +1,23 @@
 
 
+def load_setup():
+    from configparser import ConfigParser
+
+    conf = ConfigParser()
+    conf.read(["../setup.cfg"])
+
+    glbls = globals()
+    metadata = conf['metadata']
+
+    glbls['project'] = metadata['name']
+    glbls['release'] = metadata['version']
+    glbls['version'] = '.'.join(release.split('.')[:2])
+    glbls['author'] = metadata['author']
+    glbls['copyright'] = f"{metadata['copyright_years']}, {author}"
+
+load_setup()
+
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosectionlabel',
@@ -159,8 +177,8 @@ numpydoc_class_members_toctree = False
 # --- Manpage Settings
 
 man_pages = [
-    ('commands', 'kojismokydingo', "Koji Smoky Dingo Plugin Commands",
-     ["Christopher O'Brien"], 7),
+    ('commands', project, "Koji Smoky Dingo Plugin Commands",
+     [author], 7),
 ]
 
 
