@@ -28,8 +28,8 @@ calls are being used correctly.
 from configparser import ConfigParser, RawConfigParser
 from datetime import datetime
 from typing import (
-    Any, Dict, List, Optional, Tuple, TypedDict, TypeVar, Union, Set,
-    overload, )
+    Any, Dict, Iterable, List, Optional, Tuple, TypedDict, TypeVar,
+    Union, Set, overload, )
 from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
@@ -40,60 +40,46 @@ from kojismokydingo.types import (
     TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
 
 
-AUTHTYPE_NORMAL: int
-AUTHTYPE_KERB: int
-AUTHTYPE_SSL: int
-AUTHTYPE_GSSAPI: int
-
-REPO_INIT: int
-REPO_READY: int
-REPO_EXPIRED: int
-REPO_DELETED: int
-REPO_PROBLEM: int
-REPO_MERGE_MODES: Set[str]
-
-RPM_SIGTAG_GPG: int
-RPM_SIGTAG_PGP: int
-RPM_SIGTAG_RSA: int
-RPM_SIGTAG_MD5: int
-
-RPM_TAG_HEADERSIGNATURES: int
-RPM_TAG_FILEDIGESTALGO: int
-
-PRIO_DEFAULT: int
+# === Globals ===
 
 BASEDIR: str
 
+AUTHTYPE_GSSAPI: int
+AUTHTYPE_KERB: int
+AUTHTYPE_NORMAL: int
+AUTHTYPE_SSL: int
 
-class Enum(dict):
-    def getnum(self, key: Union[str, int]) -> int:
-        ...
+PRIO_DEFAULT: int
+
+REPO_DELETED: int
+REPO_EXPIRED: int
+REPO_INIT: int
+REPO_MERGE_MODES: Set[str]
+REPO_PROBLEM: int
+REPO_READY: int
+
+RPM_SIGTAG_GPG: int
+RPM_SIGTAG_MD5: int
+RPM_SIGTAG_PGP: int
+RPM_SIGTAG_RSA: int
+
+RPM_TAG_FILEDIGESTALGO: int
+RPM_TAG_HEADERSIGNATURES: int
+
+BR_STATES: "Enum"
+BR_TYPES: "Enum"
+BUILD_STATES: "Enum"
+CHECKSUM_TYPES: "Enum"
+REPO_STATES: "Enum"
+TAG_UPDATE_TYPES: "Enum"
+TASK_STATES: "Enum"
+USERTYPES: "Enum"
+USER_STATUS: "Enum"
+
+pathinfo: "PathInfo"
 
 
-BR_STATES: Enum
-BR_TYPES: Enum
-BUILD_STATES: Enum
-CHECKSUM_TYPES: Enum
-REPO_STATES: Enum
-TAG_UPDATE_TYPES: Enum
-TASK_STATES: Enum
-USERTYPES: Enum
-USER_STATUS: Enum
-
-
-class Fault:
-    def __init__(
-            self,
-            faultCode: int,
-            faultString: str,
-            **extra: Any):
-        ...
-
-
-class FaultInfo(TypedDict):
-    faultCode: int
-    faultString: str
-
+# === Exceptions ===
 
 class GenericError(Exception):
     faultCode: int
@@ -104,27 +90,11 @@ class ActionNotAllowed(GenericError):
     ...
 
 
+class ApplianceError(GenericError):
+    ...
+
+
 class AuthError(GenericError):
-    ...
-
-
-class BuildError(GenericError):
-    ...
-
-
-class BuildrootError(BuildError):
-    ...
-
-
-class ParameterError(GenericError):
-    ...
-
-
-class ConfigurationError(GenericError):
-    ...
-
-
-class LockError(GenericError):
     ...
 
 
@@ -136,6 +106,34 @@ class AuthLockError(AuthError):
     ...
 
 
+class BuildError(GenericError):
+    ...
+
+
+class BuildrootError(BuildError):
+    ...
+
+
+class ConfigurationError(GenericError):
+    ...
+
+
+class LiveCDError(GenericError):
+    ...
+
+
+class LiveMediaError(GenericError):
+    ...
+
+
+class LockError(GenericError):
+    ...
+
+
+class ParameterError(GenericError):
+    ...
+
+
 class RetryError(AuthError):
     ...
 
@@ -144,116 +142,13 @@ class TagError(GenericError):
     ...
 
 
-class LiveMediaError(GenericError):
-    ...
-
-
-class ApplianceError(GenericError):
-    ...
-
-
-class LiveCDError(GenericError):
-    ...
-
-
-class PathInfo:
-    topdir: str
-
-    def __init__(
-            self,
-            topdir: str = None):
-        ...
-
-    def build(
-            self,
-            build: BuildInfo) -> str:
-        ...
-
-    def build_logs(
-            self,
-            build: BuildInfo) -> str:
-        ...
-
-    def distrepo(
-            self,
-            repo_id: int,
-            tag: TagInfo,
-            volume: str = None) -> str:
-        ...
-
-    def imagebuild(
-            self,
-            build: BuildInfo) -> str:
-        ...
-
-    def mavenbuild(
-            self,
-            build: BuildInfo) -> str:
-        ...
-
-    def mavenfile(
-            self,
-            maveninfo: ArchiveInfo) -> str:
-        ...
-
-    def repo(
-            self,
-            repo_id: int,
-            tag_str: str) -> str:
-        ...
-
-    def rpm(
-            self,
-            rpminfo: RPMInfo) -> str:
-        ...
-
-    def sighdr(
-            self,
-            rinfo: RPMInfo,
-            sigkey: str) -> str:
-        ...
-
-    def signed(
-            self,
-            rpminfo: RPMInfo,
-            sigkey: str) -> str:
-        ...
-
-    def taskrelpath(
-            self,
-            task_id: int) -> str:
-        ...
-
-    def typedir(
-            self,
-            build: BuildInfo,
-            btype: str) -> str:
-        ...
-
-    def winbuild(
-            self,
-            build: BuildInfo) -> str:
-        ...
-
-    def winfile(
-            self,
-            wininfo: ArchiveInfo) -> str:
-        ...
-
-    def work(
-            self,
-            volume=Optional[str]) -> str:
-        ...
-
-
-pathinfo: PathInfo
-
+# === Classes ===
 
 class ClientSession:
 
     baseurl: str
-    opts: Dict[str, Any]
     multicall: bool
+    opts: Dict[str, Any]
 
     def __init__(
             self,
@@ -281,10 +176,20 @@ class ClientSession:
             extra: Optional[Dict[str, str]] = None) -> int:
         ...
 
+    def disableUser(
+            self,
+            username: Union[int, str]) -> None:
+        ...
+
     def editTag2(
             self,
             taginfo: Union[int, str],
             **kwargs) -> None:
+        ...
+
+    def enableUser(
+            self,
+            username: Union[int, str]) -> None:
         ...
 
     def exclusiveSession(self, *args, **kwargs) -> None:
@@ -357,12 +262,6 @@ class ClientSession:
             reverse: bool = False) -> TagInheritance:
         ...
 
-    def getInheritanceData(
-            self,
-            tag: Union[int, str],
-            event: Optional[int] = None) -> TagInheritance:
-        ...
-
     def getGroupMembers(
             self,
             group: Union[int, str]) -> List[UserInfo]:
@@ -373,6 +272,12 @@ class ClientSession:
             hostInfo: Union[int, str],
             strict: bool = False,
             event: Optional[int] = None) -> HostInfo:
+        ...
+
+    def getInheritanceData(
+            self,
+            tag: Union[int, str],
+            event: Optional[int] = None) -> TagInheritance:
         ...
 
     def getKojiVersion(self) -> str:
@@ -459,6 +364,13 @@ class ClientSession:
             incl_blocked: bool = False) -> List[TagGroupInfo]:
         ...
 
+    def getTaskChildren(
+            self,
+            task_id: int,
+            request: Optional[bool] = False,
+            strict: Optional[bool] = False) -> List[TaskInfo]:
+        ...
+
     @overload
     def getTaskInfo(
             self,
@@ -475,13 +387,6 @@ class ClientSession:
             strict: bool = False) -> List[TaskInfo]:
         ...
 
-    def getTaskChildren(
-            self,
-            task_id: int,
-            request: Optional[bool] = False,
-            strict: Optional[bool] = False) -> List[TaskInfo]:
-        ...
-
     def getUser(
             self,
             userInfo: Optional[Union[int, str]] = None,
@@ -491,7 +396,13 @@ class ClientSession:
 
     def getUserPerms(
             self,
-            userID: Optional[Union[int, str]] = None) -> List[str]:
+            userID: Optional[Union[int, str]] = None,
+            with_groups: bool = True) -> List[str]:
+        ...
+
+    def getUserPermsInheritance(
+            self,
+            userID: Union[int, str]) -> Dict[str, List[str]]:
         ...
 
     def gssapi_login(
@@ -500,6 +411,12 @@ class ClientSession:
             keytab: Optional[str] = None,
             ccache: Optional[str] = None,
             proxyuser: Optional[str] = None) -> bool:
+        ...
+
+    def hasPerm(
+            self,
+            perm: str,
+            strict: bool = False) -> bool:
         ...
 
     def listArchives(
@@ -560,6 +477,13 @@ class ClientSession:
             hostID: Optional[int] = None,
             arches: Optional[str] = None,
             queryOpts: Optional[QueryOptions] = None) -> List[RPMInfo]:
+        ...
+
+    def listUsers(
+            self,
+            userType: int = 0,
+            prefix: Optional[str] = None,
+            queryOpts: Optional[QueryOptions] = None) -> List[UserInfo]:
         ...
 
     def listTagged(
@@ -705,36 +629,131 @@ class ClientSession:
         ...
 
 
-def convertFault(fault: Fault) -> GenericError:
-    ...
+class Enum(dict):
+    def __init__(
+            self,
+            args: Iterable[str]):
+        ...
+
+    @overload
+    def get(self,
+            key: int,
+            default: Any = None) -> Optional[str]:
+        ...
+
+    @overload
+    def get(self,
+            key: str,
+            default: Any = None) -> Optional[int]:
+        ...
+
+    def getnum(self,
+               key: Union[str, int]) -> int:
+        ...
 
 
-def read_config(
-        profile_name: str,
-        user_config: Optional[str] = None) -> Dict[str, Any]:
-    ...
+class Fault:
+    def __init__(
+            self,
+            faultCode: int,
+            faultString: str,
+            **extra: Dict[str,Any]):
+        ...
 
 
-def read_config_files(
-        config_files: List[Union[str, Tuple[str, bool]]],
-        raw: bool = False) -> Union[ConfigParser, RawConfigParser]:
-    ...
+class FaultInfo(TypedDict):
+    faultCode: int
+    faultString: str
 
 
-def hex_string(s: str) -> str:
-    ...
+class PathInfo:
+    topdir: str
 
+    def __init__(
+            self,
+            topdir: Optional[str] = None):
+        ...
 
-def load_json(filepath: str) -> Any:
-    ...
+    def build(
+            self,
+            build: BuildInfo) -> str:
+        ...
 
+    def build_logs(
+            self,
+            build: BuildInfo) -> str:
+        ...
 
-def dump_json(
-        filepath: str,
-        data: Any,
-        indent: int = 4,
-        sort_keys: bool = False) -> None:
-    ...
+    def distrepo(
+            self,
+            repo_id: int,
+            tag: TagInfo,
+            volume: Optional[str] = None) -> str:
+        ...
+
+    def imagebuild(
+            self,
+            build: BuildInfo) -> str:
+        ...
+
+    def mavenbuild(
+            self,
+            build: BuildInfo) -> str:
+        ...
+
+    def mavenfile(
+            self,
+            maveninfo: ArchiveInfo) -> str:
+        ...
+
+    def repo(
+            self,
+            repo_id: int,
+            tag_str: str) -> str:
+        ...
+
+    def rpm(
+            self,
+            rpminfo: RPMInfo) -> str:
+        ...
+
+    def sighdr(
+            self,
+            rinfo: RPMInfo,
+            sigkey: str) -> str:
+        ...
+
+    def signed(
+            self,
+            rpminfo: RPMInfo,
+            sigkey: str) -> str:
+        ...
+
+    def taskrelpath(
+            self,
+            task_id: int) -> str:
+        ...
+
+    def typedir(
+            self,
+            build: BuildInfo,
+            btype: str) -> str:
+        ...
+
+    def winbuild(
+            self,
+            build: BuildInfo) -> str:
+        ...
+
+    def winfile(
+            self,
+            wininfo: ArchiveInfo) -> str:
+        ...
+
+    def work(
+            self,
+            volume=Optional[str]) -> str:
+        ...
 
 
 class RawHeader:
@@ -749,52 +768,7 @@ class RawHeader:
         ...
 
 
-def check_NVR(
-        nvr: Union[str, Dict[str, Union[str, int]]],
-        strict: bool = False) -> bool:
-    ...
-
-
-def parse_NVR(nvr: str) -> Dict[str, Union[str, int]]:
-    ...
-
-
-def parse_NVRA(nvra: str) -> Dict[str, Union[str, int]]:
-    ...
-
-
-def get_sigpacket_key_id(
-        sigpacket: str) -> str:
-    ...
-
-
-def ensuredir(
-        directory: str) -> None:
-    ...
-
-
-def grab_session_options(
-        options: Union[Dict[str, Any], Any]) -> Dict[str, Any]:
-    ...
-
-
-def parse_arches(
-        arches: str,
-        to_list: bool = False,
-        strict: bool = False,
-        allow_none: bool = False) -> Union[List[str], str]:
-    ...
-
-
-def canonArch(
-        arch: str) -> str:
-    ...
-
-
-def is_debuginfo(
-        name: str) -> bool:
-    ...
-
+# === Functions ===
 
 def _fix_print(
         value: Union[str, bytes]) -> str:
@@ -807,22 +781,87 @@ def _open_text_file(
     ...
 
 
+def add_file_logger(
+        logger: str,
+        fn: str) -> None:
+    ...
+
+
+def add_mail_logger(
+        logger: str,
+        addr: str) -> None:
+    ...
+
+
+def add_stderr_logger(
+        logger: str) -> None:
+    ...
+
+
+def buildLabel(
+        buildInfo: BuildInfo,
+        showEpoch: bool = False) -> str:
+    ...
+
+
+def canonArch(
+        arch: str) -> str:
+    ...
+
+
+def check_NVR(
+        nvr: Union[str, Dict[str, Union[str, int]]],
+        strict: bool = False) -> bool:
+    ...
+
+
+def convertFault(fault: Fault) -> GenericError:
+    ...
+
+
+def daemonize() -> None:
+    ...
+
+
+def dump_json(
+        filepath: str,
+        data: Any,
+        indent: int = 4,
+        sort_keys: bool = False) -> None:
+    ...
+
+
+def ensuredir(
+        directory: str) -> None:
+    ...
+
+
+def fixEncoding(
+        value: Any,
+        fallback: str = 'iso8859-15',
+        remove_nonprintable: bool = False) -> str:
+    ...
+
+
+def fix_encoding(
+        value: str,
+        fallback: str = 'iso8859-15',
+        remove_nonprintable: bool = False) -> str:
+    ...
+
+
 def formatTime(
         value: Union[int, float, datetime, DateTime]) -> str:
     ...
 
 
-def openRemoteFile(
-        relpath: str,
-        topurl: Optional[str],
-        topdir: Optional[str],
-        tempdir: Optional[str]):
-    ...
-
-
-def get_rpm_headers(
-        f: Any,
-        ts: Optional[int] = None) -> bytes:
+def genMockConfig(
+        name: str,
+        arch: str,
+        managed: bool = True,
+        repoid: Optional[int] = None,
+        tag_name: Optional[str] = None,
+        **opts) -> str:
     ...
 
 
@@ -846,61 +885,74 @@ def get_rpm_header(
     ...
 
 
+def get_rpm_headers(
+        f: Any,
+        ts: Optional[int] = None) -> bytes:
+    ...
+
+
+def get_sigpacket_key_id(
+        sigpacket: str) -> str:
+    ...
+
+
+def grab_session_options(
+        options: Union[Dict[str, Any], Any]) -> Dict[str, Any]:
+    ...
+
+
+def hex_string(s: str) -> str:
+    ...
+
+
+def is_debuginfo(
+        name: str) -> bool:
+    ...
+
+
+def load_json(filepath: str) -> Any:
+    ...
+
+
 def maven_info_to_nvr(
         maveninfo: Dict[str, Any]) -> Dict[str, Any]:
     ...
 
 
-def genMockConfig(
-        name: str,
-        arch: str,
-        managed: bool = True,
-        repoid: Optional[int] = None,
-        tag_name: Optional[str] = None,
-        **opts) -> str:
+def openRemoteFile(
+        relpath: str,
+        topurl: Optional[str],
+        topdir: Optional[str],
+        tempdir: Optional[str]):
     ...
 
 
-def buildLabel(
-        buildInfo: BuildInfo,
-        showEpoch: bool = False) -> str:
+def parse_NVR(nvr: str) -> Dict[str, Union[str, int]]:
     ...
 
 
-def fixEncoding(
-        value: Any,
-        fallback: str = 'iso8859-15',
-        remove_nonprintable: bool = False) -> str:
+def parse_NVRA(nvra: str) -> Dict[str, Union[str, int]]:
     ...
 
 
-def fix_encoding(
-        value: str,
-        fallback: str = 'iso8859-15',
-        remove_nonprintable: bool = False) -> str:
+def parse_arches(
+        arches: str,
+        to_list: bool = False,
+        strict: bool = False,
+        allow_none: bool = False) -> Union[str, List[str]]:
     ...
 
 
-def add_file_logger(
-        logger: str,
-        fn: str) -> None:
+def read_config(
+        profile_name: str,
+        user_config: Optional[str] = None) -> Dict[str, Any]:
     ...
 
 
-def add_mail_logger(
-        logger: str,
-        addr: str) -> None:
+def read_config_files(
+        config_files: List[Union[str, Tuple[str, bool]]],
+        raw: bool = False) -> Union[RawConfigParser, ConfigParser]:
     ...
 
 
-def add_stderr_logger(
-        logger: str) -> None:
-    ...
-
-
-def daemonize() -> None:
-    ...
-
-
-#
 # The end.
