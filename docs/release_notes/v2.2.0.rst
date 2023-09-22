@@ -24,6 +24,19 @@ API
 * fixed some missing ``__all__`` exports in `kojismokydingo.types`
 
 
+Bugfix
+------
+
+* added missing caret support to `kojismokydingo.rpm.evr_compare`
+
+
+Other
+-----
+
+* moved documentation build into a github action workflow, removing
+  gh-pages submodule and related Makefile targets
+
+
 Issues
 ------
 
