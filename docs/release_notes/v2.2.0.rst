@@ -15,6 +15,9 @@ Commands
   being used, which always failed because it required the admin
   permission and the command was anonymous. New implementation uses
   ``queryHistory``
+* Support for future koji 1.35 which has anonymous ``getGroupMembers``
+  and ``getUserGroups`` calls
+* Added group membership information to the ``userinfo`` command.
 
 
 API
@@ -35,6 +38,7 @@ Other
 
 * moved documentation build into a github action workflow, removing
   gh-pages submodule and related Makefile targets
+* migrated away from the ``build_sphinx`` setuptools command
 
 
 Issues
