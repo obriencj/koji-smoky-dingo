@@ -34,7 +34,7 @@ __all__ = (
 )
 
 
-_rpm_str_split_re = re.compile(r"(~?(?:\d+|[a-zA-Z]+))").split
+_rpm_str_split_re = re.compile(r"([~^]?(?:\d+|[a-zA-Z]+))").split
 
 
 def _rpm_str_split(s: str) -> Tuple[str]:
@@ -43,7 +43,7 @@ def _rpm_str_split(s: str) -> Tuple[str]:
     """
 
     return tuple(i for i in _rpm_str_split_re(s)  # type: ignore
-                 if (i.isalnum() or i.startswith("~")))
+                 if i and (i.isalnum() or (i[0] in "~^")))
 
 
 def _rpm_str_compare(leftstr: str, rightstr: str) -> int:
@@ -83,6 +83,20 @@ def _rpm_str_compare(leftstr: str, rightstr: str) -> int:
         elif rp.startswith("~"):
             # left is not tilde, but right is, therefore left is greater
             return 1
+
+        elif lp.startswith("^"):
+            # left is caret
+
+            if rp.startswith("^"):
+                lp = lp[1:]
+                rp = rp[1:]
+
+            else:
+                return -1 if rp else 1
+
+        elif rp.startswith("^"):
+            # left is not caret, nor tilde, but right is caret
+            return 1 if lp else -1
 
         # Special comparison for digits vs. alphabetical
         if lp.isdigit():
