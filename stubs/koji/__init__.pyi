@@ -37,7 +37,7 @@ from kojismokydingo.types import (
     ChannelInfo, CGInfo, HostInfo, ListTasksOptions, PackageInfo,
     PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo, RPMSignature,
     SearchResult, TagBuildInfo, TagInfo, TagGroupInfo, TagInheritance,
-    TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
+    TagPackageInfo, TargetInfo, TaskInfo, UserGroup, UserInfo, )
 
 
 AUTHTYPE_NORMAL: int
@@ -370,7 +370,7 @@ class ClientSession:
 
     def getUserGroups(
             self,
-            user: Union[int, str]) -> List[UserInfo]:
+            user: Union[int, str]) -> List[UserGroup]:
         ...
 
     def getHost(

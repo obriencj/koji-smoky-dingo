@@ -30,7 +30,8 @@ from . import (
     as_userinfo, bulk_load_users, version_check, )
 from .types import (
     CGInfo, DecoratedPermInfo, DecoratedUserInfo, NamedCGInfo,
-    PermSpec, PermUser, UserInfo, UserSpec, UserStatistics, UserType, )
+    PermSpec, PermUser, UserInfo, UserSpec, UserStatistics,
+    UserGroup, UserType, )
 
 
 __all__ = (
@@ -107,7 +108,7 @@ def collect_userstats(
 
 def get_user_groups(
         session: ClientSession,
-        user: UserSpec) -> List[UserInfo]:
+        user: UserSpec) -> List[UserGroup]:
     """
     Identify groups that a user is a member of
 
@@ -131,15 +132,9 @@ def get_user_groups(
 
     else:
         hist = session.queryHistory(tables=["user_groups"], active=True)
-
-        mems = []
-        for grpmem in hist["user_groups"]:
-            if grpmem["user_id"] == uid:
-                mems.append(grpmem)
-
-        gids = map(itemgetter("group_id"), mems)
-        found = bulk_load_users(session, gids, err=False)
-        return list(filter(None, found.values()))
+        return [{"name": g["group.name"], "group_id": g["group_id"]}
+                for g in hist["user_groups"]
+                if g["user_id"] == uid]
 
 
 def get_group_members(
