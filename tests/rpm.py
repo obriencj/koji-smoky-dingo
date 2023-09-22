@@ -79,6 +79,7 @@ RPM_STR_CMP_1 = [
     ("1.1", "1.0"),
     ("1.1", "1.A"),
     ("1.B", "1.A"),
+    ("1.0", "1.0~beta"),
     ("1.1", "1.0~beta"),
     ("1.1", "1.1~beta"),
     ("1.2~beta", "1.1"),
@@ -90,6 +91,20 @@ RPM_STR_CMP_1 = [
     ("2.0", "2"),
     ("2.0", "2~beta"),
     ("2beta", "2~beta"),
+
+    ("1.0^1", "1.0~beta"),
+    ("1.0^1", "1.0"),
+    ("1.0.1~beta", "1.0^1"),
+    ("1.0.1", "1.0^1"),
+
+    ("1.0.0^1", "1.0~0"),
+    ("1.0.0^1", "1.0^0"),
+    ("1.0.0^1", "1.0.0"),
+
+    ("1.0.1^0", "1.0~1"),
+    ("1.0.1^0", "1.0^1"),
+    ("1.0.1^0", "1.0.1"),
+    ("1.0.1^1", "1.0.1^0"),
 ]
 
 
@@ -100,44 +115,58 @@ class TestEVRSort(TestCase):
         # rpm lib. However, not all systems have rpmlib available, so
         # we omit these tests in those environments.
 
-        def test_rpm_compare_ver_0(self):
+        def test_rpmlib_compare_ver_0(self):
             for vl, vr in RPM_STR_CMP_0:
-                self.assertEqual(compareVer(vl, vr), 0)
-                self.assertEqual(compareVer(vr, vl), 0)
+                msg = f"left: {vl!r}, right: {vr!r}"
+                self.assertEqual(compareVer(vl, vr), 0, msg)
+                msg = f"left: {vr!r}, right: {vl!r}"
+                self.assertEqual(compareVer(vr, vl), 0, msg)
 
 
-        def test_rpm_compare_ver_1(self):
+        def test_rpmlib_compare_ver_1(self):
             for vl, vr in RPM_STR_CMP_1:
+                msg = f"left: {vl!r}, right: {vr!r}"
                 self.assertEqual(compareVer(vl, vr), 1)
+                msg = f"left: {vr!r}, right: {vl!r}"
                 self.assertEqual(compareVer(vr, vl), -1)
 
 
-    def test_rpm_str_cmp_0(self):
+    def test_str_cmp_0(self):
         for vl, vr in RPM_STR_CMP_0:
-            self.assertEqual(_rpm_str_compare(vl, vr), 0)
-            self.assertEqual(_rpm_str_compare(vr, vl), 0)
+            msg = f"left: {vl!r}, right: {vr!r}"
+            self.assertEqual(_rpm_str_compare(vl, vr), 0, msg)
+            msg = f"left: {vr!r}, right: {vl!r}"
+            self.assertEqual(_rpm_str_compare(vr, vl), 0, msg)
 
 
-    def test_rpm_str_cmp_1(self):
+    def test_str_cmp_1(self):
         for vl, vr in RPM_STR_CMP_1:
-            self.assertEqual(_rpm_str_compare(vl, vr), 1)
-            self.assertEqual(_rpm_str_compare(vr, vl), -1)
+            msg = f"left: {vl!r}, right: {vr!r}"
+            self.assertEqual(_rpm_str_compare(vl, vr), 1, msg)
+            msg = f"left: {vr!r}, right: {vl!r}"
+            self.assertEqual(_rpm_str_compare(vr, vl), -1, msg)
 
 
-    def test_rpm_evr_compare_cmp_0(self):
+    def test_evr_compare_cmp_0(self):
         for vl, vr in RPM_STR_CMP_0:
             evr_l = ("0", vl, "1")
             evr_r = ("0", vr, "1")
-            self.assertEqual(evr_compare(evr_l, evr_r), 0)
-            self.assertEqual(evr_compare(evr_r, evr_l), 0)
+
+            msg = f"left: {evr_l!r}, right: {evr_r!r}"
+            self.assertEqual(evr_compare(evr_l, evr_r), 0, msg)
+            msg = f"left: {evr_r!r}, right: {evr_l!r}"
+            self.assertEqual(evr_compare(evr_r, evr_l), 0, msg)
 
 
-    def test_rpm_evr_compare_cmp_1(self):
+    def test_evr_compare_cmp_1(self):
         for vl, vr in RPM_STR_CMP_1:
             evr_l = ("0", vl, "1")
             evr_r = ("0", vr, "1")
-            self.assertEqual(evr_compare(evr_l, evr_r), 1)
-            self.assertEqual(evr_compare(evr_r, evr_l), -1)
+
+            msg = f"left: {evr_l!r}, right: {evr_r!r}"
+            self.assertEqual(evr_compare(evr_l, evr_r), 1, msg)
+            msg = f"left: {evr_r!r}, right: {evr_l!r}"
+            self.assertEqual(evr_compare(evr_r, evr_l), -1, msg)
 
 
 NEVRA_SPLITS = [
@@ -162,6 +191,11 @@ NEVRA_SPLITS = [
      (None, "32", "9.10.2", "2.P1.fc22", "x86_64")),
     ("32:9.10.2",
      (None, "32", "9.10.2", None, None)),
+
+    ("package-1.0.0~beta1-203.x86_64",
+     ("package", None, "1.0.0~beta1", "203", "x86_64")),
+    ("package-1.0.0^post1-203.x86_64",
+     ("package", None, "1.0.0^post1", "203", "x86_64")),
 
     ("",
      ("", None, None, None, None)),
@@ -190,6 +224,11 @@ NEVR_SPLITS = [
      (None, "32", "9.10.2", "2.P1.fc22.x86_64")),
     ("32:9.10.2",
      (None, "32", "9.10.2", None)),
+
+    ("package-1.0.0~beta1-203",
+     ("package", None, "1.0.0~beta1", "203")),
+    ("package-1.0.0^post1-203",
+     ("package", None, "1.0.0^post1", "203")),
 
     ("",
      ("", None, None, None)),
