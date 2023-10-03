@@ -103,6 +103,7 @@ __all__ = (
     "TaskInfo",
     "TaskSpec",
     "TaskState",
+    "UserGroup",
     "UserInfo",
     "UserSpec",
     "UserStatus",
@@ -715,6 +716,20 @@ class DecoratedHostInfo(HostInfo):
 DecoratedHostInfos = Iterable[DecoratedHostInfo]
 
 
+class UserGroup(TypedDict):
+    """
+    The results of the ``getUserGroups`` XMLRPC call
+
+    :since: 2.2.0
+    """
+
+    group_id: int
+    """ the ID of the group """
+
+    name: str
+    """ the name of the group """
+
+
 class UserInfo(TypedDict):
     """
     Data representing a koji user account. These are typically
@@ -840,6 +855,9 @@ class DecoratedUserInfo(UserInfo):
 
     members: List[UserInfo]
     """ membership if user is a group """
+
+    groups: List[UserGroup]
+    """ groups that user is a member of """
 
     statistics: Optional[UserStatistics]
     """ user's interaction statistics """

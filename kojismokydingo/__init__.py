@@ -92,6 +92,7 @@ __all__ = (
     "bulk_load_users",
     "hub_version",
     "iter_bulk_load",
+    # "paged_query_history",
     "version_check",
     "version_require",
 )
@@ -1301,6 +1302,37 @@ def as_userinfo(
         raise NoSuchUser(user)
 
     return info
+
+
+# koji's queryHistory call doesn't support queryOpts for some reason
+#
+# def paged_query_history(
+#         session: ClientSession,
+#         table: str,
+#         pagesize: int = 100,
+#         **kwargs: Any):
+#
+#     qopts = {
+#         "order": "create_event",
+#         "offset": 0,
+#         "limit": pagesize,
+#     }
+#     kwargs["tables"] = [table]
+#     kwargs["queryOpts"] = qopts
+#
+#     while True:
+#         hist = session.queryHistory(**kwargs)[table]
+#         histlen = len(hist)
+#
+#         if histlen == 0:
+#             break
+#
+#         yield hist
+#
+#         if histlen < pagesize:
+#             break
+#
+#         qopts["offset"] += histlen
 
 
 def _int(val):
