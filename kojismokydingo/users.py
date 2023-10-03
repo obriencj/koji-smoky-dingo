@@ -235,11 +235,11 @@ def collect_userinfo(
             userinfo["statistics"] = collect_userstats(session, userinfo)
 
         if members:
-            userinfo["groups"] = get_user_groups(session, uid)
+            userinfo["ksd_groups"] = get_user_groups(session, uid)
 
     elif ut == UserType.GROUP:
         if members:
-            userinfo["members"] = get_group_members(session, uid)
+            userinfo["ksd_members"] = get_group_members(session, uid)
 
     return userinfo
 

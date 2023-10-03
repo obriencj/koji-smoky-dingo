@@ -160,7 +160,7 @@ def cli_userinfo(
         for cg in sorted(cgs, key=itemgetter("name")):
             print(f"{cg['name']} [{cg['id']}]")
 
-    groups = userinfo.get("groups", None)
+    groups = userinfo.get("ksd_groups", None)
     if groups:
         print("Groups:")
         for group in sorted(groups, key=lambda m: m.get("name")):
@@ -172,7 +172,7 @@ def cli_userinfo(
         for perm in sorted(perms):
             print(" ", perm)
 
-    members = userinfo.get("members", None)
+    members = userinfo.get("ksd_members", None)
     if members:
         print("Members:")
         for member in sorted(members, key=lambda m: m.get("name")):
