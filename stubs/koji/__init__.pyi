@@ -396,7 +396,8 @@ class ClientSession:
             self,
             userInfo: Optional[Union[int, str]] = None,
             strict: bool = False,
-            krb_princs: bool = True) -> UserInfo:
+            krb_princs: bool = True,
+            groups: bool = False) -> UserInfo:
         ...
 
     def getUserPerms(

@@ -740,6 +740,9 @@ class UserInfo(TypedDict):
     authtype: AuthType
     """ Only present from the ``getLoggedInUser`` call """
 
+    groups: Optional[List[str]]
+    """ names of groups that this user is a member of """
+
     id: int
     """ internal identifer """
 
@@ -853,10 +856,10 @@ class DecoratedUserInfo(UserInfo):
     content_generators: List[NamedCGInfo]
     """ names of granted content generators """
 
-    members: List[UserInfo]
+    ksd_members: List[UserInfo]
     """ membership if user is a group """
 
-    groups: List[UserGroup]
+    ksd_groups: List[UserGroup]
     """ groups that user is a member of """
 
     statistics: Optional[UserStatistics]
