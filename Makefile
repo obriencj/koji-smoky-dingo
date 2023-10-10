@@ -18,12 +18,7 @@ ARCHIVE := $(PROJECT)-$(VERSION).tar.gz
 PORT ?= 8900
 
 
-# We use this later in setting up the gh-pages submodule for pushing,
-# so forks will push their docs to their own gh-pages branch.
-ORIGIN_PUSH = $(shell git remote get-url --push origin)
-
-
-define checkfor =
+define checkfor
 	@if ! which $(1) >/dev/null 2>&1 ; then \
 		echo $(1) "is required, but not available" 1>&2 ; \
 		exit 1 ; \
@@ -70,7 +65,7 @@ endif
 
 tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
-	$(call checkfor,find)
+	@$(call checkfor,find)
 	@find -H . \
 		\( -iname '.tox' -o -iname '.eggs' -prune \) -o \
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
@@ -125,7 +120,7 @@ quick-test: requires-tox flake8	## Launches nosetest using the default python
 
 ##@ RPMs
 srpm: $(ARCHIVE)	## Produce an SRPM from the archive
-	$(call checkfor,rpmbuild)
+	@$(call checkfor,rpmbuild)
 	@rpmbuild \
 		--define "_srcrpmdir dist" \
 		--define "dist %{nil}" \
@@ -133,19 +128,16 @@ srpm: $(ARCHIVE)	## Produce an SRPM from the archive
 
 
 rpm: $(ARCHIVE)		## Produce an RPM from the archive
-	$(call checkfor,rpmbuild)
+	@$(call checkfor,rpmbuild)
 	@rpmbuild --define "_rpmdir dist" -tb "$(ARCHIVE)"
 
 
 archive: $(ARCHIVE)	## Extracts an archive from the current git commit
 
 
-# newer versions support the --format tar.gz but we're intending to work all
-# the way back to RHEL 6 which does not have that.
 $(ARCHIVE):	requires-git
-	@git archive HEAD \
-		--format tar --prefix "$(PROJECT)-$(VERSION)/" \
-		| gzip > "$(ARCHIVE)"
+	@git archive HEAD --prefix "$(PROJECT)-$(VERSION)/" \
+	   --format tar.gz -o $@
 
 
 ##@ Documentation
@@ -158,7 +150,7 @@ overview: docs/overview.rst  ## rebuilds the overview from README.md
 
 
 docs/overview.rst: README.md
-	$(call checkfor,pandoc)
+	@$(call checkfor,pandoc)
 	@pandoc --from=markdown --to=rst -o $@ $<
 
 
@@ -183,16 +175,16 @@ python:		## detected python executable
 	@echo $(PYTHON)
 
 release-notes:	## markdown variation of current version release notes
-	$(call checkfor,pandoc)
+	@$(call checkfor,pandoc)
 	@pandoc --from=rst --to=markdown -o - \
 		docs/release_notes/v$(VERSION).rst
 
 
 requires-git:
-	$(call checkfor,git)
+	@$(call checkfor,git)
 
 requires-tox:
-	$(call checkfor,$(TOX))
+	@$(call checkfor,$(TOX))
 
 
 .PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test project python quick-test release-notes report-python requires-git requires-tox rpm srpm stage-docs test tidy version
