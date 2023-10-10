@@ -63,6 +63,10 @@ endif
 
 ##@ Cleanup
 
+purge:	clean
+	@rm -rf .eggs .tox .mypy_cache
+
+
 tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
 	@$(call checkfor,find)
