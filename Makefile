@@ -61,6 +61,17 @@ else
 endif
 
 
+uninstall:	## Uninstalls using the default python for the current user
+ifeq ($(UID),"0")
+	@$(PYTHON) -B -m pip.__main__ \
+		uninstall $(PROJECT)
+else
+	@rm -f ~/.koji/plugins/kojismokydingometa.py
+	@$(PYTHON) -B -m pip.__main__ \
+		uninstall $(PROJECT)
+endif
+
+
 ##@ Cleanup
 
 purge:	clean
