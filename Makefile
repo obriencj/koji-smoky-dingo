@@ -14,6 +14,10 @@ VERSION := $(shell $(PYTHON) ./setup.py --version)
 ARCHIVE := $(PROJECT)-$(VERSION).tar.gz
 
 
+# for hosting local docs preview
+PORT ?= 8900
+
+
 # We use this later in setting up the gh-pages submodule for pushing,
 # so forks will push their docs to their own gh-pages branch.
 ORIGIN_PUSH = $(shell git remote get-url --push origin)
@@ -159,7 +163,12 @@ docs/overview.rst: README.md
 
 
 clean-docs:	## Remove built docs
-	@rm -rf build/sphinx/*
+	@rm -rf build/sphinx
+
+
+preview-docs: docs	## Build and hosts docs locally
+	@$(PYTHON) -B -m http.server -d build/sphinx \
+	  -b 127.0.0.1 $(PORT)
 
 
 ##@ Workflow Features
