@@ -56,8 +56,9 @@ Koji Smoky Dingo
 %py3_build_wheel
 
 %if %{with docs}
-  %{python3} setup.py build_sphinx --builder html,man
-  %__rm -f build/sphinx/html/.buildinfo
+  %{python3} -B -m sphinx.cmd.build -b html docs build/sphinx/html
+  %{python3} -B -m sphinx.cmd.build -b man docs build/sphinx/man
+  %__rm -f build/sphinx/*/.buildinfo
 %endif
 
 
@@ -88,7 +89,7 @@ Koji Smoky Dingo
 
 %package -n %{srcname}-docs
 Summary:        Documentation for %{srcname}
-BuildRequires:  make python3-sphinx python3-sphinx-autodoc-typehints
+BuildRequires:  python3-sphinx python3-sphinx-autodoc-typehints
 
 %description -n %{srcname}-docs
 Docs for Koji Smoky Dingo
