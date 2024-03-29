@@ -13,8 +13,8 @@
 
 
 %global srcname kojismokydingo
-%global srcver 2.1.0
-%global srcrel 1
+%global srcver 2.1.1
+%global srcrel 0
 
 
 Summary: Koji Smoky Dingo
@@ -135,6 +135,10 @@ Koji Smoky Dingo
 
 
 %changelog
+* Fri Mar 29 2024 Christopher O'Brien <obriencj@gmail.com> - 2.1.1-0
+- Compatibility fixes for Koji 1.34.0
+- See the v2.1.1 release notes for a full list of changes
+
 * Fri Aug 11 2023 Christopher O'Brien <obriencj@gmail.com> - 2.1.0-1
 - See the v2.1.0 release notes for a full list of changes
 
