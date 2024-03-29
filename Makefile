@@ -109,6 +109,7 @@ packaging-test: packaging-build	## Launches all containerized tests
 
 ##@ Testing
 
+
 test: clean requires-tox	## Launches tox
 	@$(TOX) -q
 
@@ -131,6 +132,10 @@ coverage: requires-tox	## Collects coverage report
 
 quick-test: requires-tox flake8	## Launches nosetest using the default python
 	@$(TOX) -qe quicktest
+
+
+koji-git: requires-tox flake8	## Launches nosetest with koji installed from git
+	@$(TOX) -qe koji-git
 
 
 ##@ RPMs
