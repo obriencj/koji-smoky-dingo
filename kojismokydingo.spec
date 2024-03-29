@@ -136,7 +136,7 @@ Koji Smoky Dingo
 
 
 %changelog
-* Sat Sep 09 2023 Christopher O'Brien <obriencj@gmail.com> - 2.2.0-0
+* Mon Apr 01 2024 Christopher O'Brien <obriencj@gmail.com> - 2.2.0-0
 - See the v2.2.0 release notes for a full list of changes
 
 * Fri Mar 29 2024 Christopher O'Brien <obriencj@gmail.com> - 2.1.1-1
