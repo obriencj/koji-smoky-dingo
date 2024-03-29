@@ -14,7 +14,7 @@
 
 %global srcname kojismokydingo
 %global srcver 2.1.1
-%global srcrel 0
+%global srcrel 1
 
 
 Summary: Koji Smoky Dingo
