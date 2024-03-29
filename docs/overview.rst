@@ -154,7 +154,7 @@ included spec to produce an RPM and install that.
 .. code:: bash
 
    make clean rpm
-   dnf install dist/noarch/python3-kojismokydingo-2.1.0-1.fc38.noarch.rpm
+   dnf install dist/noarch/python3-kojismokydingo-2.1.1-1.fc38.noarch.rpm
 
 As a System-wide Wheel via Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -165,7 +165,7 @@ achieve this by specifying the specific root or prefix parameter
 .. code:: bash
 
    python3 setup.py bdist_wheel
-   pip3 install --prefix /usr -I dist/kojismokydingo-2.1.0-py3-none-any.whl
+   pip3 install --prefix /usr -I dist/kojismokydingo-2.1.1-py3-none-any.whl
 
 As a User-only Wheel via Pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -177,7 +177,7 @@ install it anywhere and tell koji to look in that particular
 .. code:: bash
 
    python3 setup.py bdist_wheel
-   pip3 install --user -I dist/kojismokydingo-2.1.0-py3-none-any.whl
+   pip3 install --user -I dist/kojismokydingo-2.1.1-py3-none-any.whl
 
 Additionally, you can install straight from PyPI
 
