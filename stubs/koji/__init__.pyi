@@ -40,10 +40,13 @@ from kojismokydingo.types import (
     TagPackageInfo, TargetInfo, TaskInfo, UserInfo, )
 
 
-AUTHTYPE_NORMAL: int
-AUTHTYPE_KERB: int
-AUTHTYPE_SSL: int
-AUTHTYPE_GSSAPI: int
+# Koji 1.34.0 intentionally broke API compatibility and removed these.
+# https://pagure.io/koji/pull-request/3818
+
+# AUTHTYPE_NORMAL: int
+# AUTHTYPE_KERB: int
+# AUTHTYPE_SSL: int
+# AUTHTYPE_GSSAPI: int
 
 REPO_INIT: int
 REPO_READY: int
@@ -70,6 +73,7 @@ class Enum(dict):
         ...
 
 
+AUTHTYPES: Enum
 BR_STATES: Enum
 BR_TYPES: Enum
 BUILD_STATES: Enum

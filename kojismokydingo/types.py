@@ -26,10 +26,8 @@ enumerations
 from datetime import datetime
 from enum import IntEnum
 from koji import (
-    AUTHTYPE_NORMAL, AUTHTYPE_KERB, AUTHTYPE_SSL, AUTHTYPE_GSSAPI,
-    BR_STATES, BR_TYPES, BUILD_STATES, CHECKSUM_TYPES, REPO_STATES,
-    TASK_STATES, USERTYPES, USER_STATUS,
-    PathInfo, )
+    AUTHTYPES, BR_STATES, BR_TYPES, BUILD_STATES, CHECKSUM_TYPES,
+    REPO_STATES, TASK_STATES, USERTYPES, USER_STATUS, PathInfo, )
 from optparse import Values
 from typing import (
     Any, Callable, Dict, Iterable, List,
@@ -115,18 +113,20 @@ class AuthType(IntEnum):
 
     Normally only used in the `kojismokydingo.types.UserInfo` dict
     when obtained via the ``getLoggedInUser`` XMLRPC call.
+
+    See `koji.AUTHTYPES`
     """
 
-    GSSAPI = AUTHTYPE_GSSAPI
+    GSSAPI = AUTHTYPES['GSSAPI']
     """ user authenticated via GSSAPI """
 
-    KERB = AUTHTYPE_KERB
+    KERB = AUTHTYPES['KERBEROS']
     """ user authenticated via a Kerberos ticket """
 
-    NORMAL = AUTHTYPE_NORMAL
+    NORMAL = AUTHTYPES['NORMAL']
     """ user authenticated via password """
 
-    SSL = AUTHTYPE_SSL
+    SSL = AUTHTYPES['SSL']
     """ user authenticated via an SSL certificate """
 
 
