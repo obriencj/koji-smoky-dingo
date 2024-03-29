@@ -702,7 +702,11 @@ def cleanup_histlines(lines):
     # it works.
     collect = []
     for line in lines.strip().splitlines():
-        collect.append(line[4:8] + line[14:])
+        tweaked = line[4:8] + line[14:]
+        tweaked = tweaked.strip()
+        if tweaked.endswith(" [still active]"):
+            tweaked = tweaked[:-15]
+        collect.append(tweaked)
     return collect
 
 

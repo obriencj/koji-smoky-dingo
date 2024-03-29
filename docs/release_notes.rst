@@ -13,6 +13,7 @@ Previous Releases
 .. toctree::
    :maxdepth: 1
 
+   release_notes/v2.1.1
    release_notes/v2.1.0
    release_notes/v2.0.0
    release_notes/v1.1.0
