@@ -1,0 +1,17 @@
+Koji Smoky Dingo 2.1.1 Release Notes
+====================================
+
+*March 29, 2024*
+
+Version 2.1.1 continues compatability from 2.1.0
+
+
+Fixes
+-----
+
+- Koji 1.34.0 release broke API compatibility and removed some
+  constant values. Updated to work around this.
+
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/13?closed=1>

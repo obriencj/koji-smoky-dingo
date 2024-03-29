@@ -40,23 +40,25 @@ from kojismokydingo.types import (
     TagPackageInfo, TargetInfo, TaskInfo, UserGroup, UserInfo, )
 
 
-# === Globals ===
+# Koji 1.34.0 intentionally broke API compatibility and removed these.
+# https://pagure.io/koji/pull-request/3818
+
+# AUTHTYPE_NORMAL: int
+# AUTHTYPE_KERB: int
+# AUTHTYPE_SSL: int
+# AUTHTYPE_GSSAPI: int
 
 BASEDIR: str
 
-AUTHTYPE_GSSAPI: int
-AUTHTYPE_KERB: int
-AUTHTYPE_NORMAL: int
-AUTHTYPE_SSL: int
-
 PRIO_DEFAULT: int
 
-REPO_DELETED: int
-REPO_EXPIRED: int
-REPO_INIT: int
+# REPO_DELETED: int
+# REPO_EXPIRED: int
+# REPO_INIT: int
+# REPO_PROBLEM: int
+# REPO_READY: int
+
 REPO_MERGE_MODES: Set[str]
-REPO_PROBLEM: int
-REPO_READY: int
 
 RPM_SIGTAG_GPG: int
 RPM_SIGTAG_MD5: int
@@ -66,6 +68,7 @@ RPM_SIGTAG_RSA: int
 RPM_TAG_FILEDIGESTALGO: int
 RPM_TAG_HEADERSIGNATURES: int
 
+AUTHTYPES: "Enum"
 BR_STATES: "Enum"
 BR_TYPES: "Enum"
 BUILD_STATES: "Enum"
