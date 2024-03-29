@@ -1,0 +1,119 @@
+name: "Run: Unit Tests"
+
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+
+jobs:
+  pre-tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libkrb5-dev
+          pip install tox tox-gh-actions
+
+      - name: Run Flake8
+        run: |
+          tox -e flake8
+
+      - name: Run MyPy
+        run: |
+          tox -e mypy
+
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - '3.7'
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
+
+    needs:
+      - pre-tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libkrb5-dev
+          pip install tox tox-gh-actions
+
+      - name: Running tox
+        run: |
+          tox
+
+      - name: Store coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-data
+          path: .coverage.py*
+
+  coverage:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+
+    needs:
+      - tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          pip install coverage
+
+      - name: Fetch coverage results
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-data
+
+      - name: Combine and report coverage
+        run: |
+          coverage combine
+          coverage lcov
+          coverage report
+
+      - name: Upload to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coverage.lcov
+          allow-empty: true
+          fail-on-error: false
+
+
+# The end.

@@ -1,0 +1,40 @@
+name: "Run: Bandit Scan"
+
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+
+jobs:
+  bandit:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libkrb5-dev
+          pip install tox tox-gh-actions
+
+      - name: Run Bandit
+        run: tox -e bandit-sarif
+
+      - name: Upload Bandit results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          category: Bandit
+          sarif_file: bandit.sarif
+
+
+# The end.

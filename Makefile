@@ -4,6 +4,9 @@
 PYTHON ?= $(shell which python3 python 2>/dev/null | head -n1)
 PYTHON := $(PYTHON)
 
+TOX ?= $(shell which tox 2>/dev/null | head -n1)
+TOX := $(TOX)
+
 
 PROJECT := $(shell $(PYTHON) ./setup.py --name)
 VERSION := $(shell $(PYTHON) ./setup.py --version)
@@ -11,20 +14,20 @@ VERSION := $(shell $(PYTHON) ./setup.py --version)
 ARCHIVE := $(PROJECT)-$(VERSION).tar.gz
 
 
-# We use this later in setting up the gh-pages submodule for pushing,
-# so forks will push their docs to their own gh-pages branch.
-ORIGIN_PUSH = $(shell git remote get-url --push origin)
+# for hosting local docs preview
+PORT ?= 8900
 
 
-define checkfor =
+define checkfor
 	@if ! which $(1) >/dev/null 2>&1 ; then \
-		echo $(1) "is required, but not available" ; \
+		echo $(1) "is required, but not available" 1>&2 ; \
 		exit 1 ; \
 	fi
 endef
 
 
 ##@ Basic Targets
+
 default: quick-test	## Runs the quick-test target
 
 
@@ -38,20 +41,46 @@ report-python:
 
 
 ##@ Local Build and Install
+
 build: clean-built report-python flake8	## Produces a wheel using the default system python
-	@$(PYTHON) setup.py bdist_wheel
+	@$(TOX) -qe build
 
 
-install: quick-test	## Installs using the default python for the current user
+install: build	## Installs using the default python for the current user
+ifeq ($(UID),"0")
 	@$(PYTHON) -B -m pip.__main__ \
-		install --no-deps --user -I \
+		install -I --no-deps \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
+else
+	@$(PYTHON) -B -m pip.__main__ \
+		install -I --no-deps --user \
+		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
+	@mkdir -p ~/.koji/plugins
+	@rm -f ~/.koji/plugins/kojismokydingometa.py
+	@ln -s `$(PYTHON) -c 'import koji_cli_plugins.kojismokydingometa as ksdm ; print(ksdm.__file__);'` ~/.koji/plugins/kojismokydingometa.py
+endif
+
+
+uninstall:	## Uninstalls using the default python for the current user
+ifeq ($(UID),"0")
+	@$(PYTHON) -B -m pip.__main__ \
+		uninstall $(PROJECT)
+else
+	@rm -f ~/.koji/plugins/kojismokydingometa.py
+	@$(PYTHON) -B -m pip.__main__ \
+		uninstall $(PROJECT)
+endif
 
 
 ##@ Cleanup
+
+purge:	clean
+	@rm -rf .eggs .tox .mypy_cache
+
+
 tidy:	## Removes stray eggs and .pyc files
 	@rm -rf *.egg-info
-	$(call checkfor,find)
+	@$(call checkfor,find)
 	@find -H . \
 		\( -iname '.tox' -o -iname '.eggs' -prune \) -o \
 		\( -type d -iname '__pycache__' -exec rm -rf {} + \) -o \
@@ -64,10 +93,11 @@ clean-built:
 
 
 clean: clean-built tidy	## Removes built content, test logs, coverage reports
-	@rm -rf .coverage* htmlcov/* logs/*
+	@rm -rf .coverage* bandit.sarif htmlcov/* logs/*
 
 
 ##@ Containerized RPMs
+
 packaging-build: $(ARCHIVE)	## Launches all containerized builds
 	@./tools/launch-build.sh
 
@@ -78,29 +108,34 @@ packaging-test: packaging-build	## Launches all containerized tests
 
 
 ##@ Testing
+
 test: clean requires-tox	## Launches tox
-	@tox
+	@$(TOX) -q
 
 
 bandit:	requires-tox	## Launches bandit via tox
-	@tox -e bandit
+	@$(TOX) -qe bandit
 
 
 flake8:	requires-tox	## Launches flake8 via tox
-	@tox -e flake8
+	@$(TOX) -qe flake8
 
 
 mypy:	requires-tox	## Launches mypy via tox
-	@tox -e mypy
+	@$(TOX) -qe mypy
 
 
-quick-test: build	## Launches nosetest using the default python
-	@$(PYTHON) -B setup.py test $(NOSEARGS)
+coverage: requires-tox	## Collects coverage report
+	@$(TOX) -qe coverage
+
+
+quick-test: requires-tox flake8	## Launches nosetest using the default python
+	@$(TOX) -qe quicktest
 
 
 ##@ RPMs
 srpm: $(ARCHIVE)	## Produce an SRPM from the archive
-	$(call checkfor,rpmbuild)
+	@$(call checkfor,rpmbuild)
 	@rpmbuild \
 		--define "_srcrpmdir dist" \
 		--define "dist %{nil}" \
@@ -108,73 +143,66 @@ srpm: $(ARCHIVE)	## Produce an SRPM from the archive
 
 
 rpm: $(ARCHIVE)		## Produce an RPM from the archive
-	$(call checkfor,rpmbuild)
+	@$(call checkfor,rpmbuild)
 	@rpmbuild --define "_rpmdir dist" -tb "$(ARCHIVE)"
 
 
 archive: $(ARCHIVE)	## Extracts an archive from the current git commit
 
 
-# newer versions support the --format tar.gz but we're intending to work all
-# the way back to RHEL 6 which does not have that.
 $(ARCHIVE):	requires-git
-	@git archive HEAD \
-		--format tar --prefix "$(PROJECT)-$(VERSION)/" \
-		| gzip > "$(ARCHIVE)"
+	@git archive HEAD --prefix "$(PROJECT)-$(VERSION)/" \
+	   --format tar.gz -o $@
 
 
 ##@ Documentation
+
 docs: clean-docs requires-tox docs/overview.rst	## Build sphinx docs
-	@tox -e sphinx
+	@$(TOX) -qe sphinx
 
 
 overview: docs/overview.rst  ## rebuilds the overview from README.md
 
 
 docs/overview.rst: README.md
-	$(call checkfor,sed)
-	$(call checkfor,pandoc)
-	@sed 's/^\[\!.*/ /g' $< > overview.md && \
-	pandoc --from=markdown --to=rst -o $@ "overview.md" && \
-	rm -f overview.md
-
-
-pull-docs: requires-git	## Refreshes the gh-pages submodule
-	@git submodule init
-	@git submodule update --remote gh-pages
-
-
-stage-docs: docs pull-docs	## Builds docs and stages them in gh-pages
-	@pushd gh-pages >/dev/null && \
-	rm -rf * && \
-	touch .nojekyll ; \
-	popd >/dev/null ; \
-	cp -vr build/sphinx/dirhtml/* gh-pages/
-
-
-deploy-docs: stage-docs requires-git	## Builds, stages, and deploys docs to gh-pages
-	@pushd gh-pages >/dev/null && \
-	git remote set-url --push origin $(ORIGIN_PUSH) ; \
-	git add -A && git commit -m "deploying sphinx update" && git push ; \
-	popd >/dev/null ; \
-	if [ `git diff --name-only gh-pages` ] ; then \
-		git add gh-pages ; \
-		git commit -m "docs deploy [ci skip]" -o gh-pages ; \
-	fi
+	@$(call checkfor,pandoc)
+	@pandoc --from=markdown --to=rst -o $@ $<
 
 
 clean-docs:	## Remove built docs
-	@rm -rf build/sphinx/*
+	@rm -rf build/sphinx
+
+
+preview-docs: docs	## Build and hosts docs locally
+	@$(PYTHON) -B -m http.server -d build/sphinx \
+	  -b 127.0.0.1 $(PORT)
+
+
+##@ Workflow Features
+
+project:	## project name
+	@echo $(PROJECT)
+
+version:	## project version
+	@echo $(VERSION)
+
+python:		## detected python executable
+	@echo $(PYTHON)
+
+release-notes:	## markdown variation of current version release notes
+	@$(call checkfor,pandoc)
+	@pandoc --from=rst --to=markdown -o - \
+		docs/release_notes/v$(VERSION).rst
 
 
 requires-git:
-	$(call checkfor,git)
+	@$(call checkfor,git)
 
 requires-tox:
-	$(call checkfor,tox)
+	@$(call checkfor,$(TOX))
 
 
-.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test quick-test requires-git requires-tox rpm srpm stage-docs test tidy
+.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test project python quick-test release-notes report-python requires-git requires-tox rpm srpm stage-docs test tidy version
 
 
 # The end.

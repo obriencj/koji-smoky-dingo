@@ -1,0 +1,183 @@
+name: "Trigger: on Release"
+
+
+on:
+  release:
+    types: [published]
+
+
+jobs:
+
+  build-metadata:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install make pandoc
+
+      - name: Record Version
+        run: |
+          make version > VERSION
+          cat VERSION >> $GITHUB_STEP_SUMMARY
+
+      - name: Store Version
+        uses: actions/upload-artifact@v3
+        with:
+          name: Version
+          path: VERSION
+
+      - name: Record Notes
+        run: |
+          make release-notes > release.md
+
+      - name: Store Notes
+        uses: actions/upload-artifact@v3
+        with:
+          name: Notes
+          path: release.md
+
+  build-wheel:
+    uses: ./.github/workflows/build_wheel.yml
+
+  build-rpms:
+    uses: ./.github/workflows/build_rpms.yml
+
+  build-docs:
+    uses: ./.github/workflows/build_docs.yml
+
+  deploy-release:
+    name: Deploy assets to release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    needs:
+      - build-metadata
+      - build-wheel
+      - build-rpms
+
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install hub
+
+      - name: Fetch Wheel
+        uses: actions/download-artifact@v3
+        with:
+          name: Wheel
+          path: dist
+
+      - name: Fetch RPMs
+        uses: actions/download-artifact@v3
+        with:
+          name: RPMs
+          path: rpms
+
+      - name: Fetch Notes
+        uses: actions/download-artifact@v3
+        with:
+          name: Notes
+
+      - name: Upload release notes
+        run: |
+          gh release edit ${{ github.ref_name }} \
+            -F release.md
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+
+      - name: Upload python dist content
+        run: |
+          gh release upload ${{ github.ref_name }} \
+            dist/*.whl rpms/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+
+  deploy-docs:
+    name: Deploy documentation
+    runs-on: ubuntu-latest
+
+    needs:
+      - build-docs
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Deploy site
+        id: deploy
+        uses: actions/deploy-pages@v2
+
+  deploy-pypi:
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+
+    needs:
+      - build-wheel
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/kojismokydingo
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Fetch python dist content
+        uses: actions/download-artifact@v3
+        with:
+          name: Wheel
+          path: dist
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  announce:
+    name: Announce release
+    runs-on: ubuntu-latest
+
+    needs:
+      - deploy-release
+      - deploy-docs
+      - deploy-pypi
+
+    steps:
+      - name: Fetch python dist content
+        uses: actions/download-artifact@v3
+        with:
+          name: Version
+
+      - name: Get the package version
+        run: |
+          echo "DIST_VERSION=$(cat VERSION)" >> "$GITHUB_ENV"
+
+      - name: Get current date
+        run: |
+          echo "RELEASE_DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
+
+      - name: Post announcement
+        uses: ./.github/workflows/run_announce.yml
+        with:
+          version: ${{ env.DIST_VERSION }}
+          date: ${{ env.RELEASE_DATE }}
+          ref: ${{ github.ref_name }}
+
+
+# The end.
