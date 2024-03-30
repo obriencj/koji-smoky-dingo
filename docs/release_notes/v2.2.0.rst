@@ -3,7 +3,7 @@ Koji Smoky Dingo 2.2.0 Release Notes
 
 *Unreleased*
 
-Version 2.2.0 continues compatability from 2.1.0, with some additional
+Version 2.2.0 continues compatability from 2.1.1, with some additional
 features as noted below
 
 
@@ -27,6 +27,18 @@ API
 * fixed some missing ``__all__`` exports in `kojismokydingo.types`
 
 
+Meta Plugin
+-----------
+
+* exceptions loading entry points in the meta plugin will no longer be
+  printed to stderr by default
+* added checking for `KSD_VERBOSE=1` environment variable, which turns
+  on printing of any exceptions during entry point loading
+* added checking for `KSD_EXPLODE=1` environment variable, which will
+  cause the first exception during entry point loading to be fully
+  raised
+
+
 Bugfix
 ------
 
@@ -39,6 +51,8 @@ Other
 * moved documentation build into a github action workflow, removing
   gh-pages submodule and related Makefile targets
 * migrated away from the ``build_sphinx`` setuptools command
+* introduced nightly CI that runs against the upstream git version of
+  koji, in order to catch any additional API changes early on
 
 
 Issues
