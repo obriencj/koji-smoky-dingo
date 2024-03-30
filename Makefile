@@ -1,4 +1,5 @@
-# Sorry that this Makefile is a bit of a disaster.
+# Sorry that this Makefile is a bit of a disaster. Run `make help` to
+# see a list of valid targets.
 
 
 PYTHON ?= $(shell which python3 python 2>/dev/null | head -n1)
@@ -49,15 +50,15 @@ build: clean-built report-python flake8	## Produces a wheel using the default sy
 install: build	## Installs using the default python for the current user
 ifeq ($(UID),"0")
 	@$(PYTHON) -B -m pip.__main__ \
-		install -I --no-deps \
+		install -IU --no-deps \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
 else
-	@$(PYTHON) -B -m pip.__main__ \
-		install -I --no-deps --user \
+	$(PYTHON) -B -m pip.__main__ \
+		install -IU --no-deps --user \
 		dist/$(PROJECT)-$(VERSION)-py3-none-any.whl
 	@mkdir -p ~/.koji/plugins
 	@rm -f ~/.koji/plugins/kojismokydingometa.py
-	@ln -s `$(PYTHON) -c 'import koji_cli_plugins.kojismokydingometa as ksdm ; print(ksdm.__file__);'` ~/.koji/plugins/kojismokydingometa.py
+	@cp -v koji_cli_plugins/kojismokydingometa.py ~/.koji/plugins/
 endif
 
 
@@ -207,7 +208,7 @@ requires-tox:
 	@$(call checkfor,$(TOX))
 
 
-.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help mypy overview packaging-build packaging-test project python quick-test release-notes report-python requires-git requires-tox rpm srpm stage-docs test tidy version
+.PHONY: archive build clean clean-built clean-docs default deploy-docs docs flake8 help koji-git mypy overview packaging-build packaging-test project python quick-test release-notes report-python requires-git requires-tox rpm srpm stage-docs test tidy version
 
 
 # The end.
