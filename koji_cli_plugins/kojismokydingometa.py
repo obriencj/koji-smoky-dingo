@@ -37,10 +37,10 @@ def __plugin__(glbls):
     # want to avoid leaving references around that it can see. So all
     # the action happens inside of this function.
 
-    import sys
     from operator import attrgetter
     from os import getenv
     from pkg_resources import iter_entry_points
+    from sys import stderr
 
     # these env var checks were introduced in v2.2.0
     verbose = getenv("KSD_VERBOSE", None) == "1"
@@ -70,7 +70,7 @@ def __plugin__(glbls):
             if verbose:
                 # when KSD_VERBOSE=1 we announce than an error happened
                 message = f"Error loading plugin {entry_point!r}: {ex!r}"
-                print(message, file=sys.stderr)
+                print(message, file=stderr)
 
             if explode:
                 # when KSD_EXPLODE=1 we allow the exception to be
