@@ -57,7 +57,7 @@ def __plugin__(glbls):
             # function. This function is then invoked with the name of
             # the entry point. The return value should be either None
             # or a callable appropriate for use as a koji command
-            # handler.
+            # handler. See `kojismokydingo.types.CLIHandler`
 
             entry_fn = entry_point.resolve()
             handler = entry_fn(entry_point.name) if entry_fn else None
