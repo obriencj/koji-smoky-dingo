@@ -39,7 +39,12 @@ def __plugin__(glbls):
 
     import sys
     from operator import attrgetter
+    from os import getenv
     from pkg_resources import iter_entry_points
+
+    # these env var checks were introduced in v2.2.0
+    verbose = getenv("KSD_VERBOSE", None) == "1"
+    explode = getenv("KSD_EXPLODE", None) == "1"
 
     # we sort the entry points by module name so that duplicate
     # commands have a predictable resolution order
@@ -60,11 +65,19 @@ def __plugin__(glbls):
         except Exception as ex:
             # something has gone awry while either loading the entry
             # point, or while producing the cli handler from the unary
-            # function that the entry point provided. We just announce
-            # than an error happened and continue with the next
-            # plugin.
-            message = f"Error loading plugin {entry_point!r}: {ex!r}"
-            print(message, file=sys.stderr)
+            # function that the entry point provided.
+
+            if verbose:
+                # when KSD_VERBOSE=1 we announce than an error happened
+                message = f"Error loading plugin {entry_point!r}: {ex!r}"
+                print(message, file=sys.stderr)
+
+            if explode:
+                # when KSD_EXPLODE=1 we allow the exception to be
+                # raised all the way up. Otherwise we'll just continue
+                # on to the next entrypoint and allow for normal CLI
+                # execution
+                raise
 
         else:
             # the handler, if available, is then combined into the
