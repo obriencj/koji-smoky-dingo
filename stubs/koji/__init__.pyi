@@ -273,6 +273,9 @@ class ClientSession:
     def getUserGroups(
             self,
             user: Union[int, str]) -> List[UserGroup]:
+        """
+        :since: koji 1.35
+        """
         ...
 
     def getHost(
@@ -395,23 +398,41 @@ class ClientSession:
             strict: bool = False) -> List[TaskInfo]:
         ...
 
+    @overload
+    def getUser(
+            self,
+            userInfo: Optional[Union[int, str]] = None,
+            strict: bool = False,
+            krb_princs: bool = True) -> UserInfo:
+        ...
+
+    @overload
     def getUser(
             self,
             userInfo: Optional[Union[int, str]] = None,
             strict: bool = False,
             krb_princs: bool = True,
             groups: bool = False) -> UserInfo:
+        """
+        :since: koji 1.34
+        """
         ...
 
     def getUserPerms(
             self,
             userID: Optional[Union[int, str]] = None,
             with_groups: bool = True) -> List[str]:
+        """
+        :since: koji 1.34
+        """
         ...
 
     def getUserPermsInheritance(
             self,
             userID: Union[int, str]) -> Dict[str, List[str]]:
+        """
+        :since: koji 1.34
+        """
         ...
 
     def gssapi_login(
@@ -488,11 +509,25 @@ class ClientSession:
             queryOpts: Optional[QueryOptions] = None) -> List[RPMInfo]:
         ...
 
+    @overload
     def listUsers(
             self,
             userType: int = 0,
             prefix: Optional[str] = None,
             queryOpts: Optional[QueryOptions] = None) -> List[UserInfo]:
+        ...
+
+    @overload
+    def listUsers(
+            self,
+            userType: int = 0,
+            prefix: Optional[str] = None,
+            queryOpts: Optional[QueryOptions] = None,
+            perm: Optional[str] = None,
+            inherited_perm: bool = False) -> List[UserInfo]:
+        """
+        :since: koji 1.35
+        """
         ...
 
     def listTagged(
