@@ -41,12 +41,12 @@ from operator import itemgetter
 from os import devnull
 from os.path import basename
 from typing import (
-    Any, Callable, Dict, Iterable, List, Optional,
-    Sequence, TextIO, Tuple, Union, )
+    Any, Callable, Dict, Iterable, List, Optional, Sequence,
+    TextIO, Tuple, Union, )
 
 from .. import BadDingo, NotPermitted
 from ..common import itemsgetter, load_plugin_config
-from ..types import GOptions, HistoryEntry
+from ..types import CLIProtocol, GOptions, HistoryEntry
 
 
 __all__ = (
@@ -562,7 +562,7 @@ def print_history_results(
     return print_history(history, utc, show_events, verbose)
 
 
-class SmokyDingo(metaclass=ABCMeta):
+class SmokyDingo(CLIProtocol, metaclass=ABCMeta):
     """
     Base class for new sub-commands in Koji. Subclasses may be
     referenced via an entry point under the koji_smoky_dingo group to
