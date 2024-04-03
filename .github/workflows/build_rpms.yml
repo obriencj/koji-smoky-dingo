@@ -46,7 +46,7 @@ jobs:
       - name: Store Source RPM
         uses: actions/upload-artifact@v4
         with:
-          name: RPMs
+          name: RPMs-srpm
           path: ${{ steps.srpm.outputs.path }}
 
   build-rpm:
@@ -89,7 +89,7 @@ jobs:
       - name: Store RPM ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
         with:
-          name: RPMs
+          name: RPMs-${{ matrix.platform }}
           path: dist/${{ matrix.platform }}/RPMS/noarch/*.rpm
 
 

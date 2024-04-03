@@ -83,8 +83,9 @@ jobs:
       - name: Fetch RPMs
         uses: actions/download-artifact@v4
         with:
-          name: RPMs
           path: rpms
+          pattern: RPMs-*
+          merge-multiple: true
 
       - name: Fetch Notes
         uses: actions/download-artifact@v4

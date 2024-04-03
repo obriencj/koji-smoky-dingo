@@ -72,7 +72,7 @@ jobs:
       - name: Store coverage
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-data
+          name: coverage-data-py${{ matrix.python-version }}
           path: .coverage.py*
 
   coverage:
@@ -100,7 +100,8 @@ jobs:
       - name: Fetch coverage results
         uses: actions/download-artifact@v4
         with:
-          name: coverage-data
+          pattern: coverage-data-py*
+          merge-multiple: true
 
       - name: Combine and report coverage
         run: |
