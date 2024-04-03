@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
@@ -33,7 +33,7 @@ jobs:
           cat VERSION >> $GITHUB_STEP_SUMMARY
 
       - name: Store Version
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Version
           path: VERSION
@@ -43,7 +43,7 @@ jobs:
           make release-notes > release.md
 
       - name: Store Notes
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Notes
           path: release.md
@@ -75,19 +75,19 @@ jobs:
           sudo apt-get install hub
 
       - name: Fetch Wheel
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Wheel
           path: dist
 
       - name: Fetch RPMs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: RPMs
           path: rpms
 
       - name: Fetch Notes
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Notes
 
@@ -123,7 +123,7 @@ jobs:
     steps:
       - name: Deploy site
         id: deploy
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
 
   deploy-pypi:
     name: Upload release to PyPI
@@ -141,7 +141,7 @@ jobs:
 
     steps:
       - name: Fetch python dist content
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Wheel
           path: dist
@@ -160,10 +160,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Fetch python dist content
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Version
 
