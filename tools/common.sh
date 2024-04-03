@@ -19,6 +19,15 @@
 # License: GPL v3
 
 
+ACTIVE_PLATFORMS=(
+    fedora38
+    fedora39
+    fedora40
+    rockylinux8
+    rockylinux9
+)
+
+
 function whichever() {
     which "$@" 2>/dev/null | head -n1
 }
@@ -204,20 +213,17 @@ function ksd_platforms() {
     # the Containerfiles for all the platforms.
 
     local BASE="tools/Containerfile"
-
-    if [ ! "$1" ] ; then
-        for N in $(ls "$BASE".* | grep -v '~$\|^#') ; do
-            echo "$N" | rev | cut -f1 -d. | rev
-        done
-
-    else
-        for N in "$@" ; do
-            local FN="$BASE"."$N"
-            if [ -f "$FN" ] ; then
-                echo "$N"
-            fi
-        done
+    local WANTED="$@"
+    if [ ! "$WANTED" ] ; then
+        WANTED="${ACTIVE_PLATFORMS[@]}"
     fi
+
+    for N in $WANTED ; do
+        local FN="$BASE"."$N"
+        if [ -f "$FN" ] ; then
+            echo "$N"
+        fi
+    done
 }
 
 
