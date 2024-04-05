@@ -50,3 +50,19 @@ running `make archive` in the top project directory.
 
 A final side-effect of running launch-build.sh is the copying of the
 SRPM and RPMs to the dist directory.
+
+
+## Older Platforms
+
+The list of active platforms is stored in two places. The
+`ACTIVE_PLATFORMS` variable in [common.sh] defines the selection of
+platforms used by default if no specific platform list is specified.
+There is a also platform matrix definition in [build_rpms.yml]
+
+[common.sh]: ./common.sh
+[build_rpms.yml]: ../.github/workflows/build_rpms.yml
+
+I have in the past been removing older platforms as they fell off of
+my radar. With the addition of these two lists as methods to manage
+the defaults I will likely no longer delete Containerfiles as they
+fall into EOL.
