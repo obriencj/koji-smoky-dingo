@@ -441,6 +441,13 @@ class BuildInfo(TypedDict):
     creation_ts: float
     """ UTC timestamp indicating when this build record was created """
 
+    draft: bool
+    """
+    Whether this build is flagged as a draft
+
+    :since: koji 1.34.0
+    """
+
     epoch: str
     """ epoch of this build, or None if unspecified. This field is
     typically only used for RPM builds which have specified an epoch

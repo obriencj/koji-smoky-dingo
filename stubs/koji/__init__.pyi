@@ -33,11 +33,12 @@ from typing import (
 from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
-    ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BTypeInfo,
-    ChannelInfo, CGInfo, HostInfo, ListTasksOptions, PackageInfo,
-    PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo, RPMSignature,
-    SearchResult, TagBuildInfo, TagInfo, TagGroupInfo, TagInheritance,
-    TagPackageInfo, TargetInfo, TaskInfo, UserGroup, UserInfo, )
+    ArchiveInfo, ArchiveTypeInfo, BuildInfo, BuildrootInfo, BuildState,
+    BTypeInfo, ChannelInfo, CGInfo, HostInfo, ListTasksOptions,
+    PackageInfo, PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo,
+    RPMSignature, SearchResult, TagBuildInfo, TagInfo, TagGroupInfo,
+    TagInheritance, TagPackageInfo, TargetInfo, TaskInfo, UserGroup,
+    UserInfo, )
 
 
 # Koji 1.34.0 intentionally broke API compatibility and removed these.
@@ -501,6 +502,27 @@ class ClientSession:
             queryOpts: Optional[QueryOptions] = None) -> List[BTypeInfo]:
         ...
 
+    def listBuilds(
+            self,
+            packageID: Optional[int] = None,
+            userID: Optional[int] = None,
+            taskID: Optional[int] = None,
+            prefix: Optional[str] = None,
+            state: Optional[BuildState] = None,
+            volumeID: Optional[int] = None,
+            source: Optional[str] = None,
+            createdBefore: Optional[str] = None,
+            createdAfter: Optional[str] = None,
+            completeBefore: Optional[str] = None,
+            completeAfter: Optional[str] = None,
+            type: Optional[str] = None,
+            typeInfo: Optional[Dict] = None,
+            queryOpts: Optional[QueryOptions] = None,
+            pattern: Optional[str] = None,
+            cgID: Optional[int] = None,
+            draft: Optional[bool] = None) -> List[BuildInfo]:
+        ...
+
     def listCGs(self) -> Dict[str, CGInfo]:
         ...
 
@@ -523,7 +545,7 @@ class ClientSession:
             inherited: bool = False,
             with_dups: bool = False,
             event: Optional[int] = None,
-            quertOpts: Optional[dict] = None,
+            queryOpts: Optional[dict] = None,
             with_owners: bool = True) -> List[TagPackageInfo]:
         ...
 
