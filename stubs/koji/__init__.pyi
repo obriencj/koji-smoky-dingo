@@ -357,6 +357,28 @@ class ClientSession:
             multi: bool = False) -> Union[RPMInfo, List[RPMInfo]]:
         ...
 
+    @overload
+    def getRPMHeaders(
+            self,
+            rpmID: Optional[int] = None,
+            taskID: Optional[int] = None,
+            filepath: Optional[str] = None,
+            headers: Optional[List[str]] = None) -> Dict[str, Any]:
+        ...
+
+    @overload
+    def getRPMHeaders(
+            self,
+            rpmID: Optional[int] = None,
+            taskID: Optional[int] = None,
+            filepath: Optional[str] = None,
+            headers: Optional[List[str]] = None,
+            strict: Optional[bool] = False) -> Dict[str, Any]:
+        """
+        :since: koji 1.29.0
+        """
+        ...
+
     def getTag(
             self,
             taginfo: Union[int, str],
@@ -418,6 +440,13 @@ class ClientSession:
         """
         ...
 
+    @overload
+    def getUserPerms(
+            self,
+            userID: Optional[Union[int, str]] = None) -> List[str]:
+        ...
+
+    @overload
     def getUserPerms(
             self,
             userID: Optional[Union[int, str]] = None,
