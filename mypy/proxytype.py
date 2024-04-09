@@ -86,6 +86,16 @@ def proxytype(
       ``getPerms(self: MultiCallSession) -> VirtualCall[List[str]]``
 
     """
+
+    # note that in our case, this is never actually used as a runtime
+    # class decorator. We only ever "see" the koji typing stub when
+    # running mypy, and then it's only for static analysis. So while
+    # this impl does actually return an instance of a type if it were
+    # run, it will never be run. The important part is that mypy will
+    # see the type annotations of this decorator, and we'll be hooking
+    # into the application of that to rummage and mutate the mypy
+    # lexical internals to make it appear as if the decorated class
+    # has all those methods.
     return ProxyTypeBuilder()
 
 
