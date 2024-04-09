@@ -64,46 +64,40 @@ def collect_userstats(
 
     userinfo = as_userinfo(session, user)
 
-    with session.multicall() as mc:  # type: ignore
-        calls = (
-            ('build_count',
-             mc.listBuilds(userID=userinfo['id'],
-                           queryOpts={'countOnly': True})),
+    with session.multicall() as mc:
+        build_count = mc.listBuilds(userID=userinfo['id'],
+                                    queryOpts={'countOnly': True})
 
-            ('last_build',
-             mc.listBuilds(userID=userinfo['id'],
-                           queryOpts={'limit': 1, 'order': '-build_id'})),
+        package_count = mc.listPackages(userID=userinfo['id'],
+                                        with_dups=True,
+                                        queryOpts={'countOnly': True})
 
-            ('package_count',
-             mc.listPackages(userID=userinfo['id'], with_dups=True,
-                             queryOpts={'countOnly': True})),
+        task_count = mc.listTasks(opts={'owner': userinfo['id'],
+                                        'parent': None},
+                                  queryOpts={'countOnly': True})
 
-            ('task_count',
-             mc.listTasks(opts={'owner': userinfo['id'], 'parent': None},
-                          queryOpts={'countOnly': True})),
+        last_build = mc.listBuilds(userID=userinfo['id'],
+                                   queryOpts={'limit': 1,
+                                              'order': '-build_id'})
 
-            ('last_task',
-             mc.listTasks(opts={'owner': userinfo['id'], 'parent': None},
-                          queryOpts={'limit': 1, 'order': '-id'})),
-        )
+        last_task = mc.listTasks(opts={'owner': userinfo['id'],
+                                       'parent': None},
+                                 queryOpts={'limit': 1,
+                                            'order': '-id'})
 
-    stats = {k: v.result for k, v in calls}
+    stats: UserStatistics = {
+        # I haven't figured out how to indicate that the queryOpts
+        # with countOnly set changes the return type to int.
+        'build_count': build_count.result,      # type: ignore
+        'package_count': package_count.result,  # type: ignore
+        'task_count': task_count.result,        # type: ignore
 
-    # unwrap the last_build
-    lst = stats['last_build']
-    if lst:
-        stats['last_build'] = lst[0]
-    else:
-        stats['last_build'] = None
+        # just need to unwrap the list if any
+        'last_build': last_build.result[0] if last_build.result else None,
+        'last_task': last_task.result[0] if last_task.result else None,
+    }
 
-    # and also the last_task
-    lst = stats['last_task']
-    if lst:
-        stats['last_task'] = lst[0]
-    else:
-        stats['last_task'] = None
-
-    return cast(UserStatistics, stats)
+    return stats
 
 
 def get_user_groups(

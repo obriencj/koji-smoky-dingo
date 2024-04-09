@@ -31,7 +31,8 @@ from koji import (
     ClientSession, PathInfo, )
 from optparse import Values
 from typing import (
-    Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, )
+    Any, Callable, Dict, Generic, Iterable, List, Optional,
+    Tuple, TypeVar, Union, )
 
 
 try:
@@ -40,13 +41,17 @@ except ImportError:
     # Python < 3.10 doesn't have typing.TypedDict
     from typing_extensions import TypedDict
 
-
 try:
     from typing import Protocol
 except ImportError:
     # Python < 3.8 doesn't have typing.Protocol
     class Protocol:  # type: ignore
         ...
+
+try:
+    from contextlib import AbstractContextManager as ContextManager
+except ImportError:
+    from typing import ContextManager
 
 
 __all__ = (
