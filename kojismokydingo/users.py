@@ -64,42 +64,41 @@ def collect_userstats(
 
     userinfo = as_userinfo(session, user)
 
-    with session.multicall() as mc:  # type: ignore
-        calls = (
-            ('build_count',
-             mc.listBuilds(userID=userinfo['id'],
-                           queryOpts={'countOnly': True})),
+    with session.multicall() as mc:
+        build_count = mc.listBuilds(userID=userinfo['id'],
+                                     queryOpts={'countOnly': True})
 
-            ('last_build',
-             mc.listBuilds(userID=userinfo['id'],
-                           queryOpts={'limit': 1, 'order': '-build_id'})),
+        last_build = mc.listBuilds(userID=userinfo['id'],
+                                   queryOpts={'limit': 1,
+                                              'order': '-build_id'})
 
-            ('package_count',
-             mc.listPackages(userID=userinfo['id'], with_dups=True,
-                             queryOpts={'countOnly': True})),
+        package_count = mc.listPackages(userID=userinfo['id'],
+                                        with_dups=True,
+                                        queryOpts={'countOnly': True})
 
-            ('task_count',
-             mc.listTasks(opts={'owner': userinfo['id'], 'parent': None},
-                          queryOpts={'countOnly': True})),
+        task_count = mc.listTasks(opts={'owner': userinfo['id'],
+                                        'parent': None},
+                                  queryOpts={'countOnly': True})
 
-            ('last_task',
-             mc.listTasks(opts={'owner': userinfo['id'], 'parent': None},
-                          queryOpts={'limit': 1, 'order': '-id'})),
-        )
+        last_task = mc.listTasks(opts={'owner': userinfo['id'],
+                                       'parent': None},
+                                 queryOpts={'limit': 1,
+                                            'order': '-id'})
 
-    stats = {k: v.result for k, v in calls}
+    stats = {}
+    stats['build_count'] = cast(int, build_count)
+    stats['package_count'] = cast(int, package_count)
+    stats['task_count'] = cast(int, task_count)
 
     # unwrap the last_build
-    lst = stats['last_build']
-    if lst:
-        stats['last_build'] = lst[0]
+    if last_build:
+        stats['last_build'] = last_build[0]
     else:
         stats['last_build'] = None
 
     # and also the last_task
-    lst = stats['last_task']
-    if lst:
-        stats['last_task'] = lst[0]
+    if last_task:
+        stats['last_task'] = last_task[0]
     else:
         stats['last_task'] = None
 

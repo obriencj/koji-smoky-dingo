@@ -25,10 +25,13 @@ calls are being used correctly.
 """
 
 
+from __future__ import annotations
+
+
 from configparser import ConfigParser, RawConfigParser
 from datetime import datetime
 from typing import (
-    Any, Dict, Iterable, List, Optional, Tuple, TypedDict, TypeVar,
+    Any, Dict, Generic, Iterable, List, Optional, Tuple, TypedDict, TypeVar,
     Union, Set, overload, )
 from xmlrpc.client import DateTime
 
@@ -37,8 +40,16 @@ from kojismokydingo.types import (
     BTypeInfo, ChannelInfo, CGInfo, HostInfo, ListTasksOptions,
     PackageInfo, PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo,
     RPMSignature, SearchResult, TagBuildInfo, TagInfo, TagGroupInfo,
-    TagInheritance, TagPackageInfo, TargetInfo, TaskInfo, UserGroup,
-    UserInfo, )
+    TagInheritance, TagPackageInfo, TargetInfo, TaskInfo,
+    UserGroup, UserInfo, )
+
+from proxytype import proxytype
+
+
+try:
+    from contextlib import AbstractContextManager as ContextManager
+except ImportError:
+    from typing import ContextManager
 
 
 # Koji 1.34.0 intentionally broke API compatibility and removed these.
@@ -151,7 +162,7 @@ class TagError(GenericError):
 class ClientSession:
 
     baseurl: str
-    multicall: bool
+    multicall: Union["MultiCallHack", bool]
     opts: Dict[str, Any]
 
     def __init__(
@@ -1048,6 +1059,35 @@ def read_config_files(
         config_files: List[Union[str, Tuple[str, bool]]],
         raw: bool = False) -> Union[RawConfigParser, ConfigParser]:
     ...
+
+
+# === MultiCallSession madness
+
+
+VirtualResultType = TypeVar("VirtualResultType")
+
+class VirtualCall(Generic[VirtualResultType]):
+    result: VirtualResultType
+
+
+@proxytype(ClientSession, VirtualCall)
+class MultiCallSession:
+    ...
+
+
+class MultiCallHack:
+
+    def __bool__(self) -> bool:
+        ...
+
+    def __nonzero__(self) -> bool:
+        ...
+
+    def __call__(
+            self,
+            strict: Optional[bool] = False,
+            batch: Optional[int] = None) -> ContextManager[MultiCallSession]:
+        ...
 
 
 # The end.
