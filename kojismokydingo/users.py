@@ -66,11 +66,7 @@ def collect_userstats(
 
     with session.multicall() as mc:
         build_count = mc.listBuilds(userID=userinfo['id'],
-                                     queryOpts={'countOnly': True})
-
-        last_build = mc.listBuilds(userID=userinfo['id'],
-                                   queryOpts={'limit': 1,
-                                              'order': '-build_id'})
+                                    queryOpts={'countOnly': True})
 
         package_count = mc.listPackages(userID=userinfo['id'],
                                         with_dups=True,
@@ -79,6 +75,10 @@ def collect_userstats(
         task_count = mc.listTasks(opts={'owner': userinfo['id'],
                                         'parent': None},
                                   queryOpts={'countOnly': True})
+
+        last_build = mc.listBuilds(userID=userinfo['id'],
+                                   queryOpts={'limit': 1,
+                                              'order': '-build_id'})
 
         last_task = mc.listTasks(opts={'owner': userinfo['id'],
                                        'parent': None},

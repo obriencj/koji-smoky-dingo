@@ -31,7 +31,7 @@ from koji import (
     ClientSession, PathInfo, )
 from optparse import Values
 from typing import (
-    Any, Callable, Dict, Generic, Iterable, List, Literal, Optional,
+    Any, Callable, Dict, Generic, Iterable, List, Optional,
     Tuple, TypeVar, Union, )
 
 
@@ -40,7 +40,6 @@ try:
 except ImportError:
     # Python < 3.10 doesn't have typing.TypedDict
     from typing_extensions import TypedDict
-
 
 try:
     from typing import Protocol
@@ -1417,78 +1416,6 @@ class ListTasksOptions(TypedDict, total=False):
     startedAfter: Union[float, str]
     completeBeforer: Union[float, str]
     completeAfter: Union[float, str]
-
-
-
-VirtualResultType = TypeVar("VirtualResultType")
-
-class VirtualCall(Generic[VirtualResultType]):
-    result: VirtualResultType
-
-
-class MultiCallSessionType(type):
-
-    def __getattr__(cls, name):
-        # get the annotation from ClientSession
-        # make a wrapper that looks the same but with an updated
-        # return value which is a result
-
-        print(f"getattr of _MultiCallSession metaclass for {name}")
-
-        orig = getattr(ClientSession, name)
-
-        def munged(slf, *args, **kwds):
-            ...
-
-        munged.__name__ = orig.__name__
-        munged.__qualname__ = orig.__qualname__
-
-        annos = dict(orig.__annotations__)
-        annos['return'] = VirtualCall[annos['return']]
-        munged.__annotations__ = annos
-
-        return munged
-
-    def __getdescriptor__(cls, name):
-        # get the annotation from ClientSession
-        # make a wrapper that looks the same but with an updated
-        # return value which is a result
-
-        print(f"getdescriptor of _MultiCallSession metaclass for {name}")
-
-        orig = getattr(ClientSession, name)
-
-        def munged(slf, *args, **kwds):
-            ...
-
-        munged.__name__ = orig.__name__
-        munged.__qualname__ = orig.__qualname__
-
-        annos = dict(orig.__annotations__)
-        annos['return'] = VirtualCall[annos['return']]
-        munged.__annotations__ = annos
-
-        return munged
-
-
-class MultiCallSession(metaclass=MultiCallSessionType):
-
-    multicall: bool
-
-
-class MultiCallHack:
-
-    def __bool__(self) -> bool:
-        ...
-
-    def __nonzero__(self) -> bool:
-        ...
-
-    def __call__(
-            self,
-            strict: Optional[bool] = False,
-            batch: Optional[int] = None) -> ContextManager[MultiCallSession]:
-        ...
 
 
 #
