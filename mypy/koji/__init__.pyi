@@ -1082,12 +1082,12 @@ class MultiCallSession:
     """
     All of the same methods from a `ClientSession`, but wrapped to
     return `VirtualCall` instances instead.
-
-    KSD doesn't use this type directly and I didn't want the proxytype
-    plugin to become a runtime dependency of KSD itself, so I left its
-    definition here rather than in `kojismokydingo.types` where it will
-    only be utilized when running mypy.
     """
+
+    # KSD doesn't use this type directly and I didn't want the proxytype
+    # plugin to become a runtime dependency of KSD itself, so I left its
+    # definition here rather than in `kojismokydingo.types` where it will
+    # only be utilized when running mypy.
     ...
 
 

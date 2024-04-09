@@ -26,22 +26,24 @@ koji.ClientSession
 """
 
 
-from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef
+from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo
 from mypy.plugin import ClassDefContext, MethodContext, Plugin
-from typing import Generic, Type, TypeVar, overload
+from mypy.types import CallableType, Instance
+from typing import Generic, List, Type, TypeVar, Union, cast, overload
 
 
 __all__ = ( "proxytype", )
 
 
-PT = TypeVar("PT")
-RT = TypeVar("RT")
+PT = TypeVar("PT")  # Original type to proxy
+RT = TypeVar("RT")  # New return type
+CT = TypeVar("CT")  # Class type to augment
 
 
 class ProxyTypeBuilder(Generic[PT, RT]):
     # this class, and more specifically its __call__ method, are used
     # as the sentinel to trigger the mypy plugin hook.
-    def __call__(self, cls: type) -> type:
+    def __call__(self, cls: Type[CT]) -> Type[CT]:
         return cls
 
 
@@ -64,7 +66,7 @@ def proxytype(
 
     The canonical example is MultiCallSession, eg.
 
-    ``
+    ```
     class ClientSession:
         # lots of methods here
         ...
@@ -77,7 +79,7 @@ def proxytype(
         # all methods from ClientSession magically copied into
         # this during static analysys
         ...
-    ``
+    ```
 
     for example then, a method on ClientSession such as
       ``getPerms(self: ClientSession) -> List[str]``
@@ -99,45 +101,65 @@ def proxytype(
     return ProxyTypeBuilder()
 
 
-def clone_func(fn, cls, returntype):
-    cpt = fn.type.copy_modified()
+def clone_func(
+        fn: FuncDef,
+        cls: TypeInfo,
+        returntype: Instance) -> FuncDef:
+
+    tp = cast(CallableType, fn.type)
+    cpt = tp.copy_modified()
 
     # overwrite self
-    cpt.arg_types[0] = cpt.arg_types[0].copy_modified()
-    cpt.arg_types[0].type = cls
+    slf = cast(Instance, cpt.arg_types[0])
+    slf = slf.copy_modified()
+    slf.type = cls
+    cpt.arg_types[0] = slf
 
     # overwrite return type
     if returntype is not None:
         n = returntype.copy_modified()
-        n.args = (fn.type.ret_type, )
+        n.args = (tp.ret_type, )
         cpt.ret_type = n
 
     cp = FuncDef(fn._name, None)
     cp.type = cpt
     cp.info = cls  # this particular field took so long to debug
-    # cp._fullname = fn.fullname
 
     return cp
 
 
-def clone_decorated(dec, cls, returntype):
+def clone_decorator(
+        dec: Decorator,
+        cls: TypeInfo,
+        returntype: Instance) -> Decorator:
+
     cp = Decorator(clone_func(dec.func, cls, returntype),
                    dec.decorators, dec.var)
-
     cp.is_overload = dec.is_overload
 
     return cp
 
 
-def clone_overload(ov, cls, returntype):
-    items = [clone_decorated(i, cls, returntype) for i in ov.items]
+def clone_overloaded(
+        ov: OverloadedFuncDef,
+        cls: TypeInfo,
+        returntype: Instance) -> OverloadedFuncDef:
+
+    items: List[Union[Decorator, FuncDef]] = []
+    for item in ov.items:
+        if isinstance(item, Decorator):
+            item = clone_decorator(item, cls, returntype)
+        elif isinstance(item, FuncDef):
+            item = clone_func(item, cls, returntype)
+        items.append(item)
+
     cp = OverloadedFuncDef(items)
     cp._fullname = ov.fullname
 
     return cp
 
 
-def decorate_proxytype(wrap, orig, virt):
+def decorate_proxytype(wrap: TypeInfo, orig: Instance, virt: Instance):
     """
     Creates methods on wrap cloned from orig, modified to return
     virt wrappers.
@@ -155,38 +177,32 @@ def decorate_proxytype(wrap, orig, virt):
         if name.startswith("_"):
             continue
 
-        if isinstance(sym.node, FuncDef):
+        node = sym.node
+        if isinstance(node, FuncDef):
             nsym = sym.copy()
-            nsym.node = clone_func(nsym.node, wrap, virt)
+            nsym.node = clone_func(node, wrap, virt)
             wrap.names[name] = nsym
 
-        elif isinstance(sym.node, OverloadedFuncDef):
+        elif isinstance(node, OverloadedFuncDef):
             nsym = sym.copy()
-            nsym.node = clone_overload(nsym.node, wrap, virt)
+            nsym.node = clone_overloaded(node, wrap, virt)
             wrap.names[name] = nsym
 
-    return None
+
+def handle_proxytype_hook(ctx: MethodContext):
+    wrap = ctx.context.info     # type: ignore
+    orig, virt = ctx.type.args  # type: ignore
+
+    decorate_proxytype(wrap, orig, virt)
+
+    return ctx.default_return_type
 
 
 class ProxyTypePlugin(Plugin):
 
-    def register_proxytype(self, ctx: MethodContext):
-        args = ctx.type.args  # type: ignore
-        if len(args) == 2:
-            orig, virt = args
-        else:
-            orig = args[0]
-            virt = None
-
-        wrap = ctx.context.info  # type: ignore
-        decorate_proxytype(wrap, orig, virt)
-
-        return ctx.default_return_type
-
-
     def get_method_hook(self, fullname: str):
         if fullname == PTB_CALL:
-            return self.register_proxytype
+            return handle_proxytype_hook
         return None
 
 
