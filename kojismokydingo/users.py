@@ -85,24 +85,19 @@ def collect_userstats(
                                  queryOpts={'limit': 1,
                                             'order': '-id'})
 
-    stats = {}
-    stats['build_count'] = cast(int, build_count)
-    stats['package_count'] = cast(int, package_count)
-    stats['task_count'] = cast(int, task_count)
+    stats: UserStatistics = {
+        # I haven't figured out how to indicate that the queryOpts
+        # with countOnly set changes the return type to int.
+        'build_count': build_count.result,      # type: ignore
+        'package_count': package_count.result,  # type: ignore
+        'task_count': task_count.result,        # type: ignore
 
-    # unwrap the last_build
-    if last_build:
-        stats['last_build'] = last_build[0]
-    else:
-        stats['last_build'] = None
+        # just need to unwrap the list if any
+        'last_build': last_build.result[0] if last_build.result else None,
+        'last_task': last_task.result[0] if last_task.result else None,
+    }
 
-    # and also the last_task
-    if last_task:
-        stats['last_task'] = last_task[0]
-    else:
-        stats['last_task'] = None
-
-    return cast(UserStatistics, stats)
+    return stats
 
 
 def get_user_groups(

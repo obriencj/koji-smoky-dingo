@@ -31,8 +31,8 @@ from __future__ import annotations
 from configparser import ConfigParser, RawConfigParser
 from datetime import datetime
 from typing import (
-    Any, Dict, Generic, Iterable, List, Optional, Tuple, TypedDict, TypeVar,
-    Union, Set, overload, )
+    Any, Dict, Generic, Iterable, List, Optional, Tuple,
+    TypedDict, TypeVar, Union, Set, overload, )
 from xmlrpc.client import DateTime
 
 from kojismokydingo.types import (
@@ -50,6 +50,11 @@ try:
     from contextlib import AbstractContextManager as ContextManager
 except ImportError:
     from typing import ContextManager
+
+try:
+    from typing import Self  # type: ignore
+except ImportError:
+    from typing_extensions import Self
 
 
 # Koji 1.34.0 intentionally broke API compatibility and removed these.
@@ -162,7 +167,7 @@ class TagError(GenericError):
 class ClientSession:
 
     baseurl: str
-    multicall: Union["MultiCallHack", bool]
+    multicall: "MultiCallHack"
     opts: Dict[str, Any]
 
     def __init__(
@@ -1076,6 +1081,10 @@ class MultiCallSession:
 
 
 class MultiCallHack:
+
+    def __set__(self, obj: Any, value: bool) -> None:
+        # assignment to bool, eg. `session.multicall = True`
+        ...
 
     def __bool__(self) -> bool:
         ...
