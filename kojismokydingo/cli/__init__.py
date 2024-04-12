@@ -777,7 +777,7 @@ class SmokyDingo(CLIProtocol, metaclass=ABCMeta):
         if self.session:
             try:
                 self.session.logout()
-            except BaseException:
+            except Exception:
                 pass
 
 

@@ -1354,7 +1354,7 @@ class GOptions(Values):
     weburl: str
 
 
-CLIHandler = Callable[[GOptions, ClientSession, Optional[List[str]]],
+CLIHandler = Callable[[GOptions, ClientSession, List[str]],
                       int]
 """
 The callable signature used by Koji's CLI command handlers.
@@ -1370,7 +1370,7 @@ class CLIProtocol(Protocol):
             self,
             goptions: GOptions,
             session: ClientSession,
-            args: Optional[List[str]] = None) -> int:
+            args: List[str]) -> int:
         ...
 
 
