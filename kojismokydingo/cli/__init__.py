@@ -778,7 +778,9 @@ class SmokyDingo(CLIProtocol, metaclass=ABCMeta):
             try:
                 self.session.logout()
             except Exception:
-                pass
+                # Bandit doesn't like this, but all we want to do is
+                # logout -- we don't care if it fails.
+                pass  # nosec
 
 
     def __call__(
