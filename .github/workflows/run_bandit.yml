@@ -10,8 +10,8 @@ jobs:
   bandit:
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: true
+    permissions:
+      security-events: write
 
     steps:
       - name: Checkout
