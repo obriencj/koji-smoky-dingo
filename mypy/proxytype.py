@@ -21,6 +21,9 @@ proxies the methods of some other class. In our case that is
 specifically for the behavior of koji.MultiCallSession proxying to
 koji.ClientSession
 
+This became the basis for the slightly more generalized
+preoccupied.proxytype: https://github.com/obriencj/python-proxytype
+
 :author: Christopher O'Brien <obriencj@gmail.com>
 :license: GPL v3
 """
@@ -116,10 +119,9 @@ def clone_func(
     cpt.arg_types[0] = slf
 
     # overwrite return type
-    if returntype is not None:
-        n = returntype.copy_modified()
-        n.args = (tp.ret_type, )
-        cpt.ret_type = n
+    n = returntype.copy_modified()
+    n.args = (tp.ret_type, )
+    cpt.ret_type = n
 
     cp = FuncDef(fn._name, None)
     cp.type = cpt
