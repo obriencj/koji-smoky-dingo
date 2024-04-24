@@ -29,7 +29,16 @@ from koji import (
     AUTHTYPES, BR_STATES, BR_TYPES, BUILD_STATES, CHECKSUM_TYPES,
     REPO_STATES, TASK_STATES, USERTYPES, USER_STATUS,
     ClientSession, PathInfo, )
-from koji_types import *
+from koji_types import (
+    ArchiveInfo, ArchiveInfos, ArchiveTypeInfo, AuthType, BuildInfo,
+    BuildInfos, BuildrootInfo, BuildrootState, BuildrootType, BuildState,
+    BTypeInfo, ChannelInfo, ChecksumType, CGInfo, CLIHandler, CLIProtocol,
+    GOptions, HistoryEntry, HostInfo, ListTasksOptions, PackageInfo,
+    PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo, RPMInfos,
+    RPMSignature, SearchResult, TagBuildInfo, TagInfo, TagInfos,
+    TagInheritance, TagInheritanceEntry, TagGroupInfo, TagGroupPackage,
+    TagGroupReq, TagPackageInfo, TargetInfo, TargetInfos, TaskInfo,
+    TaskState, UserGroup, UserInfo, UserStatus, UserType, )
 from optparse import Values
 from typing import (
     Any, Callable, Dict, Generic, Iterable, List, Optional,
