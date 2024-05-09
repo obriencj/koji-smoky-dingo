@@ -30,15 +30,16 @@ from koji import (
     REPO_STATES, TASK_STATES, USERTYPES, USER_STATUS,
     ClientSession, PathInfo, )
 from koji_types import (
-    ArchiveInfo, ArchiveInfos, ArchiveTypeInfo, AuthType, BuildInfo,
-    BuildInfos, BuildrootInfo, BuildrootState, BuildrootType, BuildState,
-    BTypeInfo, ChannelInfo, ChecksumType, CGInfo, CLIHandler, CLIProtocol,
+    ArchiveInfo, ArchiveTypeInfo, AuthType, BuildInfo,
+    BuildrootInfo, BuildrootState, BuildrootType, BuildState,
+    BTypeInfo, ChannelInfo, ChecksumType, CGInfo,
     GOptions, HistoryEntry, HostInfo, ListTasksOptions, PackageInfo,
-    PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo, RPMInfos,
-    RPMSignature, SearchResult, TagBuildInfo, TagInfo, TagInfos,
+    PermInfo, QueryOptions, RepoInfo, RepoState, RPMInfo,
+    RPMSignature, SearchResult, TagBuildInfo, TagInfo,
     TagInheritance, TagInheritanceEntry, TagGroupInfo, TagGroupPackage,
-    TagGroupReq, TagPackageInfo, TargetInfo, TargetInfos, TaskInfo,
+    TagGroupReq, TagPackageInfo, TargetInfo, TaskInfo,
     TaskState, UserGroup, UserInfo, UserStatus, UserType, )
+from koji_types.cli import CLIHandler, CLIProtocol
 from optparse import Values
 from typing import (
     Any, Callable, Dict, Generic, Iterable, List, Optional,
@@ -134,6 +135,21 @@ of ints. See `kojismokydingo.version_check` and
   * ``"1.25"``
   * ``(1, 25)``
 """
+
+
+ArchiveInfos = Iterable[ArchiveInfo]
+
+
+BuildInfos = Iterable[BuildInfo]
+
+
+RPMInfos = Iterable[RPMInfo]
+
+
+TagInfos = Iterable[TagInfo]
+
+
+TargetInfos = Iterable[TargetInfo]
 
 
 class DecoratedArchiveInfo(ArchiveInfo):
