@@ -214,13 +214,13 @@ class TestVersionCheck(TestCase):
         self.assertFalse(version_check(sess, "1.26"))
         self.assertFalse(version_check(sess, (1, 26)))
         self.assertFalse(version_check(sess, (1, 27)))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 25))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 25))
         self.assertEqual(send.call_count, 1)
 
         sess, send = self.session([self.ge()])
         self.assertFalse(version_check(sess, (1, 23)))
         self.assertFalse(version_check(sess, (1, 24)))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 22))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 22))
         self.assertEqual(send.call_count, 1)
 
 
@@ -230,19 +230,19 @@ class TestVersionCheck(TestCase):
         self.assertTrue(version_check(sess, "1.23"))
         self.assertTrue(version_check(sess, (1, 23)))
         self.assertTrue(version_check(sess, (1, 24)))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 24))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 24))
         self.assertEqual(send.call_count, 1)
 
         sess, send = self.session(["1.25"])
         self.assertTrue(version_check(sess, (1, 24)))
         self.assertTrue(version_check(sess, (1, 25)))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 25))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 25))
         self.assertEqual(send.call_count, 1)
 
         sess, send = self.session([self.ge()])
         self.assertTrue(version_check(sess, (1, 22)))
         self.assertTrue(version_check(sess, (1, 22)))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 22))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 22))
         self.assertEqual(send.call_count, 1)
 
 
@@ -251,13 +251,13 @@ class TestVersionCheck(TestCase):
         sess, send = self.session(["1.25"])
         self.assertRaises(FeatureUnavailable, version_require, sess, (1, 26))
         self.assertRaises(FeatureUnavailable, version_require, sess, (1, 27))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 25))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 25))
         self.assertEqual(send.call_count, 1)
 
         sess, send = self.session([self.ge()])
         self.assertRaises(FeatureUnavailable, version_require, sess, (1, 23))
         self.assertRaises(FeatureUnavailable, version_require, sess, (1, 24))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 22))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 22))
         self.assertEqual(send.call_count, 1)
 
 
@@ -266,19 +266,19 @@ class TestVersionCheck(TestCase):
         sess, send = self.session(["1.24"])
         self.assertTrue(version_require(sess, (1, 23)))
         self.assertTrue(version_require(sess, (1, 24)))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 24))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 24))
         self.assertEqual(send.call_count, 1)
 
         sess, send = self.session(["1.25"])
         self.assertTrue(version_require(sess, (1, 24)))
         self.assertTrue(version_require(sess, (1, 25)))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 25))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 25))
         self.assertEqual(send.call_count, 1)
 
         sess, send = self.session([self.ge()])
         self.assertTrue(version_require(sess, (1, 22)))
         self.assertTrue(version_require(sess, (1, 22)))
-        self.assertEqual(vars(sess)["__hub_version"], (1, 22))
+        self.assertEqual(vars(sess)["__ksd_hub_version"], (1, 22))
         self.assertEqual(send.call_count, 1)
 
 
@@ -514,8 +514,8 @@ class TestAsUserinfo(TestCase):
         self.assertEqual(send.call_args_list[0][0], (key, False, True))
 
         sess_vars = vars(sess)
-        self.assertTrue("__new_get_user" in sess_vars)
-        self.assertTrue(sess_vars["__new_get_user"])
+        self.assertTrue("__ksd_new_get_user" in sess_vars)
+        self.assertTrue(sess_vars["__ksd_new_get_user"])
 
         res = as_userinfo(sess, key)
         self.assertEqual(res, self.DATA)
@@ -530,8 +530,8 @@ class TestAsUserinfo(TestCase):
         self.assertEqual(send.call_args_list[1][0], (key,))
 
         sess_vars = vars(sess)
-        self.assertTrue("__new_get_user" in sess_vars)
-        self.assertFalse(sess_vars["__new_get_user"])
+        self.assertTrue("__ksd_new_get_user" in sess_vars)
+        self.assertFalse(sess_vars["__ksd_new_get_user"])
 
         res = as_userinfo(sess, key)
         self.assertEqual(res, self.DATA)

@@ -837,7 +837,7 @@ def bulk_load_users(
     # whether there's already a cached answer as to which API is
     # available
     session_vars = vars(session)
-    new_get_user = session_vars.get("__new_get_user")
+    new_get_user = session_vars.get("__ksd_new_get_user")
 
     if new_get_user is None:
         # there wasn't already an answer, so we'll have to find out
@@ -845,9 +845,9 @@ def bulk_load_users(
         # list of users separately, outside of a multicall, and using
         # the as_userinfo function. This function will first try the
         # newer signature. If successful, it will record
-        # __new_get_user as True, and we'll know to use the newer
+        # __ksd_new_get_user as True, and we'll know to use the newer
         # signature. If not, the function will retry with the older
-        # signature and set __new_get_user to False.
+        # signature and set __ksd_new_get_user to False.
 
         key = users[0]
         users = users[1:]
@@ -860,9 +860,10 @@ def bulk_load_users(
             else:
                 results[key] = None
 
-        # the use of as_userinfo will have updated the __new_get_user
-        # sentinel attribute to either True or False
-        new_get_user = session_vars.get("__new_get_user")
+        # the use of as_userinfo will have updated the
+        # __ksd_new_get_user sentinel attribute to either True or
+        # False
+        new_get_user = session_vars.get("__ksd_new_get_user")
 
     if new_get_user:
         fn = lambda u: session.getUser(u, False, True)
@@ -1268,7 +1269,7 @@ def as_userinfo(
 
     if isinstance(user, (str, int)):
         session_vars = vars(session)
-        new_get_user = session_vars.get("__new_get_user")
+        new_get_user = session_vars.get("__ksd_new_get_user")
 
         if new_get_user:
             # we've tried the new way and it worked, so keep doing it.
@@ -1282,11 +1283,11 @@ def as_userinfo(
             # cannot use the version_check function to gate this.
             try:
                 info = session.getUser(user, False, True)
-                session_vars["__new_get_user"] = True
+                session_vars["__ksd_new_get_user"] = True
 
             except ParameterError:
                 info = session.getUser(user)
-                session_vars["__new_get_user"] = False
+                session_vars["__ksd_new_get_user"] = False
 
         else:
             # we've already tried the new way once and it didn't work.
@@ -1342,7 +1343,7 @@ def _int(val):
 
 
 def hub_version(
-        session: ClientSession) -> Tuple[int]:
+        session: ClientSession) -> Tuple[int, ...]:
     """
     Wrapper for ``session.getKojiVersion`` which caches the results on
     the session and splits the value into a tuple of ints for easy
@@ -1351,6 +1352,10 @@ def hub_version(
     If the getKojiVersion method isn't implemented on the hub, we
     presume that we're version 1.22 ``(1, 22)`` which is the last
     version before the getKojiVersion API was added.
+
+    If used with koji hub and client >= 1.35 then this value is farmed
+    from the Koji-Version header of XMLRPC responses, rather than
+    directly calling getKojiVersion.
 
     :param session: active koji session
 
@@ -1362,12 +1367,22 @@ def hub_version(
     # remote hub method.
     session_vars = vars(session)
 
-    hub_ver = session_vars.get("__hub_version", None)
+    hub_ver = session_vars.get("__ksd_hub_version", None)
     if hub_ver is None:
-        try:
-            hub_ver = session.getKojiVersion()
-        except GenericError:
-            pass
+
+        if "hub_version_str" in session_vars:
+            # introduced in koji 1.34, koji client can determine the
+            # hub version via a header that is available in every
+            # response (including the login response). That saves us
+            # an explicit getKojiVersion call, so use it if possible.
+
+            hub_ver = session.hub_version_str
+
+        else:
+            try:
+                hub_ver = session.getKojiVersion()
+            except GenericError:
+                pass
 
         if hub_ver is None:
             hub_ver = (1, 22)
@@ -1375,7 +1390,7 @@ def hub_version(
         elif isinstance(hub_ver, str):
             hub_ver = tuple(map(_int, hub_ver.split(".")))
 
-        session_vars["__hub_version"] = hub_ver
+        session_vars["__ksd_hub_version"] = hub_ver
 
     return hub_ver
 
