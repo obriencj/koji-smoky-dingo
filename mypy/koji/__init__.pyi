@@ -171,6 +171,20 @@ class ClientSession:
     multicall: "MultiCallHack"
     opts: Dict[str, Any]
 
+    @property
+    def hub_version(self) -> Tuple[int, ...]:
+        """
+        :since: koji 1.35
+        """
+        ...
+
+    @property
+    def hub_version_str(self) -> str:
+        """
+        :since: koji 1.35
+        """
+        ...
+
     def __init__(
             self,
             baseurl: str,
