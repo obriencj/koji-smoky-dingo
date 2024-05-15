@@ -1370,11 +1370,15 @@ def hub_version(
     hub_ver = session_vars.get("__ksd_hub_version", None)
     if hub_ver is None:
 
-        if "hub_version_str" in session_vars:
+        if hasattr(type(session), "hub_version_str"):
             # introduced in koji 1.34, koji client can determine the
             # hub version via a header that is available in every
             # response (including the login response). That saves us
-            # an explicit getKojiVersion call, so use it if possible.
+            # an explicit getKojiVersion call, so use it if
+            # possible. However, because client sessions dynamically
+            # bind every missing attr as a virtual call, we'll need to
+            # look on the session's class for the hub_version_str
+            # property rather than using vars or the session itself
 
             hub_ver = session.hub_version_str
 
