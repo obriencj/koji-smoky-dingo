@@ -48,6 +48,7 @@ Bugfix
 ------
 
 * added missing caret support to `kojismokydingo.rpm.evr_compare`
+* entry points compatability for Python 3.12
 
 
 Other
