@@ -12,12 +12,11 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from pkg_resources import EntryPoint
 from unittest import TestCase
 
 from kojismokydingo.cli import AnonSmokyDingo
 
-from . import ENTRY_POINTS
+from . import ENTRY_POINTS, get_entry_point, entry_point_load
 
 
 class TestMetaPlugin(TestCase):
@@ -28,11 +27,9 @@ class TestMetaPlugin(TestCase):
 
         # verify the expected entry points resolve and can be
         # initialized
-        for name, ref in ENTRY_POINTS.items():
-            cmd = f"{name}={ref}"
-            ep = EntryPoint.parse(cmd)
-
-            cmd_cls = ep.resolve()
+        for name in ENTRY_POINTS:
+            ep = get_entry_point(name)
+            cmd_cls = entry_point_load(ep)
             cmd_inst = cmd_cls(name)
 
             if not (cmd_inst and getattr(cmd_inst, "enabled", True)):

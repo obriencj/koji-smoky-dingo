@@ -16,25 +16,18 @@ from argparse import HelpFormatter
 from functools import partial
 from io import StringIO
 from nose.tools import assert_equal, assert_raises, assert_true
-from pkg_resources import EntryPoint
 from unittest.mock import patch
 
-from . import ENTRY_POINTS
+from . import ENTRY_POINTS, get_entry_point, entry_point_load
 from ..cli.docs import usage_normalize, find_usage
 
 
 def check_standalone_help(cmdname):
-    ref = ENTRY_POINTS[cmdname]
 
-    ep = EntryPoint.parse("=".join([cmdname, ref]))
+    ep = get_entry_point(cmdname)
     name = ep.name
 
-    if hasattr(ep, "resolve"):
-        #new environments
-        command = ep.resolve()
-    else:
-        # old environments
-        command = ep.load(require=False)
+    command = entry_point_load(ep)
 
     # this ugly little dance needs to happen because the default
     # formatter checks console width and will word-wrap on hyphens in

@@ -22,12 +22,11 @@ from docutils.utils import new_document
 from functools import partial
 from io import StringIO
 from nose.tools import assert_equal, assert_raises, assert_true
-from pkg_resources import EntryPoint
 from unittest.mock import patch
 
 from kojismokydingo.cli import SmokyDingo, space_normalize
 
-from . import ENTRY_POINTS, GOptions
+from . import ENTRY_POINTS, GOptions, get_entry_point, entry_point_load
 
 
 _varargs = re.compile(r'\[(\w*) \[\1 \.\.\.\]\]')
@@ -99,18 +98,11 @@ def find_usage(filename):
 
 
 def check_command_help(cmdname):
-    ref = ENTRY_POINTS[cmdname]
 
-    ep = EntryPoint.parse("=".join([cmdname, ref]))
+    ep = get_entry_point(cmdname)
     name = ep.name
 
-    if hasattr(ep, "resolve"):
-        #new environments
-        cmd_cls = ep.resolve()
-    else:
-        # old environments
-        cmd_cls = ep.load(require=False)
-
+    cmd_cls = entry_point_load(ep)
     command = cmd_cls(name)
 
     # this ugly little dance needs to happen because the default
