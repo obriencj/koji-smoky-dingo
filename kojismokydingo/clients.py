@@ -23,7 +23,7 @@ Some simple functions for working with the local client configuration
 
 
 from koji import ClientSession
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from .types import GOptions
 
@@ -35,7 +35,7 @@ __all__ = (
 
 def rebuild_client_config(
         session: ClientSession,
-        goptions: GOptions) -> Tuple[str, Dict[str, Any]]:
+        goptions: Optional[GOptions] = None) -> Tuple[str, Dict[str, Any]]:
     """
     Reconstructs a koji client configuration based on the fields of a
     session and a session's goptions. Returns a tuple containing the
@@ -47,6 +47,9 @@ def rebuild_client_config(
 
     :since: 1.0
     """
+
+    if goptions is None:
+        goptions = GOptions(session.opts)
 
     opts = {
         "server": session.baseurl,

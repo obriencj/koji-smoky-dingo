@@ -225,7 +225,7 @@ def _get_type_url(
         goptions: GOptions,
         datatype: str,
         fmt: str,
-        element: str) -> str:
+        element: Union[str, int, Dict]) -> str:
     """
     :since: 2.0
     """
@@ -267,23 +267,28 @@ OPEN_URL: Dict[str, Union[str, Callable]] = {
 
 def get_open_url(
         session: ClientSession,
-        goptions: GOptions,
+        goptions: Optional[GOptions],
         datatype: str,
-        element: str) -> str:
+        element: Union[str, int, Dict]) -> str:
     """
     Given a client configuration, datatype, and element identifier,
     produce a URL referencing the hub or topdir path for that record.
 
     :param session: an active koji client session
 
-    :param goptions: koji client options
+    :param goptions: koji client options. If None, an appropriate
+      object will be reconstructed from the session opts.
 
     :param datatype: name of the data type
 
-    :param element: identifier for an element of the given data type
+    :param element: identifier for an element of the given data type,
+      or the loaded element itself
 
     :since: 2.0
     """
+
+    if goptions is None:
+        goptions = GOptions(session.opts)
 
     opener: Union[str, Callable] = OPEN_URL.get(datatype)
     if opener is None:
