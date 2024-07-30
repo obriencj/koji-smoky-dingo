@@ -52,7 +52,7 @@ try:
     from contextlib import AbstractContextManager \
         as ContextManager  # type: ignore
 except ImportError:
-    from typing import ContextManager
+    from typing import ContextManager  # type: ignore
 
 
 __all__ = (
