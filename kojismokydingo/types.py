@@ -50,7 +50,7 @@ except ImportError:
 
 try:
     from contextlib import AbstractContextManager \
-        as ContextManager # type: ignore
+        as ContextManager  # type: ignore
 except ImportError:
     from typing import ContextManager
 
