@@ -46,7 +46,7 @@ from kojismokydingo.types import (
 # local mypy plugin and special decorator
 from proxytype import proxytype
 
-from typing import ContextManager
+from contextlib import AbstractContextManager
 from typing_extensions import Self
 
 
@@ -1112,7 +1112,8 @@ class MultiCallHack:
     def __call__(
             self,
             strict: Optional[bool] = False,
-            batch: Optional[int] = None) -> ContextManager[MultiCallSession]:
+            batch: Optional[int] = None) -> \
+            AbstractContextManager[MultiCallSession]:
         ...
 
 
