@@ -46,16 +46,8 @@ from kojismokydingo.types import (
 # local mypy plugin and special decorator
 from proxytype import proxytype
 
-
-try:
-    from contextlib import AbstractContextManager as ContextManager
-except ImportError:
-    from typing import ContextManager
-
-try:
-    from typing import Self  # type: ignore
-except ImportError:
-    from typing_extensions import Self
+from typing import ContextManager
+from typing_extensions import Self
 
 
 # Koji 1.34.0 intentionally broke API compatibility and removed these.
