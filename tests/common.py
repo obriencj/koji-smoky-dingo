@@ -16,7 +16,8 @@ from configparser import ConfigParser
 from contextlib import contextmanager
 from datetime import datetime
 from operator import itemgetter
-from pkg_resources import resource_filename
+from os.path import dirname, join
+from sys import version_info
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
@@ -25,6 +26,9 @@ from kojismokydingo.common import (
     find_config_dirs, find_config_files, get_plugin_config,
     globfilter, load_full_config, load_plugin_config, merge_extend,
     parse_datetime, unique, update_extend)
+
+if version_info < (3, 11):
+    from pkg_resources import resource_filename
 
 
 class TestRelace(TestCase):
@@ -304,8 +308,13 @@ class TestDates(TestCase):
 class TestConfig(TestCase):
 
     def data_dirs(self):
-        return (resource_filename(__name__, "data/system"),
-                resource_filename(__name__, "data/user"))
+        if version_info < (3, 11):
+            return (resource_filename(__name__, "data/system"),
+                    resource_filename(__name__, "data/user"))
+        else:
+            path = dirname(__file__)
+            return (join(path, "data/system"),
+                    join(path, "data/user"))
 
 
     def faux_appdir(self):

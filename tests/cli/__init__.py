@@ -13,13 +13,19 @@
 
 
 from io import StringIO
-from pkg_resources import EntryPoint
+from sys import version_info
 from unittest import TestCase
 from unittest.mock import patch
 
 from kojismokydingo.cli import (
     SmokyDingo, clean_lines, int_or_str,
     print_history_results, resplit, space_normalize, tabulate)
+
+
+if version_info < (3, 11):
+    from pkg_resources import EntryPoint
+else:
+    from importlib.metadata import EntryPoint
 
 
 ENTRY_POINTS = {
@@ -55,6 +61,31 @@ ENTRY_POINTS = {
     "swap-tag-inheritance": "kojismokydingo.cli.tags:SwapTagInheritance",
     "userinfo": "kojismokydingo.cli.users:ShowUserInfo",
 }
+
+
+def get_entry_point(name, group="koji_smoky_dingo"):
+    ref = ENTRY_POINTS[name]
+
+    if version_info < (3, 11):
+        return EntryPoint.parse("=".join((name, ref)))
+    else:
+        return EntryPoint(group=group, name=name, value=ref)
+
+
+def iter_entry_points(group="koji_smoky_dingo"):
+    if version_info < (3, 11):
+        for name, ref in ENTRY_POINTS.items():
+            yield EntryPoint.parse("=".join((name, ref)))
+    else:
+        for name, ref in ENTRY_POINTS.items():
+            yield EntryPoint(group=group, name=name, value=ref)
+
+
+def entry_point_load(ep):
+    if version_info < (3, 11):
+        return ep.resolve()
+    else:
+        return ep.load()
 
 
 def default_koji_config(profile="koji"):
@@ -99,11 +130,8 @@ class TestExpectedEntryPoints(TestCase):
     def test_entry_points(self):
         # verify the expected entry points resolve and can be
         # initialized
-        for nameref in ENTRY_POINTS.items():
-            cmd = "=".join(nameref)
-            ep = EntryPoint.parse(cmd)
-
-            cmd_cls = ep.resolve()
+        for ep in iter_entry_points():
+            cmd_cls = entry_point_load(ep)
 
             self.assertTrue(issubclass(cmd_cls, SmokyDingo))
 
