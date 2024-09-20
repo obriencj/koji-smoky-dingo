@@ -30,7 +30,7 @@ from koji import (
     REPO_STATES, TASK_STATES, USERTYPES, USER_STATUS,
     ClientSession, PathInfo, )
 from koji_types import (
-    ArchiveInfo, ArchiveTypeInfo, AuthType, BuildInfo,
+    ArchiveInfo, ATypeInfo, AuthType, BuildInfo,
     BuildrootInfo, BuildrootState, BuildrootType, BuildState,
     BTypeInfo, ChannelInfo, ChecksumType, CGInfo,
     GOptions, HistoryEntry, HostInfo, ListTasksOptions, PackageInfo,
@@ -135,6 +135,9 @@ of ints. See `kojismokydingo.version_check` and
   * ``"1.25"``
   * ``(1, 25)``
 """
+
+
+ArchiveTypeInfo = ATypeInfo
 
 
 ArchiveInfos = Iterable[ArchiveInfo]

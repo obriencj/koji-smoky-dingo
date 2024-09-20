@@ -30,6 +30,8 @@ API
   `koji.hub_version_str` property, which is populated from a new value
   in http headers on responses from the hub. This potentially saves us
   the explicit ``getKojiVersion`` call on newer deployments
+* made GOptions optional in some cases where it is trivial to recreate
+  an instance from a ClientSession
 
 
 Meta Plugin
@@ -48,6 +50,7 @@ Bugfix
 ------
 
 * added missing caret support to `kojismokydingo.rpm.evr_compare`
+* entry points compatability for Python 3.12
 
 
 Other

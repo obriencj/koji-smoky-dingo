@@ -12,8 +12,14 @@
 # along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 
-from pkg_resources import EntryPoint
+from sys import version_info
 from unittest import TestCase
+
+
+if version_info < (3, 11):
+    from pkg_resources import EntryPoint
+else:
+    from importlib.metadata import EntryPoint
 
 
 ENTRY_POINTS = {
@@ -22,21 +28,30 @@ ENTRY_POINTS = {
 }
 
 
+def get_entry_point(name, group="koji_smoky_dingo"):
+    ref = ENTRY_POINTS[name]
+
+    if version_info < (3, 11):
+        return EntryPoint.parse("=".join((name, ref)))
+    else:
+        return EntryPoint(group=group, name=name, value=ref)
+
+
+def entry_point_load(ep):
+    if version_info < (3, 11):
+        return ep.resolve()
+    else:
+        return ep.load()
+
+
 class TestExpectedStandalone(TestCase):
 
     def test_entry_points(self):
         # verify the expected entry points resolve and can be
         # initialized
-        for nameref in ENTRY_POINTS.items():
-            cmd = "=".join(nameref)
-            ep = EntryPoint.parse(cmd)
-
-            if hasattr(ep, "resolve"):
-                #new environments
-                cmd_inst = ep.resolve()
-            else:
-                # old environments
-                cmd_inst = ep.load(require=False)
+        for name in ENTRY_POINTS:
+            ep = get_entry_point(name)
+            cmd_inst = entry_point_load(ep)
 
             self.assertTrue(callable(cmd_inst))
 

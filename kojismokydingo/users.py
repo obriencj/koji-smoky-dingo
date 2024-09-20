@@ -126,7 +126,7 @@ def get_user_groups(
 
     else:
         hist = session.queryHistory(tables=["user_groups"], active=True)
-        return [{"name": g["group.name"], "group_id": g["group_id"]}
+        return [{"name": g["group.name"], "id": g["group_id"]}
                 for g in hist["user_groups"]
                 if g["user_id"] == uid]
 

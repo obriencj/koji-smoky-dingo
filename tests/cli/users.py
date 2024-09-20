@@ -56,7 +56,7 @@ class ShowUserInfoTest(TestCase):
         def do_getUserGroups(userID = None):
             if userID in (None, 100, "obrienc"):
                 return [{"name": "ldap/CoolGuys",
-                         "group_id": 500,}]
+                         "id": 500,}]
             else:
                 return []
 

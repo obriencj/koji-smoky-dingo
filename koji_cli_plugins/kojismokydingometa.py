@@ -39,8 +39,19 @@ def __plugin__(glbls):
 
     from operator import attrgetter
     from os import getenv
-    from pkg_resources import iter_entry_points
-    from sys import stderr
+    from sys import stderr, version_info
+
+    if version_info < (3, 11):
+        from pkg_resources import iter_entry_points
+        ep_key = attrgetter('module_name', 'name')
+
+    else:
+        from importlib.metadata import entry_points as _entry_points
+
+        def iter_entry_points(group):
+            return _entry_points(group=group)
+
+        ep_key = attrgetter('module', 'name')
 
     # these env var checks were introduced in v2.2.0
     verbose = getenv("KSD_VERBOSE", None) == "1"
@@ -49,7 +60,7 @@ def __plugin__(glbls):
     # we sort the entry points by module name so that duplicate
     # commands have a predictable resolution order
     points = sorted(iter_entry_points('koji_smoky_dingo'),
-                    key=attrgetter('module_name', 'name'))
+                    key=ep_key)
 
     for entry_point in points:
         try:
@@ -59,7 +70,11 @@ def __plugin__(glbls):
             # or a callable appropriate for use as a koji command
             # handler. See `kojismokydingo.types.CLIHandler`
 
-            entry_fn = entry_point.resolve()
+            if version_info < (3, 11):
+                entry_fn = entry_point.resolve()
+            else:
+                entry_fn = entry_point.load()
+
             handler = entry_fn(entry_point.name) if entry_fn else None
 
         except Exception as ex:

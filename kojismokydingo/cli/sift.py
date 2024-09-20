@@ -27,8 +27,9 @@ from collections import defaultdict
 from functools import partial
 from operator import attrgetter, itemgetter
 from os.path import basename
-from pkg_resources import EntryPoint, iter_entry_points
-from typing import Callable, Dict, Iterable, List, Optional, Type
+from sys import version_info
+from typing import (
+    TYPE_CHECKING, Callable, Dict, Iterable, List, Optional, Type, )
 
 from . import open_output, printerr, resplit
 from ..common import escapable_replace
@@ -36,6 +37,16 @@ from ..sift import DEFAULT_SIEVES, Sieve, Sifter, SifterError
 from ..sift.builds import build_info_sieves
 from ..sift.tags import tag_info_sieves
 from ..types import KeySpec
+
+
+if version_info < (3, 11):
+    from pkg_resources import EntryPoint, iter_entry_points
+
+elif not TYPE_CHECKING:
+    from importlib.metadata import EntryPoint, entry_points as _entry_points
+
+    def iter_entry_points(group):
+        return _entry_points(group=group)
 
 
 __all__ = (
