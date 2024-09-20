@@ -58,7 +58,7 @@ class LonelyDingo(SmokyDingo):
 
     @classmethod
     def main(cls, name: str = None, args: List[str] = None) -> int:
-        return cls(name)(args)
+        return cls(name)(args)  # type: ignore
 
 
     def create_session(self, profile: str) -> ManagedClientSession:
@@ -86,11 +86,7 @@ class LonelyDingo(SmokyDingo):
         return parser
 
 
-    def __call__(self, args=None):
-
-        # TODO: mypy hates that the method signature changes here, and
-        # it might be right about that being a problem. Look into
-        # it...
+    def __call__(self, args=None):  # type: ignore
 
         parser = self.parser()
         options = parser.parse_args(args)
