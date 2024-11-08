@@ -1371,7 +1371,7 @@ def hub_version(
     if hub_ver is None:
 
         if hasattr(type(session), "hub_version_str"):
-            # introduced in koji 1.34, koji client can determine the
+            # introduced in koji 1.35, koji client can determine the
             # hub version via a header that is available in every
             # response (including the login response). That saves us
             # an explicit getKojiVersion call, so use it if
