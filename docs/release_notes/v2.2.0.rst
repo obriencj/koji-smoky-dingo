@@ -1,10 +1,10 @@
 Koji Smoky Dingo 2.2.0 Release Notes
 ====================================
 
-*Unreleased*
+*November 13, 2024*
 
 Version 2.2.0 continues compatability from 2.1.1, with some additional
-features as noted below
+features and fixes as noted below
 
 
 Commands
@@ -14,8 +14,9 @@ Commands
   group membership query. Previously the ``getGroupMembers`` call was
   being used, which always failed because it required the admin
   permission and the command was anonymous. New implementation uses
-  ``queryHistory``
-* Support for future koji 1.35 which has anonymous ``getGroupMembers``
+  ``queryHistory`` for koji < 1.35 -- the ``getGroupMembers`` API was
+  moved to be anonymous in koji 1.35
+* Support for koji 1.35 which has anonymous ``getGroupMembers``
   and ``getUserGroups`` calls
 * Added group membership information to the ``userinfo`` command.
 
@@ -27,9 +28,10 @@ API
 * introduced a new `kojismokydingo.users.get_user_groups` function
 * fixed some missing ``__all__`` exports in `kojismokydingo.types`
 * the `kojismokydingo.hub_version` function will work with the new
-  `koji.hub_version_str` property, which is populated from a new value
-  in http headers on responses from the hub. This potentially saves us
-  the explicit ``getKojiVersion`` call on newer deployments
+  `koji.hub_version_str` property introduced in koji 1.35, which is
+  populated from a new value in http headers on responses from the
+  hub. This potentially saves us the explicit ``getKojiVersion`` call
+  on newer deployments
 * made GOptions optional in some cases where it is trivial to recreate
   an instance from a ClientSession
 
