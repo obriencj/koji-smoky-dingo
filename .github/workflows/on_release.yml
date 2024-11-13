@@ -70,6 +70,9 @@ jobs:
       - build-rpms
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Install Dependencies
         run: |
           sudo apt-get install hub
@@ -149,6 +152,8 @@ jobs:
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
 
   announce:
     name: Announce release
