@@ -1,0 +1,29 @@
+Koji Smoky Dingo 2.3.0 Release Notes
+====================================
+
+*Unreleased*
+
+Version 2.3.0 continues compatability from 2.2.0
+
+
+Commands
+--------
+
+
+API
+---
+
+
+Bugfix
+------
+
+
+Other
+-----
+
+
+Issues
+------
+
+Closed Issues:
+<https://github.com/obriencj/koji-smoky-dingo/milestone/14?closed=1>
