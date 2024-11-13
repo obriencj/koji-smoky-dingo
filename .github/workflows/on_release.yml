@@ -182,11 +182,23 @@ jobs:
           echo "RELEASE_DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
 
       - name: Post announcement
-        uses: ./.github/workflows/run_announce.yml
+        uses: rzr/fediverse-action@master
         with:
-          version: ${{ env.DIST_VERSION }}
-          date: ${{ env.RELEASE_DATE }}
-          ref: ${{ github.ref_name }}
+          host: fosstodon.org
+          access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+
+          message: "\
+          koji-smoky-dingo ${{ env.DIST_VERSION }} was
+          released on ${{ env.RELEASE_DATE }}
+
+
+          View the release on GitHub:
+
+          https://github.com/obriencj/koji-smoky-dingo/releases/tag/\
+          ${{ github.ref_name }}
+
+
+          #koji #kojismokydingo"
 
 
 # The end.
