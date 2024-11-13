@@ -20,9 +20,9 @@
 
 
 ACTIVE_PLATFORMS=(
-    fedora38
     fedora39
     fedora40
+    fedora41
     rockylinux8
     rockylinux9
 )

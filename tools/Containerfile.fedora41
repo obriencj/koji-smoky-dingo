@@ -1,0 +1,17 @@
+
+FROM fedora:41
+
+WORKDIR /src
+
+RUN dnf install -qy \
+        dnf-plugins-core make rpm-build which \
+        python3-docutils python3-nose koji
+
+ARG VERSION
+
+COPY kojismokydingo-${VERSION}.tar.gz tools/*.sh /src/
+
+RUN /src/rpmbuild.sh \
+        /src /src/kojismokydingo-${VERSION}.tar.gz
+
+# The end.
