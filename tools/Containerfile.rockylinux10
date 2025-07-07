@@ -1,5 +1,6 @@
 
-FROM almalinux:10-kitten
+FROM quay.io/rockylinux/rockylinux:10
+#    almalinux:10-kitten
 
 WORKDIR /src
 
