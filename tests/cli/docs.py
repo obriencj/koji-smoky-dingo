@@ -31,10 +31,9 @@ from . import ENTRY_POINTS, GOptions, get_entry_point, entry_point_load
 
 _varargs = re.compile(r'\[(\w*) \[\1 \.\.\.\]\]')
 _options = re.compile(r'^optional arguments:', flags=re.M)
-
+_longshort = re.compile(r'(\-\-?[\w\-]*) ([\w\=:]*), (\-\-?[\w\-]*) \2')
 
 def usage_normalize(text):
-
     # some versions of argparse print the options header as "options:"
     # and others as "optional arguments:" so we'll convert to the
     # short version.
@@ -47,6 +46,11 @@ def usage_normalize(text):
     # others present them as just [ARG ...]. This regex converts the
     # former to the latter
     text = _varargs.sub(lambda m: f"[{m[1]} ...]", text)
+
+    # some versions display long and short options as
+    #  eg.  -f TAG_FILE, --file TAG_FILE
+    #  vs.  -f, --file TAG_FILE
+    text = _longshort.sub(lambda m: f"{m[1]}, {m[3]} {m[2]}", text)
 
     return text
 
