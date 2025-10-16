@@ -208,6 +208,7 @@ def _get_tag_latest_dir_url(
 OPEN_LOADFN: Dict[str, Callable] = {
     "archive": as_archiveinfo,
     "build": as_buildinfo,
+    # "buildroot": as_buildrootinfo,
     "channel": as_channelinfo,
     "host": as_hostinfo,
     "package": as_packageinfo,

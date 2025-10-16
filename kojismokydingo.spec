@@ -13,7 +13,7 @@
 
 
 %global srcname kojismokydingo
-%global srcver 2.3.0
+%global srcver 2.2.1
 %global srcrel 0
 
 
@@ -136,8 +136,9 @@ Koji Smoky Dingo
 
 
 %changelog
-* Mon Jan 6 2025 Christopher O'Brien <obriencj@gmail.com> - 2.3.0-0
-- See the v2.3.0 release notes for a full list of changes
+* Fri Oct 17 2025 Christopher O'Brien <obriencj@gmail.com> - 2.2.1-0
+- Fix issue with missing component buildroots
+- See the v2.2.1 release notes for a full list of changes
 
 * Wed Nov 13 2024 Christopher O'Brien <obriencj@gmail.com> - 2.2.0-1
 - See the v2.2.0 release notes for a full list of changes

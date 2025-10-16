@@ -1257,9 +1257,19 @@ def gather_component_build_ids(
     :param btypes: Component archive btype filter. Default, all types
     """
 
+    if not btypes or None in btypes:
+        # in order to query all types, we need to explicitly query for
+        # RPMs, and then archives of type None
+        btypes = ("rpm", None)
+
     # multicall to fetch the artifacts and RPMs for all build IDs
     archives = merge_extend(bulk_load_build_archives(session, build_ids),
                             bulk_load_build_rpms(session, build_ids))
+
+    # these are build_ids that need a fallback method of looking for
+    # buildroots from their tasks, because they had artifacts with no
+    # buildroot_id
+    need_fallback = set()
 
     # gather all the buildroot IDs
     root_ids = set()
@@ -1269,11 +1279,43 @@ def gather_component_build_ids(
             if broot_id:
                 # do NOT allow None or 0
                 root_ids.add(broot_id)
+            else:
+                need_fallback.add(archive["build_id"])
 
-    if not btypes or None in btypes:
-        # in order to query all types, we need to explicitly query for
-        # RPMs, and then archives of type None
-        btypes = ("rpm", None)
+    if need_fallback and ('maven' in btypes or None in btypes):
+        # this dance is to work around a bug in koji where some maven
+        # builds won't have associated their archives with the
+        # buildroot used to create them. Luckily that buildroot is
+        # still associated with the buildMaven task itself, but we'll
+        # need to do some trickery to correlate the build to the
+        # buildMaven subtasks, then find the buildroot for that
+        # subtask, then ensure we can correlate the build to the
+        # buildroot (via a fake archives entry)
+
+        builds = bulk_load_builds(session, need_fallback, err=False)
+        build_tasks = {bid: b["task_id"] for bid, b in builds.items()
+                       if b["task_id"]}
+        if build_tasks:
+            subtasks = bulk_load(session, session.getTaskChildren,
+                                 build_tasks.values(), err=False)
+            buildmaven_tasks = {}
+            for bid, tid in build_tasks.items():
+                subs = subtasks[tid]
+                for st in subs:
+                    if st["method"] == "buildMaven":
+                        buildmaven_tasks[bid] = st["id"]
+            build_tasks = buildmaven_tasks
+
+        if build_tasks:
+            taskbrs = lambda tid: session.listBuildroots(taskID=tid)
+            taskroots = bulk_load(session, taskbrs,
+                                  build_tasks.values(), err=False)
+            for bid, tid in build_tasks.items():
+                for broot in taskroots[tid]:
+                    root_ids.add(broot["id"])
+                    archives[bid].append(
+                        {"build_id": bid,
+                         "buildroot_id": broot["id"]})
 
     # dig up the component archives (pretending that RPMs are just
     # another archive type as usual) and map them to the buildroot ID.
